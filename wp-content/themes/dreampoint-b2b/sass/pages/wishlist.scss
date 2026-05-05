@@ -1,0 +1,115 @@
+@import '../theme/vars';
+
+.tinv-wishlist {
+    .tinv-header {
+        display: none;
+    }
+    .product-action {
+        width: auto;
+        position: relative;
+        z-index: 2;
+        >.button {
+            padding: 8px;
+            width: 32px;
+            height: 32px;
+            >i {
+                display: flex;
+                margin-right: 0;
+            }
+            .tinvwl-txt {
+                display: none;
+            }
+        } 
+    }
+    .tinv-header {
+        margin-bottom: 0;
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+        @media (min-width: 576px) {
+            max-width: 524px;
+        }
+
+        @media (min-width: 768px) {
+            max-width: 704px;
+        }
+
+        @media (min-width: 992px) {
+            max-width: 944px;
+        }
+
+        @media (min-width: 1200px) {
+            max-width: 1040px;
+        }
+        @media (min-width: 1400px) {
+            max-width: 1236px;
+        }
+    }
+    .tinvwl-table-manage-list {
+        row-gap: 34px;
+        @include bp(sm-down) {
+            padding-left: 10px;
+            padding-right: 10px;
+            row-gap: 20px;
+        }
+        [class*="col-"] {
+            @include bp(sm-down) {
+                padding-left: 5px;
+                padding-right: 5px;
+                flex: 0 0 50%;
+                max-width: 50%;
+            }
+        }
+    }
+    .action-holder {
+        .button.product_type_simple {
+            @include categories-btn;
+            @include bp(md-down) {
+                font-size: 0;
+                gap: 0;
+                padding: 0;
+            }
+        }
+        .wishlist-add-to-cart, .add_to_cart_button {
+            @include categories-btn;
+            @include bp(md-down) {
+                font-size: 0;
+                gap: 0;
+                padding: 0;
+            }
+        }
+        .button i {
+            margin-right: 0;
+        }
+    }
+    .wishlist_item {
+        &.out-of-stock, &.variable {
+            .action-holder {
+                a.button {
+                    @include bp(md-down) {
+                        font-size: 0;
+                        gap: 0;
+                        padding: 0;
+                    }
+                    &:after {
+                        @include bp(md-down) {
+                            content: '';
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            color: $brand;
+                            font-size: 18px;
+                            font-family: icomoon;
+                            content: "\e915";
+                        }
+                        
+                    }
+                }  
+            }
+        }
+        
+    }
+}
+
+
+

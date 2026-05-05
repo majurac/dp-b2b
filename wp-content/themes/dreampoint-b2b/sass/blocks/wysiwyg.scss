@@ -1,0 +1,203 @@
+@import '../theme/vars';
+
+.wysiwyg-block, .blog-single {
+    .blog-single-holder {
+        overflow: hidden;
+    }
+    h1 {
+        @include heading-2;
+       + * {
+        margin-top: 16px;
+        }
+    }
+    h2, h3 {
+        &:not(.section-heading h2, .section-heading h3) {
+            @include heading-5;
+        }
+    }
+    h4, h5 {
+        @include heading-6;
+    }
+    table {
+        border: 0;
+        border-collapse: collapse;
+        td { 
+            border: 1px solid #BFBFBF;
+            padding: 5px;
+        }
+    }
+    .blog-body {
+        max-width: 792px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .inner-body, .blog-body {
+
+        :not(.featured-products):not(.featured-products *) + *:not(.col):not(.row):not(figcaption):not(li+li):not(.container):not([class*="col-"]) {
+            margin-top: 20px;
+        }
+
+        h2, h3, h4, h5, h6 {
+           + * {
+            margin-top: 16px!important;
+            }
+        }
+        * + {
+            h2, h3, h4, h5, h6 {
+                margin-top: 40px!important;
+            }
+        }
+        p+p {
+            margin-top: 20px!important;
+        }
+        img + figcaption {
+            margin-top: 16px;
+        }
+        figcaption {
+            @include caption-m;
+            color: $text-secondary;
+        }
+        ul {
+            @include list-style;
+        }
+        ol {
+            @include order-style;
+        }
+    }
+    p {
+        @include paragraph-normal;
+        em {
+            @include paragraph-large;
+            font-weight: 400;
+            font-family: 'Jost';
+            font-style: italic;
+        }
+    }
+    .blog-intro, .blog-body, .blog-metas {
+        max-width: 792px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .blog-intro {
+        text-align: center;
+        margin-bottom: 40px;
+        @include bp(sm-down) {
+            margin-bottom: 20px;
+        }
+        p {
+            @include paragraph-large;
+            font-weight: 400;
+            color: $text-secondary;
+        }
+        h1 {
+            @include heading-2;
+            font-weight: 500;
+            &+p {
+                margin-top: 16px;
+            }
+        }
+    }
+    .featured-products {
+        position: relative;
+        width: 100vw;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: $background-secondary;
+        padding-top: 32px!important;
+        padding-bottom: 32px!important;
+        +* {
+            margin-top: 64px;
+        }
+    }
+    .featured-image {
+        text-align: center;
+        img {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    }
+    .featured-image + .blog-body {
+        margin-top: 40px;
+            @include bp(sm-down) {
+            margin-top: 20px;
+        }
+    }
+    .blog-metas {
+        margin-top: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        @include bp(sm-down) {
+            margin-top: 20px;
+        }
+        .category-label {
+            @include heading-6;
+            font-weight: 500;
+            color: #000;
+            margin-right: 24px;
+        }
+        .post-category {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            ul {
+                display: inline-flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 16px;
+                li {
+                    a {
+                        height: 22px;
+                        padding-left: 6px;
+                        padding-right: 6px;
+                        font-size: 12px;
+                    }
+                }
+            }
+        }
+    }
+
+}
+
+.share {
+    .icons {
+        display: flex;
+        gap: 16px;
+        justify-content: flex-end;
+        align-items: center;
+        li {
+            .icon {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #6D6D6D;
+                font-size: 18px;
+                &#copyLink {
+                    @include paragraph-normal;
+                    font-weight: 500;
+                    color: $text-secondary;
+                    gap: 8px;
+                    i {
+                        font-size: 20px;
+                        font-weight: 400;
+                    }
+                    &:after {
+                        content: '';
+                        display: block;
+                        width: 1px;
+                        height: 36px;
+                        background: $border-primary;
+                        margin-left: 12px;
+                        margin-right: 8px;
+                    }
+                }
+                &:hover {
+                    color: $text-primary;
+                }
+            }
+        }
+    }
+}
+

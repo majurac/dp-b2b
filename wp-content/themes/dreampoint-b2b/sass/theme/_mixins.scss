@@ -1,0 +1,107 @@
+// CSS utility klase.
+// _vars.scss mora biti importovan prije ovog fajla (style.scss garantuje redoslijed).
+
+.fade {
+    -webkit-transition: opacity 0.15s linear;
+    -o-transition: opacity 0.15s linear;
+    transition: opacity 0.15s linear;
+}
+
+.categories-btn {
+    @include categories-btn;
+}
+
+.button {
+    @include button-primary;
+    &.button--outline {
+        @include button-outline;
+    }
+    &.button--sm {
+        padding: 0px 12px!important;
+        height: 36px!important;
+        font-size: 14px!important;
+        line-height: 17px!important;
+    }
+}
+
+.button--icon-after {
+    &:after {
+        display: block;
+        font-family: icomoon;
+        content: "\e917";
+        font-weight: 400;
+        font-size: 18px;
+    }
+    &.icon-reverse {
+        &:before {
+            display: block;
+            font-family: icomoon;
+            content: "\e914";
+            font-weight: 400;
+        }
+        &:after {
+            display: none;
+        }
+    }
+}
+
+.link {
+    @include button-text;
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid rgba($text-primary, .14);
+    height: 20px;
+    padding-bottom: 6px;
+    &:hover {
+        border-bottom: 2px solid $text-primary;
+    }
+}
+
+.tag {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0px 16px;
+    height: 28px;
+    background: $pink;
+    @include button-text;
+    text-align: center;
+    color: $white;
+    text-transform: uppercase;
+    &.tag--discount {
+        background-color: $pink;
+        font-weight: 500;
+        letter-spacing: 0.07em;
+        color: #fff;
+    }
+    &.tag--out-of-stock {
+        background-color: $white;
+        color: $pink;
+        font-weight: 500;
+        @include bp(sm-down) {
+            height: 18px;
+            padding: 0 6px;
+        }
+    }
+}
+
+.sliding-content-close {
+    border: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: $background-brand;
+    color: $text-primary-inverse;
+    font-size: 16px;
+    width: 36px;
+    height: 36px;
+    &:hover {
+        background: $text-tertiary;
+        color: $text-primary-inverse;
+    }
+    &:focus {
+        background: $text-secondary;
+        color: $text-primary-inverse;
+    }
+}

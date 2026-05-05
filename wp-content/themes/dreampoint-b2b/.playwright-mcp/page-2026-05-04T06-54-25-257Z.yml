@@ -1,0 +1,185 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - link "Preskoči na sadržaj" [ref=e3] [cursor=pointer]:
+      - /url: "#primary-content"
+    - banner [ref=e4]:
+      - list [ref=e11]:
+        - listitem [ref=e12]:
+          - link "Brendovi" [ref=e13] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/brendovi/
+        - listitem [ref=e14]:
+          - link "Cart" [ref=e15] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/cart/
+        - listitem [ref=e16]:
+          - link "Checkout" [ref=e17] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/checkout/
+        - listitem [ref=e18]:
+          - link "My account" [ref=e19] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/my-account/
+        - listitem [ref=e20]:
+          - link "Odobrenje na čekanju" [ref=e21] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/approval-pending/
+        - listitem [ref=e22]:
+          - link "Početna" [ref=e23] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/
+        - listitem [ref=e24]:
+          - link "Sample Page" [ref=e25] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/sample-page/
+        - listitem [ref=e26]:
+          - link "Shop" [ref=e27] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/shop/
+        - listitem [ref=e28]:
+          - link "Wishlist" [ref=e29] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/wishlist/
+      - generic [ref=e32]:
+        - navigation "Glavni meni" [ref=e34]:
+          - generic [ref=e35]:
+            - generic [ref=e36]:
+              - link "Edukativne igračke" [ref=e38] [cursor=pointer]:
+                - /url: http://localhost:8080/dp-b2b/product-category/edukativne-igracke/
+              - list [ref=e39]:
+                - listitem [ref=e40]:
+                  - link "Društvene igre" [ref=e41] [cursor=pointer]:
+                    - /url: http://localhost:8080/dp-b2b/product-category/edukativne-igracke/drustvene-igre/
+                - listitem [ref=e42]:
+                  - link "Magneti" [ref=e43] [cursor=pointer]:
+                    - /url: http://localhost:8080/dp-b2b/product-category/edukativne-igracke/magneti/
+                - listitem [ref=e44]:
+                  - link "Ostale edukatvine igraćke" [ref=e45] [cursor=pointer]:
+                    - /url: http://localhost:8080/dp-b2b/product-category/edukativne-igracke/ostale-edukatvine-igracke/
+                - listitem [ref=e46]:
+                  - link "Puzzle" [ref=e47] [cursor=pointer]:
+                    - /url: http://localhost:8080/dp-b2b/product-category/edukativne-igracke/puzzle/
+                - listitem [ref=e48]:
+                  - link "Slikovnice" [ref=e49] [cursor=pointer]:
+                    - /url: http://localhost:8080/dp-b2b/product-category/edukativne-igracke/slikovnice/
+            - generic [ref=e50]:
+              - link "Kreativni kutak" [ref=e52] [cursor=pointer]:
+                - /url: http://localhost:8080/dp-b2b/product-category/kreativni-kutak/
+              - list [ref=e53]:
+                - listitem [ref=e54]:
+                  - link "Bilježnice, notesi i dnevnici" [ref=e55] [cursor=pointer]:
+                    - /url: http://localhost:8080/dp-b2b/product-category/kreativni-kutak/biljeznice-notesi-i-dnevnici/
+                - listitem [ref=e56]:
+                  - link "Bojanke, pribor za crtanje i pernice" [ref=e57] [cursor=pointer]:
+                    - /url: http://localhost:8080/dp-b2b/product-category/kreativni-kutak/bojanke-pribor-za-crtanje-i-pernice/
+                - listitem [ref=e58]:
+                  - link "Kreativni setovi i origami" [ref=e59] [cursor=pointer]:
+                    - /url: http://localhost:8080/dp-b2b/product-category/kreativni-kutak/kreativni-setovi-i-origami/
+                - listitem [ref=e60]:
+                  - link "Naljepnice, štambilji i dječje tetovaže" [ref=e61] [cursor=pointer]:
+                    - /url: http://localhost:8080/dp-b2b/product-category/kreativni-kutak/naljepnice-stambilji-i-djecje-tetovaze/
+            - generic [ref=e62]:
+              - link "Termo boce, posude za hranu i sl" [ref=e64] [cursor=pointer]:
+                - /url: http://localhost:8080/dp-b2b/product-category/termo-boce-posude-za-hranu-i-sl/
+              - list [ref=e65]:
+                - listitem [ref=e66]:
+                  - link "Dodaci" [ref=e67] [cursor=pointer]:
+                    - /url: http://localhost:8080/dp-b2b/product-category/termo-boce-posude-za-hranu-i-sl/dodaci/
+                - listitem [ref=e68]:
+                  - link "Posude za hranu" [ref=e69] [cursor=pointer]:
+                    - /url: http://localhost:8080/dp-b2b/product-category/termo-boce-posude-za-hranu-i-sl/posude-za-hranu/
+                - listitem [ref=e70]:
+                  - link "Promo materjal" [ref=e71] [cursor=pointer]:
+                    - /url: http://localhost:8080/dp-b2b/product-category/termo-boce-posude-za-hranu-i-sl/promo-materjal/
+                - listitem [ref=e72]:
+                  - link "Šalice za kavu" [ref=e73] [cursor=pointer]:
+                    - /url: http://localhost:8080/dp-b2b/product-category/termo-boce-posude-za-hranu-i-sl/salice-za-kavu/
+                - listitem [ref=e74]:
+                  - link "Termo boce" [ref=e75] [cursor=pointer]:
+                    - /url: http://localhost:8080/dp-b2b/product-category/termo-boce-posude-za-hranu-i-sl/termo-boce/
+        - generic [ref=e77]:
+          - text: 
+          - button "Otvori pretragu" [ref=e79]:
+            - generic [ref=e80]: 
+          - link "Wishlist -" [ref=e82] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/wishlist/
+            - text: 
+          - link "Moj nalog" [ref=e85] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/my-account/
+            - generic [ref=e86]: 
+          - button " 0" [ref=e88]:
+            - generic [ref=e89]: 
+            - generic [ref=e90]: "0"
+      - text:     
+    - complementary "košarica" [ref=e91]:
+      - generic [ref=e92]:
+        - generic [ref=e93]: Mini košarica
+        - button "Zatvori mini košaricu" [ref=e94]:
+          - generic [ref=e95]: 
+      - paragraph [ref=e96]: No products in the cart.
+    - generic [ref=e97]:
+      - generic [ref=e99]:
+        - navigation "Breadcrumb" [ref=e100]:
+          - link "Home" [ref=e101] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b
+          - text: / Chilly's
+        - heading "Chilly's" [level=1] [ref=e102]
+      - generic [ref=e105]:
+        - generic [ref=e106]:
+          - generic:
+            - button "":
+              - generic: 
+        - generic [ref=e108]:
+          - generic [ref=e110]:
+            - alert [ref=e111]: All 2 products
+            - generic [ref=e112]:
+              - combobox [ref=e113]
+              - combobox "Default sorting" [ref=e116] [cursor=pointer]:
+                - textbox "Default sorting" [ref=e117]
+                - text: 
+          - generic [ref=e119]:
+            - generic [ref=e121]:
+              - generic [ref=e122]:
+                - link "Boca Urban - Jurassic Friends (500 ml)" [ref=e123] [cursor=pointer]:
+                  - /url: http://localhost:8080/dp-b2b/product/boca-urban-jurassic-friends-500-ml/
+                  - img "Boca Urban - Jurassic Friends (500 ml)" [ref=e124]
+                - generic:
+                  - link "Dodaj Boca Urban - Jurassic Friends (500 ml) u košaricu":
+                    - /url: /dp-b2b/brand/chillys/?add-to-cart=23
+                    - generic: Dodaj u košaricu
+                    - generic: Dodaj u košaricu
+                    - text: 
+                  - generic:
+                    - generic:
+                      - button "Add to Wishlist":
+                        - text: 
+                        - generic: Add to Wishlist
+              - generic [ref=e125]:
+                - link "Boca Urban - Jurassic Friends (500 ml)" [ref=e126] [cursor=pointer]:
+                  - /url: http://localhost:8080/dp-b2b/product/boca-urban-jurassic-friends-500-ml/
+                  - generic [ref=e127]: Boca Urban - Jurassic Friends (500 ml)
+                - generic [ref=e129]: 25,00 €
+              - link "Pogledaj proizvod Boca Urban - Jurassic Friends (500 ml)" [ref=e130] [cursor=pointer]:
+                - /url: http://localhost:8080/dp-b2b/product/boca-urban-jurassic-friends-500-ml/
+                - generic [ref=e131]: Pogledaj proizvod Boca Urban - Jurassic Friends (500 ml)
+            - generic [ref=e133]:
+              - generic [ref=e134]: Novo
+              - generic [ref=e135]:
+                - link "Chilly's boca Abyss Black - Serija 2 - Sport (500 ml)" [ref=e136] [cursor=pointer]:
+                  - /url: http://localhost:8080/dp-b2b/product/chillys-boca-abyss-black-serija-2-sport-500-ml/
+                  - img "Chilly's boca Abyss Black - Serija 2 - Sport (500 ml)" [ref=e137]
+                - generic:
+                  - link "Dodaj Chilly's boca Abyss Black - Serija 2 - Sport (500 ml) u košaricu":
+                    - /url: /dp-b2b/brand/chillys/?add-to-cart=113
+                    - generic: Dodaj u košaricu
+                    - generic: Dodaj u košaricu
+                    - text: 
+                  - generic:
+                    - generic:
+                      - button "Add to Wishlist":
+                        - text: 
+                        - generic: Add to Wishlist
+              - generic [ref=e138]:
+                - link "Chilly's boca Abyss Black - Serija 2 - Sport (500 ml)" [ref=e139] [cursor=pointer]:
+                  - /url: http://localhost:8080/dp-b2b/product/chillys-boca-abyss-black-serija-2-sport-500-ml/
+                  - generic [ref=e140]: Chilly's boca Abyss Black - Serija 2 - Sport (500 ml)
+                - generic [ref=e142]: 28,00 €
+              - link "Pogledaj proizvod Chilly's boca Abyss Black - Serija 2 - Sport (500 ml)" [ref=e143] [cursor=pointer]:
+                - /url: http://localhost:8080/dp-b2b/product/chillys-boca-abyss-black-serija-2-sport-500-ml/
+                - generic [ref=e144]: Pogledaj proizvod Chilly's boca Abyss Black - Serija 2 - Sport (500 ml)
+    - contentinfo [ref=e146]:
+      - generic [ref=e147]:
+        - generic [ref=e153]: Kontaktirajte nas
+        - generic [ref=e157]: © 2026 Dreampoint B2B Shop.
+  - status [ref=e160]

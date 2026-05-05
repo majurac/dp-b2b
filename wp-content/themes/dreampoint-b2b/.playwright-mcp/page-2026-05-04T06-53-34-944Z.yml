@@ -1,0 +1,205 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - link "Preskoči na sadržaj" [ref=e3] [cursor=pointer]:
+      - /url: "#primary-content"
+    - banner [ref=e4]:
+      - list [ref=e11]:
+        - listitem [ref=e12]:
+          - link "Brendovi" [ref=e13] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/brendovi/
+        - listitem [ref=e14]:
+          - link "Cart" [ref=e15] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/cart/
+        - listitem [ref=e16]:
+          - link "Checkout" [ref=e17] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/checkout/
+        - listitem [ref=e18]:
+          - link "My account" [ref=e19] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/my-account/
+        - listitem [ref=e20]:
+          - link "Odobrenje na čekanju" [ref=e21] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/approval-pending/
+        - listitem [ref=e22]:
+          - link "Početna" [ref=e23] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/
+        - listitem [ref=e24]:
+          - link "Sample Page" [ref=e25] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/sample-page/
+        - listitem [ref=e26]:
+          - link "Shop" [ref=e27] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/shop/
+        - listitem [ref=e28]:
+          - link "Wishlist" [ref=e29] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/wishlist/
+      - generic [ref=e32]:
+        - navigation "Glavni meni" [ref=e34]:
+          - generic [ref=e35]:
+            - generic [ref=e36]:
+              - link "Edukativne igračke" [ref=e38] [cursor=pointer]:
+                - /url: http://localhost:8080/dp-b2b/product-category/edukativne-igracke/
+              - list [ref=e39]:
+                - listitem [ref=e40]:
+                  - link "Društvene igre" [ref=e41] [cursor=pointer]:
+                    - /url: http://localhost:8080/dp-b2b/product-category/edukativne-igracke/drustvene-igre/
+                - listitem [ref=e42]:
+                  - link "Magneti" [ref=e43] [cursor=pointer]:
+                    - /url: http://localhost:8080/dp-b2b/product-category/edukativne-igracke/magneti/
+                - listitem [ref=e44]:
+                  - link "Ostale edukatvine igraćke" [ref=e45] [cursor=pointer]:
+                    - /url: http://localhost:8080/dp-b2b/product-category/edukativne-igracke/ostale-edukatvine-igracke/
+                - listitem [ref=e46]:
+                  - link "Puzzle" [ref=e47] [cursor=pointer]:
+                    - /url: http://localhost:8080/dp-b2b/product-category/edukativne-igracke/puzzle/
+                - listitem [ref=e48]:
+                  - link "Slikovnice" [ref=e49] [cursor=pointer]:
+                    - /url: http://localhost:8080/dp-b2b/product-category/edukativne-igracke/slikovnice/
+            - generic [ref=e50]:
+              - link "Kreativni kutak" [ref=e52] [cursor=pointer]:
+                - /url: http://localhost:8080/dp-b2b/product-category/kreativni-kutak/
+              - list [ref=e53]:
+                - listitem [ref=e54]:
+                  - link "Bilježnice, notesi i dnevnici" [ref=e55] [cursor=pointer]:
+                    - /url: http://localhost:8080/dp-b2b/product-category/kreativni-kutak/biljeznice-notesi-i-dnevnici/
+                - listitem [ref=e56]:
+                  - link "Bojanke, pribor za crtanje i pernice" [ref=e57] [cursor=pointer]:
+                    - /url: http://localhost:8080/dp-b2b/product-category/kreativni-kutak/bojanke-pribor-za-crtanje-i-pernice/
+                - listitem [ref=e58]:
+                  - link "Kreativni setovi i origami" [ref=e59] [cursor=pointer]:
+                    - /url: http://localhost:8080/dp-b2b/product-category/kreativni-kutak/kreativni-setovi-i-origami/
+                - listitem [ref=e60]:
+                  - link "Naljepnice, štambilji i dječje tetovaže" [ref=e61] [cursor=pointer]:
+                    - /url: http://localhost:8080/dp-b2b/product-category/kreativni-kutak/naljepnice-stambilji-i-djecje-tetovaze/
+            - generic [ref=e62]:
+              - link "Termo boce, posude za hranu i sl" [ref=e64] [cursor=pointer]:
+                - /url: http://localhost:8080/dp-b2b/product-category/termo-boce-posude-za-hranu-i-sl/
+              - list [ref=e65]:
+                - listitem [ref=e66]:
+                  - link "Dodaci" [ref=e67] [cursor=pointer]:
+                    - /url: http://localhost:8080/dp-b2b/product-category/termo-boce-posude-za-hranu-i-sl/dodaci/
+                - listitem [ref=e68]:
+                  - link "Posude za hranu" [ref=e69] [cursor=pointer]:
+                    - /url: http://localhost:8080/dp-b2b/product-category/termo-boce-posude-za-hranu-i-sl/posude-za-hranu/
+                - listitem [ref=e70]:
+                  - link "Promo materjal" [ref=e71] [cursor=pointer]:
+                    - /url: http://localhost:8080/dp-b2b/product-category/termo-boce-posude-za-hranu-i-sl/promo-materjal/
+                - listitem [ref=e72]:
+                  - link "Šalice za kavu" [ref=e73] [cursor=pointer]:
+                    - /url: http://localhost:8080/dp-b2b/product-category/termo-boce-posude-za-hranu-i-sl/salice-za-kavu/
+                - listitem [ref=e74]:
+                  - link "Termo boce" [ref=e75] [cursor=pointer]:
+                    - /url: http://localhost:8080/dp-b2b/product-category/termo-boce-posude-za-hranu-i-sl/termo-boce/
+        - generic [ref=e77]:
+          - text: 
+          - button "Otvori pretragu" [ref=e79]:
+            - generic [ref=e80]: 
+          - link "Wishlist -" [ref=e82] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/wishlist/
+            - text: 
+          - link "Moj nalog" [ref=e85] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/my-account/
+            - generic [ref=e86]: 
+          - button " 0" [ref=e88]:
+            - generic [ref=e89]: 
+            - generic [ref=e90]: "0"
+      - text:     
+    - generic [ref=e91]:
+      - generic [ref=e92]:
+        - generic [ref=e93]: Mini košarica
+        - button "Zatvori mini košaricu" [ref=e94]:
+          - generic [ref=e95]: 
+      - paragraph [ref=e96]: No products in the cart.
+    - generic [ref=e97]:
+      - generic [ref=e99]:
+        - generic [ref=e100]:
+          - link "Početna" [ref=e101] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/
+          - text: / My account
+        - heading "My account" [level=1] [ref=e102]
+        - paragraph [ref=e104]:
+          - text: Hello
+          - strong [ref=e105]: vis_rule_brand
+          - text: (not
+          - strong [ref=e106]: vis_rule_brand
+          - text: "?"
+          - link "Log out" [ref=e107] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/wp-login.php?action=logout&redirect_to=http%3A%2F%2Flocalhost%3A8080%2Fdp-b2b%2Fmy-account%2F&_wpnonce=0fba0a7e15
+          - text: ) From your account dashboard you can view and manage your
+          - link "account details" [ref=e108] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/my-account/edit-account/
+          - text: ","
+          - link "shipping and billing addresses" [ref=e109] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/my-account/edit-address/
+          - text: and view
+          - link "recent orders" [ref=e110] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/my-account/orders/
+          - text: .
+      - main [ref=e111]:
+        - generic [ref=e116]:
+          - navigation "Account pages" [ref=e118]:
+            - list [ref=e120]:
+              - listitem [ref=e121]:
+                - link "Lični podaci" [ref=e122] [cursor=pointer]:
+                  - /url: http://localhost:8080/dp-b2b/my-account/
+              - listitem [ref=e123]:
+                - link "Istorija narudžbi" [ref=e124] [cursor=pointer]:
+                  - /url: http://localhost:8080/dp-b2b/my-account/orders/
+              - listitem [ref=e125]:
+                - link "Upravljanje adresama" [ref=e126] [cursor=pointer]:
+                  - /url: http://localhost:8080/dp-b2b/my-account/edit-address/
+              - listitem [ref=e127]:
+                - link "Odjava" [ref=e128] [cursor=pointer]:
+                  - /url: http://localhost:8080/dp-b2b/my-account/customer-logout/?_wpnonce=8a85efaf10
+          - generic [ref=e132]:
+            - generic [ref=e133]:
+              - heading "Lični podaci" [level=2] [ref=e135]
+              - paragraph [ref=e136]:
+                - generic [ref=e137]: First name *
+                - textbox "First name *" [ref=e138]
+              - paragraph [ref=e139]:
+                - generic [ref=e140]: Last name *
+                - textbox "Last name *" [ref=e141]
+              - paragraph [ref=e142]:
+                - generic [ref=e143]: Display name *
+                - textbox "Display name *" [ref=e144]: vis_rule_brand
+                - emphasis [ref=e146]: This will be how your name will be displayed in the account section and in reviews
+              - paragraph [ref=e147]:
+                - generic [ref=e148]: Email address *
+                - textbox "Email address *" [ref=e149]: vis_rule_brand@test.local
+              - paragraph [ref=e150]:
+                - generic [ref=e151]: Company
+                - textbox "Company" [ref=e152]
+              - paragraph [ref=e153]:
+                - generic [ref=e154]: OIB
+                - textbox "OIB" [ref=e155]
+              - paragraph [ref=e156]:
+                - generic [ref=e157]: Phone
+                - textbox "Phone Telefon *" [ref=e158]
+              - button "Spremi izmjenu" [ref=e159]
+            - generic [ref=e160]:
+              - heading "Lozinka" [level=2] [ref=e162]
+              - paragraph [ref=e163]:
+                - generic [ref=e164]: Current password (leave blank to leave unchanged)
+                - generic [ref=e165]:
+                  - textbox "Current password (leave blank to leave unchanged)" [ref=e166]
+                  - button "Show password" [ref=e167]: 
+              - paragraph [ref=e168]:
+                - generic [ref=e169]: New password (leave blank to leave unchanged)
+                - generic [ref=e170]:
+                  - textbox "New password (leave blank to leave unchanged)" [ref=e171]
+                  - button "Show password" [ref=e172]: 
+              - paragraph [ref=e173]:
+                - generic [ref=e174]: Confirm new password
+                - generic [ref=e175]:
+                  - textbox "Confirm new password" [ref=e176]
+                  - button "Show password" [ref=e177]: 
+            - paragraph [ref=e178]:
+              - generic [ref=e179]: Telefon *
+              - textbox "Unesite važeći broj telefona" [ref=e180]:
+                - /placeholder: Broj telefona
+            - paragraph [ref=e181]:
+              - button "Save changes" [ref=e182]
+    - contentinfo [ref=e183]:
+      - generic [ref=e184]:
+        - generic [ref=e190]: Kontaktirajte nas
+        - generic [ref=e194]: © 2026 Dreampoint B2B Shop.
+  - status [ref=e195]

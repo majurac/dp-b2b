@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<install>
+    <modules>
+		<mod code = "license" active = "1" type_id = "6"  label = "license" />
+		<mod code = "access" active = "1" type_id = "6"  label = "access" />
+		<mod code = "woofilterpro" active = "1" type_id = "6"  label = "woofilterpro" />
+		<mod code = "statistics" active = "1" type_id = "6"  label = "Statistics" />
+    </modules>
+</install>

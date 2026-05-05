@@ -1,0 +1,69 @@
+# ─── DEPLOY SAFETY ───────────────────────────────────────────────────────────
+# git pull NE sme da se izvršava kao root
+# uvek koristi ispravnog site korisnika:
+#   sudo -u <siteUser> git pull
+# u suprotnom dolazi do problema sa permisijama na WordPress fajlovima
+
+# ─── WordPress Configuration ─────────────────────────────────────────────────
+# DEPLOY NOTE: wp-config.php mora postojati na serveru pre prvog git pull-a
+# Kreiraj ga ručno ili kopiraj i prilagodi wp-config-sample.php
+wp-config.php
+
+# ─── WordPress Upgrade Temp ──────────────────────────────────────────────────
+wp-content/upgrade/
+
+# ─── Cache ───────────────────────────────────────────────────────────────────
+# DEPLOY NOTE: keš se uvek regeneriše automatski — nikad ne deployovati
+wp-content/cache/
+wp-content/litespeed/*
+!wp-content/litespeed/.htaccess
+
+# ─── Uploads ─────────────────────────────────────────────────────────────────
+# DEPLOY NOTE: mediji se ne versiraju — direktorijum mora postojati na serveru
+# pre prvog git pull-a; uradi jednokratni rsync za inicijalni prenos fajlova
+# git deploy NE dira uploads/ — fajlovi na serveru ostaju netaknuti
+wp-content/uploads/
+
+# ─── Default teme (nisu potrebne na produkciji) ───────────────────────────────
+wp-content/themes/twenty*/
+
+# ─── Theme: node_modules ─────────────────────────────────────────────────────
+# devDependencies (esbuild, sass) — nisu potrebni na serveru
+# Build outputi (style.css, css/, js/theme.min.js) su u gitu i deployuju se
+wp-content/themes/dreampoint-b2b/node_modules/
+
+# ─── Composer ────────────────────────────────────────────────────────────────
+vendor/
+
+# ─── Source Maps ─────────────────────────────────────────────────────────────
+# Dev-only, nema efekta na produkciji
+*.css.map
+
+# ─── Claude Code ─────────────────────────────────────────────────────────────
+wp-content/themes/dreampoint-b2b/.claude/
+.claude/
+
+# ─── WP-CLI ──────────────────────────────────────────────────────────────────
+.wp-cli/
+
+# ─── Logovi ──────────────────────────────────────────────────────────────────
+*.log
+error_log
+debug.log
+
+# ─── OS / Editor ─────────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ─── Arhive i backup fajlovi ─────────────────────────────────────────────────
+*.zip
+*.tar.gz
+*.bak
+*.sql
+*.tmp

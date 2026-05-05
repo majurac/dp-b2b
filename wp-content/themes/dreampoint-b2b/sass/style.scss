@@ -1,0 +1,32 @@
+/*!
+Theme Name: Dreampoint B2B
+Theme URI: http://underscores.me/
+Author: UncleDev
+Author URI: https://uncledev.com/
+Description: B2B WooCommerce theme based on Underscores
+Version: 1.0.0
+Tested up to: 6.5
+Requires PHP: 8.0
+License: GNU General Public License v2 or later
+License URI: LICENSE
+Text Domain: dreampoint-b2b
+Tags: custom-background, custom-logo, custom-menu, featured-images, translation-ready
+
+This theme, like WordPress, is licensed under the GPL.
+Use it to make something cool, have fun, and share what you've learned.
+
+Dreampoint B2B is based on Underscores https://underscores.me/, (C) 2012-2020 Automattic, Inc.
+Underscores is distributed under the terms of the GNU GPL v2 or later.
+*/
+
+/* Custom Sass files
+--------------------------------------------- */
+
+@import "theme/grids";
+@import "theme/vars";
+@import "theme/mixins";
+@import "theme/typography";
+@import "components/header";
+@import "components/content";
+@import "components/footer";
+@import "components/nav";

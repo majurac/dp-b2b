@@ -1,0 +1,458 @@
+.wpfSingleInputSearch {
+	position: relative;
+}
+.wpfSingleInputSearch input.passiveFilter {
+	width: 100%;
+    margin: 5px 0px;
+    box-sizing: border-box;
+	padding-right: 30px;
+}
+.wpfSingleInputSearch button, .wpfSearchWrapper button {
+	position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: 30px;
+    background: none;
+    border: none;
+    font-size: 13px;
+    outline: none;
+    margin: auto 0;
+    bottom: 0;
+    line-height: normal;
+    padding: 5px 10px;
+}
+.wpfSingleInputSearch button:before {
+    content: '\f002';
+    font-family: "FontAwesome";
+    display: block;
+    color: #777;
+}
+.wpfSearchWrapper button:before {
+    content: '\f054';
+    font-family: "FontAwesome";
+    display: block;
+    color: #777;
+}
+.wpfLabelInputSearch {
+	display: flex;
+}
+.wpfBeforeInputSearch, .wpfAfterInputSearch {
+	align-self: center;
+	white-space: nowrap;
+}
+.wpfBeforeInputSearch {
+	margin-right: 10px;
+}
+.wpfAfterInputSearch {
+	margin-left: 3px;
+}
+.wpfValue img{
+    vertical-align: text-bottom;
+    display: inline-block;
+    margin: 0px 5px 0px 0;
+}
+.wpfCustomLoader {
+    background-repeat: no-repeat;
+    min-width: 30px;
+    min-height: 30px;
+    max-width: 500px;
+    max-height: 500px;
+}
+.wpfShowMoreWrapper, .wpfShowFewerWrapper {
+    cursor: pointer;
+    font-size: smaller;
+    font-weight: 700;
+    margin-bottom: 0; 
+}
+@media (max-width: 992px) {
+	.wpfShowMoreWrapper, .wpfShowFewerWrapper {
+		font-size: larger;
+	}
+}
+.wpfMoreHidden {
+    display: none !important;
+}
+.wpfSelectedParameters {
+    display: block;
+    padding: 10px 0px;
+    clear: both;
+}
+.wpfSelectedParametersClear {
+    display: inline-block;
+    cursor: pointer;
+    margin: 2px 5px;
+    text-decoration: underline;
+}
+.wpfSelectedParameter {
+    display: inline-block;
+    padding: 2px 5px;
+    margin: 5px !important;
+    background-color: #eae1e1;
+    border-radius: 2px;
+}
+.wpfSelectedParameter[data-query-logic="not_in"] .wpfSelectedTitle {
+    text-decoration: line-through;
+}
+.wpfSelectedTitle{
+    display: inline-block;
+    padding-left: 5px !important;
+}
+.wpfSelectedTitle img {
+    display: inline-block;
+    vertical-align: middle;
+        margin-right: 5px;
+}
+.wpfSelectedDelete{
+    display: inline-block;
+    cursor: pointer;
+}
+.wfpHideButton {
+    width: 100%;
+    max-width: 300px;
+    align-items: center;
+}
+.wfpHideButton i, .wfpHideButton svg {
+    float: right;
+    line-height: inherit;
+}
+.wpfHideFilter {
+    display: none !important;
+}
+.wfpHideButton:after, .wpfSelectedParameters:after {
+    content: " ";
+    display: table;
+    clear: both;
+}
+.wpfFilterWrapper .wpfTermWrapper input{
+    display: none !important;
+}
+.wpfButtonsFilter .wpfTermWrapper {
+    text-align: center;
+    display: inline-block;
+    cursor: pointer;
+    width: auto;
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Old versions of Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none;
+    white-space: nowrap;
+}
+.wpfButtonsFilter .wpfTermWrapper .wpfValue {
+    padding: 0 !important;
+}
+.wpfButtonsFilter .wpfCount, .wpfTextFilter .wpfCount {
+    padding: 0 0 0 3px;
+}
+.wpfTextFilter .wpfCheckbox label {
+    display: none !important;
+}
+.wpfTextFilter .wpfCheckbox input {
+    display: none !important;
+}
+.wpfTextFilter .wpfValue {
+    padding-left: 0;
+}
+.wpfTextFilter .wpfValue.wpfTermChecked {
+    font-weight: bolder;
+}
+.wpfSwitchFilter input.wpfSwitch{
+    display: none !important;
+}
+.wpfSwitchFilter label.wpfSwitch {
+    cursor: pointer;
+    text-indent: -9999px;
+    width: 30px;
+    height: 16px;
+    background: #b0bec5;
+    display: block;
+    border-radius: 100px;
+    position: relative;
+    margin: 0;
+}
+.wpfSwitchFilter label.wpfSwitch:after {
+    content: '';
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    width: 14px;
+    height: 14px;
+    background: #fff;
+    border-radius: 90px;
+    transition: 0.3s;
+}
+.wpfSwitchFilter input.wpfSwitch:checked + label.wpfSwitch {
+    background: #81d742;
+}
+.wpfSwitchFilter input.wpfSwitch:checked + label.wpfSwitch:after {
+    left: calc(100% - 1px);
+    transform: translateX(-100%);
+}
+.wpfSwitchFilter label.wpfSwitch:active:after {
+    width: 16px;
+}
+.wpfToggleSwitch {
+    display: inline-block;
+    vertical-align: middle;
+}
+li.wpfAbcLetter {
+    font-weight: bold;
+    font-size: larger;
+    width: 100% !important;
+}
+.wpfAbcLink {
+    display: inline-block;
+    margin: 0 5px;
+    cursor: pointer;
+}
+.wpfAbcLinkFirst{
+    margin-left: 0;
+}
+.wpfAbcToggle {
+    cursor: pointer;
+    width: auto;
+    text-decoration: underline dotted;
+}
+.wpfAbcToggle:hover, .wpfAbcLink:hover {
+    color: inherit;
+}
+.wpfButtonsFilter .wpfOptionDisabled {
+    color: #acacac !important;
+    cursor: default;
+}
+
+/* Star Rating */
+.wpfStarsRating {
+    display: inline-block;
+}
+.wpfStarsAdditional, .wpfStarsAdditional5{
+    margin: auto 0 auto 5px;
+    white-space: nowrap;
+    float: right;
+    font-size: 14px;
+    color: #444;
+}
+.rtl .wpfStarsAdditional, .rtl .wpfStarsAdditional5{
+     margin: auto 5px auto 0;
+}
+.wpfStarsRatingBlock{
+    display: flex;
+    font-size: 20px;
+    line-height: 20px;
+    position: relative;
+    margin-bottom: 5px;
+}
+.wpfStarsRatingLine{
+    display: inline-flex;
+    line-height: 20px;
+    height: 20px;
+    font-size: 20px;
+}
+.wpfStarInput{
+    position: absolute;
+    left: -9999px;
+}
+.wpfLineChecked .wpfStarsAdditional{
+    font-weight: bold;
+}
+.wpfStarItem{
+    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;  
+    position: relative;
+    padding-right: 3px;
+    margin-left: 0 !important;
+}
+.wpfRatingStar{
+    display: flex;
+    width: 1em;
+    height: 1em;
+    fill: currentColor;
+    stroke: #a3a3a3;
+    stroke-width: 2px;
+}
+.wpfStarsRatingLine .checked {
+    color: #eeee22;
+}
+
+/* Colors Rating */
+.wpfColorsFilter label.icon {
+    border-width: 0;
+    border-style: solid;
+    height: 16px;
+    width: 16px;
+    float: left;
+    background-color: #000000;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+}
+.wpfColorsFilter {
+    display: inline-block;
+    width: 100%;
+}
+.wpfColorsFilter input[type=checkbox] { display: none !important; }
+.wpfColorsFilterHor label.icon {
+    margin: 0;
+    font-weight: normal;
+}
+.wpfColorsRow {
+    clear:both;
+}
+.wpfColorsFilterVer {
+    display: flex;
+}
+.wpfColorsFilterVer label.icon {
+    display: inline-block;
+    margin: 0 0 6px 0;
+    font-weight: normal;
+	flex: 1 0 auto;
+}
+.wpfColorsFilterVer .wpfColorsCol {
+    display: inline-block;
+    margin-right: 10px;
+    float: left;
+}
+.wpfColorsFilterVer .wpfColorsCol .wpfColorsColBlock {
+    display: flex;
+}
+.wpfColorsFilterVer label.wpfAttrLabel {
+    font-weight: normal;
+    margin-left: 10px;
+}
+.wpfColorsFilter input:checked + label.icon:before {
+  content: '\f00c';
+    font-family: FontAwesome !important;
+    margin-left: 25%; 
+}
+.wpfPriceRangeCustom {
+    display: block;
+    margin-left: 20px;
+}
+.wpfPriceRangeCustom input {
+    max-width: 35%;
+    min-width: 30px;
+    min-height: 20px;
+    margin: 0 5px;
+}
+.wpfPriceRangeCustom i {
+    float: none;
+}
+.wpfSearchWrapper {
+    position: relative;
+}
+.wpfSearchWrapper input {
+    padding-left: 5px !important;
+    padding-right: 40px !important;
+}
+.rtl .wpfSearchWrapper input {
+    padding-left: 40px !important;
+    padding-right: 5px !important;
+}
+.animate-rotate {
+    animation: 1s linear 0s normal none infinite running animate-rotate;
+    -webkit-animation: 1s linear 0s normal none infinite running animate-rotate;
+}
+#wpfMinAttrNum,
+#wpfMaxAttrNum {
+    width: 35%;
+    min-width: 16%;
+    display: inline-block;
+}
+@keyframes animate-rotate {
+    0% {transform: rotate(0deg);}
+    100% {transform: rotate(360deg);}
+}
+@-webkit-keyframes animate-rotate {
+    0% {transform: rotate(0deg);}
+    100% {transform: rotate(360deg);}
+}
+
+.animate-jump {
+    animation: 0.7s linear 0s normal none infinite running animate-jump;
+    -webkit-animation: 0.7s linear 0s normal none infinite running animate-jump;
+    position:relative;
+}
+@keyframe animate-jump {
+    from {top: -25px;}
+    to {top: 25px;}
+}
+@-webkit-keyframes animate-jump {
+    from {top: -25px;}
+    to {top: 25px;}
+}
+
+.animate-flip {
+    animation: 2s linear 0s normal none infinite running animate-flip;
+    -webkit-animation: 2s linear 0s normal none infinite running animate-flip;
+}
+@keyframes animate-flip {
+    0% {transform: rotateY(0deg);}
+    100% {transform: rotateY(360deg);}
+}
+@-webkit-keyframes animate-flip {
+    0% {transform: rotateY(0deg);}
+    100% {transform: rotateY(360deg);}
+}
+.hideUntilPrevSelected {
+    display:none !important;
+}
+
+.wpfDisable select{
+    background: #aaaaaa;
+}
+
+.wpfDisable .ms-options-wrap > button {
+    background-color: #aaaaaa !important;
+    pointer-events: none !important;
+    opacity: 0.6;
+    cursor: not-allowed !important;
+} 
+
+.wpfDisable .ms-options-wrap > .ms-options {
+    display: none !important;
+}
+
+
+/* Floating Filter */
+.wpfFloatingWrapper {
+    background: #FFFFFF;
+	z-index: 999999;
+    position: fixed !important;
+    display:none;
+    min-width: 200px;
+	max-width: 100%;
+    max-height: 100%;
+}
+.wpfFloatingTitle {
+    padding: 10px 30px 10px 10px;
+    overflow: hidden;
+    white-space: nowrap;
+    font-size: 16px;
+    line-height: 16px;
+	/*margin: 0 -10px 10px -10px;*/
+}
+.wpfFloatingClose {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+	font-weight: normal;
+	cursor: pointer;
+}
+.wpfFloatingOverlay {
+  position: fixed;
+  display: none;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9998;
+  cursor: pointer;
+}
+.wpfFloating {
+	overflow: auto;
+    padding: 0 10px 10px 10px;
+}

@@ -1,0 +1,104 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - link "Preskoči na sadržaj" [ref=e3] [cursor=pointer]:
+      - /url: "#primary-content"
+    - banner [ref=e4]:
+      - generic [ref=e8]:
+        - generic [ref=e9]:
+          - text: 
+          - button "Otvori pretragu" [ref=e11]:
+            - generic [ref=e12]: 
+          - link "Wishlist -" [ref=e14] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/wishlist/
+            - text: 
+          - link "Moj nalog" [ref=e17] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/my-account/
+            - generic [ref=e18]: 
+          - button " 0" [ref=e20]:
+            - generic [ref=e21]: 
+            - generic [ref=e22]: "0"
+        - button "Otvori mobilni meni" [ref=e24]:
+          - img [ref=e25]
+      - text:     
+    - complementary "košarica" [ref=e27]:
+      - generic [ref=e28]:
+        - generic [ref=e29]: Mini košarica
+        - button "Zatvori mini košaricu" [ref=e30]:
+          - generic [ref=e31]: 
+      - paragraph [ref=e32]: No products in the cart.
+    - generic [ref=e33]:
+      - generic [ref=e35]:
+        - navigation "Breadcrumb" [ref=e36]:
+          - link "Home" [ref=e37] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b
+          - text: / Edukativne igračke
+        - heading "Edukativne igračke" [level=1] [ref=e38]
+      - generic [ref=e41]:
+        - generic:
+          - generic:
+            - button "":
+              - generic: 
+        - generic [ref=e43]:
+          - generic [ref=e45]:
+            - generic [ref=e46]:
+              - combobox [ref=e47]
+              - combobox "Default sorting" [ref=e50] [cursor=pointer]:
+                - textbox "Default sorting" [ref=e51]
+                - text: 
+            - button "Filtriraj" [ref=e52]
+          - generic [ref=e54]:
+            - generic [ref=e56]:
+              - generic [ref=e57]: Novo
+              - generic [ref=e58]:
+                - link "2U1 Drvene puzzle - Autići" [ref=e59] [cursor=pointer]:
+                  - /url: http://localhost:8080/dp-b2b/product/2u1-drvene-puzzle-autici/
+                  - img "2U1 Drvene puzzle - Autići" [ref=e60]
+                - generic [ref=e61]:
+                  - link "Dodaj 2U1 Drvene puzzle - Autići u košaricu" [ref=e62] [cursor=pointer]:
+                    - /url: /dp-b2b/product-category/edukativne-igracke/?add-to-cart=119
+                    - generic [ref=e63]: Dodaj u košaricu
+                    - generic [ref=e64]: 
+                  - link "Pošaljite upit za proizvod 2U1 Drvene puzzle - Autići" [ref=e65] [cursor=pointer]:
+                    - /url: http://localhost:8080/dp-b2b/product-inquiry/119/
+                    - generic [ref=e66]: 
+                  - button "Add to Wishlist" [ref=e69] [cursor=pointer]:
+                    - text: 
+                    - generic [ref=e70]: Add to Wishlist
+              - generic [ref=e71]:
+                - link "2U1 Drvene puzzle - Autići" [ref=e72] [cursor=pointer]:
+                  - /url: http://localhost:8080/dp-b2b/product/2u1-drvene-puzzle-autici/
+                  - generic [ref=e73]: 2U1 Drvene puzzle - Autići
+                - generic [ref=e75]: 9,31 €
+              - link "Pogledaj proizvod 2U1 Drvene puzzle - Autići" [ref=e76] [cursor=pointer]:
+                - /url: http://localhost:8080/dp-b2b/product/2u1-drvene-puzzle-autici/
+                - generic [ref=e77]: Pogledaj proizvod 2U1 Drvene puzzle - Autići
+            - generic [ref=e79]:
+              - generic [ref=e80]: Novo
+              - generic [ref=e81]:
+                - link "Pecanje - Ribice" [ref=e82] [cursor=pointer]:
+                  - /url: http://localhost:8080/dp-b2b/product/pecanje-ribice/
+                  - img "Pecanje - Ribice" [ref=e83]
+                - generic [ref=e84]:
+                  - link "Dodaj Pecanje - Ribice u košaricu" [ref=e85] [cursor=pointer]:
+                    - /url: /dp-b2b/product-category/edukativne-igracke/?add-to-cart=124
+                    - generic [ref=e86]: Dodaj u košaricu
+                    - generic [ref=e87]: 
+                  - link "Pošaljite upit za proizvod Pecanje - Ribice" [ref=e88] [cursor=pointer]:
+                    - /url: http://localhost:8080/dp-b2b/product-inquiry/124/
+                    - generic [ref=e89]: 
+                  - button "Add to Wishlist" [ref=e92] [cursor=pointer]:
+                    - text: 
+                    - generic [ref=e93]: Add to Wishlist
+              - generic [ref=e94]:
+                - link "Pecanje - Ribice" [ref=e95] [cursor=pointer]:
+                  - /url: http://localhost:8080/dp-b2b/product/pecanje-ribice/
+                  - generic [ref=e96]: Pecanje - Ribice
+                - generic [ref=e98]: 10,87 €
+              - link "Pogledaj proizvod Pecanje - Ribice" [ref=e99] [cursor=pointer]:
+                - /url: http://localhost:8080/dp-b2b/product/pecanje-ribice/
+                - generic [ref=e100]: Pogledaj proizvod Pecanje - Ribice
+    - contentinfo [ref=e102]:
+      - generic [ref=e103]:
+        - generic [ref=e109]: Kontaktirajte nas
+        - generic [ref=e113]: © 2026 Dreampoint B2B Shop.
+  - status [ref=e116]

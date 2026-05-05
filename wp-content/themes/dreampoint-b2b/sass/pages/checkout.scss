@@ -1,0 +1,281 @@
+@import '../theme/vars';
+
+// =============================
+// CHECKOUT BLOCK ROOT
+// =============================
+.wp-block-woocommerce-checkout {
+    padding-bottom: 64px;
+
+    @include bp(lg) { padding-bottom: 50px; }
+    @include bp(md) { padding-bottom: 40px; }
+    @include bp(sm-down) { padding-bottom: 32px; }
+
+    #shipping-method { margin-bottom: 24px; }
+    #payment-method { margin-bottom: 32px; }
+
+    .wc-block-checkout__terms {
+        margin-bottom: 32px;
+    }
+}
+
+
+// =============================
+// MAIN CHECKOUT WRAPPER
+// =============================
+.woocommerce-checkout {
+
+    // -------------------------
+    // TYPOGRAPHY & LABELS
+    // -------------------------
+    .wc-block-components-text-input,
+    .wc-block-components-form {
+
+        label {
+            @include paragraph-normal;
+            color: $icon-secondary;
+            font-size: 16px;
+        }
+
+        &.is-active label {
+            color: $black;
+        }
+    }
+
+    .wc-block-components-validation-error {
+        color: $error;
+
+        p {
+            font-size: 12px;
+            letter-spacing: 0.02em;
+        }
+    }
+
+
+    // -------------------------
+    // INPUTS / SELECTS
+    // -------------------------
+    .wc-block-components-text-input input,
+    .wc-blocks-components-select__select {
+        display: block;
+        width: 100%;
+        height: 46px;
+        padding: 0 16px !important;
+        border: 1px solid $border-primary;
+        background: $white;
+        color: $black;
+
+        @include paragraph-normal;
+        font-size: 16px;
+
+        &:focus {
+            border-color: $text-disabled;
+            box-shadow: 0 0 0 3px $border-focus;
+        }
+
+        @include input-placeholder {
+            color: $text-secondary;
+        }
+    }
+
+    .has-error {
+        input,
+        .wc-blocks-components-select__select {
+            border-color: $error !important;
+        }
+    }
+
+
+    // -------------------------
+    // CHECKBOX
+    // -------------------------
+    .wc-block-components-checkbox {
+
+        label {
+            @include paragraph-normal;
+            align-items: center;
+        }
+
+        &__input[type=checkbox] {
+            width: 1em;
+            height: 1em;
+            border: 1px solid $text-primary;
+            background: transparent;
+
+            &:checked {
+                background: $background-brand;
+                border-color: $background-brand;
+            }
+
+            &:focus {
+                outline: none;
+            }
+        }
+
+        &__mark {
+            width: 1em;
+            height: 1em;
+            fill: $white;
+        }
+    }
+
+
+    // -------------------------
+    // RADIO CONTROL
+    // -------------------------
+    .wc-block-components-radio-control {
+
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+
+        &__input {
+            width: 20px !important;
+            height: 20px !important;
+
+            &:checked {
+                background: $brand;
+
+                &:before {
+                    background: $white;
+                    width: 8px;
+                    height: 8px;
+                }
+            }
+        }
+
+        &__option {
+            padding-left: 32px !important;
+
+            &--checked-option-highlighted {
+                border: 2px solid $brand !important;
+            }
+        }
+
+        &__label {
+            @include paragraph-normal;
+            color: #344054;
+        }
+    }
+
+
+    // -------------------------
+    // ORDER SUMMARY
+    // -------------------------
+    .wp-block-woocommerce-checkout-order-summary-block {
+
+        border: 0;
+
+        .wc-block-components-checkout-step__heading {
+            display: none;
+        }
+
+        .checkout-order-summary-block-fill {
+            @include bp(md-down) {
+                display: flex;
+                flex-direction: column;
+                @include paragraph-normal;
+            }
+        }
+        .proceed-order-button {
+            width: 100%;
+            margin-top: 24px;
+            order: 4;
+        }
+    }
+
+    .wc-block-components-totals-wrapper {
+        border-top: 1px solid $border-secondary;
+    }
+
+
+    // -------------------------
+    // PAYMENT
+    // -------------------------
+    .payment {
+
+        .wc-block-components-radio-control-accordion-option {
+            border: 1px solid $text-primary !important;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .wc-block-components-radio-control-accordion-option--checked-option-highlighted {
+            border: 2px solid $background-brand !important;
+        }
+
+        .wc-block-components-radio-control-accordion-content {
+            margin-left: 56px;
+            margin-top: -12px;
+            padding-bottom: 16px;
+
+            @include paragraph-normal;
+            color: #475467;
+        }
+    }
+
+
+    // -------------------------
+    // BUTTONS
+    // -------------------------
+    .wc-block-checkout__actions_row {
+
+        .wc-block-components-checkout-return-to-cart-button {
+            display: none;
+        }
+
+        button.wc-block-components-button {
+            @include button-primary;
+            height: 44px;
+            width: 100%;
+            padding: 0 24px;
+
+            span {
+                color: $white;
+                font-family: 'Jost';
+                font-weight: 500;
+            }
+        }
+    }
+
+
+    // -------------------------
+    // HEADINGS
+    // -------------------------
+    .wc-block-components-checkout-step__heading {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        margin-bottom: 24px;
+
+        &:after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: #d0d5dd;
+        }
+    }
+
+    h2.wc-block-components-checkout-step__title {
+        @include heading-5;
+    }
+}
+
+
+.wc-block-checkout__main {
+    .wc-block-checkout__terms {
+        @include bp(sm-down) {
+            padding-top: 0;
+        }
+    }
+}
+
+.wc-block-components-address-card {
+    address .wc-block-components-address-card__address-section:first-child {
+        font-weight: 500;
+    }
+}
+
+
+#billing-fields {
+    display: none!important;
+}

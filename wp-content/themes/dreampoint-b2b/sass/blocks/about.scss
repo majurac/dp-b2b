@@ -1,0 +1,63 @@
+@import '../theme/vars';
+
+.about {
+    background-color: #F1F1F0;
+    .about-content {
+        background-color: #fff;
+        .row {
+            align-items: center;
+            &.reverse {
+                @include bp(md-up) {
+                    flex-direction: row-reverse;
+                }
+                .block-image {
+                    @include bp(md-up) {
+                        right: auto;
+                        eft: 0;
+                    }
+                }
+            }
+            .col-lg-6:first-of-type {
+                @include bp(md-up) {
+                    padding-right: 9px;
+                }
+            }
+            .block-content {
+                padding: 30px;
+                display: flex;
+                justify-content: center;
+                flex-direction: column;
+                max-width: 562px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            h2 {
+                @include heading-4;
+                margin-bottom: 12px;
+            }
+            p + .button {
+                margin-top: 26px;
+            }
+            p + p {
+                margin-top: 24px;
+            }
+            ul {
+                @include list-style;
+            }
+            .button {
+                @include categories-btn-reverse;
+                align-self: flex-start;
+            }
+            img {
+                width: 100%;
+                object-fit: cover;
+            }
+        }
+    }
+    &.block {
+        + .wp-block-image {
+            padding-top: 32px;
+            padding-bottom: 32px;
+        }
+    }
+}

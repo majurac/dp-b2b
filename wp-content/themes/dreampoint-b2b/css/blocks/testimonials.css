@@ -1,0 +1,76 @@
+/*#525252*/
+.testimonials {
+  text-align: center;
+}
+.testimonials h2 {
+  font-family: "Jost";
+  font-style: normal;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: normal;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+@media only screen and (max-width: 767.98px) {
+  .testimonials h2 {
+    font-size: 16px;
+  }
+}
+.testimonials h2 {
+  margin-bottom: 40px;
+}
+.testimonials .testimonials-slider {
+  overflow: unset;
+  width: 100%;
+}
+.testimonials .testimonials-slider .testimonial-content {
+  max-width: 860px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.testimonials .testimonials-slider .testimonial-content blockquote {
+  font-family: "Marcellus";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 44px;
+  line-height: 144%;
+  text-align: center;
+  letter-spacing: 0.04em;
+  color: #111111;
+}
+@media only screen and (max-width: 1199.98px) {
+  .testimonials .testimonials-slider .testimonial-content blockquote {
+    font-size: 38px;
+  }
+}
+@media only screen and (max-width: 767.98px) {
+  .testimonials .testimonials-slider .testimonial-content blockquote {
+    font-size: 33px;
+  }
+}
+@media only screen and (min-width: 768px) {
+  .testimonials .testimonials-slider .testimonial-content blockquote {
+    font-size: 32px !important;
+  }
+}
+.testimonials .testimonials-slider .testimonial-content blockquote {
+  margin: 0;
+  margin-bottom: 20px;
+}
+@media only screen and (max-width: 767.98px) {
+  .testimonials .testimonials-slider .testimonial-content blockquote {
+    font-size: 24px;
+  }
+}
+.testimonials .testimonials-slider .testimonial-content .author {
+  font-family: "Jost";
+  font-style: normal;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/*# sourceMappingURL=testimonials.css.map */

@@ -1,0 +1,27 @@
+- generic [ref=e1]:
+  - heading "Log In" [level=1] [ref=e2]
+  - generic [ref=e3]:
+    - link "Powered by WordPress" [ref=e4] [cursor=pointer]:
+      - /url: https://wordpress.org/
+    - paragraph [ref=e6]: You are now logged out.
+    - generic [ref=e7]:
+      - paragraph [ref=e8]:
+        - generic [ref=e9]: Username or Email Address
+        - textbox "Username or Email Address" [active] [ref=e10]
+      - generic [ref=e11]:
+        - generic [ref=e12]: Password
+        - generic [ref=e13]:
+          - textbox "Password" [ref=e14]
+          - button "Show password" [ref=e15] [cursor=pointer]:
+            - generic [ref=e16]: 
+      - paragraph [ref=e17]:
+        - checkbox "Remember Me" [ref=e18] [cursor=pointer]
+        - generic [ref=e19]: Remember Me
+      - paragraph:
+        - button "Log In" [ref=e20] [cursor=pointer]
+    - paragraph [ref=e21]:
+      - link "Lost your password?" [ref=e22] [cursor=pointer]:
+        - /url: http://localhost:8080/dp-b2b/wp-login.php?action=lostpassword
+    - paragraph [ref=e23]:
+      - link "← Go to Dreampoint B2B Shop" [ref=e24] [cursor=pointer]:
+        - /url: http://localhost:8080/dp-b2b/

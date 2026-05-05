@@ -1,0 +1,72 @@
+{
+  "apiVersion": 2,
+  "name": "silkypress/input-field",
+  "version": "2.0.0",
+  "title": "Input Field",
+  "category": "woocommerce",
+  "description": "Add input fields to the WooCommerce Checkout Block. SilkyPress Input Field Block plugin.",
+  "supports": {
+    "html": false,
+    "align": false,
+    "multiple": true,
+    "reusable": false
+  },
+  "parent": [
+    "woocommerce/checkout-totals-block",
+    "woocommerce/checkout-fields-block",
+    "woocommerce/checkout-contact-information-block",
+    "woocommerce/checkout-shipping-address-block",
+    "woocommerce/checkout-billing-address-block",
+    "woocommerce/checkout-shipping-method-block",
+    "woocommerce/checkout-shipping-methods-block",
+    "woocommerce/checkout-pickup-options-block"
+  ],
+  "attributes": {
+    "type": {
+      "type": "string",
+      "default": "text"
+    },
+    "label": {
+      "type": "string",
+      "default": "Label"
+    },
+    "name": {
+      "type": "string",
+      "default": "id"
+    },
+    "options": {
+      "type": "string",
+      "default": ""
+    },
+    "defaultValue": {
+      "type": "string",
+      "default": ""
+    },
+    "placeholder": {
+      "type": "string",
+      "default": ""
+    },
+    "extra": {
+      "type": "string",
+      "default": ""
+    },
+    "required": {
+      "type": "boolean",
+      "default": true
+    },
+    "showOrder": {
+      "type": "boolean",
+      "default": true
+    },
+    "showOrderConfirmation": {
+      "type": "boolean",
+      "default": true
+    },
+    "showOrderEmail": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "textdomain": "silkypress-input-field-block",
+  "editorStyle": "file:../../../build/style-silkypress-input-field-block-block.css"
+}

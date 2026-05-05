@@ -1,0 +1,206 @@
+{
+    "key": "group_dp_bucket_fields",
+    "title": "Customer Bucket Rules",
+    "fields": [
+        {
+            "key": "field_dp_access_type",
+            "label": "Access Type",
+            "name": "dp_access_type",
+            "aria-label": "",
+            "type": "select",
+            "instructions": "Rule Based: allowed set defined by brands and/or categories (OR logic). Full Access: entire catalog visible — no filtering. Custom Offer: product list managed via the Custom Offer Products admin page.",
+            "required": 1,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "choices": {
+                "rule_based": "Rule Based",
+                "full_access": "Full Access",
+                "custom_offer": "Custom Offer"
+            },
+            "default_value": "rule_based",
+            "return_format": "value",
+            "multiple": 0,
+            "allow_null": 0,
+            "allow_custom": 0,
+            "search_placeholder": "",
+            "ui": 0,
+            "ajax": 0,
+            "placeholder": ""
+        },
+        {
+            "key": "field_dp_allowed_brands",
+            "label": "Allowed Brands",
+            "name": "dp_allowed_brands",
+            "aria-label": "",
+            "type": "taxonomy",
+            "instructions": "Products belonging to these brands are visible. Combined with Allowed Categories using OR logic — a product is visible if it matches any brand OR any category.",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_dp_access_type",
+                        "operator": "==",
+                        "value": "rule_based"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "taxonomy": "product_brand",
+            "add_term": 0,
+            "save_terms": 0,
+            "load_terms": 0,
+            "return_format": "id",
+            "field_type": "checkbox",
+            "allow_null": 0,
+            "bidirectional": 0,
+            "multiple": 0,
+            "bidirectional_target": []
+        },
+        {
+            "key": "field_dp_allowed_categories",
+            "label": "Allowed Categories",
+            "name": "dp_allowed_categories",
+            "aria-label": "",
+            "type": "taxonomy",
+            "instructions": "Products belonging to these categories are visible. Combined with Allowed Brands using OR logic.",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_dp_access_type",
+                        "operator": "==",
+                        "value": "rule_based"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "taxonomy": "product_cat",
+            "add_term": 0,
+            "save_terms": 0,
+            "load_terms": 0,
+            "return_format": "id",
+            "field_type": "checkbox",
+            "allow_null": 0,
+            "bidirectional": 0,
+            "multiple": 0,
+            "bidirectional_target": []
+        },
+        {
+            "key": "field_dp_explicit_include",
+            "label": "Explicit Include",
+            "name": "dp_explicit_include",
+            "aria-label": "",
+            "type": "relationship",
+            "instructions": "Products explicitly added to the allowed set regardless of brand/category rules. Note: Explicit Exclude (layer 3) overrides Explicit Include (layer 4) if the same product appears in both.",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_dp_access_type",
+                        "operator": "==",
+                        "value": "rule_based"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "post_type": [
+                "product"
+            ],
+            "post_status": "",
+            "taxonomy": "",
+            "filters": [
+                "search",
+                "taxonomy"
+            ],
+            "return_format": "id",
+            "min": "",
+            "max": "",
+            "elements": ""
+        },
+        {
+            "key": "field_dp_explicit_exclude",
+            "label": "Explicit Exclude",
+            "name": "dp_explicit_exclude",
+            "aria-label": "",
+            "type": "relationship",
+            "instructions": "Products explicitly blocked even if they match allowed brands or categories. Per-user Override Add (user meta) can override this exclusion.",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_dp_access_type",
+                        "operator": "==",
+                        "value": "rule_based"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "post_type": [
+                "product"
+            ],
+            "post_status": "",
+            "taxonomy": "",
+            "filters": [
+                "search",
+                "taxonomy"
+            ],
+            "return_format": "id",
+            "min": "",
+            "max": "",
+            "elements": ""
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "dp_bucket"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": [
+        "the_content",
+        "excerpt",
+        "discussion",
+        "comments",
+        "revisions",
+        "slug",
+        "author",
+        "format",
+        "featured_image",
+        "tags",
+        "categories",
+        "custom_fields",
+        "send-trackbacks"
+    ],
+    "active": true,
+    "description": "Visibility rules for customer bucket CPT. Controls which products each bucket of users can see.",
+    "show_in_rest": 0,
+    "modified": 1745492400
+}

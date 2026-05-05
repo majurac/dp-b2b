@@ -1,0 +1,750 @@
+// Varijable i mixin definicije — nula CSS outputa.
+// Importovati ovdje u standalone fajlovima (blocks/, pages/).
+// style.scss ovaj fajl importuje eksplicitno prije _mixins.scss.
+
+$white: #ffffff;
+$brand: #025788;
+$black: #111111;
+$pink: #e3869c;
+$text-primary: #303030;
+$text-secondary: #9C9C9C;
+$text-tertiary: #000; /*#525252*/
+$text-hover: #A8A9A5;
+$text-disabled: #BFBFBF;
+$text-brand-disabled: #CDCFD4;
+$text-brand-inverse: #141414;
+$text-primary-inverse: #FAFAFA;
+$text-secondary-inverse: $white;
+$border-primary: #BBBBBB;
+$border-secondary: #E5E7EB;
+$border-focus: #F3F4F6;
+$border-brand: #7C4982;
+$background-brand: #111111;
+$background-brand-500: #877F5B;
+$background-secondary: #fff;
+$background-brand-hover: #535038;
+$icon-brand: #A8A9A5;
+$icon-secondary: #6C727E;
+$icon-tertiary: #B8B8B8;
+$error: #F04437;
+
+$header-height: 135px;
+
+@mixin animate-fade {
+    transition: .25s ease-in-out;
+}
+@mixin animate-scale {
+    transform: scale(1.1);
+}
+
+//mixins
+@mixin bp($value) {
+    @if $value=='xxs-down' {
+        @media only screen and (max-width: 370px) {
+            @content;
+        }
+    }
+    @if $value=='xs-down' {
+        @media only screen and (max-width: 575.98px) {
+            @content;
+        }
+    }
+    @else if $value=='sm-down' {
+        @media only screen and (max-width: 767.98px) {
+            @content;
+        }
+    }
+    @else if $value=='md-down' {
+        @media only screen and (max-width: 991.98px) {
+            @content;
+        }
+    }
+    @else if $value=='lg-down' {
+        @media only screen and (max-width: 1199.98px) {
+            @content;
+        }
+    }
+    @else if $value=='xl-down' {
+        @media only screen and (max-width: 1399px) {
+            @content;
+        }
+    }
+    @else if $value=='md' {
+        @media only screen and (min-width: 768px) and (max-width: 991.98px) {
+            @content;
+        }
+    }
+    @else if $value=='lg' {
+        @media only screen and (min-width: 992px) and (max-width: 1199.98px) {
+            @content;
+        }
+    }
+    @else if $value=='small-lap' {
+        @media only screen and (min-width: 1025px) and (max-height: 767px) {
+            @content;
+        }
+    }
+    @else if $value=='desktop' {
+        @media only screen and (min-width: 1200px) and (max-width:1550px) {
+            @content;
+        }
+    }
+    @else if $value=='desktop-lg' {
+        @media only screen and (min-width: 1551px) {
+            @content;
+        }
+    }
+    @else if $value=='xl-up' {
+        @media only screen and (min-width: 1400px) {
+            @content;
+        }
+    }
+    @else if $value=='xs-up' {
+        @media only screen and (min-width: 576px) {
+            @content;
+        }
+    }
+    @else if $value=='sm-up' {
+        @media only screen and (min-width: 768px) {
+            @content;
+        }
+    }
+    @else if $value=='md-up' {
+        @media only screen and (min-width: 992px) {
+            @content;
+        }
+    }
+    @else if $value=='lg-up' {
+        @media only screen and (min-width: 1200px) {
+            @content;
+        }
+    }
+    @else {
+        @media only screen and (min-width: 240px) and (max-width: $value) {
+            @content;
+        }
+    }
+}
+
+@mixin sharp-img {
+    -ms-interpolation-mode: nearest-neighbor;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -o-crisp-edges;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+}
+
+// center vert horizontal
+@mixin centre($axis: "both") {
+    position: absolute;
+    @if $axis=="y" {
+        top: 50%;
+        -webkit-transform: translateY(-50%);
+        -moz-transform: translateY(-50%);
+        -ms-transform: translateY(-50%);
+        -o-transform: translateY(-50%);
+        transform: translateY(-50%);
+    }
+    @if $axis=="x" {
+        left: 50%;
+        -webkit-transform: translateX(-50%);
+        -moz-transform: translateX(-50%);
+        -ms-transform: translateX(-50%);
+        -o-transform: translateX(-50%);
+        transform: translateX(-50%);
+    }
+    @if $axis=="both" {
+        top: 50%;
+        left: 50%;
+        -webkit-transform: translate(-50%, -50%);
+        -moz-transform: translate(-50%, -50%);
+        -ms-transform: translate(-50%, -50%);
+        -o-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+    }
+}
+
+@mixin clear-pos {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+}
+
+// placeholder
+@mixin input-placeholder {
+    &.placeholder {
+        @content;
+    }
+    &:-moz-placeholder {
+        @content;
+    }
+    &::-moz-placeholder {
+        @content;
+    }
+    &:-ms-input-placeholder {
+        @content;
+    }
+    &::-webkit-input-placeholder {
+        @content;
+    }
+}
+
+@mixin btn-reset {
+    padding: 0;
+    border: 0;
+    background: none;
+}
+
+
+@mixin paragraph-large {
+    font-family: 'Jost';
+    font-style: normal;
+    font-weight: 300;
+    font-size: 24px;
+    line-height: 136%;
+    letter-spacing: 0.01em;
+    padding: 0;
+    margin: 0;
+    @include bp(sm-down) {
+        font-size: 20px;
+    }
+}
+
+@mixin paragraph-normal {
+    font-family: 'Jost';
+    font-style: normal;
+    font-weight: 300;
+    font-size: 18px;
+    line-height: 136%;
+    letter-spacing: 0.01em;
+    padding: 0;
+    margin: 0;
+    @include bp(sm-down) {
+        font-size: 16px;
+    }
+}
+
+
+@mixin caption-m {
+    font-family: 'Jost';
+    font-style: normal;
+    font-weight: 300;
+    font-size: 16px;
+    line-height: 136%;
+    letter-spacing: 0.01em;
+    @include bp(sm-down) {
+        font-size: 14px;
+    }
+}
+
+
+
+@mixin heading-1 {
+    font-family: 'Marcellus';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 60px;
+    line-height: normal;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    @include bp(lg-down) {
+        font-size: 40px;
+    }
+    @include bp(sm-down) {
+        font-size: 32px;
+    }
+}
+
+@mixin heading-2 {
+    font-family: 'Marcellus';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 48px;
+    line-height: normal;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    @include bp(lg-down) {
+        font-size: 36px;
+    }
+    @include bp(sm-down) {
+        font-size: 28px;
+    }
+}
+
+@mixin heading-3 {
+    font-family: 'Marcellus';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 32px;
+    line-height: normal;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    @include bp(lg-down) {
+        font-size: 28px;
+    }
+    @include bp(sm-down) {
+        font-size: 24px;
+    }
+}
+
+@mixin heading-4 {
+    font-family: 'Marcellus';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 26px;
+    line-height: normal;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+
+    @include bp(md-down) {
+        font-size: 20px;
+    }
+}
+
+@mixin heading-5 {
+    font-family: 'Jost';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 18px;
+    line-height: normal;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    @include bp(sm-down) {
+        font-size: 16px;
+    }
+}
+
+@mixin heading-6 {
+    font-family: 'Jost';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 18px;
+    line-height: normal;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    @include bp(sm-down) {
+        font-size: 16px;
+    }
+}
+
+@mixin button-text-large {
+    font-family: 'Jost';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 29px;
+    text-align: center;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    @include bp(sm-down) {
+        font-size: 18px;
+    }
+}
+
+
+@mixin button-text {
+    font-family: 'Jost';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 20px;
+    text-align: center;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: $black;
+    @include bp(sm-down) {
+        font-size: 12px;
+    }
+}
+
+@mixin extra {
+    font-family: 'Marcellus';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 44px;
+    line-height: 144%;
+    text-align: center;
+    letter-spacing: 0.04em;
+    color: $black;
+    @include bp(lg-down) {
+        font-size: 38px;
+    }
+    @include bp(sm-down) {
+        font-size: 33px;
+    }
+}
+
+@mixin card {
+    font-family: 'Marcellus';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 25px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    @include bp(sm-down) {
+        font-size: 16px;
+        line-height: normal;
+    }
+}
+
+@mixin card-sm {
+    font-family: 'Marcellus';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 20px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+
+}
+
+@mixin card-price {
+    font-family: 'Jost';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 26px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    @include bp(sm-down) {
+        font-size: 16px;
+    }
+}
+
+@mixin card-price-sm {
+    font-family: 'Jost';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    @include bp(sm-down) {
+        font-size: 14px;
+    }
+}
+
+@mixin list-style {
+    list-style-type: disc;
+    margin-top: 16px;
+    margin-bottom: 24px;
+    padding-left: 1.5em;
+    li {
+        @include paragraph-normal;
+        margin-bottom: 0;
+        & + li {
+            margin-top: 8px;
+        }
+    }
+}
+
+@mixin order-style {
+    list-style-type: decimal;
+    margin-top: 16px;
+    margin-bottom: 24px;
+    padding-left: 1.5em;
+    li {
+        list-style: inherit;
+        @include paragraph-normal;
+        margin-bottom: 0;
+        & + li {
+            margin-top: 8px;
+        }
+    }
+}
+
+
+@mixin link-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    font-size: 0;
+}
+
+@mixin after-cnt {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+@mixin button-primary {
+    @include button-text;
+    color: $white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0px 24px;
+    background: $pink;
+    gap: 8px;
+    height: 58px;
+    border: 1px solid $pink;
+    @include animate-fade;
+    @include bp(desktop) {
+        padding: 0 14px;
+    }
+    &:hover {
+        background: $brand;
+        border-color: $brand;
+        color: $white;
+    }
+    &:focus {
+        color: $white;
+        background: $brand;
+        border-color: $brand;
+        box-shadow: 0px 0px 0px 1px $brand;
+
+    }
+    /*&:disabled {
+        background: $white;
+        color: $text-disabled;
+        cursor: not-allowed;
+        pointer-events: none;
+    }*/
+}
+
+@mixin button-outline {
+    @include button-primary;
+    color: $black;
+    background: $white;
+    border: 1px solid $black;
+    &:hover {
+        background: $brand;
+        border-color: $brand;
+        color: $white;
+    }
+    &:focus {
+        color: $white;
+        background: $brand;
+        border-color: $brand;
+        box-shadow: 0px 0px 0px 1px $brand;
+
+    }
+    &:disabled {
+        /*background: $white;
+        color: $text-brand-disabled;
+        border-color: $text-brand-disabled;
+        cursor: not-allowed;
+        pointer-events: none;*/
+    }
+}
+
+@mixin categories-btn {
+    @include button-text;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0px 24px;
+    height: 34px;
+    background: $white;
+    gap: 8px;
+    border: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    //border: 1px solid rgba(140, 144, 126, 0.2);
+    @include bp(desktop) {
+        padding: 0 8px;
+        font-size: 12px;
+    }
+    &:hover {
+        background: $brand;
+        color: $white;
+    }
+}
+
+@mixin categories-btn-reverse {
+    @include categories-btn;
+    background-color: $brand;
+    color: $white;
+}
+
+
+@mixin custom-tabs {
+    ul {
+        display: flex;
+        gap: 24px;
+        border-bottom: 1px solid $text-disabled;
+        margin-bottom: 60px;
+        @include bp(sm-down) {
+            display: flex;
+        }
+        li {
+            a {
+                @include heading-6;
+                color: $black;
+                display: flex;
+                align-items: center;
+                text-align: center;
+                justify-content: center;
+                padding-bottom: 10px;
+                border-bottom: 3px solid transparent;
+                &.active, &:hover {
+                    color: $brand;
+                    border-color: $brand;
+                }
+            }
+            &.active {
+                a {
+                    color: $brand;
+                    border-color: $brand;
+                }
+            }
+        }
+    }
+    .tab-placeholder {
+        position: relative;
+        @include heading-5;
+        display: flex;
+        align-items: center;
+        text-align: center;
+        justify-content: center;
+        width: 100%;
+        padding: 0px 24px;
+        height: 36px;
+        background: $white;
+        background: #000;
+        color: $text-primary-inverse;
+        @include bp(md-up) {
+            display: none;
+        }
+    }
+    @include bp(md-down) {
+        .wrapper-dropdown {
+            position: relative;
+            padding: 0px;
+            cursor: pointer;
+            outline: none;
+            &:after {
+                @include centre(y);
+                display: block;
+                right: 24px;
+                color: $white;
+                font-size: 16px;
+                font-family: 'icomoon';
+                content: "\e903";
+                @include animate-fade;
+            }
+            .dropd {
+                /* Size & position */
+                position: absolute;
+                top: calc(100% + 4px);
+                left: 0px;
+                right: 0px;
+                padding: 0px;
+                z-index: 100;
+                overflow: scroll;
+                height: auto;
+                /* Styles */
+                -webkit-transition: all 0.3s ease-out;
+                -moz-transition: all 0.3s ease-out;
+                -ms-transition: all 0.3s ease-out;
+                -o-transition: all 0.3s ease-out;
+                transition: all 0.3s ease-out;
+                list-style: none;
+                /* Hiding */
+                opacity: 0;
+                pointer-events: none;
+                text-align: center;
+                border-radius: 8px;
+                border-bottom: 1px solid $text-secondary-inverse;
+                background: $white;
+                li {
+                    a {
+                        font-family: 'Jost';
+                        font-style: normal;
+                        font-weight: 500;
+                        font-size: 16px;
+                        line-height: 20px;
+                        letter-spacing: 0.05em;
+                        text-transform: uppercase;
+                        color: $text-secondary;
+                        padding: 16px 10px 16px 10px;
+                        display: inline-flex;
+                        padding-right: 30px;
+                        margin-left: auto;
+                        margin-right: auto;
+                        text-align: center;
+                        border-bottom: 1px solid $text-secondary-inverse;
+                        &:hover, &.active {
+                            color: $text-primary;
+                            background-color: $text-primary-inverse;
+                        }
+                    }
+                    &.is-active {
+                        a {
+                            color: $text-primary;
+                            background-color: $text-primary-inverse;
+                        }
+                    }
+                }
+            }
+            &.active {
+                &:after {
+                    transform: translateY(-50%) rotate(180deg);
+                }
+                .dropd {
+                    opacity: 1;
+                    pointer-events: auto;
+                }
+            }
+        }
+    }
+}
+
+
+@mixin sliding-content {
+    position: fixed !important;
+    max-width: 100%;
+    right: -100%;
+    top: 0;
+    width: 100%;
+    max-width: 504px;
+    overflow-y: auto;
+    height: 100%;
+    z-index: 99999;
+    -webkit-transition: all 0.5s ease-in-out;
+    transition: all 0.5s ease-in-out;
+    text-align: left;
+    background: $white;
+    padding: 32px;
+    @include bp(sm-down) {
+        padding: 16px;
+    }
+    &.active {
+        right: 0;
+    }
+    .sliding-content-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 24px;
+        .sliding-content-title {
+            display: flex;
+            flex-grow: 1;
+            align-items: center;
+            @include heading-5;
+            font-weight: 500;
+            color: #101828;
+            &:after {
+                content: "";
+                display: flex;
+                flex: 1;
+                height: 1px;
+                width: 100%;
+                background: $border-primary;
+                margin-left: 24px;
+                margin-right: 8px;
+            }
+        }
+
+    }
+}

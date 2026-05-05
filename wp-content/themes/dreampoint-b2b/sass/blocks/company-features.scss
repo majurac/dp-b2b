@@ -1,0 +1,62 @@
+@import '../theme/vars';
+
+.features {
+    padding: 0;
+    &-content {
+        padding-top: 64px;
+        padding-bottom: 64px;
+        @include bp(sm-down) {
+            padding-top: 60px;
+            margin-bottom: 0px;
+            row-gap: 30px;
+        }
+        .item {
+            display: flex;
+            padding: 0px 24px;
+            column-gap: 24px;
+            flex-direction: column;
+            text-align: center;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+            @include bp(lg-down) {
+                padding: 0 10px;
+            }
+            .features-icon {
+                min-width: 32px;
+                width: 46px;
+                margin-left: auto;
+                margin-right: auto;
+                margin-bottom: 16px;
+            }
+            .features-text {
+                flex-grow: 1;
+                h3, .features-title {
+                    font-family: 'Marcellus';
+                    font-style: normal;
+                    font-weight: 400;
+                    font-size: 20px;
+                    line-height: 25px;
+                    text-align: center;
+                    letter-spacing: 0.04em;
+                    text-transform: capitalize;
+                    @include bp(lg-down) {
+                        font-size: 18px;
+                        line-height: 23px;
+                    }
+                    +p {
+                        margin-top: 5px;
+                    }
+                }
+                p {
+                    @include paragraph-normal;
+                }
+            }
+        }
+    }
+    + .featured-categories {
+        @include bp(sm-down) {
+            //padding-top: 0;
+        }
+    }
+}

@@ -1,0 +1,98 @@
+- generic [ref=e2]:
+  - navigation "Main menu":
+    - link "Skip to main content" [ref=e3] [cursor=pointer]:
+      - /url: "#wpbody-content"
+    - text:                 
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - navigation "Toolbar":
+        - menu:
+          - group [ref=e6]:
+            - menuitem "Menu" [ref=e7] [cursor=pointer]:
+              - generic [ref=e8]: 
+              - generic [ref=e9]: Menu
+          - group [ref=e10]:
+            - menuitem "Dreampoint B2B Shop" [ref=e11] [cursor=pointer]
+          - group [ref=e12]:
+            - menuitem "New" [ref=e13] [cursor=pointer]:
+              - generic [ref=e15]: New
+        - menu [ref=e16]:
+          - group [ref=e17]:
+            - menuitem "Howdy, admin" [ref=e18] [cursor=pointer]
+    - main [ref=e19]:
+      - generic [ref=e20]:
+        - button "Help" [ref=e23] [cursor=pointer]
+        - generic [ref=e24]:
+          - heading "Reading Settings" [level=1] [ref=e25]
+          - generic [ref=e26]:
+            - text: Your homepage displays
+            - group "Your homepage displays" [ref=e27]:
+              - generic [ref=e29]: Your homepage displays
+              - paragraph [ref=e30]:
+                - generic [ref=e31]:
+                  - radio "Your latest posts" [ref=e32] [cursor=pointer]
+                  - text: Your latest posts
+              - paragraph [ref=e33]:
+                - generic [ref=e34]:
+                  - radio "A static page (select below)" [checked] [ref=e35] [cursor=pointer]
+                  - text: A
+                  - link "static page" [ref=e36] [cursor=pointer]:
+                    - /url: edit.php?post_type=page
+                  - text: (select below)
+              - list [ref=e37]:
+                - listitem [ref=e38]:
+                  - generic [ref=e39]:
+                    - text: "Homepage:"
+                    - combobox "Homepage:" [ref=e40] [cursor=pointer]:
+                      - option "— Select —"
+                      - option "Brendovi"
+                      - option "Cart"
+                      - option "Checkout"
+                      - option "My account"
+                      - option "Odobrenje na čekanju"
+                      - option "Početna" [selected]
+                      - option "Sample Page"
+                      - option "Shop"
+                      - option "Wishlist"
+                - listitem [ref=e41]:
+                  - generic [ref=e42]:
+                    - text: "Posts page:"
+                    - combobox "Posts page:" [ref=e43] [cursor=pointer]:
+                      - option "— Select —" [selected]
+                      - option "Brendovi"
+                      - option "Cart"
+                      - option "Checkout"
+                      - option "My account"
+                      - option "Odobrenje na čekanju"
+                      - option "Početna"
+                      - option "Sample Page"
+                      - option "Shop"
+                      - option "Wishlist"
+            - text: Blog pages show at most
+            - spinbutton "Blog pages show at most" [ref=e44]: "10"
+            - text: posts Syndication feeds show the most recent
+            - spinbutton "Syndication feeds show the most recent" [ref=e45]: "10"
+            - text: items For each post in a feed, include
+            - group "For each post in a feed, include" [ref=e46]:
+              - generic [ref=e48]: For each post in a feed, include
+              - paragraph [ref=e49]:
+                - generic [ref=e50]:
+                  - radio "Full text" [checked] [ref=e51] [cursor=pointer]
+                  - text: Full text
+                - generic [ref=e52]:
+                  - radio "Excerpt" [ref=e53] [cursor=pointer]
+                  - text: Excerpt
+              - paragraph [ref=e54]:
+                - text: Your theme determines how content is displayed in browsers.
+                - link "Learn more about feeds" [ref=e55] [cursor=pointer]:
+                  - /url: https://developer.wordpress.org/advanced-administration/wordpress/feeds/
+                - text: .
+            - text: Search engine visibility
+            - group "Search engine visibility" [ref=e56]:
+              - generic [ref=e58]: Search engine visibility
+              - generic [ref=e59]:
+                - checkbox "Discourage search engines from indexing this site" [checked] [ref=e60] [cursor=pointer]
+                - text: Discourage search engines from indexing this site
+              - paragraph [ref=e61]: It is up to search engines to honor this request.
+            - paragraph [ref=e62]:
+              - button "Save Changes" [ref=e63] [cursor=pointer]

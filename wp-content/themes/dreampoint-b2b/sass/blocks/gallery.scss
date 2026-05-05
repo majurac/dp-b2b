@@ -1,0 +1,21 @@
+@import '../theme/vars';
+
+.gallery-slider {
+    .gallery-item {
+        a {
+            display: block;
+            border: 1px solid rgba(17, 17, 17, 0.1);
+            overflow: hidden;
+            img {
+                @include animate-fade;
+                width: 100%;
+                display: block;
+            }
+            &:hover {
+                img{
+                    @include animate-scale;
+                }
+            }
+        }
+    }
+}

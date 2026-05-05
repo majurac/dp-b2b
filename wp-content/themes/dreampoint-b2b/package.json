@@ -1,0 +1,28 @@
+{
+  "name": "dreampoint-b2b",
+  "version": "1.0.0",
+  "description": "Dreampoint B2B WooCommerce theme",
+  "author": "UncleDev",
+  "license": "GPL-2.0-or-later",
+  "devDependencies": {
+    "esbuild": "^0.21.5",
+    "npm-run-all": "^4.1.5",
+    "rtlcss": "^4.3.0",
+    "sass": "^1.99.0"
+  },
+  "scripts": {
+    "build:css":    "sass sass/style.scss:style.css --style=compressed --silence-deprecation=import --no-source-map",
+    "build:pages":  "sass sass/pages/:css/pages/ --style=compressed --silence-deprecation=import --no-source-map",
+    "build:blocks": "sass sass/blocks/:css/blocks/ --style=compressed --silence-deprecation=import --no-source-map",
+    "build:vendors": "sass sass/vendors/:css/vendors/ --style=compressed --silence-deprecation=import --no-source-map",
+    "build:js":     "esbuild js/theme-scripts.js --bundle --minify --outfile=js/theme.min.js",
+    "build":        "npm-run-all build:css build:pages build:blocks build:vendors build:js",
+    "watch:css":    "sass --watch sass/style.scss:style.css --style=expanded --source-map --silence-deprecation=import",
+    "watch:pages":  "sass --watch sass/pages/:css/pages/ --style=expanded --source-map --silence-deprecation=import",
+    "watch:blocks": "sass --watch sass/blocks/:css/blocks/ --style=expanded --source-map --silence-deprecation=import",
+    "watch:vendors": "sass --watch sass/vendors/:css/vendors/ --style=expanded --source-map --silence-deprecation=import",
+    "watch:js":     "esbuild js/theme-scripts.js --bundle --minify --outfile=js/theme.min.js --watch",
+    "watch":        "npm-run-all --parallel watch:css watch:pages watch:blocks watch:vendors watch:js",
+    "rtl":          "rtlcss style.css style-rtl.css"
+  }
+}

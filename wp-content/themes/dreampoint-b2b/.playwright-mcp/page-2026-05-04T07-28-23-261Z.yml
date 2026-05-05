@@ -1,0 +1,244 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - link "Preskoči na sadržaj" [ref=e3] [cursor=pointer]:
+      - /url: "#primary-content"
+    - banner [ref=e4]:
+      - generic [ref=e8]:
+        - generic [ref=e9]:
+          - link "Početna stranica" [ref=e11] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/
+            - generic [ref=e12]: 
+          - button "Otvori pretragu" [ref=e14]:
+            - generic [ref=e15]: 
+          - link "Wishlist -" [ref=e17] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/wishlist/
+            - text: 
+            - generic [ref=e18]: "0"
+          - link "Moj nalog" [ref=e20] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/my-account/
+            - generic [ref=e21]: 
+          - button " 0" [ref=e23]:
+            - generic [ref=e24]: 
+            - generic [ref=e25]: "0"
+        - button "Otvori mobilni meni" [ref=e27]:
+          - img [ref=e28]
+      - text:     
+    - complementary "košarica" [ref=e30]:
+      - generic [ref=e31]:
+        - generic [ref=e32]: Mini košarica
+        - button "Zatvori mini košaricu" [ref=e33]:
+          - generic [ref=e34]: 
+      - paragraph [ref=e35]: No products in the cart.
+    - generic [ref=e36]:
+      - generic [ref=e38]:
+        - generic [ref=e39]:
+          - link "Početna" [ref=e40] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/
+          - text: / Shop
+        - heading "Shop" [level=1] [ref=e41]
+      - generic [ref=e44]:
+        - generic [ref=e157]:
+          - button "" [ref=e158]:
+            - generic [ref=e159]: 
+          - generic [ref=e160]:
+            - generic [ref=e161]:
+              - generic [ref=e163] [cursor=pointer]: Price
+              - generic [ref=e164]:
+                - generic [ref=e165]: Cijena
+                - generic [ref=e170]:
+                  - generic [ref=e171]: €
+                  - generic [ref=e172] [cursor=pointer]: Minimum Price
+                  - spinbutton "Minimum Price" [ref=e173]: "3"
+                  - generic [ref=e174]: "-"
+                  - generic [ref=e175] [cursor=pointer]: Maximum Price
+                  - spinbutton "Maximum Price" [ref=e176]: "25"
+            - generic [ref=e177]:
+              - generic [ref=e179] [cursor=pointer]: Product categories
+              - generic [ref=e180]:
+                - generic [ref=e181]: Kategorije
+                - list [ref=e183]:
+                  - listitem [ref=e184]:
+                    - generic [ref=e185] [cursor=pointer]:
+                      - generic [ref=e186]:
+                        - checkbox "Društvene igre Društvene igre" [ref=e187]
+                        - generic "Društvene igre"
+                      - generic [ref=e189]: Društvene igre
+                  - listitem [ref=e190]:
+                    - generic [ref=e191] [cursor=pointer]:
+                      - generic [ref=e192]:
+                        - checkbox "Edukativne igračke Edukativne igračke" [ref=e193]
+                        - generic "Edukativne igračke"
+                      - generic [ref=e195]: Edukativne igračke
+                  - listitem [ref=e196]:
+                    - generic [ref=e197] [cursor=pointer]:
+                      - generic [ref=e198]:
+                        - checkbox "Kreativni kutak Kreativni kutak" [ref=e199]
+                        - generic "Kreativni kutak"
+                      - generic [ref=e201]: Kreativni kutak
+                  - listitem [ref=e202]:
+                    - generic [ref=e203] [cursor=pointer]:
+                      - generic [ref=e204]:
+                        - checkbox "Naljepnice, štambilji i dječje tetovaže Naljepnice, štambilji i dječje tetovaže" [ref=e205]
+                        - generic "Naljepnice, štambilji i dječje tetovaže"
+                      - generic [ref=e207]: Naljepnice, štambilji i dječje tetovaže
+                  - listitem [ref=e208]:
+                    - generic [ref=e209] [cursor=pointer]:
+                      - generic [ref=e210]:
+                        - checkbox "Puzzle Puzzle" [ref=e211]
+                        - generic "Puzzle"
+                      - generic [ref=e213]: Puzzle
+                  - listitem [ref=e214]:
+                    - generic [ref=e215] [cursor=pointer]:
+                      - generic [ref=e216]:
+                        - checkbox "Termo boce Termo boce" [ref=e217]
+                        - generic "Termo boce"
+                      - generic [ref=e219]: Termo boce
+                  - listitem [ref=e220]:
+                    - generic [ref=e221] [cursor=pointer]:
+                      - generic [ref=e222]:
+                        - checkbox "Termo boce, posude za hranu i sl Termo boce, posude za hranu i sl" [ref=e223]
+                        - generic "Termo boce, posude za hranu i sl"
+                      - generic [ref=e225]: Termo boce, posude za hranu i sl
+            - generic [ref=e226]:
+              - generic [ref=e228] [cursor=pointer]: Stock status
+              - generic [ref=e229]:
+                - generic [ref=e230]: Dostupnost
+                - list [ref=e231]:
+                  - listitem [ref=e232]:
+                    - generic [ref=e233] [cursor=pointer]:
+                      - generic [ref=e234]:
+                        - checkbox "In Stock In Stock" [ref=e235]
+                        - generic "In Stock"
+                      - generic [ref=e237]: In Stock
+                  - listitem [ref=e238]:
+                    - generic [ref=e239] [cursor=pointer]:
+                      - generic [ref=e240]:
+                        - checkbox "Out of Stock Out of Stock" [ref=e241]
+                        - generic "Out of Stock"
+                      - generic [ref=e243]: Out of Stock
+            - generic [ref=e244]:
+              - generic [ref=e246] [cursor=pointer]: Product brands
+              - generic [ref=e247]:
+                - generic [ref=e248]: Brendovi
+                - list [ref=e250]:
+                  - listitem [ref=e251]:
+                    - generic [ref=e252] [cursor=pointer]:
+                      - generic [ref=e253]:
+                        - checkbox "Chilly's Chilly's" [ref=e254]
+                        - generic "Chilly's"
+                      - generic [ref=e256]: Chilly's
+                  - listitem [ref=e257]:
+                    - generic [ref=e258] [cursor=pointer]:
+                      - generic [ref=e259]:
+                        - checkbox "Djeco Djeco" [ref=e260]
+                        - generic "Djeco"
+                      - generic [ref=e262]: Djeco
+                  - listitem [ref=e263]:
+                    - generic [ref=e264] [cursor=pointer]:
+                      - generic [ref=e265]:
+                        - checkbox "Janod Janod" [ref=e266]
+                        - generic "Janod"
+                      - generic [ref=e268]: Janod
+            - button "Filter" [ref=e270] [cursor=pointer]
+            - text: 
+        - generic [ref=e46]:
+          - generic [ref=e48]:
+            - generic [ref=e49]:
+              - combobox [ref=e50]
+              - combobox "Default sorting" [ref=e53] [cursor=pointer]:
+                - textbox "Default sorting" [ref=e54]
+                - text: 
+            - button "Filtriraj" [active] [ref=e55]
+          - generic [ref=e57]:
+            - generic [ref=e59]:
+              - generic [ref=e60]: Novo
+              - generic [ref=e61]:
+                - link "2U1 Drvene puzzle - Autići" [ref=e62] [cursor=pointer]:
+                  - /url: http://localhost:8080/dp-b2b/product/2u1-drvene-puzzle-autici/
+                  - img "2U1 Drvene puzzle - Autići" [ref=e63]
+                - generic [ref=e64]:
+                  - link "Dodaj 2U1 Drvene puzzle - Autići u košaricu" [ref=e65] [cursor=pointer]:
+                    - /url: /dp-b2b/shop/?add-to-cart=119
+                    - generic [ref=e66]: Dodaj u košaricu
+                    - generic [ref=e67]: 
+                  - button "Add to Wishlist" [ref=e70] [cursor=pointer]:
+                    - text: 
+                    - generic [ref=e71]: Add to Wishlist
+              - generic [ref=e72]:
+                - link "2U1 Drvene puzzle - Autići" [ref=e73] [cursor=pointer]:
+                  - /url: http://localhost:8080/dp-b2b/product/2u1-drvene-puzzle-autici/
+                  - generic [ref=e74]: 2U1 Drvene puzzle - Autići
+                - generic [ref=e76]: 9,31 €
+              - link "Pogledaj proizvod 2U1 Drvene puzzle - Autići" [ref=e77] [cursor=pointer]:
+                - /url: http://localhost:8080/dp-b2b/product/2u1-drvene-puzzle-autici/
+                - generic [ref=e78]: Pogledaj proizvod 2U1 Drvene puzzle - Autići
+            - generic [ref=e80]:
+              - generic [ref=e81]: Novo
+              - generic [ref=e82]:
+                - link "300 velikih naljepnica - Geometrijski oblici" [ref=e83] [cursor=pointer]:
+                  - /url: http://localhost:8080/dp-b2b/product/300-velikih-naljepnica-geometrijski-oblici/
+                  - img "300 velikih naljepnica - Geometrijski oblici" [ref=e84]
+                - generic [ref=e85]:
+                  - link "Dodaj 300 velikih naljepnica - Geometrijski oblici u košaricu" [ref=e86] [cursor=pointer]:
+                    - /url: /dp-b2b/shop/?add-to-cart=127
+                    - generic [ref=e87]: Dodaj u košaricu
+                    - generic [ref=e88]: 
+                  - button "Add to Wishlist" [ref=e91] [cursor=pointer]:
+                    - text: 
+                    - generic [ref=e92]: Add to Wishlist
+              - generic [ref=e93]:
+                - link "300 velikih naljepnica - Geometrijski oblici" [ref=e94] [cursor=pointer]:
+                  - /url: http://localhost:8080/dp-b2b/product/300-velikih-naljepnica-geometrijski-oblici/
+                  - generic [ref=e95]: 300 velikih naljepnica - Geometrijski oblici
+                - generic [ref=e97]: 3,59 €
+              - link "Pogledaj proizvod 300 velikih naljepnica - Geometrijski oblici" [ref=e98] [cursor=pointer]:
+                - /url: http://localhost:8080/dp-b2b/product/300-velikih-naljepnica-geometrijski-oblici/
+                - generic [ref=e99]: Pogledaj proizvod 300 velikih naljepnica - Geometrijski oblici
+            - generic [ref=e101]:
+              - generic [ref=e102]:
+                - link "Boca Urban - Jurassic Friends (500 ml)" [ref=e103] [cursor=pointer]:
+                  - /url: http://localhost:8080/dp-b2b/product/boca-urban-jurassic-friends-500-ml/
+                  - img "Boca Urban - Jurassic Friends (500 ml)" [ref=e104]
+                - generic [ref=e105]:
+                  - link "Dodaj Boca Urban - Jurassic Friends (500 ml) u košaricu" [ref=e106] [cursor=pointer]:
+                    - /url: /dp-b2b/shop/?add-to-cart=23
+                    - generic [ref=e107]: Dodaj u košaricu
+                    - generic [ref=e108]: 
+                  - button "Add to Wishlist" [ref=e111] [cursor=pointer]:
+                    - text: 
+                    - generic [ref=e112]: Add to Wishlist
+              - generic [ref=e113]:
+                - link "Boca Urban - Jurassic Friends (500 ml)" [ref=e114] [cursor=pointer]:
+                  - /url: http://localhost:8080/dp-b2b/product/boca-urban-jurassic-friends-500-ml/
+                  - generic [ref=e115]: Boca Urban - Jurassic Friends (500 ml)
+                - generic [ref=e117]: 25,00 €
+              - link "Pogledaj proizvod Boca Urban - Jurassic Friends (500 ml)" [ref=e118] [cursor=pointer]:
+                - /url: http://localhost:8080/dp-b2b/product/boca-urban-jurassic-friends-500-ml/
+                - generic [ref=e119]: Pogledaj proizvod Boca Urban - Jurassic Friends (500 ml)
+            - generic [ref=e121]:
+              - generic [ref=e122]: Novo
+              - generic [ref=e123]:
+                - link "Pecanje - Ribice" [ref=e124] [cursor=pointer]:
+                  - /url: http://localhost:8080/dp-b2b/product/pecanje-ribice/
+                  - img "Pecanje - Ribice" [ref=e125]
+                - generic [ref=e126]:
+                  - link "Dodaj Pecanje - Ribice u košaricu" [ref=e127] [cursor=pointer]:
+                    - /url: /dp-b2b/shop/?add-to-cart=124
+                    - generic [ref=e128]: Dodaj u košaricu
+                    - generic [ref=e129]: 
+                  - button "Add to Wishlist" [ref=e132] [cursor=pointer]:
+                    - text: 
+                    - generic [ref=e133]: Add to Wishlist
+              - generic [ref=e134]:
+                - link "Pecanje - Ribice" [ref=e135] [cursor=pointer]:
+                  - /url: http://localhost:8080/dp-b2b/product/pecanje-ribice/
+                  - generic [ref=e136]: Pecanje - Ribice
+                - generic [ref=e138]: 10,87 €
+              - link "Pogledaj proizvod Pecanje - Ribice" [ref=e139] [cursor=pointer]:
+                - /url: http://localhost:8080/dp-b2b/product/pecanje-ribice/
+                - generic [ref=e140]: Pogledaj proizvod Pecanje - Ribice
+    - contentinfo [ref=e142]:
+      - generic [ref=e143]:
+        - generic [ref=e148]: Kontaktirajte nas
+        - generic [ref=e152]: © 2026 Dreampoint B2B Shop.
+  - status [ref=e155]

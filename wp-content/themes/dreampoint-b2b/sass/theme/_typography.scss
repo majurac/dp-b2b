@@ -1,0 +1,359 @@
+@font-face {
+    font-family: 'Marcellus';
+    src: url('fonts/Marcellus-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Jost';
+    src: url('fonts/Jost-Medium.woff2') format('woff2');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Jost';
+    src: url('fonts/Jost-Light.woff2') format('woff2');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Jost';
+    src: url('fonts/Jost-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+
+@font-face {
+  font-family: 'icomoon';
+  src: url('fonts/icomoon.woff2?vby0nj') format('woff2'); // samo woff2, ostalo je staro
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap; // ← umjesto block (Lighthouse preporučuje swap za ikone)
+}
+
+[class^="icon-"], [class*=" icon-"] {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'icomoon' !important;
+  speak: never;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-envelope:before {
+  content: "\e920";
+}
+
+.icon-shield-check:before {
+  content: "\e91d";
+}
+.icon-arrow-rotate-left:before {
+  content: "\e91e";
+}
+.icon-file-certificate:before {
+  content: "\e91f";
+}
+.icon-arrow-left-long:before {
+  content: "\e91c";
+}
+.icon-house:before {
+  content: "\e91b";
+}
+.icon-chevron-down:before {
+  content: "\e91a";
+}
+.icon-copy:before {
+  content: "\e919";
+}
+.icon-shopping-bag:before {
+  content: "\e918";
+}
+.icon-trashcan:before {
+  content: "\e900";
+}
+.icon-cart:before {
+  content: "\e901";
+}
+.icon-heart:before {
+  content: "\e902";
+}
+.icon-user:before {
+  content: "\e903";
+}
+.icon-search:before {
+  content: "\e904";
+}
+.icon-eye-slash:before {
+  content: "\e905";
+}
+.icon-eye:before {
+  content: "\e906";
+}
+.icon-minus:before {
+  content: "\e907";
+}
+.icon-plus:before {
+  content: "\e908";
+}
+.icon-xmark:before {
+  content: "\e909";
+}
+.icon-youtube:before {
+  content: "\e90a";
+}
+.icon-linkedin:before {
+  content: "\e90b";
+}
+.icon-instagram:before {
+  content: "\e90c";
+}
+.icon-viber:before {
+  content: "\e90d";
+}
+.icon-whatsapp:before {
+  content: "\e90e";
+}
+.icon-facebook:before {
+  content: "\e90f";
+}
+.icon-twitter:before {
+  content: "\e910";
+}
+.icon-tiktok:before {
+  content: "\e911";
+}
+.icon-pinterest:before {
+  content: "\e912";
+}
+.icon-star-solid:before {
+  content: "\e913";
+}
+.icon-chevron-left:before {
+  content: "\e914";
+}
+.icon-chevron-right:before {
+  content: "\e915";
+}
+.icon-arrow-left:before {
+  content: "\e916";
+}
+.icon-arrow-right:before {
+  content: "\e917";
+}
+
+
+
+
+//reset
+
+
+*, :after, :before {
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    padding: 0;
+    margin: 0;
+    margin-bottom: 0!important;
+    line-height: 1;
+    font: {
+        size: 16px;
+        family: 'Jost';
+    }
+    color: $text-primary;
+    -webkit-text-size-adjust: 100%; //fix for iOS 
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+
+ul {
+    list-style: none;
+    margin: 0px;
+    padding: 0px;
+}
+
+figure {
+    margin-bottom: 0;
+}
+
+
+a {
+    text-decoration: none;
+    @include animate-fade;
+    &:hover {
+        text-decoration: none;
+    }
+}
+
+
+input[type=submit], button[type="submit"] {
+    &:hover {
+        cursor: pointer;
+    }
+}
+input:focus-visible {
+    outline: none!important;
+}
+button {
+    @include animate-fade;
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+a,
+button,
+input,
+textarea {
+    &:focus {
+        outline: none!important;
+    }
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    padding: 0;
+    margin: 0;
+    font-weight: 400;
+}
+h1 {
+    @include heading-1;
+}
+
+h2 {
+    @include heading-2;
+}
+
+h3 {
+    @include heading-3;
+}
+
+h4 {
+    @include heading-4;
+}
+
+h5 {
+    @include heading-5;
+}
+
+h6 {
+    @include heading-6;
+}
+
+p {
+    @include paragraph-normal;
+    strong {
+        font-weight: 500;
+    }
+    a {
+        color: $brand;
+        text-decoration: none;
+        font-weight: 400;
+        &:hover {
+            color: $pink;
+        }
+    }
+}
+
+strong {
+    font-weight: 500;
+}
+
+
+address {
+    margin: 0px;
+    padding: 0px;
+    font-style: normal;
+}
+
+i {
+    font-style: normal;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    vertical-align: middle;
+    border-style: none;
+}
+
+table {
+    margin-bottom: 0;
+    border-spacing: 0;
+    width: 100%;
+}
+
+small {
+    font-size: inherit;
+}
+
+.page, .post {
+    margin-bottom: 0;
+}
+
+.entry-content, .entry-summary, .page-content {
+    margin: 0;
+}
+
+/* clears the ‘X’ from Internet Explorer */
+input[type=search]::-ms-clear { display: none; width : 0; height: 0; }
+input[type=search]::-ms-reveal { display: none; width : 0; height: 0; }
+/* clears the ‘X’ from Chrome */
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration { display: none; }
+
+
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+input:focus::placeholder {
+  color: transparent!important;
+}
+input:focus::-webkit-input-placeholder { color:transparent!important; }
+input:focus:-moz-placeholder { color:transparent!important; } /* FF 4-18 */
+input:focus::-moz-placeholder { color:transparent!important; } /* FF 19+ */
+input:focus:-ms-input-placeholder { color:transparent!important; } /* IE 10+ */
+
+textarea:focus::placeholder {
+  color: transparent!important;
+}
+
+input[type="checkbox"]:checked, input[type="radio"] {
+    accent-color: $black;
+}
+
+select:focus {
+    outline: none;
+}

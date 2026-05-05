@@ -1,0 +1,16 @@
+/*#525252*/
+.gallery-slider .gallery-item a {
+  display: block;
+  border: 1px solid rgba(17, 17, 17, 0.1);
+  overflow: hidden;
+}
+.gallery-slider .gallery-item a img {
+  transition: 0.25s ease-in-out;
+  width: 100%;
+  display: block;
+}
+.gallery-slider .gallery-item a:hover img {
+  transform: scale(1.1);
+}
+
+/*# sourceMappingURL=gallery.css.map */

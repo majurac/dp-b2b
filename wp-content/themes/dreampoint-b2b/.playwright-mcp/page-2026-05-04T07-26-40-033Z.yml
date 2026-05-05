@@ -1,0 +1,128 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - link "Preskoči na sadržaj" [ref=e3] [cursor=pointer]:
+      - /url: "#primary-content"
+    - banner [ref=e4]:
+      - generic [ref=e8]:
+        - generic [ref=e9]:
+          - link "Početna stranica" [ref=e11] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/
+            - generic [ref=e12]: 
+          - button "Otvori pretragu" [ref=e14]:
+            - generic [ref=e15]: 
+          - link "Wishlist -" [ref=e17] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/wishlist/
+            - text: 
+          - link "Moj nalog" [ref=e20] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/my-account/
+            - generic [ref=e21]: 
+          - button " 0" [ref=e23]:
+            - generic [ref=e24]: 
+            - generic [ref=e25]: "0"
+        - button "Otvori mobilni meni" [ref=e27]:
+          - img [ref=e28]
+      - text:     
+    - generic [ref=e30]:
+      - generic [ref=e31]:
+        - generic [ref=e32]: Mini košarica
+        - button "Zatvori mini košaricu" [ref=e33]:
+          - generic [ref=e34]: 
+      - paragraph [ref=e35]: No products in the cart.
+    - generic [ref=e36]:
+      - generic [ref=e38]:
+        - generic [ref=e39]:
+          - link "Početna" [ref=e40] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/
+          - text: / My account
+        - heading "My account" [level=1] [ref=e41]
+        - paragraph [ref=e43]:
+          - text: Hello
+          - strong [ref=e44]: vis_rule_cat
+          - text: (not
+          - strong [ref=e45]: vis_rule_cat
+          - text: "?"
+          - link "Log out" [ref=e46] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/wp-login.php?action=logout&redirect_to=http%3A%2F%2Flocalhost%3A8080%2Fdp-b2b%2Fmy-account%2F&_wpnonce=d1b02d671c
+          - text: ) From your account dashboard you can view and manage your
+          - link "account details" [ref=e47] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/my-account/edit-account/
+          - text: ","
+          - link "shipping and billing addresses" [ref=e48] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/my-account/edit-address/
+          - text: and view
+          - link "recent orders" [ref=e49] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/my-account/orders/
+          - text: .
+      - main [ref=e50]:
+        - generic [ref=e55]:
+          - navigation "Account pages" [ref=e57]:
+            - generic [ref=e58] [cursor=pointer]:
+              - generic [ref=e59]: Lični podaci
+              - list:
+                - listitem:
+                  - link "Lični podaci":
+                    - /url: http://localhost:8080/dp-b2b/my-account/
+                - listitem:
+                  - link "Istorija narudžbi":
+                    - /url: http://localhost:8080/dp-b2b/my-account/orders/
+                - listitem:
+                  - link "Upravljanje adresama":
+                    - /url: http://localhost:8080/dp-b2b/my-account/edit-address/
+                - listitem:
+                  - link "Odjava":
+                    - /url: http://localhost:8080/dp-b2b/my-account/customer-logout/?_wpnonce=29d51ad1b5
+              - text: 
+          - generic [ref=e63]:
+            - generic [ref=e64]:
+              - heading "Lični podaci" [level=2] [ref=e66]
+              - paragraph [ref=e67]:
+                - generic [ref=e68]: First name *
+                - textbox "First name *" [ref=e69]
+              - paragraph [ref=e70]:
+                - generic [ref=e71]: Last name *
+                - textbox "Last name *" [ref=e72]
+              - paragraph [ref=e73]:
+                - generic [ref=e74]: Display name *
+                - textbox "Display name *" [ref=e75]: vis_rule_cat
+                - emphasis [ref=e77]: This will be how your name will be displayed in the account section and in reviews
+              - paragraph [ref=e78]:
+                - generic [ref=e79]: Email address *
+                - textbox "Email address *" [ref=e80]: vis_rule_cat@test.local
+              - paragraph [ref=e81]:
+                - generic [ref=e82]: Company
+                - textbox "Company" [ref=e83]
+              - paragraph [ref=e84]:
+                - generic [ref=e85]: OIB
+                - textbox "OIB" [ref=e86]
+              - paragraph [ref=e87]:
+                - generic [ref=e88]: Phone
+                - textbox "Phone Telefon *" [ref=e89]
+              - button "Spremi izmjenu" [ref=e90]
+            - generic [ref=e91]:
+              - heading "Lozinka" [level=2] [ref=e93]
+              - paragraph [ref=e94]:
+                - generic [ref=e95]: Current password (leave blank to leave unchanged)
+                - generic [ref=e96]:
+                  - textbox "Current password (leave blank to leave unchanged)" [ref=e97]
+                  - button "Show password" [ref=e98]: 
+              - paragraph [ref=e99]:
+                - generic [ref=e100]: New password (leave blank to leave unchanged)
+                - generic [ref=e101]:
+                  - textbox "New password (leave blank to leave unchanged)" [ref=e102]
+                  - button "Show password" [ref=e103]: 
+              - paragraph [ref=e104]:
+                - generic [ref=e105]: Confirm new password
+                - generic [ref=e106]:
+                  - textbox "Confirm new password" [ref=e107]
+                  - button "Show password" [ref=e108]: 
+            - paragraph [ref=e109]:
+              - generic [ref=e110]: Telefon *
+              - textbox "Unesite važeći broj telefona" [ref=e111]:
+                - /placeholder: Broj telefona
+            - paragraph [ref=e112]:
+              - button "Save changes" [ref=e113]
+    - contentinfo [ref=e114]:
+      - generic [ref=e115]:
+        - generic [ref=e120]: Kontaktirajte nas
+        - generic [ref=e124]: © 2026 Dreampoint B2B Shop.
+  - status [ref=e125]

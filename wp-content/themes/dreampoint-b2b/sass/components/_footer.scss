@@ -1,0 +1,194 @@
+
+.newsletter {
+    position: relative;
+    z-index: 1;
+    background-color: #F1F1F0;
+    padding-top: 100px;
+    padding-bottom: 100px;
+    @include bp(lg) {
+        padding-top: 80px;
+        padding-bottom: 80px;
+    }
+    @include bp(md-down) {
+        padding-top: 60px;
+        padding-bottom: 60px;
+    }
+    .row {
+        align-items: center;
+    }
+    .newsletter-in {
+        max-width: 906px;
+        margin-left: auto;
+        margin-right: auto;
+        h3 {
+            @include heading-3;
+            font-weight: 500;
+            color: $text-primary;
+            +p {
+                margin-top: 8px;
+            }
+        }
+        p {
+            @include paragraph-normal;
+            color: $text-primary;
+        }
+        .subscription-form {
+            margin-top: 32px;
+            input[type="email"], input[type="text"]  {
+                background: $white;
+                border: 0;
+                margin-bottom: 16px;
+            }
+            button[type="submit"] {
+                display: flex;
+                width: 100%;
+                margin-top: 24px;
+            }
+            label {
+                color: $text-primary;
+            }
+            input[type="checkbox"] {
+                background: #fff;
+            }
+        }
+    }
+}
+
+.newsletter + .page-footer {
+    border-top: 0!important;
+}
+
+.page-footer {
+    background-color: #fff;
+    border-top: 1px solid rgba($black, .1);
+    .main-footer {
+        padding-top: 64px;
+        padding-bottom: 64px;
+        .col {
+            &:first-of-type {
+                min-width: 30%;
+            }
+        }
+        .footer-block {
+            p {
+                @media (min-width: 992px) and (max-width: 1550px) {
+                    font-size: 16px;
+                }
+                a {
+                    @media (min-width: 992px) and (max-width: 1550px) {
+                        display: block;
+                    }
+                }
+            }
+        }
+        .footer-logo {
+            margin-bottom: 15px;
+            img {
+                max-width: 240px;
+                //width: 100%;
+                @include bp(lg-down) {
+                    max-width: 200px;
+                }
+                @include bp(lg-down) {
+                    max-width: 150px;
+                }
+            }
+        }
+        .row {
+            @include bp(sm-down) {
+                row-gap: 32px;
+            }
+        }
+        .footer-title {
+            @include card;
+            display: block;
+            margin-bottom: 20px;
+            @include bp(lg-down) {
+                font-size: 18px;
+            }
+        }
+        .footer-sitemap {
+            ul {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                li {
+                    a {
+                        display: inline-block;
+                        @include button-text;
+                        text-align: left;
+                        color: $black;
+                        &:hover {
+                            color: $brand;
+                        }
+                    }
+                }
+            }
+        }
+        .footer-about {
+            max-width: 339px;
+        }
+    }
+    .copyright-area {
+        border-top: 1px solid rgba($black, .1);
+        padding-top: 23px;
+        padding-bottom: 23px;
+        .row {
+            align-items: center;
+            @include bp(md-down) {
+                row-gap: 24px;
+            }
+        }
+        .copyright {
+            @include paragraph-normal;
+            color: $text-primary;
+            text-align: right;
+            @include bp(sm-down) {
+                text-align: center;
+            }
+            a {
+                color: inherit;
+                text-decoration: underline;
+            }
+        }
+    }
+    .company-description {
+        margin-top: 15px;
+        margin-bottom: 26px;
+    }
+    .socials {
+        ul {
+            display: flex;
+            gap: 26px;
+            align-items: center;
+            li {
+                a {
+                    display: block;
+                    color: $icon-brand;
+                    font-size: 16px;
+                    &:hover {
+                        color: $black;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.credit-cards {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    @include bp(md-down) {
+        justify-content: center;
+    }
+    img {
+        align-self: center;
+        width: auto;
+        height: 30px;
+        @include bp(lg) {
+            height: 22px;
+        }
+    }
+}

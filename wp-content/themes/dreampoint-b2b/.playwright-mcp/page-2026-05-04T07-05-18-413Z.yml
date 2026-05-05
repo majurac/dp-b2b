@@ -1,0 +1,299 @@
+- generic [ref=e2]:
+  - navigation "Main menu":
+    - link "Skip to main content" [ref=e3] [cursor=pointer]:
+      - /url: "#wpbody-content"
+    - text:                 
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - navigation "Toolbar":
+        - menu:
+          - group [ref=e6]:
+            - menuitem "Menu" [ref=e7] [cursor=pointer]:
+              - generic [ref=e8]: 
+              - generic [ref=e9]: Menu
+          - group [ref=e10]:
+            - menuitem "Dreampoint B2B Shop" [ref=e11] [cursor=pointer]
+          - group [ref=e12]:
+            - menuitem "New" [ref=e13] [cursor=pointer]:
+              - generic [ref=e15]: New
+        - menu [ref=e16]:
+          - group [ref=e17]:
+            - menuitem "Howdy, admin" [ref=e18] [cursor=pointer]
+    - main [ref=e19]:
+      - generic [ref=e20]:
+        - generic [ref=e21]:
+          - button "Screen Options" [ref=e23] [cursor=pointer]
+          - button "Help" [ref=e25] [cursor=pointer]
+        - generic [ref=e26]:
+          - heading "Dashboard" [level=1] [ref=e27]
+          - text: 
+          - generic [ref=e29]:
+            - generic [ref=e31]:
+              - generic [ref=e32]:
+                - generic [ref=e33]:
+                  - heading "WooCommerce Setup" [level=2] [ref=e34]
+                  - generic [ref=e35]:
+                    - button "Move up" [disabled] [ref=e36]:
+                      - generic [ref=e37]: Move up
+                    - button "Move down" [ref=e39] [cursor=pointer]:
+                      - generic [ref=e40]: Move down
+                    - 'button "Toggle panel: WooCommerce Setup" [expanded] [ref=e42] [cursor=pointer]':
+                      - generic [ref=e43]: "Toggle panel: WooCommerce Setup"
+                - generic [ref=e46]:
+                  - generic [ref=e47]:
+                    - img [ref=e48]
+                    - text: Step 5 of 5
+                  - generic:
+                    - generic [ref=e51]:
+                      - text: You're almost there! Once you complete store setup you can start receiving orders.
+                      - link "Start selling" [ref=e53] [cursor=pointer]:
+                        - /url: http://localhost:8080/dp-b2b/wp-admin/admin.php?page=wc-admin&path=%2Fcustomize-store
+                    - img [ref=e54]
+              - generic [ref=e55]:
+                - generic [ref=e56]:
+                  - heading "Site Health Status" [level=2] [ref=e57]
+                  - generic [ref=e58]:
+                    - button "Move up" [ref=e59] [cursor=pointer]:
+                      - generic [ref=e60]: Move up
+                    - button "Move down" [ref=e62] [cursor=pointer]:
+                      - generic [ref=e63]: Move down
+                    - 'button "Toggle panel: Site Health Status" [expanded] [ref=e65] [cursor=pointer]':
+                      - generic [ref=e66]: "Toggle panel: Site Health Status"
+                - generic [ref=e69]:
+                  - generic [ref=e70]:
+                    - img [ref=e72]
+                    - generic [ref=e75]: Should be improved
+                  - generic [ref=e76]:
+                    - paragraph [ref=e77]: Your site has a critical issue that should be addressed as soon as possible to improve its performance and security.
+                    - paragraph [ref=e78]:
+                      - text: Take a look at the
+                      - strong [ref=e79]: 8 items
+                      - text: on the
+                      - link "Site Health screen" [ref=e80] [cursor=pointer]:
+                        - /url: http://localhost:8080/dp-b2b/wp-admin/site-health.php
+                      - text: .
+              - generic [ref=e81]:
+                - generic [ref=e82]:
+                  - heading "At a Glance" [level=2] [ref=e83]
+                  - generic [ref=e84]:
+                    - button "Move up" [ref=e85] [cursor=pointer]:
+                      - generic [ref=e86]: Move up
+                    - button "Move down" [ref=e88] [cursor=pointer]:
+                      - generic [ref=e89]: Move down
+                    - 'button "Toggle panel: At a Glance" [expanded] [ref=e91] [cursor=pointer]':
+                      - generic [ref=e92]: "Toggle panel: At a Glance"
+                - generic [ref=e95]:
+                  - list [ref=e96]:
+                    - listitem [ref=e97]:
+                      - link "1 Post" [ref=e98] [cursor=pointer]:
+                        - /url: edit.php?post_type=post
+                    - listitem [ref=e99]:
+                      - link "9 Pages" [ref=e100] [cursor=pointer]:
+                        - /url: edit.php?post_type=page
+                    - listitem [ref=e101]:
+                      - link "1 Comment" [ref=e102] [cursor=pointer]:
+                        - /url: edit-comments.php
+                  - paragraph [ref=e103]:
+                    - generic [ref=e104]:
+                      - text: WordPress 6.9.4 running
+                      - link "Dreampoint B2B" [ref=e105] [cursor=pointer]:
+                        - /url: themes.php
+                      - text: theme.
+                  - paragraph [ref=e106]:
+                    - link "Search engines discouraged" [ref=e107] [cursor=pointer]:
+                      - /url: options-reading.php
+              - generic [ref=e108]:
+                - generic [ref=e109]:
+                  - heading "Activity" [level=2] [ref=e110]
+                  - generic [ref=e111]:
+                    - button "Move up" [ref=e112] [cursor=pointer]:
+                      - generic [ref=e113]: Move up
+                    - button "Move down" [ref=e115] [cursor=pointer]:
+                      - generic [ref=e116]: Move down
+                    - 'button "Toggle panel: Activity" [expanded] [ref=e118] [cursor=pointer]':
+                      - generic [ref=e119]: "Toggle panel: Activity"
+                - generic [ref=e122]:
+                  - generic [ref=e123]:
+                    - heading "Recently Published" [level=3] [ref=e124]
+                    - list [ref=e125]:
+                      - listitem [ref=e126]:
+                        - generic [ref=e127]: Apr 9th, 05:51
+                        - link "Edit “Hello world!”" [ref=e128] [cursor=pointer]:
+                          - /url: http://localhost:8080/dp-b2b/wp-admin/post.php?post=1&action=edit
+                          - text: Hello world!
+                  - generic [ref=e129]:
+                    - heading "Recent Comments" [level=3] [ref=e130]
+                    - list [ref=e131]:
+                      - listitem [ref=e132]:
+                        - generic [ref=e133]:
+                          - paragraph [ref=e134]:
+                            - text: From
+                            - link "A WordPress Commenter" [ref=e136] [cursor=pointer]:
+                              - /url: https://wordpress.org/
+                            - text: "on"
+                            - link "Hello world!" [ref=e137] [cursor=pointer]:
+                              - /url: http://localhost:8080/dp-b2b/hello-world/
+                          - blockquote [ref=e138]:
+                            - paragraph [ref=e139]: Hi, this is a comment. To get started with moderating, editing, and deleting comments, please visit the Comments screen in…
+                          - paragraph [ref=e140]:
+                            - text: "|"
+                            - generic [ref=e141]:
+                              - text: "|"
+                              - button "Unapprove this comment" [ref=e142] [cursor=pointer]: Unapprove
+                            - generic [ref=e143]:
+                              - text: "|"
+                              - button "Reply to this comment" [ref=e144] [cursor=pointer]: Reply
+                            - generic [ref=e145]:
+                              - text: "|"
+                              - link "Edit this comment" [ref=e146] [cursor=pointer]:
+                                - /url: comment.php?action=editcomment&c=1
+                                - text: Edit
+                            - generic [ref=e147]:
+                              - text: "|"
+                              - button "Mark this comment as spam" [ref=e148] [cursor=pointer]: Spam
+                            - generic [ref=e149]:
+                              - text: "|"
+                              - button "Move this comment to the Trash" [ref=e150] [cursor=pointer]: Trash
+                            - generic [ref=e151]:
+                              - text: "|"
+                              - link "View this comment" [ref=e152] [cursor=pointer]:
+                                - /url: http://localhost:8080/dp-b2b/hello-world/#comment-1
+                                - text: View
+                    - heading "View more comments" [level=3] [ref=e153]
+                    - list [ref=e154]:
+                      - listitem [ref=e155]:
+                        - link "All (1)" [ref=e156] [cursor=pointer]:
+                          - /url: http://localhost:8080/dp-b2b/wp-admin/edit-comments.php?comment_status=all
+                          - text: All
+                          - generic [ref=e157]: (1)
+                        - text: "|"
+                      - listitem [ref=e158]:
+                        - link "Mine (0)" [ref=e159] [cursor=pointer]:
+                          - /url: http://localhost:8080/dp-b2b/wp-admin/edit-comments.php?comment_status=mine&user_id=1
+                          - text: Mine
+                          - generic [ref=e160]: (0)
+                        - text: "|"
+                      - listitem [ref=e161]:
+                        - link "Pending (0)" [ref=e162] [cursor=pointer]:
+                          - /url: http://localhost:8080/dp-b2b/wp-admin/edit-comments.php?comment_status=moderated
+                          - text: Pending
+                          - generic [ref=e163]: (0)
+                        - text: "|"
+                      - listitem [ref=e164]:
+                        - link "Approved (1)" [ref=e165] [cursor=pointer]:
+                          - /url: http://localhost:8080/dp-b2b/wp-admin/edit-comments.php?comment_status=approved
+                          - text: Approved
+                          - generic [ref=e166]: (1)
+                        - text: "|"
+                      - listitem [ref=e167]:
+                        - link "Spam (0)" [ref=e168] [cursor=pointer]:
+                          - /url: http://localhost:8080/dp-b2b/wp-admin/edit-comments.php?comment_status=spam
+                          - text: Spam
+                          - generic [ref=e169]: (0)
+                        - text: "|"
+                      - listitem [ref=e170]:
+                        - link "Trash (0)" [ref=e171] [cursor=pointer]:
+                          - /url: http://localhost:8080/dp-b2b/wp-admin/edit-comments.php?comment_status=trash
+                          - text: Trash
+                          - generic [ref=e172]: (0)
+              - generic [ref=e173]:
+                - generic [ref=e174]:
+                  - heading "📊 Back In Stock Notifier for WooCommerce" [level=2] [ref=e175]
+                  - generic [ref=e176]:
+                    - button "Move up" [ref=e177] [cursor=pointer]:
+                      - generic [ref=e178]: Move up
+                    - button "Move down" [ref=e180] [cursor=pointer]:
+                      - generic [ref=e181]: Move down
+                    - 'button "Toggle panel: 📊 Back In Stock Notifier for WooCommerce" [expanded] [ref=e183] [cursor=pointer]':
+                      - generic [ref=e184]: "Toggle panel: 📊 Back In Stock Notifier for WooCommerce"
+                - generic [ref=e186]:
+                  - combobox [ref=e188] [cursor=pointer]:
+                    - option "Last 7 Days" [selected]
+                    - option "Last 30 Days"
+                    - option "Last 90 Days"
+                    - option "All Time"
+                  - generic [ref=e189]:
+                    - generic [ref=e190]:
+                      - text: 🧍 New Subscribers
+                      - strong [ref=e191]: "0"
+                    - generic [ref=e192]:
+                      - text: 📩 Emails Sent
+                      - strong [ref=e193]: "0"
+                    - generic [ref=e194]:
+                      - text: 🛒 Converted
+                      - strong [ref=e195]: "0"
+                    - generic [ref=e196]:
+                      - text: 🏆 Most Wanted Products
+                      - emphasis [ref=e197]: — No data for selected period —
+            - generic [ref=e199]:
+              - generic [ref=e200]:
+                - generic [ref=e201]:
+                  - heading "Quick Draft" [level=2] [ref=e202]:
+                    - generic [ref=e203]: Quick Draft
+                  - generic [ref=e204]:
+                    - button "Move up" [ref=e205] [cursor=pointer]:
+                      - generic [ref=e206]: Move up
+                    - button "Move down" [ref=e208] [cursor=pointer]:
+                      - generic [ref=e209]: Move down
+                    - 'button "Toggle panel: Quick Draft" [expanded] [ref=e211] [cursor=pointer]':
+                      - generic [ref=e212]:
+                        - text: "Toggle panel:"
+                        - generic [ref=e213]: Quick Draft
+                - generic [ref=e216]:
+                  - generic [ref=e217]:
+                    - generic [ref=e218]: Title
+                    - textbox "Title" [ref=e219]
+                  - generic [ref=e220]:
+                    - generic [ref=e221]: Content
+                    - textbox "Content" [ref=e222]:
+                      - /placeholder: What’s on your mind?
+                  - paragraph [ref=e223]:
+                    - button "Save Draft" [ref=e224] [cursor=pointer]
+              - generic [ref=e225]:
+                - generic [ref=e226]:
+                  - heading "WordPress Events and News" [level=2] [ref=e227]
+                  - generic [ref=e228]:
+                    - button "Move up" [ref=e229] [cursor=pointer]:
+                      - generic [ref=e230]: Move up
+                    - button "Move down" [ref=e232] [cursor=pointer]:
+                      - generic [ref=e233]: Move down
+                    - 'button "Toggle panel: WordPress Events and News" [expanded] [ref=e235] [cursor=pointer]':
+                      - generic [ref=e236]: "Toggle panel: WordPress Events and News"
+                - generic [ref=e238]:
+                  - text: 
+                  - generic [ref=e239]:
+                    - list [ref=e241]:
+                      - listitem [ref=e242]:
+                        - link "WordPress Student Clubs Build Momentum" [ref=e243] [cursor=pointer]:
+                          - /url: https://wordpress.org/news/2026/04/student-clubs-build-momentum/
+                      - listitem [ref=e244]:
+                        - link "Celebrating Community at WordCamp Asia 2026" [ref=e245] [cursor=pointer]:
+                          - /url: https://wordpress.org/news/2026/04/celebrating-wcasia-2026/
+                    - list [ref=e247]:
+                      - listitem [ref=e248]:
+                        - 'link "Gutenberg Times: Block Format Bridge: A Practical Solution for AI-Generated Content in WordPress" [ref=e249] [cursor=pointer]':
+                          - /url: https://gutenbergtimes.com/block-format-bridge-a-practical-solution-for-ai-generated-content-in-wordpress/
+                      - listitem [ref=e250]:
+                        - 'link "Gutenberg Times: Studio Code, Hosting call for testing, Design with AI, and more — Weekend Edition 365" [ref=e251] [cursor=pointer]':
+                          - /url: https://gutenbergtimes.com/studio-code-hosting-call-for-testing-design-with-ai-and-more-weekend-edition-365/
+                      - listitem [ref=e252]:
+                        - 'link "Open Channels FM: Building WooCommerce, Community Lessons from Checkout Summit" [ref=e253] [cursor=pointer]':
+                          - /url: https://openchannels.fm/building-woocommerce-community-lessons-from-checkout-summit/
+                  - paragraph [ref=e254]:
+                    - link "Meetups (opens in a new tab)" [ref=e255] [cursor=pointer]:
+                      - /url: https://make.wordpress.org/community/meetups-landing-page
+                      - text: Meetups
+                      - generic [ref=e256]: (opens in a new tab)
+                      - generic [ref=e257]: 
+                    - text: "|"
+                    - link "WordCamps (opens in a new tab)" [ref=e258] [cursor=pointer]:
+                      - /url: https://central.wordcamp.org/schedule/
+                      - text: WordCamps
+                      - generic [ref=e259]: (opens in a new tab)
+                      - generic [ref=e260]: 
+                    - text: "|"
+                    - link "News (opens in a new tab)" [ref=e261] [cursor=pointer]:
+                      - /url: https://wordpress.org/news/
+                      - text: News
+                      - generic [ref=e262]: (opens in a new tab)
+                      - generic [ref=e263]: 

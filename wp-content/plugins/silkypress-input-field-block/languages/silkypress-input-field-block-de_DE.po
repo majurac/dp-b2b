@@ -1,0 +1,116 @@
+# Copyright (C) 2023 SilkyPress
+# This file is distributed under the GPL v2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: SilkyPress Input Field Block 1.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/silkypress-input-field-block\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2023-11-03T20:20:24+01:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.6.0\n"
+"X-Domain: silkypress-input-field-block\n"
+"Language: de\n"
+
+#. Plugin Name of the plugin
+msgid "SilkyPress Input Field Block"
+msgstr "SilkyPress Input Field Block"
+
+#. Description of the plugin
+msgid "A plugin for adding input fields to the WooCommerce Checkout Block."
+msgstr "Ein Plugin um Input Fields zu einem WooCommerce Checkout Block hinzuzufügen."
+
+#. Author of the plugin
+msgid "SilkyPress"
+msgstr "SilkyPress"
+
+#: includes/class-blocks-integration.php:101
+#: includes/class-blocks-integration.php:129
+msgid "No values"
+msgstr "Keine Eingaben"
+
+#: includes/class-blocks-integration.php:123
+msgid "Yes"
+msgstr "Ja"
+
+#: includes/class-blocks-integration.php:123
+msgid "No"
+msgstr "Nein"
+
+#: includes/class-blocks-integration.php:147
+#: includes/class-blocks-integration.php:160
+#: includes/class-blocks-integration.php:173
+msgid "Additional Information"
+msgstr "Zusätzliche Information"
+
+#: includes/class-input-settings.php:116
+msgid "Label"
+msgstr "Label"
+
+#: src/js/editor-block/edit.js:58
+msgid "The text in front of the input field"
+msgstr "Der Beschreibungstext des Input Fields"
+
+#: src/js/editor-block/edit.js:67
+msgid "Single word, no spaces. Underscores and dashes allowed"
+msgstr "Ein Wort, keine Leerzeichen. Unterstrich und Bindestrich erlaubt"
+
+#: src/js/editor-block/edit.js:77
+msgid "Enter each option on a different line"
+msgstr "Geben Sie jede Option in einer eigenen Zeile ein"
+
+#: src/js/editor-block/edit.js:95
+msgid "Checked by default"
+msgstr "Ausgewählt per Default"
+
+#: src/js/editor-block/edit.js:105
+msgid "Shown under the input field"
+msgstr "Wird unterhalb des Input Field eingezeigt"
+
+#: src/js/editor-block/edit.js:116
+msgid "Required"
+msgstr "Verpflichtend"
+
+#: src/js/editor-block/edit.js:125
+msgid "Show on Order page (in dashboard)"
+msgstr "Darstellen auf der Bestellung Seite (im Dashboard)" 
+
+#: src/js/editor-block/edit.js:132
+msgid "Show on Order Confirmation page"
+msgstr "Darstellen auf der Bestellbestätigung Seite"
+
+#: src/js/editor-block/edit.js:139
+msgid "Show in Order Email"
+msgstr "Darstellen auf der Bestellung E-Mails"
+
+#: src/js/editor-block/edit.js:153
+#: src/js/editor-block/edit.js:160
+#: src/js/editor-block/edit.js:169
+#: src/js/editor-block/edit.js:177
+#: src/js/editor-block/edit.js:185
+#: src/js/frontend/inputs-block.js:173
+msgid " (optional)"
+msgstr " (optional)"
+
+#: src/js/frontend/inputs-block.js:93
+msgid "Please fill this field"
+msgstr "Bitte das Feld ausfühlen"
+
+#: block.json
+msgctxt "block title"
+msgid "SilkyPress Input Field Block"
+msgstr "SilkyPress Input Field Block"
+
+#: src/js/editor-block/block.json
+msgctxt "block title"
+msgid "Input Field"
+msgstr "Input Field"
+
+#: src/js/editor-block/block.json
+msgctxt "block description"
+msgid "Add input fields to the WooCommerce Checkout Block. SilkyPress Input Field Block plugin."
+msgstr "Füge Input Fields zu einem WooCommerce Checkout Block hinzu. SilkyPress Input Field Block Plugin."
+

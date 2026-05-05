@@ -1,0 +1,57 @@
+.wpfSingleInputSearch input.passiveFilter {
+	min-height: 30px;
+    line-height: 21px;
+}
+.wpfCollapsible {
+    font-size: 20px;
+    font-weight: bold;
+    padding: 0 7px;
+    line-height: 15px;
+}
+.wfpHideButton {
+	padding: 5px 10px;
+    min-height: 52px;
+    border-radius: 4px;
+    font-size: 17px !important;
+    text-decoration: none !important;
+    text-align: center;
+    transition: all 0.2s;
+    white-space: normal;
+    line-height: normal;
+}
+.wpfAbcLink, .wpfAbcToggle {
+    color: #0064b4;
+}
+.wpfSwitchFilter li {
+    margin-bottom: 5px;
+}
+.wpfSingleInputSearch input.usePlaceholder::-webkit-input-placeholder,
+.wpfSingleInputSearch input.usePlaceholder:-ms-input-placeholder,
+.wpfSingleInputSearch input.usePlaceholder::-moz-placeholder,
+.wpfSingleInputSearch input.usePlaceholder:-moz-placeholder,
+.wpfSingleInputSearch input.usePlaceholder::placeholder {
+    color: inherit!important;
+}
+[dir="rtl"] .wpfFilterContent .irs {
+    direction: ltr;
+}
+.wpfPriceRangeCustom input {
+    background-color: #ffffff;
+    border: 1px solid #cccccc;
+    box-shadow: none;
+    height: 26px;
+    width: 100px;
+    padding: 5px;
+}
+#wpfMinAttrNum,
+#wpfMaxAttrNum {
+    background-color: #f9f9f9;
+    border: 1px solid #6e6666;
+    color: black;
+    font-family: myFont;
+    font: normal 14px Arial, Helvetica, sans-serif;
+    border-radius: 5px;
+    height: 26px;
+    padding: 5px;
+    -moz-appearance: textfield;
+}

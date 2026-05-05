@@ -1,0 +1,98 @@
+.wpfAttributesColors {
+	align-items: baseline !important;
+}
+.wpfAttributesColors label {
+	padding-left: 5px;
+}
+.wpfImageIconsFontAwesome td {
+	padding: 3px 5px;
+}
+.wpfImageIconsFontAwesome td.active{
+	background-color: #8cd1fa;
+}
+.wpfSearchByItem {
+    margin-bottom: 5px;
+}
+.wpfSearchByItem input {
+	margin: 0 5px 0 0; 
+}
+.wpfMiniInput {
+	width: 30px !important;
+	height: 25px !important;
+	text-align: center;
+}
+
+.wpfSmallerInput {
+	width: 50px;
+	text-align: center;
+}
+.wpfMiddleLabel {
+    line-height: 25px;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+ul.wpfTermsOptions {
+	margin: 0;
+}
+ul.wpfTermsOptions .wpfColorTermPreview {
+	cursor: pointer;
+}
+ul.wpfTermsOptions label {
+	vertical-align: top;
+}
+ul.wpfTermsOptions li:after, .wpfTermsOptionsForm:after {
+	content: " ";
+	display: table;
+	clear: both;
+}
+.wpfTermsOptionsForm {
+	border: 1px dashed #d8dfe3;
+	padding: 10px 0 0 15px;
+}
+.wpfTermsOptionsForm .wpfTermsRemoveIcon {
+	margin: 0 5px;
+	cursor: pointer;
+}
+.wpfColorTermPreview {
+	width: 20px;
+    height: 20px;
+    min-width: 16px !important;
+    min-height: 16px !important;
+    padding: 0 !important;
+    margin: 0;
+    overflow: hidden;
+    background-color: #ffffff;
+    display: inline-block;
+    border: 1px solid #d8dfe3;
+    max-width: 50px;
+    max-height: 50px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.wpfFiltersBlockPreview #wpfMinAttrNum,
+.wpfFiltersBlockPreview #wpfMaxAttrNum {
+	max-width: 50px;
+}
+@media (max-width: 992px) {
+	.wpfTermsOptionsForm {
+		margin-left: -50px;
+	}
+}
+.wpfFloatingIconPreview {
+	margin-right: 5px;
+}
+
+.colorGroupChildren {
+	margin-left: 30px;
+}
+
+.colorGroupChildren > span{
+	padding: 3px 20px 3px 5px;
+	margin: 3px 0 3px 5px;
+	border: 1px solid #d8dfe3;
+	color: #64808e;
+}
+.wpfErrorColorFilter {
+	color: red;
+}

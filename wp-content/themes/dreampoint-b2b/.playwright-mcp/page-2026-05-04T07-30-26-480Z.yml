@@ -1,0 +1,55 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - link "Preskoči na sadržaj" [ref=e3] [cursor=pointer]:
+      - /url: "#primary-content"
+    - banner [ref=e4]:
+      - generic [ref=e8]:
+        - generic [ref=e9]:
+          - link "Početna stranica" [ref=e11] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/
+            - generic [ref=e12]: 
+          - button "Otvori pretragu" [ref=e14]:
+            - generic [ref=e15]: 
+          - link "Wishlist -" [ref=e17] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/wishlist/
+            - text: 
+          - link "Moj nalog" [ref=e20] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/my-account/
+            - generic [ref=e21]: 
+          - button " 0" [ref=e23]:
+            - generic [ref=e24]: 
+            - generic [ref=e25]: "0"
+        - button "Otvori mobilni meni" [ref=e27]:
+          - img [ref=e28]
+      - text:     
+    - complementary "košarica" [ref=e30]:
+      - generic [ref=e31]:
+        - generic [ref=e32]: Mini košarica
+        - button "Zatvori mini košaricu" [ref=e33]:
+          - generic [ref=e34]: 
+      - paragraph [ref=e35]: No products in the cart.
+    - generic [ref=e36]:
+      - generic [ref=e38]:
+        - generic [ref=e39]:
+          - link "Početna" [ref=e40] [cursor=pointer]:
+            - /url: http://localhost:8080/dp-b2b/
+          - text: / Shop
+        - heading "Shop" [level=1] [ref=e41]
+      - generic [ref=e44]:
+        - generic:
+          - generic:
+            - button "":
+              - generic: 
+            - generic:
+              - generic:
+                - button "Filter"
+              - generic:
+                - generic:
+                  - generic: 
+        - status [ref=e50]:
+          - generic [ref=e51]: No products were found matching your selection.
+    - contentinfo [ref=e53]:
+      - generic [ref=e54]:
+        - generic [ref=e59]: Kontaktirajte nas
+        - generic [ref=e63]: © 2026 Dreampoint B2B Shop.
+  - status [ref=e66]

@@ -9,6 +9,11 @@
 # Kreiraj ga ručno ili kopiraj i prilagodi wp-config-sample.php
 wp-config.php
 
+# ─── Plugins ─────────────────────────────────────────────────────────────────
+# POLICY: plugins are runtime environment, not source code — never track in git
+# install/manage plugins manually or via composer on each environment
+wp-content/plugins/*
+
 # ─── WordPress Upgrade Temp ──────────────────────────────────────────────────
 wp-content/upgrade/
 

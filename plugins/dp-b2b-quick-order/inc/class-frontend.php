@@ -6,7 +6,7 @@ class DP_Quick_Order_Frontend {
 	public function __construct(
 		private readonly DP_Quick_Order_Assets $assets
 	) {
-		add_shortcode( 'dp_quick_order', [ $this, 'render_shortcode' ] );
+		add_shortcode( DP_Quick_Order_Config::SHORTCODE, [ $this, 'render_shortcode' ] );
 	}
 
 	public function render_shortcode( array $atts ): string {

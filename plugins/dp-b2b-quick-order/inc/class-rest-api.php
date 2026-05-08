@@ -3,8 +3,6 @@ defined( 'ABSPATH' ) || exit;
 
 class DP_Quick_Order_Rest_Api {
 
-	private const NAMESPACE = 'dreampoint-b2b/v1';
-
 	public function __construct(
 		private readonly DP_Quick_Order_Product_Query $product_query,
 		private readonly DP_Quick_Order_Cart_Sync $cart_sync
@@ -13,20 +11,20 @@ class DP_Quick_Order_Rest_Api {
 	}
 
 	public function register_routes(): void {
-		register_rest_route( self::NAMESPACE, '/quick-order/products', [
+		register_rest_route( DP_Quick_Order_Config::REST_NAMESPACE, '/' . DP_Quick_Order_Config::REST_BASE . '/products', [
 			'methods'             => WP_REST_Server::READABLE,
 			'callback'            => [ $this, 'get_products' ],
 			'permission_callback' => [ $this, 'is_b2b_user' ],
 			'args'                => [
 				'page'     => [ 'type' => 'integer', 'default' => 1, 'minimum' => 1 ],
-				'per_page' => [ 'type' => 'integer', 'default' => 50, 'minimum' => 1, 'maximum' => 200 ],
+				'per_page' => [ 'type' => 'integer', 'default' => DP_Quick_Order_Config::PRODUCTS_PER_PAGE_DEFAULT, 'minimum' => 1, 'maximum' => DP_Quick_Order_Config::PRODUCTS_PER_PAGE_MAX ],
 				'search'   => [ 'type' => 'string', 'default' => '' ],
 				'category' => [ 'type' => 'integer', 'default' => 0 ],
 				'brand'    => [ 'type' => 'integer', 'default' => 0 ],
 			],
 		] );
 
-		register_rest_route( self::NAMESPACE, '/quick-order/cart/sync', [
+		register_rest_route( DP_Quick_Order_Config::REST_NAMESPACE, '/' . DP_Quick_Order_Config::REST_BASE . '/cart/sync', [
 			'methods'             => WP_REST_Server::CREATABLE,
 			'callback'            => [ $this, 'sync_cart' ],
 			'permission_callback' => [ $this, 'is_b2b_user' ],

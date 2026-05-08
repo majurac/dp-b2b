@@ -28,14 +28,14 @@ class DP_Quick_Order_Assets {
 		);
 
 		wp_localize_script( 'dp-quick-order', 'dpQuickOrder', [
-			'restUrl'  => esc_url_raw( rest_url( 'dreampoint-b2b/v1/' ) ),
+			'restUrl'  => esc_url_raw( rest_url( DP_Quick_Order_Config::REST_NAMESPACE . '/' ) ),
 			'storeUrl' => esc_url_raw( rest_url( 'wc/store/v1/' ) ),
-			'nonce'    => wp_create_nonce( 'wc_store_api' ),
+			'nonce'    => wp_create_nonce( DP_Quick_Order_Config::NONCE_ACTION ),
 			'i18n'     => [],
 		] );
 	}
 
 	public function is_quick_order_page(): bool {
-		return is_page( 'quick-order' );
+		return is_page( DP_Quick_Order_Config::PAGE_SLUG );
 	}
 }

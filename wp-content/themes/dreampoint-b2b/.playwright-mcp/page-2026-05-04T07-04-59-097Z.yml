@@ -1,8 +1,0 @@
-- generic [ref=e2]:
-  - text: You are attempting to log out of Dreampoint B2B Shop
-  - paragraph
-  - paragraph [ref=e3]:
-    - text: Do you really want to
-    - link "log out" [ref=e4] [cursor=pointer]:
-      - /url: http://localhost:8080/dp-b2b/wp-login.php?action=logout&_wpnonce=d4fc2e221a
-    - text: "?"

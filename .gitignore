@@ -1,60 +1,37 @@
-# ─── DEPLOY SAFETY ───────────────────────────────────────────────────────────
-# git pull NE sme da se izvršava kao root
-# uvek koristi ispravnog site korisnika:
-#   sudo -u <siteUser> git pull
-# u suprotnom dolazi do problema sa permisijama na WordPress fajlovima
+# ─── Uploads ─────────────────────────────────────────────────────────────────
+# DEPLOY NOTE: media files are not versioned — directory must exist on server
+# before first git pull; use one-time rsync for initial media transfer
+uploads/
 
-# ─── WordPress Configuration ─────────────────────────────────────────────────
-# DEPLOY NOTE: wp-config.php mora postojati na serveru pre prvog git pull-a
-# Kreiraj ga ručno ili kopiraj i prilagodi wp-config-sample.php
-wp-config.php
+# ─── WordPress Upgrade Temp ──────────────────────────────────────────────────
+upgrade/
+
+# ─── Cache ───────────────────────────────────────────────────────────────────
+cache/
+litespeed/*
+!litespeed/.htaccess
 
 # ─── Plugins ─────────────────────────────────────────────────────────────────
 # POLICY: plugins are runtime environment, not source code — never track in git
-# install/manage plugins manually or via composer on each environment
-wp-content/plugins/*
+# Install/manage plugins manually or via WP-CLI on each environment
+plugins/*
 
-# ─── WordPress Upgrade Temp ──────────────────────────────────────────────────
-wp-content/upgrade/
+# Allow controlled custom plugins
+!plugins/dp-b2b-quick-order/
 
-# ─── Cache ───────────────────────────────────────────────────────────────────
-# DEPLOY NOTE: keš se uvek regeneriše automatski — nikad ne deployovati
-wp-content/cache/
-wp-content/litespeed/*
-!wp-content/litespeed/.htaccess
+# ─── Default themes (not needed in production) ───────────────────────────────
+themes/twenty*/
 
-# ─── Uploads ─────────────────────────────────────────────────────────────────
-# DEPLOY NOTE: mediji se ne versiraju — direktorijum mora postojati na serveru
-# pre prvog git pull-a; uradi jednokratni rsync za inicijalni prenos fajlova
-# git deploy NE dira uploads/ — fajlovi na serveru ostaju netaknuti
-wp-content/uploads/
+# ─── Theme: devDependencies ──────────────────────────────────────────────────
+# Build outputs (style.css, js/theme.min.js) are tracked and deployed
+themes/dreampoint-b2b/node_modules/
 
-# ─── Default teme (nisu potrebne na produkciji) ───────────────────────────────
-wp-content/themes/twenty*/
-
-# ─── Theme: node_modules ─────────────────────────────────────────────────────
-# devDependencies (esbuild, sass) — nisu potrebni na serveru
-# Build outputi (style.css, css/, js/theme.min.js) su u gitu i deployuju se
-wp-content/themes/dreampoint-b2b/node_modules/
-
-# ─── Composer ────────────────────────────────────────────────────────────────
-vendor/
+# ─── Claude Code / MCP session files ────────────────────────────────────────
+themes/dreampoint-b2b/.claude/
+**/.playwright-mcp/
 
 # ─── Source Maps ─────────────────────────────────────────────────────────────
-# Dev-only, nema efekta na produkciji
 *.css.map
-
-# ─── Claude Code ─────────────────────────────────────────────────────────────
-wp-content/themes/dreampoint-b2b/.claude/
-.claude/
-
-# ─── WP-CLI ──────────────────────────────────────────────────────────────────
-.wp-cli/
-
-# ─── Logovi ──────────────────────────────────────────────────────────────────
-*.log
-error_log
-debug.log
 
 # ─── OS / Editor ─────────────────────────────────────────────────────────────
 .DS_Store
@@ -66,9 +43,7 @@ Thumbs.db
 *.swo
 *~
 
-# ─── Arhive i backup fajlovi ─────────────────────────────────────────────────
-*.zip
-*.tar.gz
-*.bak
-*.sql
-*.tmp
+# ─── Logs ────────────────────────────────────────────────────────────────────
+*.log
+error_log
+debug.log

@@ -145,8 +145,11 @@ class DP_Quick_Order_Product_Query {
 				if ( '' === $value ) {
 					continue;
 				}
-				$attr_label = wc_attribute_label( str_replace( 'attribute_', '', $key ), $variation );
-				$attr_parts[] = $attr_label . ': ' . $value;
+				$attr_label  = wc_attribute_label( str_replace( 'attribute_', '', $key ), $variation );
+				$taxonomy    = str_replace( 'attribute_', '', $key );
+				$term        = get_term_by( 'slug', $value, $taxonomy );
+				$value_label = $term instanceof WP_Term ? $term->name : $value;
+				$attr_parts[] = $attr_label . ': ' . $value_label;
 			}
 			$label = $attr_parts
 				? implode( ' / ', $attr_parts )

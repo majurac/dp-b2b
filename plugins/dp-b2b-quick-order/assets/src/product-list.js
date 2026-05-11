@@ -63,7 +63,7 @@ export class ProductList {
         const rowKey     = `${product.id}_0`;
 
         const stockLabel = { instock: 'Na stanju', outofstock: 'Nema na stanju', onbackorder: 'Po narudžbi' };
-        const stockClass = `dp-qo-stock--${product.stock?.status ?? 'outofstock'}`;
+        const stockClass = `dp-qo-stock--${escHtml(product.stock?.status ?? 'outofstock')}`;
         const stockText  = stockLabel[product.stock?.status] ?? (product.stock?.status ?? '');
 
         const variationCell = isVariable
@@ -75,7 +75,7 @@ export class ProductList {
         return `
 <tr class="dp-qo-row"
     data-product-id="${product.id}"
-    data-type="${product.type}"
+    data-type="${escHtml(product.type)}"
     data-row-key="${rowKey}">
   <td class="dp-qo-col-name">
     <strong class="dp-qo-name">${escHtml(product.name)}</strong>

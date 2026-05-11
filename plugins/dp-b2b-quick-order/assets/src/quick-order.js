@@ -22,11 +22,13 @@ import { RowSync }     from './row-sync.js';
     const productList = new ProductList(config);
 
     const boot = () => productList.loadPage(1);
-    document.readyState === 'loading'
-        ? document.addEventListener('DOMContentLoaded', boot)
-        : boot();
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', boot, { once: true });
+    } else {
+        boot();
+    }
 
-    // Expose for browser-console stress testing.
+    // Expose internal instances for browser-console stress testing (dev/staging only).
     config.sync        = sync;
     config.queue       = queue;
     config.productList = productList;

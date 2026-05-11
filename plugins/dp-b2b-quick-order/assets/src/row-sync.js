@@ -3,14 +3,14 @@
 /**
  * Row interaction controller — Batch 2: quantity wiring only.
  *
- * Wires quantity inputs to CartSync via event delegation.
- * Variable product qty inputs remain disabled until variation selection
+ * Wires quantity inputs to CartSync via event delegation on the tbody shell.
+ * Variable product qty inputs remain disabled until a variation is selected
  * (Batch 3 will handle the variation→qty enable flow).
  */
 export class RowSync {
     /** @type {import('./cart-sync.js').CartSync} */
     #sync;
-    /** @type {HTMLElement} */
+    /** @type {HTMLElement|null} */
     #tbody;
 
     /**
@@ -19,16 +19,14 @@ export class RowSync {
     constructor(sync) {
         this.#sync  = sync;
         this.#tbody = document.querySelector('.dp-qo-tbody');
+        if (!this.#tbody) return;
         this.#bindTableEvents();
     }
 
     #bindTableEvents() {
-        // Event delegation — handles dynamically rendered rows on every page load.
+        // 'input' fires on every keystroke, paste, cut, and spinner click — sufficient
+        // for debounce-based cart sync. No duplicate 'change' listener needed.
         this.#tbody.addEventListener('input', e => {
-            if (e.target.matches('.dp-qo-qty')) this.#onQtyInput(e.target);
-        });
-        // Catch paste and spinner-click changes that fire 'change' but not 'input'.
-        this.#tbody.addEventListener('change', e => {
             if (e.target.matches('.dp-qo-qty')) this.#onQtyInput(e.target);
         });
     }
@@ -37,13 +35,14 @@ export class RowSync {
      * Parse quantity safely and schedule a cart sync.
      *
      * Normalization rules:
-     * - empty / non-numeric → 0
+     * - empty / non-numeric → 0  (schedules a remove — "quantity IS cart state")
      * - negative → clamped to 0
      * - decimals → truncated via parseInt
-     *
-     * qty === 0 schedules a remove — CartSync handles this natively.
      */
     #onQtyInput(input) {
+        // Skip disabled inputs — variable products before variation selection.
+        if (input.disabled) return;
+
         const rowKey = input.dataset.rowKey;
         if (!rowKey) return;
 

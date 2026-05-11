@@ -29,6 +29,15 @@ class DP_Quick_Order_Rest_Api {
 			'callback'            => [ $this, 'sync_cart' ],
 			'permission_callback' => [ $this, 'is_b2b_user' ],
 		] );
+
+		register_rest_route( DP_Quick_Order_Config::REST_NAMESPACE, '/' . DP_Quick_Order_Config::REST_BASE . '/products/(?P<id>\d+)/variations', [
+			'methods'             => WP_REST_Server::READABLE,
+			'callback'            => [ $this, 'get_variations' ],
+			'permission_callback' => [ $this, 'is_b2b_user' ],
+			'args'                => [
+				'id' => [ 'type' => 'integer', 'minimum' => 1 ],
+			],
+		] );
 	}
 
 	public function get_products( WP_REST_Request $request ): WP_REST_Response|WP_Error {
@@ -41,6 +50,21 @@ class DP_Quick_Order_Rest_Api {
 		] );
 
 		return rest_ensure_response( $results );
+	}
+
+	public function get_variations( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		$product_id = absint( $request->get_param( 'id' ) );
+		$product    = wc_get_product( $product_id );
+
+		if ( ! $product instanceof WC_Product_Variable ) {
+			return new WP_Error(
+				'not_variable',
+				__( 'Product is not a variable product.', 'dp-b2b-quick-order' ),
+				[ 'status' => 404 ]
+			);
+		}
+
+		return rest_ensure_response( $this->product_query->get_variation_details( $product_id ) );
 	}
 
 	public function sync_cart( WP_REST_Request $request ): WP_REST_Response|WP_Error {
@@ -99,6 +123,10 @@ class DP_Quick_Order_Rest_Api {
 	}
 
 	public function is_b2b_user(): bool {
-		return is_user_logged_in();
+		return (bool) apply_filters(
+			'dp_b2b_quick_order_user_allowed',
+			is_user_logged_in(),
+			get_current_user_id()
+		);
 	}
 }

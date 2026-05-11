@@ -115,4 +115,55 @@ class DP_Quick_Order_Product_Query {
 			'variation_ids' => $product->get_children(),
 		];
 	}
+
+	/**
+	 * Returns lightweight variation details for a variable product.
+	 * Loads each variation via wc_get_product() — uses WC object cache (Redis).
+	 * Never calls get_available_variations() — avoids full variation tree hydration.
+	 *
+	 * @param int $product_id Parent variable product ID.
+	 * @return list<array{id:int,sku:string,label:string,price:string,price_html:string,stock_status:string,stock_qty:int|null}>
+	 */
+	public function get_variation_details( int $product_id ): array {
+		$product = wc_get_product( $product_id );
+
+		if ( ! $product instanceof WC_Product_Variable ) {
+			return [];
+		}
+
+		$result = [];
+
+		foreach ( $product->get_children() as $variation_id ) {
+			$variation = wc_get_product( $variation_id );
+
+			if ( ! $variation instanceof WC_Product_Variation || ! $variation->exists() ) {
+				continue;
+			}
+
+			$attr_parts = [];
+			foreach ( $variation->get_attributes() as $key => $value ) {
+				if ( '' === $value ) {
+					continue;
+				}
+				$attr_label = wc_attribute_label( str_replace( 'attribute_', '', $key ), $variation );
+				$attr_parts[] = $attr_label . ': ' . $value;
+			}
+			$label = $attr_parts
+				? implode( ' / ', $attr_parts )
+				/* translators: %d: variation ID */
+				: sprintf( __( 'Variation #%d', 'dp-b2b-quick-order' ), $variation_id );
+
+			$result[] = [
+				'id'           => $variation_id,
+				'sku'          => $variation->get_sku(),
+				'label'        => $label,
+				'price'        => (string) $variation->get_price(),
+				'price_html'   => $variation->get_price_html(),
+				'stock_status' => $variation->get_stock_status(),
+				'stock_qty'    => $variation->get_manage_stock() ? (int) $variation->get_stock_quantity() : null,
+			];
+		}
+
+		return $result;
+	}
 }

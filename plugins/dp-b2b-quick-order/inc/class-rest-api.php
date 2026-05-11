@@ -44,6 +44,12 @@ class DP_Quick_Order_Rest_Api {
 	}
 
 	public function sync_cart( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		// WC cart/session are not initialized in REST context — load them explicitly.
+		// wc_load_cart() is idempotent (guards against double-init via did_action check).
+		if ( function_exists( 'wc_load_cart' ) ) {
+			wc_load_cart();
+		}
+
 		$body = $request->get_json_params();
 
 		// Accept both formats:

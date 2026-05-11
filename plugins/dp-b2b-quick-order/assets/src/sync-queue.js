@@ -18,6 +18,10 @@ export class SyncQueue {
      * @param {number} quantity  0 = remove from cart
      */
     enqueue(rowKey, quantity) {
+        if (typeof rowKey !== 'string' || !rowKey.includes('_')) {
+            console.error('[SyncQueue] Invalid rowKey:', rowKey);
+            return;
+        }
         this.#pending.set(rowKey, quantity);
     }
 

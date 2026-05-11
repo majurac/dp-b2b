@@ -14,6 +14,7 @@ export class CartSync {
     /** @type {SyncConfig} */
     #config;
     #timer = null;
+    #inflight = false;
 
     /**
      * @param {import('./sync-queue.js').SyncQueue} queue
@@ -22,6 +23,7 @@ export class CartSync {
     constructor(queue, config) {
         this.#queue  = queue;
         this.#config = config;
+        // timeoutMs is applied via AbortSignal.timeout() in Task 2 (AbortController phase).
     }
 
     /**
@@ -38,8 +40,14 @@ export class CartSync {
     }
 
     async #dispatch() {
+        if (this.#inflight) return;
+        this.#inflight = true;
+
         const items = this.#queue.flush();
-        if (!items) return;
+        if (!items) {
+            this.#inflight = false;
+            return;
+        }
 
         try {
             const response = await fetch(this.#config.cartSyncUrl, {
@@ -55,13 +63,16 @@ export class CartSync {
                 throw new Error(`HTTP ${response.status}`);
             }
 
-            // Task 2 will add token validation here.
-            // Task 3 will add optimistic state confirmation here.
+            // Task 2 adds token validation here.
+            // Task 3 adds optimistic state confirmation here.
         } catch (err) {
-            // Task 3 will add rollback here.
-            // For now: log only — do not break the UI.
-            if (typeof console !== 'undefined') {
-                console.error('[CartSync] Sync failed:', err.message);
+            // Task 3 adds rollback here.
+            console.error('[CartSync] Sync failed:', err.message);
+        } finally {
+            this.#inflight = false;
+            // Items queued during this request get dispatched after completion.
+            if (!this.#queue.isEmpty()) {
+                this.#timer = setTimeout(() => this.#dispatch(), this.#config.debounceMs);
             }
         }
     }

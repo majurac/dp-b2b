@@ -5,7 +5,7 @@ import { CartSync }  from './cart-sync.js';
 
 (function () {
     const config = window.dpQuickOrder;
-    if (!config || !config.cartSyncUrl) return;
+    if (!config || !config.cartSyncUrl || !config.wpNonce) return;
 
     const queue = new SyncQueue();
     const sync  = new CartSync(queue, {

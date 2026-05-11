@@ -85,6 +85,7 @@ export class CartSync {
         this.#controller = new AbortController();
 
         const token = ++this.#token;
+        document.dispatchEvent(new CustomEvent('dp:sync:start', { detail: { items } }));
 
         try {
             const response = await fetch(this.#config.cartSyncUrl, {
@@ -126,12 +127,6 @@ export class CartSync {
         }
     }
 
-    /**
-     * Confirm optimistic state from server response.
-     * Adjusts row quantities to match what WC actually applied (e.g. stock clamping).
-     *
-     * @param {{ synced: Array<{product_id: number, variation_id: number, action: string, quantity?: number}>, totals: object }} data
-     */
     #onSuccess(data) {
         if (!Array.isArray(data.synced)) return;
 
@@ -141,11 +136,9 @@ export class CartSync {
                 case 'removed':
                 case 'skipped':
                 case 'failed':
-                    // Server rejected or skipped — item is not in cart.
                     this.#optimisticState.delete(key);
                     break;
                 case 'out_of_stock':
-                    // Server applied a lower quantity (stock clamp) or couldn't add at all.
                     if (item.quantity_allowed > 0) {
                         this.#optimisticState.set(key, item.quantity_allowed);
                     } else {
@@ -153,23 +146,19 @@ export class CartSync {
                     }
                     break;
                 default:
-                    // added / updated — use server-confirmed quantity.
                     if (item.quantity != null) {
                         this.#optimisticState.set(key, item.quantity);
                     }
             }
         }
-        // Future: dispatch custom event with data.totals for cart summary UI update.
+
+        document.dispatchEvent(new CustomEvent('dp:sync:success', {
+            detail: { synced: data.synced, totals: data.totals ?? null },
+        }));
     }
 
-    /**
-     * Restore pre-dispatch snapshot on real sync failure.
-     * Only called for server errors — never for AbortError (cancelled requests).
-     *
-     * @param {Map<string, number>} snapshot
-     */
     #onError(snapshot) {
         this.#optimisticState = snapshot;
-        // Future: dispatch custom event to signal UI rollback needed.
+        document.dispatchEvent(new CustomEvent('dp:sync:error', { detail: {} }));
     }
 }

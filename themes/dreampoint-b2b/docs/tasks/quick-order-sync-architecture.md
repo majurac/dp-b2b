@@ -276,7 +276,18 @@ one request, not three.
 
 ---
 
-## 8. Future Phases
+## 8. Known Limitations
+
+- **No offline support** — requests fail silently if network is unavailable; no queue persistence or retry
+- **No realtime multi-tab synchronization** — each tab maintains independent optimistic state; WC cart is shared server-side but tabs do not notify each other of changes
+- **Optimistic state is request-scoped only** — state resets on page reload; no persistence across navigations
+- **WooCommerce remains authoritative** — optimistic quantities may temporarily diverge from WC cart during inflight requests; server response is always final
+- **No realtime stock synchronization** — stock availability is checked at sync time only; stock depletion by other users between syncs is not surfaced until the next request
+- **REST endpoint response time** — `wc_load_cart()` initializes WC session on each REST request; on environments without persistent PHP workers this adds overhead on first request per process (local: ~1500ms, production PHP-FPM: significantly faster on warm workers)
+
+---
+
+## 9. Future Phases
 
 - **Filtering integration** — sync requests must remain compatible with bucket/brand/category visibility rules already enforced by the visibility system
 - **Frontend rendering** — UI modules will read `getOptimisticQuantity()` and subscribe to custom events dispatched from `#onSuccess`/`#onError` (hooks are in place, events not yet dispatched)

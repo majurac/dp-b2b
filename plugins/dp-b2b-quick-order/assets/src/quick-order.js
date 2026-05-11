@@ -1,11 +1,13 @@
 'use strict';
 
-import { SyncQueue } from './sync-queue.js';
-import { CartSync }  from './cart-sync.js';
+import { SyncQueue }   from './sync-queue.js';
+import { CartSync }    from './cart-sync.js';
+import { ProductList } from './product-list.js';
+import { RowSync }     from './row-sync.js';
 
 (function () {
     const config = window.dpQuickOrder;
-    if (!config || !config.cartSyncUrl || !config.wpNonce) return;
+    if (!config || !config.cartSyncUrl || !config.wpNonce || !config.productsUrl) return;
 
     const queue = new SyncQueue();
     const sync  = new CartSync(queue, {
@@ -15,7 +17,18 @@ import { CartSync }  from './cart-sync.js';
         timeoutMs:   config.timeoutMs  ?? 10000,
     });
 
-    // Expose on config for future UI modules and browser testing.
-    config.sync  = sync;
-    config.queue = queue;
+    // RowSync binds event delegation on tbody — must init before ProductList renders rows.
+    const rowSync     = new RowSync(sync);
+    const productList = new ProductList(config);
+
+    const boot = () => productList.loadPage(1);
+    document.readyState === 'loading'
+        ? document.addEventListener('DOMContentLoaded', boot)
+        : boot();
+
+    // Expose for browser-console stress testing.
+    config.sync        = sync;
+    config.queue       = queue;
+    config.productList = productList;
+    config.rowSync     = rowSync;
 })();

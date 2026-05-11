@@ -33,9 +33,13 @@ class DP_Quick_Order_Assets {
 				DP_Quick_Order_Config::REST_NAMESPACE . '/' .
 				DP_Quick_Order_Config::REST_BASE . '/cart/sync'
 			) ),
+			'productsUrl' => esc_url_raw( rest_url(
+				DP_Quick_Order_Config::REST_NAMESPACE . '/' .
+				DP_Quick_Order_Config::REST_BASE . '/products'
+			) ),
 			'storeUrl'    => esc_url_raw( rest_url( 'wc/store/v1/' ) ),
-			'nonce'   => wp_create_nonce( DP_Quick_Order_Config::NONCE_ACTION ), // wc_store_api — reserved for future WC Store API calls
-			'wpNonce' => wp_create_nonce( 'wp_rest' ), // wp_rest — used by custom REST endpoints
+			'nonce'       => wp_create_nonce( DP_Quick_Order_Config::NONCE_ACTION ),
+			'wpNonce'     => wp_create_nonce( 'wp_rest' ),
 			'debounceMs'  => DP_Quick_Order_Config::CART_SYNC_DEBOUNCE_MS,
 			'timeoutMs'   => DP_Quick_Order_Config::CART_SYNC_TIMEOUT_MS,
 			'i18n'        => [],

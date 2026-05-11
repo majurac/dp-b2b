@@ -28,10 +28,17 @@ class DP_Quick_Order_Assets {
 		);
 
 		wp_localize_script( 'dp-quick-order', 'dpQuickOrder', [
-			'restUrl'  => esc_url_raw( rest_url( DP_Quick_Order_Config::REST_NAMESPACE . '/' ) ),
-			'storeUrl' => esc_url_raw( rest_url( 'wc/store/v1/' ) ),
-			'nonce'    => wp_create_nonce( DP_Quick_Order_Config::NONCE_ACTION ),
-			'i18n'     => [],
+			'restUrl'     => esc_url_raw( rest_url( DP_Quick_Order_Config::REST_NAMESPACE . '/' ) ),
+			'cartSyncUrl' => esc_url_raw( rest_url(
+				DP_Quick_Order_Config::REST_NAMESPACE . '/' .
+				DP_Quick_Order_Config::REST_BASE . '/cart/sync'
+			) ),
+			'storeUrl'    => esc_url_raw( rest_url( 'wc/store/v1/' ) ),
+			'nonce'       => wp_create_nonce( DP_Quick_Order_Config::NONCE_ACTION ),
+			'wpNonce'     => wp_create_nonce( 'wp_rest' ),
+			'debounceMs'  => DP_Quick_Order_Config::CART_SYNC_DEBOUNCE_MS,
+			'timeoutMs'   => DP_Quick_Order_Config::CART_SYNC_TIMEOUT_MS,
+			'i18n'        => [],
 		] );
 	}
 

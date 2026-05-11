@@ -38,4 +38,10 @@ class DP_Quick_Order_Config {
 	// Frontend debounce before dispatching cart sync AJAX — prevents excessive requests
 	// during rapid quantity changes. Applied in JS, defined here for documentation parity.
 	const CART_SYNC_DEBOUNCE_MS = 300;
+
+	// Maximum items per single sync batch dispatch.
+	const CART_SYNC_MAX_BATCH  = 50;
+
+	// Fetch timeout for cart sync requests (ms). Prevents stalled requests blocking the queue.
+	const CART_SYNC_TIMEOUT_MS = 10000;
 }

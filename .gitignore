@@ -26,6 +26,9 @@ themes/twenty*/
 # Build outputs (style.css, js/theme.min.js) are tracked and deployed
 themes/dreampoint-b2b/node_modules/
 
+# ─── Plugin: devDependencies ─────────────────────────────────────────────────
+plugins/dp-b2b-quick-order/node_modules/
+
 # ─── Claude Code / MCP session files ────────────────────────────────────────
 themes/dreampoint-b2b/.claude/
 **/.playwright-mcp/

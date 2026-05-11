@@ -1,0 +1,13 @@
+{
+  "name": "dp-b2b-quick-order",
+  "description": "DP B2B Quick Order plugin JS",
+  "private": true,
+  "scripts": {
+    "build:js": "esbuild assets/src/quick-order.js --bundle --minify --outfile=assets/dist/quick-order.js --format=iife",
+    "watch:js": "esbuild assets/src/quick-order.js --bundle --outfile=assets/dist/quick-order.js --format=iife --watch",
+    "build": "npm run build:js"
+  },
+  "devDependencies": {
+    "esbuild": "^0.21.5"
+  }
+}

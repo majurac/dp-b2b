@@ -1,0 +1,83 @@
+/* ── Layout ─────────────────────────────────────────────────── */
+.dp-quick-order { font-size: 14px; }
+
+.dp-qo-table-wrap { overflow-x: auto; margin: 12px 0; }
+
+.dp-qo-table { width: 100%; border-collapse: collapse; }
+
+.dp-qo-table th,
+.dp-qo-table td {
+    padding: 7px 10px;
+    border-bottom: 1px solid #e2e2e2;
+    vertical-align: middle;
+}
+
+.dp-qo-table th { text-align: left; font-weight: 600; background: #f7f7f7; }
+
+/* ── Product name / SKU ──────────────────────────────────────── */
+.dp-qo-name { display: block; font-weight: 500; }
+.dp-qo-sku  { display: block; color: #888; font-size: 12px; }
+
+/* ── Stock badge ─────────────────────────────────────────────── */
+.dp-qo-stock { display: inline-block; font-size: 11px; padding: 2px 6px; border-radius: 3px; white-space: nowrap; }
+.dp-qo-stock--instock     { background: #e8f5e9; color: #2e7d32; }
+.dp-qo-stock--outofstock  { background: #fce4ec; color: #c62828; }
+.dp-qo-stock--onbackorder { background: #fff3e0; color: #e65100; }
+
+/* ── Variation select ────────────────────────────────────────── */
+.dp-qo-variation { max-width: 200px; padding: 4px 6px; border: 1px solid #ccc; border-radius: 3px; font-size: 13px; }
+
+/* ── Quantity input ──────────────────────────────────────────── */
+.dp-qo-qty { width: 64px; text-align: center; padding: 4px 6px; border: 1px solid #ccc; border-radius: 3px; font-size: 14px; }
+.dp-qo-qty:disabled { background: #f3f3f3; opacity: 0.5; cursor: not-allowed; }
+
+/* ── Row states ──────────────────────────────────────────────── */
+.dp-qo-row.is-pending      { background: #fffde7; }
+.dp-qo-row.is-syncing      { background: #e3f2fd; opacity: 0.8; }
+.dp-qo-row.is-synced       { background: #e8f5e9; }
+.dp-qo-row.is-error        { background: #fce4ec; }
+.dp-qo-row.is-out-of-stock { background: #fff3e0; }
+
+/* ── Status icon ─────────────────────────────────────────────── */
+.dp-qo-status-icon { display: inline-block; width: 18px; text-align: center; font-size: 15px; }
+
+/* ── Pagination ──────────────────────────────────────────────── */
+.dp-qo-pagination { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
+
+.dp-qo-btn { padding: 5px 12px; border: 1px solid #ccc; background: #fff; border-radius: 3px; cursor: pointer; font-size: 13px; }
+.dp-qo-btn:hover { background: #f3f3f3; }
+
+.dp-qo-page-info { font-size: 13px; color: #666; }
+
+/* ── Cart footer ─────────────────────────────────────────────── */
+.dp-qo-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+    padding: 12px 0;
+    border-top: 2px solid #e2e2e2;
+    margin-top: 8px;
+}
+
+.dp-qo-footer__total { font-weight: 600; font-size: 15px; }
+
+.dp-qo-footer__cart-link {
+    display: inline-block;
+    padding: 8px 18px;
+    background: #222;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 3px;
+    font-size: 13px;
+}
+.dp-qo-footer__cart-link:hover { background: #444; color: #fff; }
+
+/* ── Loading / empty / error states ─────────────────────────── */
+.dp-qo-loading, .dp-qo-empty, .dp-qo-error {
+    text-align: center;
+    padding: 24px;
+    font-style: italic;
+    color: #aaa;
+}
+.dp-qo-error { color: #c62828; }

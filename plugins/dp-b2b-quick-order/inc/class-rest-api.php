@@ -44,15 +44,52 @@ class DP_Quick_Order_Rest_Api {
 	}
 
 	public function sync_cart( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-		$items = $request->get_json_params();
-		if ( ! is_array( $items ) ) {
+		$body = $request->get_json_params();
+
+		// Accept both formats:
+		//   {items: [...], token: N}  — batched format with stale-response token
+		//   [...]                     — legacy flat array (backwards compat)
+		if ( is_array( $body ) && array_key_exists( 'items', $body ) ) {
+			$items = $body['items'] ?? [];
+			$token = isset( $body['token'] ) ? absint( $body['token'] ) : null;
+		} elseif ( is_array( $body ) && array_is_list( $body ) ) {
+			$items = $body;
+			$token = null;
+		} else {
 			return new WP_Error(
 				'invalid_payload',
-				__( 'Invalid cart payload.', 'dp-b2b-quick-order' ),
+				__( 'Invalid cart sync payload.', 'dp-b2b-quick-order' ),
 				[ 'status' => 400 ]
 			);
 		}
-		return rest_ensure_response( $this->cart_sync->sync( $items ) );
+
+		if ( ! is_array( $items ) ) {
+			return new WP_Error(
+				'invalid_items',
+				__( 'Items must be an array.', 'dp-b2b-quick-order' ),
+				[ 'status' => 400 ]
+			);
+		}
+
+		if ( count( $items ) > DP_Quick_Order_Config::CART_SYNC_MAX_BATCH ) {
+			return new WP_Error(
+				'payload_too_large',
+				sprintf(
+					/* translators: %d: max allowed items */
+					__( 'Sync request exceeds maximum of %d items.', 'dp-b2b-quick-order' ),
+					DP_Quick_Order_Config::CART_SYNC_MAX_BATCH
+				),
+				[ 'status' => 400 ]
+			);
+		}
+
+		$result = $this->cart_sync->sync( $items );
+
+		if ( null !== $token ) {
+			$result['token'] = $token;
+		}
+
+		return rest_ensure_response( $result );
 	}
 
 	public function is_b2b_user(): bool {

@@ -103,8 +103,10 @@ export class CartSync {
 
             const data = await response.json();
 
-            // Stale response — a newer request has already dispatched. Discard silently.
-            if (data.token !== token) return;
+            // Stale response — a newer dispatch has incremented #token since this request
+            // started. Using this.#token (not data.token) catches the case where
+            // response.json() completes after abort() when the body was already buffered.
+            if (this.#token !== token) return;
 
             this.#onSuccess(data);
         } catch (err) {
@@ -115,8 +117,10 @@ export class CartSync {
             // Real server error or validation failure — restore pre-dispatch snapshot.
             this.#onError(snapshot);
         } finally {
-            // Items queued during this request get dispatched after completion.
-            if (!this.#queue.isEmpty()) {
+            // Only reschedule from the dispatch that currently owns the token.
+            // Without this guard, an aborted dispatch's finally can schedule a redundant
+            // timer that is no longer tracked by this.#timer, leaking past clearTimeout().
+            if (!this.#queue.isEmpty() && this.#token === token) {
                 this.#timer = setTimeout(() => this.#dispatch(), this.#config.debounceMs);
             }
         }
@@ -133,10 +137,26 @@ export class CartSync {
 
         for (const item of data.synced) {
             const key = `${item.product_id}_${item.variation_id}`;
-            if (item.action === 'removed' || item.action === 'skipped') {
-                this.#optimisticState.delete(key);
-            } else if (item.quantity != null) {
-                this.#optimisticState.set(key, item.quantity);
+            switch (item.action) {
+                case 'removed':
+                case 'skipped':
+                case 'failed':
+                    // Server rejected or skipped — item is not in cart.
+                    this.#optimisticState.delete(key);
+                    break;
+                case 'out_of_stock':
+                    // Server applied a lower quantity (stock clamp) or couldn't add at all.
+                    if (item.quantity_allowed > 0) {
+                        this.#optimisticState.set(key, item.quantity_allowed);
+                    } else {
+                        this.#optimisticState.delete(key);
+                    }
+                    break;
+                default:
+                    // added / updated — use server-confirmed quantity.
+                    if (item.quantity != null) {
+                        this.#optimisticState.set(key, item.quantity);
+                    }
             }
         }
         // Future: dispatch custom event with data.totals for cart summary UI update.

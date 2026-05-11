@@ -48,9 +48,11 @@ export class RowSync {
         const row = select.closest('.dp-qo-row');
         if (!row) return;
 
-        const productId   = row.dataset.productId;
+        const productId = parseInt(row.dataset.productId, 10);
+        if (!productId) return; // malformed row — prevents "undefined_N" keys
+
         const qtyInput    = row.querySelector('.dp-qo-qty');
-        const variationId = select.value;
+        const variationId = parseInt(select.value, 10) || 0; // NaN/empty/non-numeric → 0
 
         if (!variationId) {
             // User reset to placeholder — disable qty, reset row key to neutral.
@@ -58,13 +60,16 @@ export class RowSync {
             if (qtyInput) {
                 qtyInput.dataset.rowKey = `${productId}_0`;
                 qtyInput.disabled       = true;
-                qtyInput.value          = 0;
+                qtyInput.value          = '0';
             }
             return;
         }
 
-        const oldKey     = row.dataset.rowKey;
-        const newKey     = `${productId}_${variationId}`;
+        const oldKey = row.dataset.rowKey;
+        const newKey = `${productId}_${variationId}`;
+
+        if (oldKey === newKey) return; // same variation re-selected — no-op
+
         const currentQty = qtyInput ? Math.max(0, parseInt(qtyInput.value, 10) || 0) : 0;
 
         // Update row identity before scheduling — qty input listener reads data-row-key.
@@ -76,11 +81,12 @@ export class RowSync {
 
         // Implicit replace: remove old variation + add new variation in the same synchronous
         // call so both land in one debounce window. Feels atomic from user perspective.
+        // In-flight abort (if any) is handled by CartSync's AbortController — not our concern.
         const hadOldVariation = oldKey !== `${productId}_0`;
         if (hadOldVariation && currentQty > 0) {
             this.#sync.schedule(oldKey, 0);          // remove old
             this.#sync.schedule(newKey, currentQty); // add new with same qty
         }
-        // qty === 0: user will set quantity manually; no sync until they do.
+        // First selection or qty still 0: nothing to sync until user enters a quantity.
     }
 }

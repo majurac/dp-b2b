@@ -17,14 +17,27 @@ class DP_Quick_Order_Product_Query {
 	 */
 	public function query( array $args ): array {
 		$query_args = [
-			'post_type'      => 'product',
-			'post_status'    => 'publish',
-			'posts_per_page' => (int) $args['per_page'],
-			'paged'          => (int) $args['page'],
-			'fields'         => 'ids',
-			'no_found_rows'  => false,
+			'post_type'        => 'product',
+			'post_status'      => 'publish',
+			'posts_per_page'   => (int) $args['per_page'],
+			'paged'            => (int) $args['page'],
+			'fields'           => 'ids',
+			'no_found_rows'    => false,
 			'suppress_filters' => false,
+			'dp_quick_order'   => true,
 		];
+
+		$orderby = $args['orderby'] ?? 'title';
+		$order   = strtoupper( $args['order'] ?? 'ASC' );
+		$order   = in_array( $order, [ 'ASC', 'DESC' ], true ) ? $order : 'ASC';
+
+		if ( 'price' === $orderby ) {
+			$query_args['orderby']  = 'meta_value_num';
+			$query_args['meta_key'] = '_price';
+		} else {
+			$query_args['orderby'] = 'title';
+		}
+		$query_args['order'] = $order;
 
 		if ( ! empty( $args['search'] ) ) {
 			$query_args['s'] = sanitize_text_field( $args['search'] );

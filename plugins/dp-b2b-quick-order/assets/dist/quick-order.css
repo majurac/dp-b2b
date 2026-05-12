@@ -31,15 +31,16 @@
 .dp-qo-qty { width: 64px; text-align: center; padding: 4px 6px; border: 1px solid #ccc; border-radius: 3px; font-size: 14px; }
 .dp-qo-qty:disabled { background: #f3f3f3; opacity: 0.5; cursor: not-allowed; }
 
-/* ── Row states ──────────────────────────────────────────────── */
-.dp-qo-row.is-pending      { background: #fffde7; }
-.dp-qo-row.is-syncing      { background: #e3f2fd; opacity: 0.8; }
-.dp-qo-row.is-synced       { background: #e8f5e9; }
-.dp-qo-row.is-error        { background: #fce4ec; }
-.dp-qo-row.is-out-of-stock { background: #fff3e0; }
+/* ── Row states: idle (default), pending, synced, error ──────── */
+.dp-qo-row.is-pending { background: #fffde7; }
+.dp-qo-row.is-synced  { background: #e8f5e9; }
+.dp-qo-row.is-error   { background: #fce4ec; }
 
 /* ── Status icon ─────────────────────────────────────────────── */
-.dp-qo-status-icon { display: inline-block; width: 18px; text-align: center; font-size: 15px; }
+.dp-qo-status-icon                        { display: inline-block; width: 18px; text-align: center; font-size: 15px; }
+.dp-qo-row.is-pending .dp-qo-status-icon  { color: #888; }
+.dp-qo-row.is-synced  .dp-qo-status-icon  { color: #2e7d32; }
+.dp-qo-row.is-error   .dp-qo-status-icon  { color: #c62828; }
 
 /* ── Pagination ──────────────────────────────────────────────── */
 .dp-qo-pagination { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
@@ -81,3 +82,30 @@
     color: #aaa;
 }
 .dp-qo-error { color: #c62828; }
+
+/* ── Access denied ───────────────────────────────────────────── */
+.dp-qo-access-denied { color: #666; font-style: italic; padding: 12px 0; margin: 0; }
+
+/* ── Neutral stock badge (variable before selection) ─────────── */
+.dp-qo-stock--neutral { background: #f5f5f5; color: #999; }
+
+/* ── Sortable column headers ─────────────────────────────────── */
+.dp-qo-table th[data-sort] { cursor: pointer; user-select: none; }
+.dp-qo-table th[data-sort]:hover { background: #efefef; }
+.dp-qo-sort-arrow { font-size: 11px; margin-left: 3px; }
+
+/* ── Qty +/- wrap ─────────────────────────────────────────────── */
+.dp-qo-qty-wrap { display: inline-flex; align-items: center; gap: 3px; }
+.dp-qo-qty-btn {
+    width: 26px; height: 26px;
+    padding: 0;
+    border: 1px solid #ccc;
+    background: #fff;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 15px;
+    line-height: 1;
+}
+.dp-qo-qty-btn:hover:not(:disabled) { background: #f3f3f3; }
+.dp-qo-qty-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.dp-qo-qty { width: 52px; }

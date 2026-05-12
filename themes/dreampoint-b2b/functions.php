@@ -164,6 +164,11 @@ if ( class_exists( 'ACF' ) ) {
     }, 5 );
 }
 
+// Dev tooling — WP-CLI only; zero overhead on web and admin requests.
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
+    require get_template_directory() . '/inc/dev/dev-tools.php';
+}
+
 // ============================================================================
 // HELPER FUNKCIJE
 // ============================================================================
@@ -438,7 +443,8 @@ function dreampoint_b2b_scripts(): void {
         is_product()        ||
         is_shop()           ||
         is_product_category() ||
-        is_tax( 'product_brand' )
+        is_tax( 'product_brand' ) ||
+        is_page( 'quick-order' )
     ) {
         wp_enqueue_style(
             'dreampoint-b2b-toastify',
@@ -645,7 +651,7 @@ function dreampoint_b2b_scripts(): void {
  */
 add_action( 'wp_enqueue_scripts', 'dreampoint_b2b_maybe_disable_cart_fragments', 9999 );
 function dreampoint_b2b_maybe_disable_cart_fragments(): void {
-    if ( is_cart() || is_checkout() || is_account_page() ) return;
+    if ( is_cart() || is_checkout() || is_account_page() || is_page( 'quick-order' ) ) return;
 
     wp_dequeue_script( 'wc-cart-fragments' );
     wp_deregister_script( 'wc-cart-fragments' );

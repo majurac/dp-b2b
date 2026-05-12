@@ -2,7 +2,7 @@
 /**
  * Plugin Name: DP B2B Quick Order
  * Description: Performance-oriented WooCommerce B2B Quick Order system for Dreampoint B2B.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: Dreampoint
  * Text Domain: dp-b2b-quick-order
  * Domain Path: /languages
@@ -13,7 +13,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'DP_QUICK_ORDER_VERSION', '1.0.0' );
+define( 'DP_QUICK_ORDER_VERSION', '1.0.1' );
 define( 'DP_QUICK_ORDER_FILE', __FILE__ );
 define( 'DP_QUICK_ORDER_PATH', plugin_dir_path( __FILE__ ) );
 define( 'DP_QUICK_ORDER_URL', plugin_dir_url( __FILE__ ) );
@@ -38,5 +38,15 @@ add_action( 'plugins_loaded', function (): void {
 		} );
 		return;
 	}
+
+	if ( ! file_exists( DP_QUICK_ORDER_PATH . 'assets/dist/quick-order.js' ) ) {
+		add_action( 'admin_notices', function (): void {
+			echo '<div class="notice notice-error"><p>' .
+				esc_html__( 'DP B2B Quick Order: compiled JS asset missing. Run `npm run build` in the plugin directory.', 'dp-b2b-quick-order' ) .
+				'</p></div>';
+		} );
+		return;
+	}
+
 	DP_Quick_Order_Plugin::get_instance();
 } );

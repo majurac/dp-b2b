@@ -196,7 +196,11 @@ Per item in `sync_item()`:
    object (or parent for simple products). Uses WC object cache — no redundant DB hits.
 2. `$product->is_purchasable()` — WC-native check covering status, visibility, price,
    and any plugin-added purchasability rules.
-3. If adding new: `$product->is_in_stock()` — quick guard before calling `add_to_cart()`.
+3. If adding new: `$product->is_in_stock()` — quick guard for fully out-of-stock products.
+   For managed-stock products where `is_in_stock()` is true but requested qty exceeds
+   available stock: pre-check via `get_stock_quantity()` returns `out_of_stock` with
+   `quantity_allowed: N` before calling `add_to_cart()`. This prevents `add_to_cart()`
+   from silently returning false with no typed error information.
 4. If updating existing: `get_manage_stock()` + `get_stock_quantity()` — validates the
    requested quantity against available stock, returns `quantity_allowed` for UI feedback.
 
@@ -220,9 +224,21 @@ on the specific `variation_id` is sufficient and O(1).
 |----------|----------|
 | variation_id deleted/deactivated | `action: failed, error: invalid_product` |
 | variation not purchasable | `action: failed, error: invalid_product` |
-| out of stock (new item) | `action: out_of_stock` |
+| out of stock (new item, fully) | `action: out_of_stock` |
+| out of stock (new item, managed stock, qty > stock) | `action: out_of_stock, quantity_allowed: N` |
 | out of stock (update, managed) | `action: out_of_stock, quantity_allowed: N` |
 | add_to_cart rejected (attribute mismatch, etc.) | `action: failed, error: add_failed` |
+
+### Visibility gate scope
+
+The visibility check (`dp_b2b_product_accessible` filter) fires **only on new `add_to_cart()` calls**.
+Items already in the WC cart are not revalidated when a user's bucket rules or overrides change
+after the initial add.
+
+This is intentional. Retroactive revalidation on every sync would cause cart instability when
+bucket rules are edited mid-session, create unpredictable UX on stale sessions, and break the
+deterministic WooCommerce-native sync model. **This is not a bug — do not add background
+revalidation or cart-cleanup logic to address it.**
 
 ---
 
@@ -284,6 +300,7 @@ one request, not three.
 - **WooCommerce remains authoritative** — optimistic quantities may temporarily diverge from WC cart during inflight requests; server response is always final
 - **No realtime stock synchronization** — stock availability is checked at sync time only; stock depletion by other users between syncs is not surfaced until the next request
 - **REST endpoint response time** — `wc_load_cart()` initializes WC session on each REST request; on environments without persistent PHP workers this adds overhead on first request per process (local: ~1500ms, production PHP-FPM: significantly faster on warm workers)
+- **V1: Pagination quantity reset** — qty inputs reset to 0 on every page navigation; there is no pre-population from current WC cart state. Users who have added items and then change pages will see empty qty fields on return. This is intentionally deferred: cross-page cart hydration requires solving stale hydration, synchronization drift, hidden optimistic state, multi-tab consistency, and visibility invalidation — complexity out of scope for V1. Considered a known usability tradeoff for V1 multi-page workflows. Future V2 consideration.
 
 ---
 

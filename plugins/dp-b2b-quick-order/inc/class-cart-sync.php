@@ -114,10 +114,32 @@ class DP_Quick_Order_Cart_Sync {
 		}
 
 		if ( $quantity > 0 ) {
+			// Visibility gate: reject new-item adds for products the user cannot access.
+			// Uses a WP filter contract so the plugin stays decoupled from theme classes.
+			// Falls back to true (allow) if no filter is attached.
+			$user_id = get_current_user_id();
+			if ( ! (bool) apply_filters( 'dp_b2b_product_accessible', true, $product_id, $user_id ) ) {
+				return array_merge( $base, [ 'action' => 'failed', 'error' => 'access_denied' ] );
+			}
+
 			// Quick in-stock guard before calling add_to_cart — avoids WC error notices
 			// for clearly out-of-stock items and returns a typed error code.
 			if ( ! $product->is_in_stock() ) {
 				return array_merge( $base, [ 'action' => 'out_of_stock' ] );
+			}
+
+			// Managed-stock quantity check for new adds — mirrors the existing check for
+			// updates. WC's add_to_cart() silently returns false when qty > stock, which
+			// would produce action:failed with no quantity_allowed hint. This pre-check
+			// returns a typed out_of_stock response so the frontend can correct the input.
+			if ( $product->get_manage_stock() ) {
+				$stock_qty = (int) $product->get_stock_quantity();
+				if ( $stock_qty < $quantity ) {
+					return array_merge( $base, [
+						'action'           => 'out_of_stock',
+						'quantity_allowed' => max( 0, $stock_qty ),
+					] );
+				}
 			}
 
 			// WC handles attribute→variation resolution and all remaining validation

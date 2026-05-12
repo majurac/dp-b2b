@@ -19,6 +19,10 @@ class Dreampoint_B2B_Access_Guard {
 	public function register_hooks(): void {
 		add_action( 'template_redirect', [ $this, 'guard_single_product' ] );
 		add_filter( 'woocommerce_rest_prepare_product_object', [ $this, 'scrub_rest_response' ], 10, 3 );
+
+		// Quick Order integration contracts — loosely coupled via WP filters.
+		add_filter( 'dp_b2b_product_accessible',          [ $this, 'handle_product_accessible' ], 10, 3 );
+		add_filter( 'dp_b2b_quick_order_user_allowed',    [ $this, 'handle_user_allowed' ],        10, 2 );
 	}
 
 	// -------------------------------------------------------------------------
@@ -63,7 +67,25 @@ class Dreampoint_B2B_Access_Guard {
 	// Visibility check (per-product, used by guard and scrub)
 	// -------------------------------------------------------------------------
 
-	private function is_product_visible( int $product_id, int $user_id ): bool {
+	public function handle_product_accessible( bool $default, int $product_id, int $user_id ): bool {
+		if ( current_user_can( 'manage_options' ) ) {
+			return true;
+		}
+		return $this->is_product_visible( $product_id, $user_id );
+	}
+
+	public function handle_user_allowed( bool $default, int $user_id ): bool {
+		if ( ! $user_id ) {
+			return false;
+		}
+		if ( current_user_can( 'manage_woocommerce' ) ) {
+			return true;
+		}
+		// B2B users are identified by a bucket assignment — lightweight meta lookup.
+		return ! empty( get_user_meta( $user_id, 'dp_bucket_id', true ) );
+	}
+
+	public function is_product_visible( int $product_id, int $user_id ): bool {
 		$context = $this->engine->get_context( $user_id );
 
 		if ( $context->is_full_access() ) {

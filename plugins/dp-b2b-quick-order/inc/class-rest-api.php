@@ -21,6 +21,8 @@ class DP_Quick_Order_Rest_Api {
 				'search'   => [ 'type' => 'string', 'default' => '' ],
 				'category' => [ 'type' => 'integer', 'default' => 0 ],
 				'brand'    => [ 'type' => 'integer', 'default' => 0 ],
+				'qo_orderby' => [ 'type' => 'string', 'enum' => [ 'title', 'price' ], 'default' => 'title' ],
+				'qo_order'   => [ 'type' => 'string', 'enum' => [ 'asc', 'desc' ], 'default' => 'asc' ],
 			],
 		] );
 
@@ -47,6 +49,8 @@ class DP_Quick_Order_Rest_Api {
 			'search'   => $request->get_param( 'search' ),
 			'category' => $request->get_param( 'category' ),
 			'brand'    => $request->get_param( 'brand' ),
+			'orderby'  => $request->get_param( 'qo_orderby' ),
+			'order'    => $request->get_param( 'qo_order' ),
 		] );
 
 		return rest_ensure_response( $results );

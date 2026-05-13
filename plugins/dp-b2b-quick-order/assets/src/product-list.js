@@ -5,6 +5,9 @@
  *
  * Fetches /products (paginated), renders rows into .dp-qo-tbody,
  * lazy-loads variation options for variable products after each page render.
+ * Integrates with WOOF/WBW filter URL changes: when WOOF updates the browser URL
+ * with wpf_filter_pa_* or pr_min/pr_max params, re-fetches with those filters mapped
+ * to Quick Order's server-side REST params.
  */
 export class ProductList {
     /** @type {object} dpQuickOrder config */
@@ -17,6 +20,8 @@ export class ProductList {
     #totalPages   = 1;
     #orderBy      = 'title';
     #orderDir     = 'asc';
+    /** WOOF-sourced filter state. Reset to {} on each URL change parse. */
+    #woofFilters  = {};
 
     /**
      * @param {object} config  window.dpQuickOrder
@@ -27,6 +32,7 @@ export class ProductList {
         this.#paginationEl = document.querySelector('.dp-qo-pagination');
         this.#bindSortHeaders();
         this.#updateSortIndicators();
+        this.#bindWoofIntegration();
     }
 
     /**
@@ -40,7 +46,7 @@ export class ProductList {
 
         let data;
         try {
-            const url = `${this.#config.productsUrl}?page=${page}&per_page=${this.#config.perPage ?? 50}&qo_orderby=${this.#orderBy}&qo_order=${this.#orderDir}`;
+            const url = this.#buildProductsUrl(page);
             const res = await fetch(url, { headers: { 'X-WP-Nonce': this.#config.wpNonce } });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             data = await res.json();
@@ -53,6 +59,29 @@ export class ProductList {
         this.#renderRows(data.products ?? []);
         this.#renderPagination();
         this.#loadAllVariations();
+    }
+
+    /**
+     * Build the REST URL for a product page, including sort and any active WOOF filters.
+     * @param {number} page
+     * @returns {string}
+     */
+    #buildProductsUrl(page) {
+        const params = new URLSearchParams({
+            page,
+            per_page:   this.#config.perPage ?? 50,
+            qo_orderby: this.#orderBy,
+            qo_order:   this.#orderDir,
+        });
+
+        const f = this.#woofFilters;
+        if (f.price_min > 0)                           params.set('price_min', f.price_min);
+        if (f.price_max > 0)                           params.set('price_max', f.price_max);
+        if (f.attributes && Object.keys(f.attributes).length) {
+            params.set('attributes', JSON.stringify(f.attributes));
+        }
+
+        return `${this.#config.productsUrl}?${params.toString()}`;
     }
 
     #renderRows(products) {
@@ -185,6 +214,78 @@ export class ProductList {
                 ? (this.#orderDir === 'asc' ? ' ↑' : ' ↓')
                 : '';
         });
+    }
+
+    /**
+     * Intercept history.pushState and popstate so that when WOOF updates the browser
+     * URL with filter params, Quick Order re-fetches its product list from the server.
+     *
+     * WOOF uses history.pushState to apply filters without a page reload.
+     * We wrap pushState once and listen for popstate (back/forward navigation).
+     * If WOOF is not on the page, no wpf_ or pr_ params ever appear and this is a no-op.
+     *
+     * #woofFilters is hydrated from the current URL immediately so that the first
+     * loadPage() call (from the entry point) respects any pre-existing WOOF params
+     * in the URL (e.g. bookmarked filtered pages).
+     */
+    #bindWoofIntegration() {
+        this.#woofFilters = this.#extractWoofFilters(new URLSearchParams(window.location.search));
+
+        const onUrlChange = () => this.#onWoofUrlChange();
+
+        const origPushState = history.pushState.bind(history);
+        history.pushState = (state, title, url) => {
+            origPushState(state, title, url);
+            onUrlChange();
+        };
+
+        window.addEventListener('popstate', onUrlChange);
+    }
+
+    #onWoofUrlChange() {
+        const params  = new URLSearchParams(window.location.search);
+        const next    = this.#extractWoofFilters(params);
+        const current = JSON.stringify(this.#woofFilters);
+
+        if (JSON.stringify(next) !== current) {
+            this.#woofFilters = next;
+            this.loadPage(1);
+        }
+    }
+
+    /**
+     * Extract Quick Order filter params from a WOOF-updated URL.
+     *
+     * WOOF URL format → QO REST params:
+     *   pr_min=100            → price_min: 100
+     *   pr_max=500            → price_max: 500
+     *   wpf_filter_pa_color=red|blue → attributes.color: ['red', 'blue']
+     *
+     * Category (wpf_filter_cat_*) is intentionally excluded — QO uses its own
+     * category param, and WOOF category slugs differ from QO's term ID format.
+     *
+     * @param {URLSearchParams} params
+     * @returns {{ price_min?: number, price_max?: number, attributes?: object }}
+     */
+    #extractWoofFilters(params) {
+        const result = {};
+
+        const prMin = parseFloat(params.get('pr_min') ?? '');
+        const prMax = parseFloat(params.get('pr_max') ?? '');
+        if (!isNaN(prMin) && prMin > 0) result.price_min = prMin;
+        if (!isNaN(prMax) && prMax > 0) result.price_max = prMax;
+
+        const attrs = {};
+        for (const [key, val] of params) {
+            if (!key.startsWith('wpf_filter_pa_')) continue;
+            const attrName = key.slice('wpf_filter_pa_'.length);
+            if (!attrName) continue;
+            // WOOF uses | as multi-value delimiter
+            attrs[attrName] = val.split('|').filter(Boolean);
+        }
+        if (Object.keys(attrs).length) result.attributes = attrs;
+
+        return result;
     }
 }
 

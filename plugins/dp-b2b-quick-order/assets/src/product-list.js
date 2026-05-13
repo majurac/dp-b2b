@@ -42,7 +42,7 @@ export class ProductList {
     async loadPage(page = 1) {
         if (!this.#tbody) return;
         this.#currentPage = page;
-        this.#tbody.innerHTML = `<tr><td colspan="6" class="dp-qo-loading">Učitavanje...</td></tr>`;
+        this.#tbody.innerHTML = `<tr><td colspan="7" class="dp-qo-loading">Učitavanje...</td></tr>`;
 
         let data;
         try {
@@ -51,7 +51,7 @@ export class ProductList {
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             data = await res.json();
         } catch (err) {
-            this.#tbody.innerHTML = `<tr><td colspan="6" class="dp-qo-error">Greška pri učitavanju proizvoda.</td></tr>`;
+            this.#tbody.innerHTML = `<tr><td colspan="7" class="dp-qo-error">Greška pri učitavanju proizvoda.</td></tr>`;
             return;
         }
 
@@ -77,6 +77,8 @@ export class ProductList {
         const f = this.#woofFilters;
         if (f.price_min > 0)                           params.set('price_min', f.price_min);
         if (f.price_max > 0)                           params.set('price_max', f.price_max);
+        if (f.category > 0)                            params.set('category',  f.category);
+        if (f.brand > 0)                               params.set('brand',     f.brand);
         if (f.attributes && Object.keys(f.attributes).length) {
             params.set('attributes', JSON.stringify(f.attributes));
         }
@@ -86,7 +88,7 @@ export class ProductList {
 
     #renderRows(products) {
         if (!products.length) {
-            this.#tbody.innerHTML = `<tr><td colspan="6" class="dp-qo-empty">Nema dostupnih proizvoda.</td></tr>`;
+            this.#tbody.innerHTML = `<tr><td colspan="7" class="dp-qo-empty">Nema dostupnih proizvoda.</td></tr>`;
             return;
         }
         this.#tbody.innerHTML = products.map(p => this.#rowHTML(p)).join('');
@@ -113,13 +115,23 @@ export class ProductList {
                </select>`
             : '';
 
+        const thumbSrc = product.image || this.#config.placeholderImg || '';
+        const thumbCell = thumbSrc
+            ? `<img src="${escHtml(thumbSrc)}" alt="" class="dp-qo-thumb" width="40" height="40" loading="lazy">`
+            : '';
+
+        const nameInner = product.permalink
+            ? `<a href="${escHtml(product.permalink)}" class="dp-qo-name-link"><strong class="dp-qo-name">${escHtml(product.name)}</strong></a>`
+            : `<strong class="dp-qo-name">${escHtml(product.name)}</strong>`;
+
         return `
 <tr class="dp-qo-row"
     data-product-id="${product.id}"
     data-type="${escHtml(product.type)}"
     data-row-key="${rowKey}">
+  <td class="dp-qo-col-thumb">${thumbCell}</td>
   <td class="dp-qo-col-name">
-    <strong class="dp-qo-name">${escHtml(product.name)}</strong>
+    ${nameInner}
     <small class="dp-qo-sku">${escHtml(product.sku)}</small>
   </td>
   <td class="dp-qo-col-stock">
@@ -257,15 +269,17 @@ export class ProductList {
      * Extract Quick Order filter params from a WOOF-updated URL.
      *
      * WOOF URL format → QO REST params:
-     *   pr_min=100            → price_min: 100
-     *   pr_max=500            → price_max: 500
-     *   wpf_filter_pa_color=red|blue → attributes.color: ['red', 'blue']
+     *   pr_min=100                           → price_min: 100
+     *   pr_max=500                           → price_max: 500
+     *   wpf_filter_pa_color=red|blue         → attributes.color: ['red', 'blue']
+     *   wpf_filter_cat_{N}=30                → category: 30  (term ID)
+     *   wpf_filter_product_brand_{N}=42      → brand: 42     (term ID)
      *
-     * Category (wpf_filter_cat_*) is intentionally excluded — QO uses its own
-     * category param, and WOOF category slugs differ from QO's term ID format.
+     * Category and brand values are sent by WOOF as numeric term IDs.
+     * Non-numeric values (slugs) are ignored — parseInt returns NaN, guard fails safely.
      *
      * @param {URLSearchParams} params
-     * @returns {{ price_min?: number, price_max?: number, attributes?: object }}
+     * @returns {{ price_min?: number, price_max?: number, category?: number, brand?: number, attributes?: object }}
      */
     #extractWoofFilters(params) {
         const result = {};
@@ -274,6 +288,20 @@ export class ProductList {
         const prMax = parseFloat(params.get('pr_max') ?? '');
         if (!isNaN(prMin) && prMin > 0) result.price_min = prMin;
         if (!isNaN(prMax) && prMax > 0) result.price_max = prMax;
+
+        // Category: wpf_filter_cat_{N}=term_id
+        for (const [key, val] of params) {
+            if (!/^wpf_filter_cat_\d+$/.test(key)) continue;
+            const termId = parseInt(val, 10);
+            if (termId > 0) { result.category = termId; break; }
+        }
+
+        // Brand: wpf_filter_product_brand_{N}=term_id
+        for (const [key, val] of params) {
+            if (!/^wpf_filter_product_brand_\d+$/.test(key)) continue;
+            const termId = parseInt(val, 10);
+            if (termId > 0) { result.brand = termId; break; }
+        }
 
         const attrs = {};
         for (const [key, val] of params) {

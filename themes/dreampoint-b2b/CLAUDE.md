@@ -198,6 +198,15 @@ Read the relevant file before modifying any completed feature.
 
 ---
 
+## Canonical Docs
+
+Use `docs/index.md` as the documentation entrypoint.
+
+Do not infer architecture from random task files.
+Prefer canonical docs listed in the index.
+
+---
+
 ## When to use dev-context.md
 
 Only consult docs/dev-context.md if:

@@ -23,6 +23,9 @@ class DP_Quick_Order_Rest_Api {
 				'brand'    => [ 'type' => 'integer', 'default' => 0 ],
 				'qo_orderby' => [ 'type' => 'string', 'enum' => [ 'title', 'price' ], 'default' => 'title' ],
 				'qo_order'   => [ 'type' => 'string', 'enum' => [ 'asc', 'desc' ], 'default' => 'asc' ],
+				'price_min'  => [ 'type' => 'number', 'minimum' => 0, 'default' => null ],
+				'price_max'  => [ 'type' => 'number', 'minimum' => 0, 'default' => null ],
+				'attributes' => [ 'type' => 'string', 'default' => '' ],
 			],
 		] );
 
@@ -43,14 +46,26 @@ class DP_Quick_Order_Rest_Api {
 	}
 
 	public function get_products( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		$raw_attrs  = $request->get_param( 'attributes' );
+		$attributes = [];
+		if ( '' !== $raw_attrs ) {
+			$decoded = json_decode( $raw_attrs, true );
+			if ( is_array( $decoded ) ) {
+				$attributes = $decoded;
+			}
+		}
+
 		$results = $this->product_query->query( [
-			'page'     => $request->get_param( 'page' ),
-			'per_page' => $request->get_param( 'per_page' ),
-			'search'   => $request->get_param( 'search' ),
-			'category' => $request->get_param( 'category' ),
-			'brand'    => $request->get_param( 'brand' ),
-			'orderby'  => $request->get_param( 'qo_orderby' ),
-			'order'    => $request->get_param( 'qo_order' ),
+			'page'       => $request->get_param( 'page' ),
+			'per_page'   => $request->get_param( 'per_page' ),
+			'search'     => $request->get_param( 'search' ),
+			'category'   => $request->get_param( 'category' ),
+			'brand'      => $request->get_param( 'brand' ),
+			'orderby'    => $request->get_param( 'qo_orderby' ),
+			'order'      => $request->get_param( 'qo_order' ),
+			'price_min'  => $request->get_param( 'price_min' ),
+			'price_max'  => $request->get_param( 'price_max' ),
+			'attributes' => $attributes,
 		] );
 
 		return rest_ensure_response( $results );

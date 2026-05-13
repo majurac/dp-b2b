@@ -48,6 +48,7 @@ class Dreampoint_B2B_Dev_Catalog_Generator extends WP_CLI_Command {
 	 *   - taxonomies
 	 *   - products
 	 *   - variables
+	 *   - ugly
 	 * ---
 	 *
 	 * [--count=<count>]
@@ -78,6 +79,9 @@ class Dreampoint_B2B_Dev_Catalog_Generator extends WP_CLI_Command {
 				break;
 			case 'variables':
 				$this->run_variables( $assoc_args );
+				break;
+			case 'ugly':
+				$this->run_ugly();
 				break;
 			default:
 				WP_CLI::error( "Unknown phase: {$phase}" );
@@ -823,5 +827,319 @@ class Dreampoint_B2B_Dev_Catalog_Generator extends WP_CLI_Command {
 		} elseif ( $action === 'skipped' ) {
 			$skipped++;
 		}
+	}
+
+	// -------------------------------------------------------------------------
+	// Phase: ugly
+	// -------------------------------------------------------------------------
+
+	private function run_ugly(): void {
+		WP_CLI::log( "Batch: {$this->batch_id}" );
+		WP_CLI::log( 'Generating ugly edge-case products...' );
+		WP_CLI::log( '' );
+
+		$result = $this->generate_ugly_products();
+
+		WP_CLI::log( '' );
+		WP_CLI::success( sprintf(
+			'Ugly done — %d simple, %d variable (%d variations) created.',
+			$result['simple'], $result['variable'], $result['variations']
+		) );
+	}
+
+	private function generate_ugly_products(): array {
+		$cat_ids   = $this->get_generated_child_cat_ids();
+		$brand_ids = $this->get_generated_brand_ids();
+
+		if ( empty( $cat_ids ) ) {
+			WP_CLI::error( 'No generated categories found. Run --phase=taxonomies first.' );
+		}
+		if ( empty( $brand_ids ) ) {
+			WP_CLI::error( 'No generated brands found. Run --phase=taxonomies first.' );
+		}
+
+		$cat_id   = $cat_ids[0];
+		$brand_id = $brand_ids[0];
+		$simple   = 0;
+		$variable = 0;
+		$vars     = 0;
+
+		// DEV-UGLY-001: 160-char name — layout overflow test.
+		$simple += (int) $this->ugly_simple(
+			'DEV-UGLY-001',
+			'[DEV] Artikal s Ekstremno Dugačkim Nazivom Koji Testira Prelamanje Teksta u Svim Stupcima Tablice Quick Order Sučelja 001',
+			'49.99', 'instock', $cat_id, $brand_id
+		);
+
+		// DEV-UGLY-002: Croatian unicode chars — encoding/escaping test.
+		$simple += (int) $this->ugly_simple(
+			'DEV-UGLY-002',
+			'[DEV] Artikal: Čačak, Šibenik, Đakovo, Žuta Školjka — Ćevapi 002',
+			'29.99', 'instock', $cat_id, $brand_id
+		);
+
+		// DEV-UGLY-003: HTML-ish chars — XSS escape test.
+		$simple += (int) $this->ugly_simple(
+			'DEV-UGLY-003',
+			"[DEV] Artikal <Poseban> & \"Navodnici\" 'Apostrof' 003",
+			'39.99', 'instock', $cat_id, $brand_id
+		);
+
+		// DEV-UGLY-004: Price 0.01 EUR — edge low price format.
+		$simple += (int) $this->ugly_simple(
+			'DEV-UGLY-004',
+			'[DEV] Artikal Mikro Cijena 004',
+			'0.01', 'instock', $cat_id, $brand_id
+		);
+
+		// DEV-UGLY-005: Price 9999.99 EUR — edge high price format.
+		$simple += (int) $this->ugly_simple(
+			'DEV-UGLY-005',
+			'[DEV] Artikal Makro Cijena 005',
+			'9999.99', 'instock', $cat_id, $brand_id
+		);
+
+		// DEV-UGLY-006: onbackorder + no image — stock badge + thumbnail fallback.
+		$simple += (int) $this->ugly_simple(
+			'DEV-UGLY-006',
+			'[DEV] Artikal Na Čekanju Bez Slike 006',
+			'59.99', 'onbackorder', $cat_id, $brand_id, true
+		);
+
+		// DEV-UGLY-007: No description, no image — placeholder image test.
+		$simple += (int) $this->ugly_simple(
+			'DEV-UGLY-007',
+			'[DEV] Artikal Bez Opisa i Slike 007',
+			'19.99', 'instock', $cat_id, $brand_id
+		);
+
+		// DEV-UGLY-008: Solo variation (1 var only) — minimal variation UI test.
+		if ( ! wc_get_product_id_by_sku( 'DEV-UGLY-008' ) ) {
+			$p = new WC_Product_Variable();
+			$p->set_name( '[DEV] Artikal Solo Varijanta 008' );
+			$p->set_sku( 'DEV-UGLY-008' );
+			$p->set_status( 'publish' );
+			$p->set_catalog_visibility( 'visible' );
+			$p->set_category_ids( [ $cat_id ] );
+			$p->set_attributes( $this->ugly_attributes( [ [ 'name' => 'Pack Size', 'options' => [ '1pc' ] ] ] ) );
+			$pid = $p->save();
+
+			if ( $pid ) {
+				wp_set_object_terms( $pid, [ $brand_id ], 'product_brand' );
+				update_post_meta( $pid, self::GENERATED_KEY, 1 );
+				update_post_meta( $pid, self::BATCH_KEY, $this->batch_id );
+
+				$v = new WC_Product_Variation();
+				$v->set_parent_id( $pid );
+				$v->set_attributes( [ 'pack-size' => '1pc' ] );
+				$v->set_sku( 'DEV-UGLY-008-01' );
+				$v->set_regular_price( '14.99' );
+				$v->set_stock_status( 'instock' );
+				$v->set_manage_stock( false );
+				$vid = $v->save();
+				if ( $vid ) {
+					update_post_meta( $vid, self::GENERATED_KEY, 1 );
+					update_post_meta( $vid, self::BATCH_KEY, $this->batch_id );
+					$vars++;
+				}
+
+				WC_Product_Variable::sync( $pid );
+				WP_CLI::log( '  +     DEV-UGLY-008  [1 var]   [DEV] Artikal Solo Varijanta 008' );
+				$variable++;
+			}
+		} else {
+			WP_CLI::log( '  skip  DEV-UGLY-008' );
+		}
+
+		// DEV-UGLY-009: Dense attributes (3×3×3 = 27 vars) — variation selector + CartSync stress.
+		if ( ! wc_get_product_id_by_sku( 'DEV-UGLY-009' ) ) {
+			$attr_data_009 = [
+				[ 'name' => 'Velicina', 'options' => [ 'S', 'M', 'L' ] ],
+				[ 'name' => 'Boja',     'options' => [ 'Crna', 'Bijela', 'Plava' ] ],
+				[ 'name' => 'Material', 'options' => [ 'Pamuk', 'Vuna', 'Najlon' ] ],
+			];
+
+			$p = new WC_Product_Variable();
+			$p->set_name( '[DEV] Artikal Gusta Atributa 009' );
+			$p->set_sku( 'DEV-UGLY-009' );
+			$p->set_status( 'publish' );
+			$p->set_catalog_visibility( 'visible' );
+			$p->set_category_ids( [ $cat_id ] );
+			$p->set_attributes( $this->ugly_attributes( $attr_data_009 ) );
+			$pid = $p->save();
+
+			if ( $pid ) {
+				wp_set_object_terms( $pid, [ $brand_id ], 'product_brand' );
+				update_post_meta( $pid, self::GENERATED_KEY, 1 );
+				update_post_meta( $pid, self::BATCH_KEY, $this->batch_id );
+
+				$combos = $this->ugly_cartesian( $attr_data_009 );
+				foreach ( $combos as $j => $combo ) {
+					$var_sku = sprintf( 'DEV-UGLY-009-%02d', $j + 1 );
+					$v = new WC_Product_Variation();
+					$v->set_parent_id( $pid );
+					$v->set_attributes( array_combine(
+						array_map( 'sanitize_title', array_keys( $combo ) ),
+						array_values( $combo )
+					) );
+					$v->set_sku( $var_sku );
+					$v->set_regular_price( '24.99' );
+					$v->set_stock_status( 'instock' );
+					$v->set_manage_stock( false );
+					$vid = $v->save();
+					if ( $vid ) {
+						update_post_meta( $vid, self::GENERATED_KEY, 1 );
+						update_post_meta( $vid, self::BATCH_KEY, $this->batch_id );
+						$vars++;
+					}
+				}
+
+				WC_Product_Variable::sync( $pid );
+				WP_CLI::log( '  +     DEV-UGLY-009  [27 vars]  [DEV] Artikal Gusta Atributa 009' );
+				$variable++;
+			}
+		} else {
+			WP_CLI::log( '  skip  DEV-UGLY-009' );
+		}
+
+		// DEV-UGLY-010: Mixed stock (instock / outofstock / onbackorder) — stock badge accuracy.
+		if ( ! wc_get_product_id_by_sku( 'DEV-UGLY-010' ) ) {
+			$p = new WC_Product_Variable();
+			$p->set_name( '[DEV] Artikal Mješoviti Stok 010' );
+			$p->set_sku( 'DEV-UGLY-010' );
+			$p->set_status( 'publish' );
+			$p->set_catalog_visibility( 'visible' );
+			$p->set_category_ids( [ $cat_id ] );
+			$p->set_attributes( $this->ugly_attributes( [ [ 'name' => 'Tip', 'options' => [ 'A', 'B', 'C' ] ] ] ) );
+			$pid = $p->save();
+
+			if ( $pid ) {
+				wp_set_object_terms( $pid, [ $brand_id ], 'product_brand' );
+				update_post_meta( $pid, self::GENERATED_KEY, 1 );
+				update_post_meta( $pid, self::BATCH_KEY, $this->batch_id );
+
+				$mixed = [
+					[ 'sku' => 'DEV-UGLY-010-01', 'attr' => 'A', 'status' => 'instock',     'backorder' => false ],
+					[ 'sku' => 'DEV-UGLY-010-02', 'attr' => 'B', 'status' => 'outofstock',  'backorder' => false ],
+					[ 'sku' => 'DEV-UGLY-010-03', 'attr' => 'C', 'status' => 'onbackorder', 'backorder' => true  ],
+				];
+
+				foreach ( $mixed as $ms ) {
+					$v = new WC_Product_Variation();
+					$v->set_parent_id( $pid );
+					$v->set_attributes( [ 'tip' => $ms['attr'] ] );
+					$v->set_sku( $ms['sku'] );
+					$v->set_regular_price( '34.99' );
+					$v->set_stock_status( $ms['status'] );
+					$v->set_manage_stock( false );
+					if ( $ms['backorder'] ) {
+						$v->set_backorders( 'yes' );
+					}
+					$vid = $v->save();
+					if ( $vid ) {
+						update_post_meta( $vid, self::GENERATED_KEY, 1 );
+						update_post_meta( $vid, self::BATCH_KEY, $this->batch_id );
+						$vars++;
+					}
+				}
+
+				WC_Product_Variable::sync( $pid );
+				WP_CLI::log( '  +     DEV-UGLY-010  [3 vars]   [DEV] Artikal Mješoviti Stok 010' );
+				$variable++;
+			}
+		} else {
+			WP_CLI::log( '  skip  DEV-UGLY-010' );
+		}
+
+		return [ 'simple' => $simple, 'variable' => $variable, 'variations' => $vars ];
+	}
+
+	/**
+	 * Create a single ugly simple product. Returns true on success, false if skipped or failed.
+	 */
+	private function ugly_simple(
+		string $sku,
+		string $title,
+		string $price,
+		string $stock_status,
+		int    $cat_id,
+		int    $brand_id,
+		bool   $backorder = false
+	): bool {
+		if ( wc_get_product_id_by_sku( $sku ) ) {
+			WP_CLI::log( "  skip  {$sku}" );
+			return false;
+		}
+
+		$product = new WC_Product_Simple();
+		$product->set_name( $title );
+		$product->set_sku( $sku );
+		$product->set_regular_price( $price );
+		$product->set_status( 'publish' );
+		$product->set_catalog_visibility( 'visible' );
+		$product->set_category_ids( [ $cat_id ] );
+		$product->set_stock_status( $stock_status );
+		$product->set_manage_stock( false );
+
+		if ( $backorder ) {
+			$product->set_backorders( 'yes' );
+		}
+
+		$id = $product->save();
+
+		if ( ! $id ) {
+			WP_CLI::warning( "  FAIL  {$sku}" );
+			return false;
+		}
+
+		wp_set_object_terms( $id, [ $brand_id ], 'product_brand' );
+		update_post_meta( $id, self::GENERATED_KEY, 1 );
+		update_post_meta( $id, self::BATCH_KEY, $this->batch_id );
+
+		WP_CLI::log( "  +     {$sku}  {$title}" );
+		return true;
+	}
+
+	/**
+	 * Build WC_Product_Attribute[] from a plain data array.
+	 * Isolated from build_product_attributes() to avoid coupling ugly phase to tier system.
+	 *
+	 * @param  array<int, array{name: string, options: string[]}> $attr_data
+	 * @return WC_Product_Attribute[]  Keyed by sanitize_title(name).
+	 */
+	private function ugly_attributes( array $attr_data ): array {
+		$attrs = [];
+		foreach ( $attr_data as $position => $cfg ) {
+			$attr = new WC_Product_Attribute();
+			$attr->set_id( 0 );
+			$attr->set_name( $cfg['name'] );
+			$attr->set_options( $cfg['options'] );
+			$attr->set_position( $position );
+			$attr->set_visible( true );
+			$attr->set_variation( true );
+			$attrs[ sanitize_title( $cfg['name'] ) ] = $attr;
+		}
+		return $attrs;
+	}
+
+	/**
+	 * Cartesian product of attribute option arrays.
+	 * Isolated from get_tier_combinations() to avoid coupling ugly phase to tier system.
+	 *
+	 * @param  array<int, array{name: string, options: string[]}> $attr_data
+	 * @return array<int, array<string, string>>
+	 */
+	private function ugly_cartesian( array $attr_data ): array {
+		$combos = [ [] ];
+		foreach ( $attr_data as $attr ) {
+			$expanded = [];
+			foreach ( $combos as $combo ) {
+				foreach ( $attr['options'] as $option ) {
+					$expanded[] = array_merge( $combo, [ $attr['name'] => $option ] );
+				}
+			}
+			$combos = $expanded;
+		}
+		return $combos;
 	}
 }

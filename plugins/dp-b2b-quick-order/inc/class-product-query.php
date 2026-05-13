@@ -12,7 +12,7 @@ class DP_Quick_Order_Product_Query {
 	 * Uses fields=>ids first, then hydrates only the paginated result set —
 	 * never calls wc_get_product() across the full catalog.
 	 *
-	 * @param array{page: int, per_page: int, search: string, category: int, brand: int} $args
+	 * @param array{page: int, per_page: int, search: string, category: int, brand: int, price_min: float|null, price_max: float|null, attributes: array} $args
 	 * @return array{products: list<array>, total: int, total_pages: int}
 	 */
 	public function query( array $args ): array {
@@ -57,6 +57,54 @@ class DP_Quick_Order_Product_Query {
 				'field'    => 'term_id',
 				'terms'    => (int) $args['brand'],
 			];
+		}
+
+		// Price range filter — maps to _price meta.
+		$price_min = isset( $args['price_min'] ) && '' !== $args['price_min'] ? (float) $args['price_min'] : null;
+		$price_max = isset( $args['price_max'] ) && '' !== $args['price_max'] ? (float) $args['price_max'] : null;
+
+		if ( null !== $price_min && null !== $price_max ) {
+			$query_args['meta_query'][] = [
+				'key'     => '_price',
+				'value'   => [ $price_min, $price_max ],
+				'compare' => 'BETWEEN',
+				'type'    => 'NUMERIC',
+			];
+		} elseif ( null !== $price_min ) {
+			$query_args['meta_query'][] = [
+				'key'     => '_price',
+				'value'   => $price_min,
+				'compare' => '>=',
+				'type'    => 'NUMERIC',
+			];
+		} elseif ( null !== $price_max ) {
+			$query_args['meta_query'][] = [
+				'key'     => '_price',
+				'value'   => $price_max,
+				'compare' => '<=',
+				'type'    => 'NUMERIC',
+			];
+		}
+
+		// Product attribute filters — each maps to a tax_query entry.
+		// $args['attributes'] is an assoc array: ['color' => ['red','blue'], 'size' => ['M']].
+		if ( ! empty( $args['attributes'] ) && is_array( $args['attributes'] ) ) {
+			foreach ( $args['attributes'] as $attr_name => $terms ) {
+				$taxonomy = 'pa_' . sanitize_key( (string) $attr_name );
+				if ( ! taxonomy_exists( $taxonomy ) ) {
+					continue;
+				}
+				$slugs = array_filter( array_map( 'sanitize_key', (array) $terms ) );
+				if ( empty( $slugs ) ) {
+					continue;
+				}
+				$query_args['tax_query'][] = [
+					'taxonomy' => $taxonomy,
+					'field'    => 'slug',
+					'terms'    => array_values( $slugs ),
+					'operator' => 'IN',
+				];
+			}
 		}
 
 		$this->visibility->apply_to_query( $query_args );

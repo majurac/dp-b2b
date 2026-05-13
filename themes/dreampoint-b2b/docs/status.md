@@ -1,6 +1,6 @@
 # Quick Order — Implementation Status
 
-Last updated: 2026-05-12
+Last updated: 2026-05-13
 
 ---
 
@@ -10,7 +10,8 @@ Last updated: 2026-05-12
 | Pagination | ACTIVE | Yes | Yes | In-place re-render. Qty resets on page change — known V1 tradeoff. |
 | Variation handling | ACTIVE | Yes | Yes | Implicit replace flow (remove-old + add-new in one debounce window). |
 | Visibility integration | ACTIVE | Yes | Yes | Gate fires on `add_to_cart` only. No retroactive revalidation — intentional. |
-| Sorting | DEFERRED | No | No | V1.1 plan written, not yet executed. No sort UI or server params yet. |
+| Sorting | ACTIVE | Yes | Yes | `qo_orderby` / `qo_order` params. Title and price sort, ASC/DESC toggle. Isolated from WOOF `orderby` detection. |
+| Filter integration (WOOF/WBW) | ACTIVE | Yes | Yes | Price range + pa_* attribute filters via REST. WOOF URL change propagation via pushState wrapper. Isolation guard strips wpf_query from QO WP_Query instances. |
 | Cart totals footer | EXPERIMENTAL | Partial | No | `data.totals` in every sync response. Footer div in template. Render not wired to response data. |
 | Variable stock neutral state | DEFERRED | No | No | V1.1 plan — variable rows currently show incorrect stock badge before variation selection. |
 | Qty +/- buttons | DEFERRED | No | No | V1.1 plan — qty input only, no +/- controls yet. |

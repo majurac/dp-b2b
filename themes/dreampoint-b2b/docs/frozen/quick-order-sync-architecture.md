@@ -1,5 +1,11 @@
 # Quick Order — Cart Sync Architecture
 
+## Status
+FROZEN — DO NOT REFACTOR WITHOUT EXPLICIT APPROVAL
+
+Architecture status:
+STABLE / PRODUCTION-VALIDATED
+
 Operational reference for the Quick Order synchronization system.
 Covers JS engine, PHP endpoint, concurrency model, and variation handling.
 

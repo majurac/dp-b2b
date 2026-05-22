@@ -1,5 +1,11 @@
 # Checkout Logic
 
+## Status
+FROZEN — DO NOT REFACTOR WITHOUT EXPLICIT APPROVAL
+
+Architecture status:
+STABLE / PRODUCTION-VALIDATED
+
 ## Goal
 Centralize all checkout-related logic: payment method restrictions based on selected shipping method, billing→shipping field prefill, and protection of master B2B billing data from being overwritten at checkout.
 

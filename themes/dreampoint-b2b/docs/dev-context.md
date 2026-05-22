@@ -349,7 +349,7 @@ For other languages: replace with `icl_object_id`.
 
 ### Still needs attention
 - `footer-shop.php` — incomplete template, ends div structure without header pair — verify intent before deploy
-- `composer.json` — still targets PHP `>=5.6`; theme uses PHP 8.x; update to `>=8.0` before deploy (low priority)
+- `composer.json` — still targets PHP `>=5.6`; theme uses PHP 8.3+; update to `>=8.3` before deploy (low priority)
 - Font preload list — empty in `functions.php`; fonts confirmed in `fonts/`: `Jost-Light.woff2`, `Jost-Medium.woff2`, `Jost-Regular.woff2`, `Marcellus-Regular.woff2`
 
 ---

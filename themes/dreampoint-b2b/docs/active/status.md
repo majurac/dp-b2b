@@ -6,7 +6,7 @@ Last updated: 2026-05-13
 
 | System | Status | Stable | Staging Ready | Notes |
 |--------|--------|--------|---------------|-------|
-| CartSync (debounce, token, abort) | ACTIVE | Yes | Yes | Architecture locked. See `docs/tasks/quick-order-sync-architecture.md`. |
+| CartSync (debounce, token, abort) | ACTIVE | Yes | Yes | Architecture locked. See `docs/frozen/quick-order-sync-architecture.md`. |
 | Pagination | ACTIVE | Yes | Yes | In-place re-render. Qty resets on page change — known V1 tradeoff. |
 | Variation handling | ACTIVE | Yes | Yes | Implicit replace flow (remove-old + add-new in one debounce window). |
 | Visibility integration | ACTIVE | Yes | Yes | Gate fires on `add_to_cart` only. No retroactive revalidation — intentional. |

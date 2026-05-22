@@ -32,7 +32,7 @@ Do not modify or re-analyze the visibility system unless explicitly requested.
 
 - WordPress
 - WooCommerce
-- PHP 8.x
+- PHP 8.3+
 - ACF Pro
 - Redis Object Cache
 - LiteSpeed Cache
@@ -121,7 +121,7 @@ Test users:
 - vis_offer
 
 Admin credentials:
-[ADD ADMIN USER/PASS HERE]
+admin/armin123#
 
 ---
 
@@ -143,6 +143,12 @@ DO NOT:
 If database access is truly needed:
 - ask for confirmation first
 - explain why browser/WP admin/WP-CLI is not enough
+
+## Playwright Login Reliability
+
+Browser autofill can interfere with automated login flows during Playwright testing.
+
+Prefer explicit Playwright focus/type/click interactions over JS form submission or evaluate-based login flows when authentication behaves inconsistently.
 
 ---
 
@@ -191,10 +197,10 @@ If something already works, do not touch it.
 
 ## Completed Tasks
 
-Archived implementations are in `docs/tasks/`.
+Archived implementations are in `docs/frozen/`.
 Read the relevant file before modifying any completed feature.
 
-- `docs/tasks/checkout-logic.md` — payment rules, billing prefill, billing data protection
+- `docs/frozen/checkout-logic.md` — payment rules, billing prefill, billing data protection
 
 ---
 
@@ -343,7 +349,7 @@ Do NOT:
 - introduce new permission architecture
 
 Quick Order must integrate with existing systems, not replace them.
-Before modifying checkout, payment, or visibility logic — read `docs/tasks/checkout-logic.md`.
+Before modifying checkout, payment, or visibility logic — read `docs/frozen/checkout-logic.md`.
 
 ### WooCommerce Blocks Compatibility
 
@@ -422,3 +428,18 @@ Calling `wc_get_product()` or `get_available_variations()` across large product 
 - slow AJAX/API responses
 
 Quick Order must remain performant on large B2B catalogs with high variation counts.
+
+---
+
+## Quick Order — Page Requirement
+
+Quick Order depends on a normal WordPress page entity existing in the database.
+
+Canonical page configuration:
+- Title: `Quick Order`
+- Slug: `quick-order`
+- Content: `[dp_quick_order]`
+- Template: default
+
+Important:
+Git deploys do NOT sync WordPress DB content. If Quick Order exists locally but not on staging/production, verify the page entity exists before modifying plugin architecture.

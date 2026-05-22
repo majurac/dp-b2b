@@ -6,7 +6,7 @@ Performance-oriented WooCommerce B2B Quick Order plugin for Dreampoint B2B.
 
 - WordPress 6.0+
 - WooCommerce 8.0+
-- PHP 8.1+
+- PHP 8.3+
 
 ## Architecture
 

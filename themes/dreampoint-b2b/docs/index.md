@@ -5,6 +5,24 @@ If a doc is not listed here, treat it as implementation detail only.
 
 ---
 
+## Historical Documentation Notice
+
+Docs in `docs/historical/`, `docs/superpowers/plans/historical/`, and `docs/superpowers/specs/historical/` are archival snapshots.
+Do not treat them as active implementation guidance.
+
+They exist to preserve:
+- implementation history
+- architectural decisions
+- migration context
+- debugging context
+
+Active engineering guidance lives in:
+- `docs/active/`
+- `docs/frozen/`
+- `CLAUDE.md`
+
+---
+
 ## Documentation Zones
 
 | Zone | Path | Purpose |

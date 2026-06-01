@@ -208,6 +208,34 @@ ignore it completely.
 
 ---
 
+## ACF Governance
+
+### ACF Governance Standard
+
+- All active editable field groups must be tracked in `acf-json/` and committed to Git
+- ACF Pro GUI remains the primary editing interface — `acf-json/` provides Git protection and reproducibility
+- New field groups must be exported to `acf-json/` immediately after creation in the GUI
+- DB-only field groups require explicit justification — no silent accumulation
+- Orphaned or unused field groups must not be retained without purpose — remove them
+- Governance operations (export, deletion, sync) must not modify runtime behavior
+
+### Local JSON Priority
+
+When a field group already exists in `acf-json/`, ACF treats the local JSON file as authoritative.
+
+Observed behavior:
+- `acf_get_field_group( $key )` returns an object with `ID = 0` when a local JSON version exists
+- export logic that relies on a database-backed field group will produce incomplete exports (empty `fields` array)
+- this is expected ACF behavior, not a bug
+
+Operational rule — before any field-group export, sync validation, or governance operation:
+1. Check whether the field group already exists in `acf-json/`
+2. If yes — load by post ID (not by key): `acf_get_field_group( $post_id )`
+3. Pass the post ID to `acf_get_fields()` to retrieve fields from the database
+4. Do not assume `acf_get_field_group( $key )` represents a database-backed object
+
+---
+
 ## Quick Order System (Phase 6)
 
 Dreampoint B2B will include a CUSTOM Quick Order system.

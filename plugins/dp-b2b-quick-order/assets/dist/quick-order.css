@@ -14,9 +14,20 @@
 
 .dp-qo-table th { text-align: left; font-weight: 600; background: #f7f7f7; }
 
+/* ── Thumbnail column ────────────────────────────────────────── */
+.dp-qo-col-thumb { width: 50px; padding: 4px 6px; }
+.dp-qo-thumb { display: block; width: 40px; height: 40px; object-fit: contain; border-radius: 2px; }
+
 /* ── Product name / SKU ──────────────────────────────────────── */
 .dp-qo-name { display: block; font-weight: 500; }
 .dp-qo-sku  { display: block; color: #888; font-size: 12px; }
+
+/* ── Product name link ───────────────────────────────────────── */
+.dp-qo-name-link { text-decoration: none; color: inherit; }
+.dp-qo-name-link:hover .dp-qo-name { text-decoration: underline; }
+
+/* ── WPF filter area ─────────────────────────────────────────── */
+.dp-qo-filter-area { margin-bottom: 16px; }
 
 /* ── Stock badge ─────────────────────────────────────────────── */
 .dp-qo-stock { display: inline-block; font-size: 11px; padding: 2px 6px; border-radius: 3px; white-space: nowrap; }

@@ -86,6 +86,16 @@ class DP_Quick_Order_Product_Query {
 			];
 		}
 
+		// Stock status filter — maps to _stock_status post meta.
+		$stock_status = $args['stock_status'] ?? '';
+		if ( in_array( $stock_status, [ 'instock', 'outofstock', 'onbackorder' ], true ) ) {
+			$query_args['meta_query'][] = [
+				'key'     => '_stock_status',
+				'value'   => $stock_status,
+				'compare' => '=',
+			];
+		}
+
 		// Product attribute filters — each maps to a tax_query entry.
 		// $args['attributes'] is an assoc array: ['color' => ['red','blue'], 'size' => ['M']].
 		if ( ! empty( $args['attributes'] ) && is_array( $args['attributes'] ) ) {
@@ -143,6 +153,7 @@ class DP_Quick_Order_Product_Query {
 				'managed'  => $product->get_manage_stock(),
 			],
 			'image'      => $this->get_thumbnail_url( $id ),
+			'permalink'  => get_permalink( $id ),
 		];
 
 		if ( $product instanceof WC_Product_Variable ) {

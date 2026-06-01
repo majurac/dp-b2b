@@ -39,11 +39,17 @@ import { RowSync }     from './row-sync.js';
         const hasOos     = synced.some(i => i.action === 'out_of_stock');
 
         if (hasAdded) {
-            // Success: toast + cart open + fragment refresh (existing added_to_cart flow).
-            jQuery(document.body).trigger('added_to_cart', [[], '', null]);
+            // Refresh fragments first so cart opens with fresh content.
+            // added_to_cart (toast + cart open) fires once DOM is updated.
+            // wc_fragments_ajax_error fallback preserves behavior when AJAX fails.
+            jQuery(document.body).one('wc_fragments_refreshed wc_fragments_ajax_error', function () {
+                jQuery(document.body).trigger('added_to_cart', [[], '', null]);
+            });
+            jQuery(document.body).trigger('wc_fragment_refresh');
         } else if (hasRemoved && !hasOos) {
-            // Pure remove: close cart + fragment refresh (existing removed_from_cart flow).
+            // Close cart first, then refresh fragments (count badge + panel update).
             jQuery(document.body).trigger('removed_from_cart', [[], '']);
+            jQuery(document.body).trigger('wc_fragment_refresh');
         } else if (hasRemoved || hasOos) {
             // Mixed or oos-only: refresh fragments without toast or cart open/close.
             jQuery(document.body).trigger('wc_fragment_refresh');
@@ -56,7 +62,7 @@ import { RowSync }     from './row-sync.js';
     document.addEventListener('dp:sync:success', e => {
         const { totals } = e.detail;
         if (!totals) return;
-        const totalEl = document.querySelector('.dp-qo-footer__total');
+        const totalEl = document.querySelector('.dp-qo-footer__total-amount');
         if (!totalEl) return;
         try {
             totalEl.textContent = new Intl.NumberFormat(navigator.language, {

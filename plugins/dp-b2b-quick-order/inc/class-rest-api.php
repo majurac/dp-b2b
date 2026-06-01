@@ -23,9 +23,10 @@ class DP_Quick_Order_Rest_Api {
 				'brand'    => [ 'type' => 'integer', 'default' => 0 ],
 				'qo_orderby' => [ 'type' => 'string', 'enum' => [ 'title', 'price' ], 'default' => 'title' ],
 				'qo_order'   => [ 'type' => 'string', 'enum' => [ 'asc', 'desc' ], 'default' => 'asc' ],
-				'price_min'  => [ 'type' => 'number', 'minimum' => 0, 'default' => null ],
-				'price_max'  => [ 'type' => 'number', 'minimum' => 0, 'default' => null ],
-				'attributes' => [ 'type' => 'string', 'default' => '' ],
+				'price_min'    => [ 'type' => 'number', 'minimum' => 0, 'default' => null ],
+				'price_max'    => [ 'type' => 'number', 'minimum' => 0, 'default' => null ],
+				'stock_status' => [ 'type' => 'string', 'enum' => [ 'instock', 'outofstock', 'onbackorder', '' ], 'default' => '' ],
+				'attributes'   => [ 'type' => 'string', 'default' => '' ],
 			],
 		] );
 
@@ -56,16 +57,17 @@ class DP_Quick_Order_Rest_Api {
 		}
 
 		$results = $this->product_query->query( [
-			'page'       => $request->get_param( 'page' ),
-			'per_page'   => $request->get_param( 'per_page' ),
-			'search'     => $request->get_param( 'search' ),
-			'category'   => $request->get_param( 'category' ),
-			'brand'      => $request->get_param( 'brand' ),
-			'orderby'    => $request->get_param( 'qo_orderby' ),
-			'order'      => $request->get_param( 'qo_order' ),
-			'price_min'  => $request->get_param( 'price_min' ),
-			'price_max'  => $request->get_param( 'price_max' ),
-			'attributes' => $attributes,
+			'page'         => $request->get_param( 'page' ),
+			'per_page'     => $request->get_param( 'per_page' ),
+			'search'       => $request->get_param( 'search' ),
+			'category'     => $request->get_param( 'category' ),
+			'brand'        => $request->get_param( 'brand' ),
+			'orderby'      => $request->get_param( 'qo_orderby' ),
+			'order'        => $request->get_param( 'qo_order' ),
+			'price_min'    => $request->get_param( 'price_min' ),
+			'price_max'    => $request->get_param( 'price_max' ),
+			'stock_status' => $request->get_param( 'stock_status' ),
+			'attributes'   => $attributes,
 		] );
 
 		return rest_ensure_response( $results );

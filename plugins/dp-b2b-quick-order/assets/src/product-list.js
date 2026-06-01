@@ -75,10 +75,11 @@ export class ProductList {
         });
 
         const f = this.#woofFilters;
-        if (f.price_min > 0)                           params.set('price_min', f.price_min);
-        if (f.price_max > 0)                           params.set('price_max', f.price_max);
-        if (f.category > 0)                            params.set('category',  f.category);
-        if (f.brand > 0)                               params.set('brand',     f.brand);
+        if (f.price_min > 0)                           params.set('price_min',    f.price_min);
+        if (f.price_max > 0)                           params.set('price_max',    f.price_max);
+        if (f.stock_status)                            params.set('stock_status', f.stock_status);
+        if (f.category > 0)                            params.set('category',     f.category);
+        if (f.brand > 0)                               params.set('brand',        f.brand);
         if (f.attributes && Object.keys(f.attributes).length) {
             params.set('attributes', JSON.stringify(f.attributes));
         }
@@ -269,8 +270,9 @@ export class ProductList {
      * Extract Quick Order filter params from a WOOF-updated URL.
      *
      * WOOF URL format → QO REST params:
-     *   pr_min=100                           → price_min: 100
-     *   pr_max=500                           → price_max: 500
+     *   wpf_min_price=100                    → price_min: 100
+     *   wpf_max_price=500                    → price_max: 500
+     *   pr_stock=instock                     → stock_status: 'instock'
      *   wpf_filter_pa_color=red|blue         → attributes.color: ['red', 'blue']
      *   wpf_filter_cat_{N}=30                → category: 30  (term ID)
      *   wpf_filter_product_brand_{N}=42      → brand: 42     (term ID)
@@ -279,15 +281,20 @@ export class ProductList {
      * Non-numeric values (slugs) are ignored — parseInt returns NaN, guard fails safely.
      *
      * @param {URLSearchParams} params
-     * @returns {{ price_min?: number, price_max?: number, category?: number, brand?: number, attributes?: object }}
+     * @returns {{ price_min?: number, price_max?: number, stock_status?: string, category?: number, brand?: number, attributes?: object }}
      */
     #extractWoofFilters(params) {
         const result = {};
 
-        const prMin = parseFloat(params.get('pr_min') ?? '');
-        const prMax = parseFloat(params.get('pr_max') ?? '');
+        const prMin = parseFloat(params.get('wpf_min_price') ?? '');
+        const prMax = parseFloat(params.get('wpf_max_price') ?? '');
         if (!isNaN(prMin) && prMin > 0) result.price_min = prMin;
         if (!isNaN(prMax) && prMax > 0) result.price_max = prMax;
+
+        const stockStatus = params.get('pr_stock');
+        if (stockStatus && ['instock', 'outofstock', 'onbackorder'].includes(stockStatus)) {
+            result.stock_status = stockStatus;
+        }
 
         // Category: wpf_filter_cat_{N}=term_id
         for (const [key, val] of params) {

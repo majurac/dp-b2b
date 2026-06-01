@@ -7,7 +7,7 @@
  * Text Domain: dp-b2b-quick-order
  * Domain Path: /languages
  * Requires at least: 6.0
- * Requires PHP: 8.1
+ * Requires PHP: 8.3
  * WC requires at least: 8.0
  */
 

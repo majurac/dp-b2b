@@ -104,24 +104,7 @@ Do not touch visibility code unless explicitly requested.
 
 ## Local Environment
 
-Site:
-http://localhost:8080/dp-b2b
-
-WP Admin:
-http://localhost:8080/dp-b2b/wp-admin
-
-Test users password:
-TestVis2025!
-
-Test users:
-- vis_none
-- vis_full
-- vis_rule_cat
-- vis_rule_brand
-- vis_offer
-
-Admin credentials:
-admin/armin123#
+See `.claude/environment.md`
 
 ---
 

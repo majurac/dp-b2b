@@ -206,6 +206,8 @@ Value `4` must be validated against the actual number of above-fold products in 
 
 ## Project Roadmap (8 Phases)
 
+> **Note:** This is the original planning roadmap. Phase statuses below reflect the initial plan scope and have not been updated as individual systems were implemented. For current system-level implementation status, see `docs/active/status.md`. Several systems marked "Pending" below have since been built (Phases 5, 6, partial 7) — but the phases themselves are not permanently closed as broader design, ERP integration, and testing remain active.
+
 | Phase | Content | Estimate | Status |
 |-------|---------|----------|--------|
 | 1 | Design (UX/UI) — login/reg, homepage pre/post login, categories, listing, product page, cart, checkout | 150h | In progress |
@@ -346,10 +348,10 @@ For other languages: replace with `icl_object_id`.
 - `js/products-tabs.js` — deleted + enqueue and AJAX handler in `blocks/products-tabs.php` removed
 - `js/variation-stock.js` — enqueue added on `is_product()` with `wp_localize_script` for `stockText`
 - `js/tabs-dropdown.js` — enqueue added on `is_product()`
+- `composer.json` — updated to PHP `>=8.3` (commit bbba828, 2026-06-01)
 
 ### Still needs attention
 - `footer-shop.php` — incomplete template, ends div structure without header pair — verify intent before deploy
-- `composer.json` — still targets PHP `>=5.6`; theme uses PHP 8.3+; update to `>=8.3` before deploy (low priority)
 - Font preload list — empty in `functions.php`; fonts confirmed in `fonts/`: `Jost-Light.woff2`, `Jost-Medium.woff2`, `Jost-Regular.woff2`, `Marcellus-Regular.woff2`
 
 ---

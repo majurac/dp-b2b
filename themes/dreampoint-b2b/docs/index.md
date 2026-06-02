@@ -104,12 +104,21 @@ Executed plans: `docs/superpowers/plans/historical/`
 | `2026-05-11-quick-order-ux-validation.md` | ProductList, RowSync, UI polish |
 | `2026-05-13-quick-order-ugly-dataset.md` | Edge-case catalog (ugly dataset) |
 | `2026-05-13-woof-filter-compat.md` | WOOF/WBW filter integration |
+| `2026-05-22-docs-refactor.md` | Docs reorganization into Active/Frozen/Historical/Operational zones |
 
 Executed specs: `docs/superpowers/specs/historical/`
 
 | Spec | Delivered |
 |------|-----------|
 | `2026-05-13-quick-order-ugly-dataset-design.md` | Ugly dataset generator design |
+
+---
+
+## Strategic Reference
+
+| Doc | Role |
+|-----|------|
+| `docs/future-visibility-plugin.md` | Future UncleDev Catalog Visibility plugin — consolidated review conclusions, trigger conditions, open questions |
 
 ---
 

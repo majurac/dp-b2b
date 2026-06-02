@@ -28,3 +28,60 @@ Last updated: 2026-05-13
 - **ACTIVE** — built, tested locally, works as designed
 - **EXPERIMENTAL** — partially built; behavior may be incomplete or untested
 - **DEFERRED** — intentionally not built yet; no regression, just missing functionality
+
+---
+
+## ACF Governance Coverage
+
+Last updated: 2026-06-01 (Wave 4 complete — commit a014af6)
+
+| Area | Status | Notes |
+|------|--------|-------|
+| Active editable field groups in `acf-json/` | COMPLETE | 7/7 active groups tracked and Git-protected |
+| Frozen blocks without field groups (10 blocks) | INTENTIONAL | Static blocks with no editable fields. Do NOT add field groups to these — absence is intentional. |
+| New field groups (future) | ONGOING RULE | Any new ACF field group created in GUI must be immediately exported to `acf-json/`. See `CLAUDE.md` ACF Governance section. |
+
+Wave 4 governance is complete unless new field groups are introduced. Do not reopen past waves.
+
+---
+
+## Frontend Architecture — Leorigine Alignment
+
+Last updated: 2026-06-02
+
+| Status | DEFERRED — interrupted by ACF governance work (Wave 4) |
+|--------|---|
+
+Scope of pending alignment work:
+- `functions.php` organization
+- Sass/CSS architecture
+- JS file organization
+- Enqueue structure
+
+**Hard constraint:** B2B-specific systems (visibility engine, Quick Order, checkout logic) must NOT be simplified, reorganized, or merged during Leorigine alignment. Structural changes apply to general frontend scaffolding only.
+
+This is unfinished architecture work — not a locked system and not abandoned. Resume when the ACF/blocks governance cycle is complete.
+
+---
+
+## Staging TODOs (Open / Blocked)
+
+Last updated: 2026-06-02
+
+These items remain open due to external dependencies. Do NOT mark as resolved unless the blocking dependency is confirmed resolved.
+
+| # | Item | Priority | Status | Blocked by |
+|---|------|----------|--------|------------|
+| 1 | CorvusPay + jquery-migrate testing | BLOCKER | Open | CorvusPay test environment access not yet available |
+| 2 | LSCache JS Defer config in WP admin | HIGH | Open | Requires staging deploy |
+| 3 | `fetchpriority` count validation | MEDIUM | Open | Requires staging deploy (above-fold grid layout) |
+| 4 | Font preload list (`dreampoint_b2b_font_preloads()`) | MEDIUM | Open | Final site design / above-fold font selection |
+| 5 | `update_post_meta_cache = false` — verify WPF filters | MEDIUM | Open | Requires staging deploy |
+| 6 | GTM snippet in `footer.php` | LOW | Open | GTM account data / final site design |
+| 7 | `woocommerce/archive-product-discounted.php` deletion | LOW | Open | Confirm `/akcija/` page works on staging |
+| 8 | `footer-shop.php` — verify intent | LOW | Open | Design clarification |
+| 9 | Define `DP_ERP_WEBHOOK_SECRET` in `wp-config.php` on all environments | REQUIRED | Open | Required before ERP webhook is usable |
+| 10 | Test B2B registration flow + both emails | REQUIRED | Open | Requires staging |
+| 11 | Test `/akcija/` page — WPF filter, sorting, pagination | REQUIRED | Open | Requires staging |
+
+Full detail on items 1–8: `docs/dev-context.md` → "Staging TODOs" and "Cleanup Status".

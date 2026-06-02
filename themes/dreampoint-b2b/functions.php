@@ -22,7 +22,10 @@ defined( 'ABSPATH' ) || exit;
 // ============================================================================
 
 if ( ! defined( '_S_VERSION' ) ) {
-    define( '_S_VERSION', '1.0.0' );
+    define( '_S_VERSION', (string) max(
+        filemtime( get_template_directory() . '/style.css' ),
+        filemtime( get_template_directory() . '/js/theme.min.js' )
+    ) );
 }
 
 // ============================================================================
@@ -194,6 +197,35 @@ function dreampoint_b2b_needs_select2(): bool {
 }
 
 /**
+ * Da li trenutna stranica zahteva FancyBox galeriju?
+ * Proizvod, blog post i naslovna — jedini konteksti s prikazom galerije.
+ */
+function dreampoint_b2b_needs_fancybox(): bool {
+    return is_product() || is_singular( 'post' ) || is_front_page();
+}
+
+/**
+ * Da li trenutna stranica zahteva Toastify toast obaveštenja?
+ * Sve stranice s akcijom "dodaj u košaricu".
+ */
+function dreampoint_b2b_needs_toastify(): bool {
+    return is_front_page()            ||
+           is_product()               ||
+           is_shop()                  ||
+           is_product_category()      ||
+           is_tax( 'product_brand' )  ||
+           is_page( 'quick-order' );
+}
+
+/**
+ * Da li trenutna stranica zahteva Slick Slider?
+ * Naslovna, blog arhiva, blog post, stranica proizvoda.
+ */
+function dreampoint_b2b_needs_slick(): bool {
+    return is_front_page() || is_singular( 'post' ) || is_home() || is_product();
+}
+
+/**
  * Ispisuje ACF link polje kao <a> tag.
  *
  * @param array|null $link       ACF link niz (url, title, target)
@@ -330,13 +362,7 @@ function dreampoint_b2b_scripts(): void {
     " );
 
     // FancyBox — samo na stranicama gde se galerija koristi
-    if (
-        is_product() ||
-        is_singular( 'post' ) ||
-        //is_post_type_archive( 'insta-shop-item' ) ||
-        //is_singular( 'insta-shop-item' ) ||
-        is_front_page()
-    ) {
+    if ( dreampoint_b2b_needs_fancybox() ) {
         wp_enqueue_style(
             'dreampoint-b2b-fancybox',
             get_template_directory_uri() . '/css/src/fancybox.min.css',
@@ -421,14 +447,7 @@ function dreampoint_b2b_scripts(): void {
 
     // --- CSS/JS: Toastify — obaveštenja za dodavanje u korpu ---
     // Učitava se na stranicama gde korisnik može da dodaje proizvode u korpu
-    if (
-        is_front_page()     ||
-        is_product()        ||
-        is_shop()           ||
-        is_product_category() ||
-        is_tax( 'product_brand' ) ||
-        is_page( 'quick-order' )
-    ) {
+    if ( dreampoint_b2b_needs_toastify() ) {
         wp_enqueue_style(
             'dreampoint-b2b-toastify',
             get_template_directory_uri() . '/css/src/toastify.min.css',
@@ -477,7 +496,7 @@ function dreampoint_b2b_scripts(): void {
     }
 
     // --- CSS/JS: Slick Slider ---
-    if ( is_front_page() || is_singular( 'post' ) || is_home() || is_product() ) {
+    if ( dreampoint_b2b_needs_slick() ) {
         wp_enqueue_style(
             'dreampoint-b2b-slick',
             get_template_directory_uri() . '/css/src/slick.min.css',

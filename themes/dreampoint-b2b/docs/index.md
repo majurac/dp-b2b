@@ -119,6 +119,7 @@ Executed specs: `docs/superpowers/specs/historical/`
 | Doc | Role |
 |-----|------|
 | `docs/future-visibility-plugin.md` | Future UncleDev Catalog Visibility plugin — consolidated review conclusions, trigger conditions, open questions |
+| `docs/erp-validation-checklist.md` | ERP discovery checklist for first Apros sessions — validates all Phase 4 assumptions before implementation begins |
 
 ---
 
@@ -128,3 +129,4 @@ Executed specs: `docs/superpowers/specs/historical/`
 - Offline / network-failure queue persistence
 - Playwright E2E test suite for Quick Order flows
 - Matrix ordering, SKU search, saved order templates (documented in `CLAUDE.md` as future scope)
+- Fancybox binding consolidation — accepted low-severity debt, no action needed; see `docs/active/fancybox-binding-debt.md`

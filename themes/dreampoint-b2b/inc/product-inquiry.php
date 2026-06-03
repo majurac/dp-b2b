@@ -125,9 +125,9 @@ function dreampoint_b2b_product_inquiry_fancybox_init(): void {
     }
     ?>
     <script>
-    ( function () {
-        'use strict';
-        Fancybox.bind('[data-fancybox].product-inquiry-btn', {
+    document.addEventListener( 'DOMContentLoaded', function () {
+        if ( typeof Fancybox === 'undefined' ) return;
+        Fancybox.bind( '[data-fancybox].product-inquiry-btn', {
             type       : 'iframe',
             preload    : false,
             autoFocus  : true,
@@ -137,8 +137,8 @@ function dreampoint_b2b_product_inquiry_fancybox_init(): void {
             idle       : false,
             width      : 850,
             height     : 'auto',
-        });
-    } )();
+        } );
+    } );
     </script>
     <?php
 }

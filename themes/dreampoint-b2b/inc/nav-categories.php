@@ -4,7 +4,7 @@
  *
  * Desktop and mobile product category navigation with transient caching.
  *
- * @package dreampoint-b2b
+ * @package Dreampoint_B2B
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;

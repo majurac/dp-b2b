@@ -4,7 +4,7 @@
  * 
  * Displays FAQ posts with accordion functionality and pagination
  * 
- * @package fjok
+ * @package Dreampoint_B2B
  * @version 1.1.0
  */
 
@@ -78,13 +78,13 @@ $faq_query = new WP_Query($query_args);
                                 'total'      => $faq_query->max_num_pages,
                                 'current'    => $current_page,
                                 'format'     => '?faq_page=%#%',
-                                'prev_text'  => '<i class="icon-chevron-left" aria-hidden="true"></i> <span>' . esc_html__('Nazad', 'fjok') . '</span>',
-                                'next_text'  => '<span>' . esc_html__('Naprijed', 'fjok') . '</span> <i class="icon-chevron-right" aria-hidden="true"></i>',
+                                'prev_text'  => '<i class="icon-chevron-left" aria-hidden="true"></i> <span>' . esc_html__('Nazad', 'dreampoint-b2b') . '</span>',
+                                'next_text'  => '<span>' . esc_html__('Naprijed', 'dreampoint-b2b') . '</span> <i class="icon-chevron-right" aria-hidden="true"></i>',
                                 'type'       => 'list',
                                 'mid_size'   => 2,
                                 'end_size'   => 1,
                                 'add_args'   => false,
-                                'aria_label' => esc_attr__('FAQ paginacija', 'fjok'),
+                                'aria_label' => esc_attr__('FAQ paginacija', 'dreampoint-b2b'),
                             ];
                             
                             echo paginate_links($pagination_args);
@@ -95,7 +95,7 @@ $faq_query = new WP_Query($query_args);
                 <?php else : ?>
                     
                     <div class="no-results">
-                        <p><?php esc_html_e('Nema dostupnih pitanja.', 'fjok'); ?></p>
+                        <p><?php esc_html_e('Nema dostupnih pitanja.', 'dreampoint-b2b'); ?></p>
                     </div>
                     
                 <?php endif; ?>

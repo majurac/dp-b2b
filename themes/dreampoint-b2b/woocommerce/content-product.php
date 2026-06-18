@@ -25,14 +25,11 @@ $sku = $product->get_sku();
 $out_of_stock = !$product->is_in_stock();
 $is_variable = $product->is_type('variable');
 $permalink = get_permalink($product_id);
-$uncledev_cijena_loop = wc_get_loop_prop( 'uncledev_cijena_loop' );
-$image_size = $uncledev_cijena_loop ? 'voucher_loop' : 'product-loop';
+$image_size = 'product-loop';
 ?>
 
-<?php 
-$uncledev_cijena_loop = wc_get_loop_prop( 'uncledev_cijena_loop' );
-
-if ( is_shop() || is_product_category() || is_tax('product_brand') || $uncledev_cijena_loop ) : 
+<?php
+if ( is_shop() || is_product_category() || is_tax('product_brand') ) :
 ?>
     <div class="col-md-4">
 <?php else : ?>

@@ -9,7 +9,7 @@
      *
      * @link https://developer.wordpress.org/themes/basics/template-hierarchy/
      *
-     * @package jekaa
+     * @package Dreampoint_B2B
      */
     
     get_header();;;

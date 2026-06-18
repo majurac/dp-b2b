@@ -2,7 +2,7 @@
 /**
  * AJAX Handlers
  *
- * @package dreampoint-b2b
+ * @package Dreampoint_B2B
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;

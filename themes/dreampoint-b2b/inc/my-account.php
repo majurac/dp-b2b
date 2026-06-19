@@ -294,17 +294,10 @@ function dreampoint_b2b_save_admin_phone_field($user_id) {
  * @return string Modified template location
  */
 add_filter('wc_get_template', 'dreampoint_b2b_hide_customer_details_thankyou', 10, 3);
-function dreampoint_b2b_hide_customer_details_thankyou($located, $template_name, $args) {
-    // Only on thank you page
-    if (!is_wc_endpoint_url('order-received')) {
-        return $located;
+function dreampoint_b2b_hide_customer_details_thankyou( $located, $template_name, $args ) {
+    if ( ( is_wc_endpoint_url( 'order-received' ) || is_wc_endpoint_url( 'view-order' ) ) && $template_name === 'order/order-details-customer.php' ) {
+        return '';
     }
-    
-    // Hide customer details template
-    if ($template_name === 'order/order-details-customer.php') {
-        return ''; // Return empty to skip loading
-    }
-    
     return $located;
 }
 
@@ -493,3 +486,10 @@ add_filter('woocommerce_default_address_fields', function($fields) {
     $fields['state']['required'] = false;
     return $fields;
 });
+
+add_filter( 'woocommerce_my_account_my_orders_actions', function( $actions ) {
+	if ( isset( $actions['refund'] ) ) {
+		$actions['refund']['name'] = __( 'Povrat', 'dreampoint-b2b' );
+	}
+	return $actions;
+}, 101 );

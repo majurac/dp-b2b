@@ -30,6 +30,16 @@ if ( ! $order ) {
 $order_items        = $order->get_items( apply_filters( 'woocommerce_purchase_order_item_types', 'line_item' ) );
 $show_purchase_note = $order->has_status( apply_filters( 'woocommerce_purchase_note_order_statuses', array( 'completed', 'processing' ) ) );
 $downloads          = $order->get_downloadable_items();
+$actions            = array_filter(
+	wc_get_account_orders_actions( $order ),
+	function ( $key ) {
+		return 'view' !== $key;
+	},
+	ARRAY_FILTER_USE_KEY
+);
+
+$refund_action = $actions['refund'] ?? null;
+unset( $actions['refund'] );
 
 // We make sure the order belongs to the user. This will also be true if the user is a guest, and the order belongs to a guest (userID === 0).
 $show_customer_details = $order->get_user_id() === get_current_user_id();
@@ -119,6 +129,28 @@ if ( $show_downloads ) {
 		</tbody>
 
 
+		<?php if ( ! empty( $actions ) ) : ?>
+		<tfoot>
+			<tr>
+				<th class="order-actions--heading"><?php esc_html_e( 'Actions', 'woocommerce' ); ?>:</th>
+				<td>
+					<?php
+					$wp_button_class = wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '';
+					foreach ( $actions as $key => $action ) { // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+						if ( empty( $action['aria-label'] ) ) {
+							/* translators: %1$s Action name, %2$s Order number. */
+							$action_aria_label = sprintf( __( '%1$s order number %2$s', 'woocommerce' ), $action['name'], $order->get_order_number() );
+						} else {
+							$action_aria_label = $action['aria-label'];
+						}
+						echo '<a href="' . esc_url( $action['url'] ) . '" class="woocommerce-button' . esc_attr( $wp_button_class ) . ' button ' . sanitize_html_class( $key ) . ' order-actions-button" aria-label="' . esc_attr( $action_aria_label ) . '">' . esc_html( $action['name'] ) . '</a>';
+						unset( $action_aria_label );
+					}
+					?>
+				</td>
+			</tr>
+		</tfoot>
+		<?php endif; ?>
 		<tfoot>
 			<?php
 			foreach ( $order->get_order_item_totals() as $key => $total ) {
@@ -157,10 +189,22 @@ if ( $show_downloads ) {
             <?php esc_html_e( 'Vrati se na moje narudžbe', 'dreampoint-b2b' ); ?>
         </a>
 
-        <?php if (!$order->has_status('completed')) : ?>
+        <?php if ( $refund_action || ! $order->has_status( 'completed' ) ) : ?>
             <div class="order-again-button">
-                <button class="button button--sm" disabled>Naruči ponovo</button>
-                <!-- /.button button--sm -->
+                <?php if ( $refund_action ) :
+                    $refund_aria_label = ! empty( $refund_action['aria-label'] )
+                        ? $refund_action['aria-label']
+                        : sprintf( __( '%1$s order number %2$s', 'woocommerce' ), $refund_action['name'], $order->get_order_number() );
+                ?>
+                    <a href="<?php echo esc_url( $refund_action['url'] ); ?>"
+                       class="woocommerce-button button refund order-actions-button button--sm"
+                       aria-label="<?php echo esc_attr( $refund_aria_label ); ?>">
+                        <?php echo esc_html( $refund_action['name'] ); ?>
+                    </a>
+                <?php endif; ?>
+                <?php if ( ! $order->has_status( 'completed' ) ) : ?>
+                    <button class="button button--sm" disabled>Naruči ponovo</button>
+                <?php endif; ?>
             </div>
         <?php endif; ?>
     </div>

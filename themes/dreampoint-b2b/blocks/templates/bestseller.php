@@ -5,6 +5,19 @@ if (!defined('ABSPATH')) {
 
 $title = get_field('title');
 
+$bestseller_page = get_page_by_path( 'bestseller' );
+if ( $bestseller_page ) {
+    $bestseller_page_url = esc_url( get_permalink( $bestseller_page ) );
+} else {
+    $bestseller_page_url = esc_url(
+        add_query_arg(
+            'orderby',
+            'popularity',
+            wc_get_page_permalink( 'shop' )
+        )
+    );
+}
+
 // Query best-selling products
 $args = array(
     'post_type'      => 'product',
@@ -23,7 +36,7 @@ $bestsellers = new WP_Query($args);
             <?php if ($title) : ?>
                 <h2><?php echo esc_html($title); ?></h2>
             <?php endif; ?>
-            <a href="<?php echo esc_url( get_permalink( get_page_by_path( 'bestseller' ) ) ); ?>" class="link"><?php esc_html_e( 'Pogledaj sve', 'dreampoint-b2b' ); ?></a>
+            <a href="<?php echo $bestseller_page_url; ?>" class="link"><?php esc_html_e( 'Pogledaj sve', 'dreampoint-b2b' ); ?></a>
         </div>
         <div class="bestseller-content">
             <?php if ($bestsellers->have_posts()) : ?>
@@ -40,7 +53,7 @@ $bestsellers = new WP_Query($args);
         </div>
         <!-- /.bestseller-content -->
         <div class="view-all-sm">
-            <a href="<?php echo esc_url( get_permalink( get_page_by_path( 'bestseller' ) ) ); ?>" class="button button--outline button--sm button--icon-after"><?php esc_html_e( 'Pogledaj sve', 'dreampoint-b2b' ); ?></a>
+            <a href="<?php echo $bestseller_page_url; ?>" class="button button--outline button--sm button--icon-after"><?php esc_html_e( 'Pogledaj sve', 'dreampoint-b2b' ); ?></a>
         </div>
         <!-- /.view-all sm -->
     </div>

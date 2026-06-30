@@ -64,6 +64,7 @@ Active engineering guidance lives in:
 |-----|--------|
 | `docs/historical/synthetic-b2b-catalog.md` | Dev-only WP-CLI catalog generator (stress testing tool) |
 | `docs/historical/handoff-2026-04.md` | April 2026 session handoff — superseded by current state |
+| `docs/historical/ssl-incident-dreampoint-b2b.md` | SSL incident Jun 2026 — root cause, classification, recovery plan |
 
 ---
 
@@ -119,7 +120,17 @@ Executed specs: `docs/superpowers/specs/historical/`
 | Doc | Role |
 |-----|------|
 | `docs/future-visibility-plugin.md` | Future UncleDev Catalog Visibility plugin — consolidated review conclusions, trigger conditions, open questions |
+| `docs/stakeholder-question-matrix.md` | **Meeting-ready workshop document** — confirmed facts, all Apros questions, all Dream Point questions, internal decisions; standalone, no other docs needed |
+| `docs/project-status-matrix.md` | **Executive status document** — confirmed facts, open questions (Apros + Dream Point), internal decisions, blockers, next steps; onboarding entrypoint |
+| `docs/erp-discovery-findings.md` | ERP discovery findings (Maj 2026) — confirmed rules, unvalidated assumptions, implementation blockers; read before any ERP work |
 | `docs/erp-validation-checklist.md` | ERP discovery checklist for first Apros sessions — validates all Phase 4 assumptions before implementation begins |
+| `docs/client-workshop-questions.md` | Distilled workshop question list — 13 client questions, 7 Apros questions, 7 internal decisions; derived from UX Foundation doc |
+| `docs/b2b-erp-plugin-analysis.md` | Production B2C plugin analysis — reuse classification, endpoint inventory, auth gap, order payload format |
+| `docs/b2b-erp-adaptation-blueprint.md` | ERP adaptation blueprint — B2B-specific components, pricing models A/B/C, warehouse/partner/order architecture, implementation roadmap |
+| `docs/b2b-architecture-validation-audit.md` | **Independent validation audit** — assumption audit, evidence gaps, contradictions, risk register (P0/P1/P2), architecture stability assessment, pre-implementation checklist |
+| `docs/apros-question-resolution-matrix.md` | **Autoritativna AP matrica** — status AP-01 – AP-14, evidencija, što ostaje za Apros sesiju, što je zatvoreno; jedini dokument koji treba za pripremu Apros meetinga |
+| `docs/apros-session-final-pack.md` | **Finalni Apros meeting pack** — executive summary, P0/P1/P2 pitanja, traženi payload primjeri, interni blokeri, checklist; koristi se live na sestanku |
+| `docs/b2b-erp-migration-plan.md` | **Implementacijski migration plan** — component inventory, product/partner/pricing/order adapation, DB impact, implementacijski koraci s ovisnostima, CAN START NOW vs. BLOCKED scope |
 
 ---
 

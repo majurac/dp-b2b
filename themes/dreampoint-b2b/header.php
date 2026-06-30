@@ -91,26 +91,6 @@ $company_phone = get_field('company_phone', 'option') ?: '';
                             <!-- /#navigation -->
                         </div>
                         <!-- /.col -->
-                        <div class="col">
-                            <div class="tagline"><?php bloginfo( 'description' ); ?></div>
-                            <!-- /.tagline -->
-                        </div>
-                        <!-- /.col -->
-
-                        <div class="col">
-                        <?php if ($company_phone) : ?>
-                            <div class="header-phone">
-                                <p>
-                                    <a href="tel:<?php echo esc_attr(preg_replace('/[^0-9+]/', '', $company_phone)); ?>" aria-label="<?php echo esc_attr(sprintf(__('Pozovi %s', 'dreampoint-b2b'), $company_phone)); ?>">
-                                        <?php echo esc_html($company_phone); ?>
-                                    </a>
-                                </p>
-                            </div>
-                            <!-- /.header-phone -->
-                        <?php endif; ?>
-                        </div>
-                        <!-- /.col -->
-
                     </div>
                     <!-- /.row -->
                 </div>
@@ -140,7 +120,7 @@ $company_phone = get_field('company_phone', 'option') ?: '';
                         <?php endif; ?>
 
                         <div class="col-lg-7 col-xl-8 products-menu">
-                            <nav role="navigation" aria-label="<?php esc_attr_e('Glavni meni', 'dreampoint-b2b'); ?>">
+                            <nav role="navigation" aria-label="<?php esc_attr_e('Glavni meni', 'dreampoint-b2b'); ?>" style="display:none;">
                                 <?php echo dreampoint_b2b_nav_categories_desktop(); ?>
                                 <?php 
                                 wp_nav_menu([

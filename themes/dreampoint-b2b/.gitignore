@@ -1,0 +1,14 @@
+# Playwright testing artifacts
+.playwright-mcp/
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Editor artifacts
+*.swp
+*.swo
+*.orig
+
+# Build artifacts
+node_modules/

@@ -313,3 +313,71 @@ Oba signala zajedno ne daju konzistentan model — dva nezavisna izvora implemen
 **BL-03 ostaje aktivan bloker.** Povjerenje u pricing model je SMANJENO u odnosu na period neposredno nakon Leo emaila — konflikt izvora zahtijeva direktnu Apros validaciju.
 
 Svi ostali blokeri (BL-01 do BL-06) ostaju nepromijenjeni.
+
+---
+
+## Discovery Revision — Apros Response Integration Update
+
+**Izvor:** Direktan odgovor Apros tima (pricing, autentikacija, order endpoint, partner approval flow, dostavne lokacije)
+**Datum dodavanja:** 2026-07-02
+**Klasifikacija izvora:** Prva direktna Apros tehnička potvrda — viša evidencijska razina od svih prethodnih izvora (Leo Benkek email, Milenko Stojaković iskustvo). Konflikt oko V-01 semantike `wholesalePrice` je ovime razriješen za arhitekturalnu razinu; egzaktni payload primjeri (field nazivi, realne vrijednosti) i dalje nedostaju.
+
+> Discovery ostaje formalno zatvoren. Ovo je nova evidencija koja se dodaje na postojeći nalaz, ne ponovno otvaranje diskusije.
+
+---
+
+### Novo potvrđene činjenice
+
+**NC-06 — Pricing model za domaće kupce razriješen (Model A potvrđen)**
+`wholesalePrice` = bazna veleprodajna neto cijena. Rabat 1 = postotni popust po partneru i brandu. Finalna cijena = `wholesalePrice − Rabat 1`. Ovo razrješava konflikt iz sekcije "Refinement — V-01" u korist Leo Benkek interpretacije (Model A) — Milenko Stojakovićevo iskustveno zapažanje (Model B) se odnosilo na B2C kontekst i ne primjenjuje se na B2B domaći tok.
+
+**NC-07 — Pricing model za strane kupce razriješen (Model C potvrđen)**
+Nema Rabat 1 mehanizma za strane kupce. Finalna neto cijena dolazi direktno iz `countryPriceList`. PDV tretman ovisi o pravnoj/poreznoj kategoriji partnera (isto kao ranije potvrđeno).
+
+**NC-08 — Autentikacija potvrđena**
+Auth mehanizam prema Apros API-ju: **API Key**. Isti pristup kao postojeća Jekaa B2C integracija.
+
+**NC-09 — Order endpoint: obavezna polja potvrđena (payload primjer i dalje nedostaje)**
+Obavezna polja u order payloadu: `sif_kup`/`partnerId`, `partnerDeliveryLocationId`, stavke narudžbe s količinama. Success/error response format nije dostavljen.
+
+**NC-10 — Partner approval flow reklasificiran: nema potvrđenog webhooka**
+Apros nije potvrdio approval webhook. Potvrđeni tok: web registracija → email notifikacija → ručno kreiranje partnera u Apros-u → atribut `B2B KUPAC = DA` → partner se pojavljuje na partner list endpointu. Ovo zamjenjuje raniju NC-05/PE-03 pretpostavku o webhook signalu (korak "[5] Apros šalje signal CMS-u" u ranijem opisu toka se povlači) — sinkronizacija partnera mora biti **periodic polling/import**, ne webhook-driven.
+
+**NC-11 — Dostavne lokacije potvrđene**
+Partner može imati više dostavnih lokacija. **Ne postoji default lokacija** — korisnik bira lokaciju pri naručivanju. Endpoint: `partnerDeliveryLocationList`.
+
+---
+
+### Razrješenje V-01 (wholesalePrice semantika)
+
+**Status: RAZRIJEŠENO na arhitekturalnoj razini.** Prethodni konflikt (vidi "Refinement — V-01" iznad) je zatvoren direktnim Apros odgovorom:
+
+| Segment | Model | Formula / mehanizam |
+|---------|-------|---------------------|
+| Domaći kupci | **Model A** | `wholesalePrice − Rabat 1 (%)` = finalna cijena |
+| Strani kupci | **Model C** | `countryPriceList` isporučuje gotovu finalnu cijenu |
+
+**Što i dalje nedostaje:** egzaktan payload primjer (`articleList/get` + ugovorni uvjeti response za istog partnera, `countryPriceList` format, `partnerBrandDiscountList` format). Bez ovoga implementacija pricing engine-a ne može biti finalizirana — vidi `docs/apros-session-final-pack.md` sekciju "Still Required From Apros".
+
+---
+
+### Ažurirane pretpostavke i blokeri
+
+| ID | Stavka | Prethodni status | Novi status | Razlog |
+|----|--------|-------------------|--------------|--------|
+| V-01 | `wholesalePrice` semantika | Konfliktni iskustveni signali | **Razriješeno (arhitektura)** — payload primjer pending | Apros potvrdio Model A (domaći) + Model C (strani) |
+| BL-03 | Pricing model | HIGH | **MEDIUM** — arhitektura poznata, payload primjer nedostaje | Isto |
+| BL-04 | Order endpoint format | HIGH | **MEDIUM** — obavezna polja poznata, puni payload/response format nedostaje | NC-09 |
+| BL-05 | Auth mehanizam WP → Apros | HIGH | **RESOLVED** — API Key, isti pristup kao Jekaa B2C | NC-08 |
+| — | Partner approval webhook | Pretpostavljen (NC-05/PE-03) | **Rekvalificirano** — nema potvrđenog webhooka; polling/import model | NC-10 |
+| — | Dostavne lokacije | Nevalidirano (V-11 djelomično) | **Djelomično razriješeno** — više lokacija, nema defaulta, endpoint poznat | NC-11 |
+
+**BL-01 (Apros API pristup) i BL-06 (Josip / prodajno mjesto) ostaju nepromijenjeni** — ovaj odgovor ih ne adresira.
+
+**V-11 (stabilnost Apros location ID-a između sync ciklusa) ostaje djelomično otvoreno** — potvrđeno je da lokacija nema default, ali stabilnost ID-a između sync ciklusa nije eksplicitno potvrđena.
+
+---
+
+### Što ostaje potrebno od Apros-a
+
+Detaljna lista u `docs/apros-session-final-pack.md` → sekcija "Still Required From Apros". Sažetak: realni payload primjeri za pricing (domaći + strani partner), order request/response, `countryPriceList`, `partnerBrandDiscountList`, i `partnerDeliveryLocationList`.

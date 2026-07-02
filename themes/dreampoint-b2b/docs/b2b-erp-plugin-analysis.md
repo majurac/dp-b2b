@@ -164,28 +164,30 @@ Ukupno: **9 GET endpointa** pozivanih sekvencijalno u svakom import runu. Nema p
 
 ## 4. Authentication Model
 
-**KRITIČNI NALAZ:** Trenutna implementacija ne šalje nikakve auth credentiale prema Apros API-ju.
+**✅ RESOLVED 2026-07-02:** Apros je direktno potvrdio auth mehanizam za B2B API pristup: **API Key**, isti pristup kao postojeća Jekaa B2C integracija.
+
+**Raniji KRITIČNI NALAZ (i dalje relevantan za razumijevanje B2C koda):** Trenutna B2C implementacija ne šalje nikakve auth credentiale prema Apros API-ju, unatoč potvrđenom API Key modelu.
 
 ### Product import
 
 - `CurlClient::request()` šalje samo `Content-Type: application/x-www-form-urlencoded` i `Accept: application/json`
 - **Nema Authorization headera**, nema API key-a, nema Basic Auth
 - `username` i `password` su polja u ACF konfiguraciji i `BaseProvider::get_username()/get_password()` metodama, ali `AprosProvider::fetch()` **nikad ne poziva te metode** niti ih prosleđuje `CurlClient`-u
-- Zaključak: ili Apros API je javno dostupan (IP whitelist ili bez autentikacije), ili postoji autentikacija implementirana na mrežnoj razini (VPN/IP whitelist)
+- Ovo je vjerojatno previd u B2C implementaciji, ili je B2C API dodatno zaštićen na mrežnoj razini (IP whitelist) pa API Key nije bio striktno enforced — nije razjašnjeno, ali ne mijenja B2B zahtjev
 
-**STATUS:** UNKNOWN — potrebna potvrda od Apros integrativnog tima
+**STATUS:** RESOLVED — B2B mora implementirati API Key header inject u `CurlClient`; isti previd (nedostatak stvarnog slanja headera) mora biti izbjegnut
 
 ### Order export
 
 - `wp_remote_post()` bez autentikacije (samo `Content-Type: application/json`)
-- Isti pattern kao import — vjerojatno isti mehanizam zaštite
+- Isti pattern kao import — B2B order export mora dodati API Key header
 
 ### Credential storage
 
-- Username/password u ACF options (WP options table)
+- Username/password u ACF options (WP options table) — za B2B, API Key treba čuvati kao `wp-config.php` konstantu (`DP_ERP_API_KEY`), ne u ACF/DB, u skladu s projektnim pravilom o secrets
 - Base endpoint URL u ACF options
 
-**Za DP-B2B:** Potrebno razjasniti auth model s Apros timom prije implementacije. Ako DP-B2B API zahtijeva autentikaciju, `CurlClient` mora biti proširen.
+**Za DP-B2B:** Implementirati `CurlClient::set_auth_header('ApiKey ' . DP_ERP_API_KEY)` pattern (Korak 5 placeholder → Korak 14 finalizacija u `docs/b2b-erp-migration-plan.md`). Preostalo, nije bloker: odvojeni credentials za read/write operacije, dodatni IP whitelist zahtjev.
 
 ---
 
@@ -476,7 +478,7 @@ Apros ERP ne šalje push notifikacije. Nema webhooks. WP-CLI komanda `wp importe
 
 ### Najveći rizici pri reupotrebi
 
-1. **Auth gap:** CurlClient ne šalje credentiale — verificirati Apros B2B auth zahtjeve
+1. **Auth implementacija:** Auth model potvrđen (API Key, 2026-07-02) — preostaje implementacija header inject mehanizma u `CurlClient`, ne validacija modela
 2. **Order export:** Kompletna nova implementacija s partner ID-em i bez Jekaa-specifičnosti
 3. **Pricing:** B2B pricing nije u postojećoj arhitekturi — nova komponenta
 4. **_RESPONSE_HASH versioning:** Hash uključuje hardkodiranu verziju `'v20260401-13'` — pri prvom deployu na B2B ovo će uzrokovati re-import svih proizvoda (što je željeno ponašanje)
@@ -487,7 +489,7 @@ Apros ERP ne šalje push notifikacije. Nema webhooks. WP-CLI komanda `wp importe
 
 Pitanja koja ne mogu biti odgovorena analizom koda:
 
-1. **Auth model:** Kako se Apros API autentificira? Zašto CurlClient ne šalje username/password? Je li Apros API zaštićen IP whitelistom ili ne zahtijeva auth za B2C? Hoće li B2B imati drugačiji auth zahtjev?
+1. ~~**Auth model:**~~ ✅ RESOLVED 2026-07-02 — API Key, isti pristup kao Jekaa B2C. Preostalo pitanje (nije bloker): zašto B2C CurlClient ne šalje username/password unatoč potvrđenom modelu — vrijedi razjasniti radi izbjegavanja istog previda u B2B.
 
 2. **B2B price fields:** Koje field-ove šalje Apros za B2B cjenike? Postoji li `customerPrice`, `priceList`, `sif_kup`-based pricing u API responsu?
 

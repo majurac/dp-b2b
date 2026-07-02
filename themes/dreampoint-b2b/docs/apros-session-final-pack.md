@@ -1,8 +1,10 @@
 # Apros Session — Final Preparation Pack
 
-**Datum:** 2026-06-08  
+**Datum:** 2026-06-08 | **Ažurirano:** 2026-07-02 (Apros Response Integration Update)
 **Svrha:** Minimalni skup pitanja potrebnih za deblokiranje implementacije  
 **Izvor istine:** `apros-question-resolution-matrix.md`, `b2b-erp-adaptation-blueprint.md`, `b2b-erp-plugin-analysis.md`
+
+> **Status 2026-07-02:** Apros je odgovorio na pricing, autentikaciju, order endpoint, partner approval flow i dostavne lokacije. Sesija je djelomično uspješna — arhitekturalni blokeri (pricing model, auth, approval flow) su razriješeni. Payload primjeri (egzaktni field nazivi i realne vrijednosti) i dalje nedostaju — vidi Sekciju "Still Required From Apros".
 
 ---
 
@@ -15,26 +17,35 @@
 - Product identifikacijski model (`articleId`, `variationId`, `barcode`) je potvrđen — bez pitanja
 - Variable produkt model (parent + varijacije) je potvrđen i nepromijenjen za B2B
 - EAN/barcode polje (`barcode` → `global_unique_id`) je potvrđeno i dostupno
-- Konceptualni onboarding tok je potvrđen (web forma → DP admin → Apros → webhook → WC rola)
+- **Onboarding tok potvrđen kao polling/import, NE webhook** (2026-07-02): web forma → DP admin → ručno kreiranje u Apros-u → `B2B KUPAC = DA` → partner se pojavljuje na partner list endpointu; WC ga preuzima periodičnim pollingom
 - Intent narudžbi je jednosmjeran (WC → Apros) — potvrđen iz više izvora
 - Default ponašanje za out-of-stock: nema narudžbe, potvrđeno od klijenta
+- **Auth mehanizam: API Key** (2026-07-02), isti pristup kao Jekaa B2C
+- **Pricing arhitektura razriješena** (2026-07-02): domaći kupci = Model A (`wholesalePrice − Rabat 1`); strani kupci = Model C (`countryPriceList`)
 
 ### Što je validirano
 
-- 2 od 14 pitanja su u potpunosti zatvorena (AP-02, AP-11)
-- Faza 1 implementacije može početi bez Apros sesije
-- 8 pitanja su djelomično odgovorena — dovoljno za okvirni arhitekturalni dizajn
+- 4 od 14 pitanja su u potpunosti zatvorena/riješena (AP-02, AP-03, AP-09, AP-11); 1 je out of scope (AP-08)
+- 3 pitanja su djelomično razriješena na arhitekturalnoj razini, payload primjer pending (AP-01, AP-06, AP-07)
+- Faza 1 implementacije može početi bez Apros sesije; Faza 3 partner sync arhitektura (polling/import) je sada poznata
 - Produkcijski B2C plugin pokriva ~75% infrastrukturnog koda koji se može direktno preuzeti
 
-### Što blokira implementaciju
+### Što i dalje blokira implementaciju
 
-- **3 P0 blokera** — arhitektura nije moguća bez odgovora (AP-01, AP-06/AP-09 mapping)
-- **3 P1 blokera** — Faze 3–5 ne mogu početi (AP-03, AP-07, AP-08)
+- **2 P0 payload blokera** — arhitektura poznata, finalizacija čeka realni payload primjer (AP-01 pricing, AP-06 order endpoint)
+- **1 P1 payload bloker** — AP-07 (delivery locations format)
 - **2 interna blokera** — moraju riješiti Dream Point, ne Apros (DP-01, DP-02)
 
-### Traženi ishod sesije
+### Razriješeno ovom sesijom
 
-Minimalni skup potrebnih odgovora: potvrda pricing modela + payload primjeri za narudžbu i lokacije + auth mehanizam + approval webhook format. Bez toga, Faze 4 i 5 se ne mogu arhitekturalno odlučiti.
+- **AP-09 (auth)** — RESOLVED: API Key
+- **AP-03 (approval flow)** — RECLASSIFIED: polling/import model, nema webhooka
+- **AP-01 (pricing)** — PARTIALLY RESOLVED: arhitektura poznata (Model A/C), payload pending
+- **AP-08 (advance_only/free_shipping)** — OUT OF SCOPE: temeljio se na webhook pretpostavci koja ne postoji
+
+### Traženi ishod sljedeće interakcije s Apros-om
+
+Preostali minimalni skup: realni payload primjeri za pricing (domaći + strani partner), order request/response, i delivery locations. Vidi Sekciju "Still Required From Apros".
 
 ---
 
@@ -44,99 +55,85 @@ Minimalni skup potrebnih odgovora: potvrda pricing modela + payload primjeri za 
 |-------|-------------------|--------------|
 | AP-02 | Product identifikacijski model u potpunosti poznat iz produkcijskog koda | `AprosProvider.php`, `Importer.php`, `ProductToImport.php` |
 | AP-11 | EAN/barcode polje potvrđeno produkcijskim kodom; čuva se kao `global_unique_id` | `AprosProvider.php`, `ProductToImport.php` |
+| AP-03 | Apros direktno odgovorio: nema webhooka, polling/import model potvrđen | Apros odgovor 2026-07-02 |
+| AP-09 | Apros direktno odgovorio: API Key, isti pristup kao Jekaa B2C | Apros odgovor 2026-07-02 |
+| AP-08 | Reklasificirano kao out of scope — temeljilo se na webhook pretpostavci koja ne postoji (vidi AP-03) | Odluka nakon Apros odgovora 2026-07-02 |
 
 ---
 
-## 3. Kritična Pitanja — P0 (blokiraju implementaciju)
+## 3. Kritična Pitanja — P0 (payload primjeri, arhitektura razriješena)
 
-### AP-01 — Pricing Model
+### AP-01 — Pricing Model ✅ PARTIALLY RESOLVED
 
-**Pitanje:**  
+**Pitanje (originalno):**  
 Je li `wholesalePrice` u `articleList/get` ista vrijednost za sve partnere (bazna katalog cijena), ili se razlikuje per-partner (Apros preračunava finalnu cijenu po kupcu)?
 
-**Zašto blokira:**  
-Dva nezavisna izvora daju direktno konfliktne interpretacije. Model A (WC računa finalnu cijenu iz baze i rabata) i Model B (WC prikazuje gotovu cijenu) zahtijevaju potpuno drugačiju arhitekturu storage-a i runtime kalkulacije. Pogrešan odabir = kompletan rework pricing komponente.
+**Odgovor Apros-a (2026-07-02):** Domaći kupci = **Model A** (`wholesalePrice − Rabat 1%` = finalna cijena). Strani kupci = **Model C** (`countryPriceList` isporučuje gotovu finalnu neto cijenu, bez Rabat 1). VAT tretman ovisi o pravnoj/poreznoj kategoriji partnera.
 
-**Traženi format odgovora:**  
-Realni `articleList/get` response za jednog **domaćeg** partnera (s Rabat 1) i jednog **stranog** partnera (s cjenikom po državama) — oboje za isti artikal, u istom prikazu. Verbalni opis nije dovoljan.
-
-**Dodatna pitanja uz payload:**
-- Je li Rabat 1 obavezan za sve domaće partnere ili opcionalan?
-- Koji je format "Rabat 1" u ugovornim uvjetima endpointu — postotak po brandu?
-- Koji je format cjenika za strane kupce — zasebni endpoint ili polje u partner responsu?
+**Što i dalje nedostaje:**  
+Realni `articleList/get` response za jednog **domaćeg** partnera (s Rabat 1) i jednog **stranog** partnera (s `countryPriceList` vrijednošću) — oboje za isti artikal, u istom prikazu. Format `partnerBrandDiscountList` (Rabat 1 isporuka). Verbalni opis arhitekture je dobiven; egzaktni field nazivi i vrijednosti nisu.
 
 ---
 
-### AP-09 — Auth Mehanizam
+### AP-09 — Auth Mehanizam ✅ RESOLVED
 
-**Pitanje:**  
+**Pitanje (originalno):**  
 Kojom metodom WP autentificira pozive prema Apros-u? Produkcijski B2C plugin (`CurlClient.php`) ne šalje nikakve auth headere — zašto?
 
-**Zašto blokira:**  
-Svaki outbound API poziv prema Apros-u je blokiran dok auth model nije poznat. OAuth 2.0 scenarij znatno multiplicira implementacijski scope (token refresh, credential rotation).
+**Odgovor Apros-a (2026-07-02):** **API Key** — isti pristup kao postojeća Jekaa B2C integracija.
 
-**Traženi format odgovora:**  
-- Auth metoda: API key / OAuth 2.0 / Basic auth / JWT / Bearer token / IP whitelist / nema
-- Zasebni credentials za read (artikli) vs. write (narudžbe)?
-- IP whitelist — koji je izlazni IP koji treba whitelistati (staging vs. produkcija)?
+**Preostalo (nije bloker, opcionalno razjasniti):** Zasebni credentials za read (artikli) vs. write (narudžbe)? Dodatni IP whitelist zahtjev uz API Key?
 
 ---
 
-### AP-06 — Order Endpoint Format
+### AP-06 — Order Endpoint Format ✅ PARTIALLY RESOLVED
 
-**Pitanje:**  
+**Pitanje (originalno):**  
 Je li B2B order endpoint isti URL kao B2C (`/order/create`)? Prihvaća li `sif_kup`, `salesLocationId` i `deliveryLocationId`? Je li endpoint idempotent?
 
-**Zašto blokira:**  
-Order export je highest-risk operacija. Duplirane narudžbe u ERP-u su poslovni incident. Bez poznatih B2B-specifičnih polja, order payload builder ne može biti implementiran.
+**Odgovor Apros-a (2026-07-02):** Obavezna polja potvrđena: `sif_kup`/`partnerId`, `partnerDeliveryLocationId`, stavke narudžbe s količinama.
 
-**Traženi format odgovora:**  
-Realni B2B order payload primjer koji Apros prihvaća — s `sif_kup`, `salesLocationId`, `deliveryLocationId`, `billingOib`. Uz to: success response format i error response format. Verbalni opis nije dovoljan.
+**Što i dalje nedostaje:**  
+Realni B2B order payload primjer koji Apros prihvaća, s potvrđenim poljima. Success response format i error response format. Je li endpoint idempotent — nije adresirano. Verbalni opis nije dovoljan za finalizaciju.
 
 **Dodatno:**
 - Što se dogodi ako ista narudžba stigne dva puta (retry scenario)?
-- Koji su obavezni vs. opcionalni fields?
+- Koja su opcionalna polja uz potvrđena obavezna (npr. `billingOib`, `salesLocationId`)?
+- Invoice splitting mehanizam — nije adresiran ovim odgovorom
 
 ---
 
-## 4. Važna Pitanja — P1 (blokiraju Faze 3–5)
+## 4. Važna Pitanja — P1
 
-### AP-03 — Approval Webhook Format
+### AP-03 — Approval / Partner Sync Format ✅ RECLASSIFIED
 
-**Pitanje:**  
+**Pitanje (originalno):**  
 Šalje li Apros `sif_kup`, ugovorni uvjeti (rabat po brandu) i `advance_only` flag u approval webhook body-u, ili zasebno?
 
-**Zašto je važno:**  
-Određuje arhitekturu onboarding flow-a. Ako `sif_kup` ne stiže u approval webhook-u, potreban je odvojeni partner sync mehanizam koji komplicira arhitekturu i dodaje moving parts.
+**Odgovor Apros-a (2026-07-02):** Nema approval webhooka. Tok: web registracija → email notifikacija → ručno kreiranje partnera u Apros-u → `B2B KUPAC = DA` → partner se pojavljuje na partner list endpointu. Partner sync = **periodic polling/import**, ne webhook.
 
-**Traženi format odgovora:**  
-Kompletna lista polja u approval webhook body-u. Format (JSON body / query params?). Postoji li webhook signature za verifikaciju?
+**Preostalo (nije arhitekturalni bloker):** Frekvencija polling-a; postoji li delta/changed-since mehanizam na partner list endpointu.
 
 ---
 
-### AP-07 — Delivery Locations Format
+### AP-07 — Delivery Locations Format ✅ PARTIALLY RESOLVED
 
-**Pitanje:**  
+**Pitanje (originalno):**  
 Format, polja i trigger za listu dostavnih lokacija po partneru. Može li partner imati više lokacija? Je li Apros location ID stabilan između sync ciklusa?
 
-**Zašto je važno:**  
-Direktno određuje storage model (user meta vs. custom post type) i checkout UI za odabir adrese dostave. Ako partner može imati mnogo lokacija, user meta nije primjeren storage.
+**Odgovor Apros-a (2026-07-02):** Endpoint: `partnerDeliveryLocationList`. Partner može imati više lokacija. **Nema default lokacije** — korisnik bira pri naručivanju.
 
-**Traženi format odgovora:**  
-Realni delivery locations response za jednog partnera — s Apros location ID-em, svim adresnim poljima i oznakom defaulta ako postoji.
+**Što i dalje nedostaje:**  
+Realni `partnerDeliveryLocationList` response za jednog partnera — s Apros location ID-em, svim adresnim poljima. Stabilnost location ID-a između sync ciklusa nije eksplicitno potvrđena.
 
 ---
 
-### AP-08 — Advance Only i Free Shipping Flagovi
+### AP-08 — Advance Only i Free Shipping Flagovi 🚫 OUT OF SCOPE
 
-**Pitanje:**  
+**Pitanje (originalno):**  
 Stižu li `advance_only` i `free_shipping` flagovi u approval webhook-u ili zasebno? Mogu li se promijeniti za aktivnog partnera i koji je mehanizam ažuriranja?
 
-**Zašto je važno:**  
-Checkout payment restrictions direktno ovise o `advance_only` flagu. Ako se flag može promijeniti bez novog webhook poziva, WC ne može garantirati konzistentne payment restrictions.
-
-**Traženi format odgovora:**  
-Kako i kada dolaze; mehanizam ažuriranja za aktivnog partnera (novi webhook / periodični sync / ručno).
+**Status (2026-07-02):** Reklasificirano kao izvan scope-a — pitanje se temeljilo na approval webhook mehanizmu koji ne postoji (vidi AP-03). `advance_only` ostaje dokumentiran kao potencijalno buduće proširenje, ne validira se u ovoj fazi.
 
 ---
 
@@ -152,66 +149,79 @@ Kako i kada dolaze; mehanizam ažuriranja za aktivnog partnera (novi webhook / p
 
 ---
 
-## 6. Traženi Payload Primjeri
+## 6. Still Required From Apros
 
-### Pricing Payload (AP-01) — P0 KRITIČNO
+> Ovo je autoritativna, konsolidirana lista svega što nedostaje za finalizaciju implementacije nakon odgovora od 2026-07-02. Arhitekturalni blokeri su razriješeni — sve što slijedi su payload primjeri i formalne potvrde, ne arhitekturalne odluke.
 
-**Svrha:** Odabir pricing modela (Model A vs Model B) — nema zaobilaznog rješenja  
+### 1. Pricing Payload Examples (AP-01) — P0 KRITIČNO
+
+**Svrha:** Finalizacija pricing engine implementacije — arhitektura poznata (Model A domaći / Model C strani), payload primjer nedostaje  
 **Traženi primjer:**
 
 ```
 articleList/get response za domaćeg partnera:
 - articleId, code, wholesalePrice, brandId, b2bArticle flag
 
-ugovorni uvjeti response za istog partnera:
+ugovorni uvjeti / partnerBrandDiscountList response za istog partnera:
 - sif_kup, brandId, discount percentage (Rabat 1)
 
-articleList/get response za stranog partnera:
-- isti artikal, ista polja — usporedba wholesalePrice vrijednosti
+countryPriceList response za stranog partnera:
+- isti artikal — finalna neto cijena po državi
 ```
 
-**Zašto je važno:** Jedini način razrješenja konflikta između dva iskustvena izvora. Verbalni opis nije dovoljan.
+**Zašto je važno:** Bez egzaktnih field naziva i realnih vrijednosti pricing engine ne može biti implementiran niti testiran. Verbalni opis arhitekture je dobiven; payload primjer nije.
 
 ---
 
-### Order Payload (AP-06) — P0 KRITIČNO
+### 2. Order Payload Examples — Success i Error Responses (AP-06) — P0 KRITIČNO
 
-**Svrha:** Implementacija B2B order export buildera  
+**Svrha:** Implementacija B2B order export buildera — obavezna polja poznata, response format nedostaje  
 **Traženi primjer:**
 
 ```
-B2B order payload koji Apros prihvaća:
-- sif_kup
-- salesLocationId
-- deliveryLocationId
-- billingOib
-- items struktura
+B2B order request payload (potvrđena obavezna polja):
+- sif_kup / partnerId
+- partnerDeliveryLocationId
+- items[] sa količinama
+- (opcionalno, format nepotvrđen): salesLocationId, billingOib
 
-Success response: { "numberErp": "..." }
-Error response: { "result": "Error", "message": "..." }
+Success response: format nepoznat (B2C referenca: { "numberErp": "..." })
+Error response: format nepoznat (B2C referenca: { "result": "Error", "message": "..." })
 ```
 
-**Zašto je važno:** Order export je highest-risk operacija; duplikate narudžbe su poslovni incident.
+**Zašto je važno:** Order export je highest-risk operacija; duplirane narudžbe su poslovni incident. Bez success/error response formata ne može se implementirati retry/idempotency logika.
 
 ---
 
-### Delivery Locations Payload (AP-07) — P1
+### 3. countryPriceList Payload (dio AP-01) — P0 KRITIČNO
 
-**Svrha:** Određivanje storage modela i checkout UI za odabir dostavne adrese  
+**Svrha:** Implementacija Model C pricing sloja za strane kupce  
+**Traženi primjer:** Realni `countryPriceList` response — format po državi, koje države su pokrivene, da li je cijena neto/bruto, veza na `articleId`.
+
+---
+
+### 4. partnerBrandDiscountList Payload (dio AP-01) — P0 KRITIČNO
+
+**Svrha:** Implementacija Rabat 1 mehanizma za domaće kupce  
+**Traženi primjer:** Realni ugovorni uvjeti / `partnerBrandDiscountList` response — `sif_kup`, `brandId`, postotak, je li obavezan za sve domaće partnere.
+
+---
+
+### 5. Delivery Locations Payload Examples (AP-07) — P1
+
+**Svrha:** Određivanje finalne storage strukture i checkout UI za odabir dostavne adrese — model poznat (više lokacija, nema defaulta), payload nedostaje  
 **Traženi primjer:**
 
 ```
-Delivery locations response za jednog partnera:
-- endpoint URL
-- Apros location ID (stabilan identifikator)
+partnerDeliveryLocationList response za jednog partnera:
+- Apros location ID (stabilan identifikator — potvrditi stabilnost između sync ciklusa)
 - adresna polja (naziv, ulica, grad, poštanski broj, zemlja)
-- oznaka defaulta
-- može li ih biti više
+- potvrda: nema default oznake (već potvrđeno verbalno)
 ```
 
 ---
 
-### B2B Artikal Payload (AP-04) — P1, Faza 2
+### 6. B2B Artikal Payload (AP-04) — P1, Faza 2
 
 **Svrha:** Validacija B2B-specifičnih polja u product sync-u (nije bloker za Fazu 1)  
 **Traženi primjer:**
@@ -240,20 +250,21 @@ Ove stavke mora riješiti **Dream Point**, ne Apros.
 
 ---
 
-## 8. Kriteriji Uspjeha Sesije
+## 8. Kriteriji Uspjeha Sesije — status 2026-07-02
 
-Sesija je uspješna ako su dobiveni sljedeći odgovori:
+| # | Stavka | Format | Status |
+|---|--------|--------|--------|
+| 1 | Pricing model potvrđen — arhitektura | Verbalni | ✅ POTVRĐENO (Model A domaći / Model C strani) |
+| 1a | Pricing — realni payload primjer | Realni payload primjer | ❌ NEDOSTAJE |
+| 2 | Auth mehanizam potvrđen — metoda autentikacije | Verbalni | ✅ POTVRĐENO (API Key) |
+| 3 | Order endpoint — obavezna polja | Verbalni | ✅ POTVRĐENO |
+| 3a | Order endpoint — URL, response format, idempotency | Realni payload primjer | ❌ NEDOSTAJE |
+| 4 | Partner approval/sync format poznat | Verbalni | ✅ POTVRĐENO (polling/import, nema webhooka) |
+| 5 | Delivery locations — model i endpoint | Verbalni | ✅ POTVRĐENO (više lokacija, nema defaulta, `partnerDeliveryLocationList`) |
+| 5a | Delivery locations — realni payload primjer | Realni payload primjer | ❌ NEDOSTAJE |
+| 6 | `advance_only` / `free_shipping` mehanizam | — | 🚫 OUT OF SCOPE |
 
-| # | Stavka | Format |
-|---|--------|--------|
-| 1 | **Pricing model potvrđen** — je li `wholesalePrice` bazna ili per-partner cijena | Realni payload primjer |
-| 2 | **Auth mehanizam potvrđen** — metoda autentikacije za outbound API pozive | Verbalni + credentials format |
-| 3 | **Order endpoint validiran** — URL, B2B-specifična polja, idempotency | Realni payload primjer |
-| 4 | **Approval webhook format poznat** — kompletna lista polja u body-u | Verbalni ili JSON primjer |
-| 5 | **Delivery locations format poznat** — endpoint, polja, storage implikacija | Realni payload primjer |
-| 6 | **`advance_only` / `free_shipping` mehanizam poznat** — isporuka i ažuriranje | Verbalni |
-
-Stavke 1, 2, 3 su **minimalni uvjet** — bez njih implementacija ne može nastaviti.
+**Preostali minimalni uvjet za finalizaciju implementacije:** stavke 1a, 3a, 5a (payload primjeri) — vidi Sekciju 6 "Still Required From Apros".
 
 ---
 
@@ -267,20 +278,24 @@ Stavke 1, 2, 3 su **minimalni uvjet** — bez njih implementacija ne može nasta
 - [ ] Razjasni DP-01 (`sif_kup` kardinalitet) s Dream Point interno **prije sesije**
 - [ ] Razjasni DP-02 (prodajno mjesto routing) s Josipom **prije sesije**
 
-### Tijekom sesije
+### Tijekom sesije — status 2026-07-02
 
-- [ ] AP-01 — Traži payload primjer, ne verbalni opis (screenshot ili JSON export)
-- [ ] AP-09 — Pitaj zašto B2C plugin ne šalje auth headere; clarify IP whitelist za staging IP
-- [ ] AP-06 — Traži sandbox test ili dokumentaciju za B2B order endpoint; potvrdi `sif_kup` kao obavezno polje
-- [ ] AP-03 — Traži primjer approval webhook body-a koji Apros šalje
-- [ ] AP-07 — Traži primjer delivery locations response-a; pitaj može li lokacija biti više od jedne
-- [ ] AP-08 — Pitaj gdje točno dolaze `advance_only` i `free_shipping` (u istom webhook pozivu ili zasebno)
-- [ ] AP-04 — Traži B2B payload primjer s `b2bArticle`, `wholesalePrice` i warehouse stock strukturom (nije hitno, ali ako ima vremena)
+- [x] AP-09 — Auth potvrđen: API Key
+- [x] AP-03 — Approval flow potvrđen: polling/import, nema webhooka
+- [x] AP-01 — Pricing arhitektura potvrđena: Model A domaći / Model C strani
+- [x] AP-06 — Obavezna polja order endpointa potvrđena
+- [x] AP-07 — Delivery locations model potvrđen: više lokacija, nema defaulta, `partnerDeliveryLocationList`
+- [x] AP-08 — Reklasificirano kao out of scope
+- [ ] AP-01 — Još treba: realni payload primjer (screenshot ili JSON export) za pricing
+- [ ] AP-06 — Još treba: sandbox test ili dokumentacija za order endpoint response format i idempotency
+- [ ] AP-07 — Još treba: realni payload primjer za delivery locations
+- [ ] AP-04 — Traži B2B payload primjer s `b2bArticle`, `wholesalePrice` i warehouse stock strukturom (nije hitno, Faza 2)
 
-### Nakon sesije
+### Nakon ove interakcije
 
-- [ ] Dokumentirati sve primljene payload primjere u `docs/erp-mapping.md`
-- [ ] Ažurirati `apros-question-resolution-matrix.md` — zatvoriti odgovorena pitanja
-- [ ] Donijeti arhitekturalnu odluku za pricing model (Model A / B / C) i dokumentirati u `docs/decisions.md`
-- [ ] Ako auth zahtijeva OAuth — procijeni implementacijski scope i prilagodi roadmap
-- [ ] Pokrenuti Fazu 3 / 4 / 5 tek nakon što su DP-01 i DP-02 interni blokeri razriješeni
+- [ ] Dokumentirati primljene payload primjere u `docs/erp-mapping.md` kad stignu
+- [x] Ažurirati `apros-question-resolution-matrix.md` — zatvoreno AP-02, AP-03, AP-09, AP-11; out of scope AP-08; djelomično razriješeno AP-01, AP-06, AP-07
+- [x] Arhitekturalna odluka za pricing model donesena: Model A (domaći) + Model C (strani) — dokumentirati formalno u `docs/decisions.md`
+- [ ] Auth implementacija (Korak 14): API Key header inject u `CurlClient` — može se implementirati odmah, nije potreban dodatni Apros input
+- [ ] Pokrenuti Fazu 3 partner sync kao polling/import job (ne webhook endpoint) — ažurirati `docs/b2b-erp-migration-plan.md` Korak 9/10 i `docs/b2b-erp-adaptation-blueprint.md` Sekciju 4
+- [ ] Pokrenuti Fazu 3 / 4 / 5 tek nakon što su DP-01 i DP-02 interni blokeri razriješeni i payload primjeri iz Sekcije 6 pristignu

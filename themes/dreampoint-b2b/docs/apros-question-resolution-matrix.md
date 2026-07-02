@@ -1,11 +1,13 @@
 # Apros Question Resolution Matrix — DP-B2B
 
-**Datum:** 2026-06-08  
+**Datum:** 2026-06-08 | **Ažurirano:** 2026-07-02 (Apros Response Integration Update)
 **Status dokumenta:** Autoritativni izvor istine za AP-01 – AP-14  
-**Evidencijska hijerarhija:** produkcijski kod → produkcijsko ponašanje → developer feedback → discovery nalazi → workshop pretpostavke
+**Evidencijska hijerarhija:** direktan Apros odgovor → produkcijski kod → produkcijsko ponašanje → developer feedback → discovery nalazi → workshop pretpostavke
 
 > Ovaj dokument određuje koji AP-od zahtijevaju Apros sesiju, koji su zatvoreni, i koji se mogu riješiti interno.  
 > Ne sadrži pretpostavke koje nisu eksplicitno označene. Ne invencija.
+
+> **Revizija 2026-07-02:** Apros je direktno odgovorio na AP-01 (pricing), AP-09 (auth), AP-06 (order endpoint), AP-03 (approval flow) i AP-07 (delivery locations). Ovi odgovori imaju najvišu evidencijsku razinu — iznad produkcijskog koda i developer feedback-a. Puni payload primjeri i dalje nedostaju za AP-01, AP-06, AP-07 — vidi `docs/apros-session-final-pack.md` → "Still Required From Apros".
 
 ---
 
@@ -17,14 +19,15 @@ Potvrdite egzaktnu vezu između `wholesalePrice`, Rabat 1 i finalne B2B cijene z
 
 **Current Status**
 
-PARTIALLY ANSWERED
+PARTIALLY RESOLVED (payload pending)
 
 **Confidence Level**
 
-LOW
+MEDIUM (arhitektura); LOW (payload)
 
 **Evidence Sources**
 
+- **Direktan Apros odgovor (2026-07-02)** — najviša evidencijska razina
 - Developer Feedback (Milenko Stojaković, 2026-06-03)
 - Discovery Findings (Leo Benkek email, NC-04)
 - Adaptation Blueprint (Sekcija 5, konflikt dokumentiran)
@@ -32,33 +35,31 @@ LOW
 
 **What We Know**
 
+- **Apros je potvrdio (2026-07-02):** Domaći kupci — `wholesalePrice` je bazna veleprodajna cijena; Rabat 1 je postotni popust po partneru/brandu; finalna cijena = `wholesalePrice − Rabat 1`. Ovo je **Model A**.
+- **Apros je potvrdio (2026-07-02):** Strani kupci — nema Rabat 1 mehanizma; finalna neto cijena dolazi direktno iz `countryPriceList`; PDV tretman ovisi o partnerovoj pravnoj/poreznoj kategoriji. Ovo je **Model C**.
+- Ovaj odgovor razrješava raniji konflikt u korist Leo Benkek interpretacije za domaći segment — Milenko Stojakovićevo zapažanje (Model B) odnosilo se na B2C kontekst i ne primjenjuje se na B2B
 - `wholesalePrice` je proširenje dodano na postojeći B2C `articleList/get` endpoint (NC-02 — potvrđeno)
-- Rabat 1 dolazi po brandu za partnera, iz "ugovorni uvjeti" endpointa: `sif_kup` + brand + postotak (NC-04 — podržano dokazima)
 - Listing prikazuje neto cijenu s rabatom, bez PDV-a (potvrđena poslovna pravila)
 - Košarica prikazuje puni iznos s PDV-om (potvrđena poslovna pravila)
-- Strani kupci dobivaju finalnu neto cijenu iz cjenika po državama — ne postotak (NC-04 — podržano dokazima)
-- Dva nezavisna iskustvena izvora daju direktno konfliktne interpretacije semantike `wholesalePrice`:
-  - Leo Benkek (integrator): `wholesalePrice` = bazna/katalog cijena, ista za sve partnere; Rabat 1 je obavezan per-partner mehanizam za finalnu cijenu
-  - Milenko Stojaković (developer, B2C iskustvo): `wholesalePrice` = generalno već finalna B2B cijena; Rabat 1 je rijedak opcionalni sloj
 
 **What We Do NOT Know**
 
-- Je li `wholesalePrice` ista vrijednost za sve partnere ili se razlikuje per-partner
-- Primjenjuje li se Rabat 1 uvijek, samo za određene partnere, ili nikad automatski
-- Format realnog payloada koji sadrži obje vrijednosti za istog partnera
-- Koji od tri modela (A, B, C iz blueprinta) implementirati — odluka nije moguća bez ovoga
+- Egzaktni field nazivi i realne vrijednosti u `articleList/get` + ugovorni uvjeti responsu za istog domaćeg partnera
+- Format i egzaktna polja `countryPriceList` payloada za stranog partnera
+- Format `partnerBrandDiscountList` (Rabat 1 isporuka)
+- Je li Rabat 1 obavezan za sve domaće partnere ili opcionalan u pojedinim slučajevima
 
 **Why This Matters**
 
-Pricing engine je nova komponenta bez presedana u B2C pluginu. Model A (WC računaju finalnu cijenu iz baze i rabata) i Model B (WC prikazuju gotovu cijenu) zahtijevaju potpuno drugačiju implementaciju i storage strategiju. Greška znači kompletan rework pricing komponente. P0-01 bloker.
+Pricing engine je nova komponenta bez presedana u B2C pluginu. Arhitekturalni model je sada poznat (Model A domaći, Model C strani), čime je najveći implementacijski rizik uklonjen. Bez realnog payload primjera implementacija se i dalje ne može finalizirati — pogrešna pretpostavka o field nazivima ili strukturi znači rework pri integraciji, ne kompletan arhitekturalni rework.
 
 **Can Implementation Proceed Without This?**
 
-NO
+PARTIALLY — arhitekturalni dizajn (Korak 11, pricing engine) može početi na osnovu potvrđenog modela; finalna implementacija i QA zahtijevaju realni payload primjer.
 
 **Required Next Action**
 
-Need payload example — realni `articleList/get` response za domaćeg partnera + realni `ugovorni uvjeti` response za istog partnera, s obje vrijednosti u istom prikazu.
+Need payload example — realni `articleList/get` response za domaćeg partnera + realni ugovorni uvjeti response za istog partnera (Rabat 1), i `countryPriceList` primjer za stranog partnera.
 
 ---
 
@@ -118,44 +119,43 @@ Kada Apros poziva WP approval endpoint, šalje li samo `email`/`user_id` — ili
 
 **Current Status**
 
-OPEN
+RECLASSIFIED (polling/import model — nema potvrđenog webhooka)
 
 **Confidence Level**
 
-LOW
+HIGH
 
 **Evidence Sources**
 
-- Discovery Findings (NC-05 — konceptualni tok potvrđen)
-- Adaptation Blueprint (Sekcija 4, Approval Lifecycle — body nevalidiran)
+- **Direktan Apros odgovor (2026-07-02)** — najviša evidencijska razina
+- Discovery Findings (NC-05 — raniji konceptualni tok, sada djelomično zamijenjen)
+- Adaptation Blueprint (Sekcija 4, Approval Lifecycle — dizajn zahtijeva reviziju)
 - Architecture Validation Audit (CO-04 — protivrječje između checklist i blueprint prioritizacije)
 
 **What We Know**
 
-- Konceptualni onboarding tok potvrđen (NC-05): web forma → DP admin notifikacija → ručno otvaranje u Apros-u → Apros šalje signal → WC dodjeljuje rolu
-- `sif_kup` je u vlasništvu Apros-a — WC čuva kopiju
-- Planirani WP inbound endpoint: `POST /wp-json/dreampoint-b2b/v1/approve-partner` (dizajn, nije implementiran)
+- **Apros je potvrdio (2026-07-02): ne postoji approval webhook.** Pretpostavka o inbound webhook pozivu prema WP se povlači.
+- Potvrđeni tok: web registracija → email notifikacija → ručno kreiranje partnera u Apros-u → `B2B KUPAC = DA` → partner se pojavljuje na partner list endpointu
+- Partner sinkronizacija mora biti **periodic polling/import**, ne webhook-driven
+- `sif_kup` je u vlasništvu Apros-a — WC čuva kopiju preko polling job-a
+- Raniji planirani WP inbound endpoint `POST /wp-json/dreampoint-b2b/v1/approve-partner` **se ne implementira u ovom obliku** — zamjenjuje ga cron-based partner sync job
 
 **What We Do NOT Know**
 
-- Koja su točno polja u webhook body-u
-- Stiže li `sif_kup` u samom approval webhook pozivu
-- Stižu li podaci o price listi/rabatu u istom pozivu
-- Stiže li `advance_only` flag u istom pozivu
-- Format webhook body-a (JSON? query params?)
-- Postoji li webhook signature za verifikaciju
+- Frekvencija na kojoj partner list endpoint treba biti polled da bi se novi/promijenjeni `B2B KUPAC = DA` zapisi pravovremeno detektirali
+- Postoji li mehanizam za detekciju promjena (delta/changed-since) na partner list endpointu ili je full-list polling jedina opcija
 
 **Why This Matters**
 
-Određuje arhitekturu onboarding flow-a. Ako `sif_kup` ne stiže u approval webhookу, potreban je odvojeni partner sync mehanizam koji komplicira arhitekturu i dodaje moving parts. Faza 3 bloker (AP-05 u blueprint Sekciji 9).
+Ovo je arhitekturalna promjena za Fazu 3: partner sync se dizajnira kao cron-based polling/import job umjesto inbound REST webhook receivera. Utječe na `docs/b2b-erp-migration-plan.md` Korak 9/10 i `docs/b2b-erp-adaptation-blueprint.md` Sekciju 4 (Approval Lifecycle) — oba moraju biti ažurirana da odražavaju polling model.
 
 **Can Implementation Proceed Without This?**
 
-NO
+YES — arhitektura je sada poznata (polling/import); implementacija partner sync job-a može biti dizajnirana. Preostaje samo pitanje frekvencije/delta detekcije, što nije arhitekturalni bloker.
 
 **Required Next Action**
 
-Validate with Apros — kompletna lista polja u approval webhook body-u.
+No further Apros validation required za osnovnu arhitekturu. Opcionalno: potvrditi postoji li delta/changed-since mehanizam na partner list endpointu (performance optimizacija, ne bloker).
 
 ---
 
@@ -268,7 +268,7 @@ URL, metoda i format payload-a za order endpoint. Vraća li Apros order ID u res
 
 **Current Status**
 
-PARTIALLY ANSWERED
+PARTIALLY RESOLVED (payload pending)
 
 **Confidence Level**
 
@@ -276,37 +276,39 @@ MEDIUM
 
 **Evidence Sources**
 
+- **Direktan Apros odgovor (2026-07-02)** — obavezna polja potvrđena
 - Production Code (`order.php`, `CurlClient.php`)
 - Plugin Analysis (Sekcija 9, Order Export Architecture)
 - Developer Feedback (PE-02 — B2C implementacija koristila slanje narudžbi)
 
 **What We Know**
 
+- **Apros je potvrdio (2026-07-02) obavezna polja:** `sif_kup`/`partnerId`, `partnerDeliveryLocationId`, stavke narudžbe s količinama
 - B2C order endpoint: `/order/create` (POST)
-- B2C success response format: `[{"numberErp": "12345"}]` — Apros order ID se vraća (potvrđeno)
-- B2C error response format: `[{"result": "Error", "message": "..."}]` (potvrđeno)
+- B2C success response format: `[{"numberErp": "12345"}]` — Apros order ID se vraća (potvrđeno, B2C)
+- B2C error response format: `[{"result": "Error", "message": "..."}]` (potvrđeno, B2C)
 - B2C core payload struktura poznata iz koda (items, billing, shipping, paymentTypeId, shippingMethodId)
 - Client-side idempotency postoji u B2C: `_erp_sync_status` meta guard (ne Apros-side garancija)
-- Apros order ID se čuva — ovo je signal da idempotency guard postoji barem na WC strani
 
 **What We Do NOT Know**
 
-- Je li B2B order endpoint isti URL ili drugačiji
-- Prihvaća li Apros B2B-specifična polja: `sif_kup`, `salesLocationId`, `deliveryLocationId`, `billingOib`
+- Je li B2B order endpoint isti URL kao B2C ili drugačiji
+- Je li success/error response format za B2B identičan B2C formatu
 - Je li Apros endpoint server-side idempotent (može li se ista narudžba poslati dva puta bez duplikata)
-- Koji su obavezni vs. opcionalni B2B order payload fields
+- Koja su opcionalna polja (npr. `billingOib`) uz potvrđena obavezna polja
+- Invoice splitting mehanizam — nije adresiran ovim odgovorom
 
 **Why This Matters**
 
-Order export je highest-risk operacija. Duplirane narudžbe u ERP-u su poslovni incident. Bez poznatih B2B polja, order export builder ne može biti implementiran. P0-02 bloker.
+Order export je highest-risk operacija. Duplirane narudžbe u ERP-u su poslovni incident. Obavezna polja su sada poznata, što omogućava payload builder dizajn; bez URL-a, response formata i idempotency potvrde implementacija se ne može finalizirati niti testirati protiv sandbox-a.
 
 **Can Implementation Proceed Without This?**
 
-NO
+PARTIALLY — payload builder dizajn (Korak 12) može početi na osnovu poznatih obaveznih polja; finalizacija i sandbox test zahtijevaju URL, response format i idempotency potvrdu.
 
 **Required Next Action**
 
-Validate with Apros + Need payload example — B2B order payload primjer koji Apros prihvaća.
+Need payload example — realni B2B order request + success/error response primjer koji Apros prihvaća/vraća; potvrda idempotency ponašanja.
 
 ---
 
@@ -318,41 +320,40 @@ Format i polja liste dostavnih lokacija po partneru. Može li partner imati viš
 
 **Current Status**
 
-PARTIALLY ANSWERED
+PARTIALLY RESOLVED (payload pending)
 
 **Confidence Level**
 
-LOW
+MEDIUM
 
 **Evidence Sources**
 
+- **Direktan Apros odgovor (2026-07-02)** — endpoint naziv i ključni model potvrđeni
 - Discovery Findings (NC-03 — endpoint tip potvrđen; NC-04 — ugovorni uvjeti struktura djelomično opisana)
 
 **What We Know**
 
-- Endpoint tip potvrđen (NC-03): "Lista primatelja / dostavnih lokacija po partneru (s ugovornim uvjetima i cjenicima)" postoji
+- **Apros je potvrdio (2026-07-02):** Endpoint `partnerDeliveryLocationList`. Partner može imati više dostavnih lokacija. **Ne postoji default lokacija** — korisnik bira lokaciju pri naručivanju.
+- Endpoint tip ranije potvrđen (NC-03): "Lista primatelja / dostavnih lokacija po partneru (s ugovornim uvjetima i cjenicima)"
 - NC-04 potvrđuje da ugovorni uvjeti sadrže: `sif_kup` + brand + postotak rabata za domaće partnere
 
 **What We Do NOT Know**
 
-- Točan endpoint URL
-- Polja po lokaciji (naziv, adresa, grad, poštanski broj, zemlja, Apros location ID)
-- Označuje li Apros default lokaciju za partnera
-- Može li partner imati jednu ili više lokacija (utječe na storage model)
-- Trigger za ažuriranje lokacija: approval webhook? periodični sync? on-demand?
-- Je li delivery location ID stabilan između sync ciklusa (V-11)
+- Egzaktna polja po lokaciji (naziv, adresa, grad, poštanski broj, zemlja, Apros location ID format)
+- Trigger za ažuriranje lokacija: periodični sync? on-demand poziv pri checkoutu?
+- Je li delivery location ID stabilan između sync ciklusa (V-11) — nije adresirano ovim odgovorom
 
 **Why This Matters**
 
-Direktno određuje storage model (user meta vs. custom post type) i checkout UI za odabir adrese dostave. Ako partner može imati mnogo lokacija, user meta nije primjeren. Faza 3 bloker (AP-04 u blueprint Sekciji 9).
+Direktno određuje storage model i checkout UI za odabir adrese dostave. Potvrđeno da partner može imati više lokacija i da nema defaulta — checkout MORA prisiliti eksplicitan odabir lokacije od korisnika (nema fallback na "default"). Finalna storage struktura ovisi o poljima iz payload primjera.
 
 **Can Implementation Proceed Without This?**
 
-NO
+PARTIALLY — checkout UX zahtjev (eksplicitan odabir, nema defaulta) i osnovni storage pristup (array lokacija) mogu biti dizajnirani; finalna polja i trigger mehanizam zahtijevaju payload primjer.
 
 **Required Next Action**
 
-Validate with Apros + Need payload example — realni delivery locations response za jednog partnera.
+Need payload example — realni `partnerDeliveryLocationList` response za jednog partnera s više lokacija.
 
 ---
 
@@ -364,41 +365,38 @@ Stižu li `advance_only` i free shipping flag u approval webhook-u ili zasebno? 
 
 **Current Status**
 
-OPEN
+OUT OF SCOPE
 
 **Confidence Level**
 
-LOW
+N/A
 
 **Evidence Sources**
 
+- **Odluka nakon Apros odgovora (2026-07-02)** — pitanje se temeljilo na pretpostavci approval webhooka koji ne postoji (vidi AP-03)
 - Discovery Findings (flagovi postoje kao koncepti)
 - Architecture Validation Audit (CO-05 — identificirana kao gap u dokumentima)
-- Adaptation Blueprint (Data Ownership Matrix — "Apros → WC (pri approval)" — nevalidirano)
 
 **What We Know**
 
-- `advance_only` i `free_shipping` flagovi postoje kao koncepti u projektu
-- Blueprint tretira ih kao podatke koji dolaze pri approval-u — ali ovo je pretpostavka, ne potvrda
-- CO-05 identificira gap: postoji razlika između "kako dolazi?" i pretpostavke "dolazi pri approval"
+- `advance_only` i `free_shipping` flagovi postoje kao koncepti u projektu, ali isporučni mehanizam na kojem se pitanje temeljilo (approval webhook) ne postoji
+- Reklasificirano kao izvan scope-a za inicijalnu implementaciju
 
 **What We Do NOT Know**
 
-- Kako i kada ovi flagovi dolaze do WC-a (approval webhook? zasebni sync?)
-- Mogu li se promijeniti za aktivnog partnera i koji je mehanizam ažuriranja
-- Format i naziv polja u Apros payloadu
+- Kako i kada bi ovi flagovi eventualno dolazili do WC-a u polling/import modelu — nije istraženo jer je izvan scope-a
 
 **Why This Matters**
 
-Checkout payment restrictions ovise o `advance_only` flagu. Ako se flag može promijeniti za aktivnog partnera bez novog webhook poziva, WC ne može garantirati konzistentne payment restrictions. P2-02 operativni rizik; P1-05 ako nema mehanizma ažuriranja.
+Payment restrictions bazirane na `advance_only` nisu dio inicijalne implementacije. Flag ostaje dokumentiran u arhitekturi (storage polje) kao potencijalno buduće proširenje, ali se ne validira niti implementira u ovoj fazi.
 
 **Can Implementation Proceed Without This?**
 
-NO (Faza 3 bloker — payment restriction logika ne može biti finalizirana)
+YES — nije bloker; funkcionalnost je izvan scope-a
 
 **Required Next Action**
 
-Validate with Apros — isporuka i mehanizam ažuriranja oba flaga.
+No action required. Ako se `advance_only` funkcionalnost naknadno vrati u scope, potreban je zaseban estimate i nova Apros validacija u kontekstu polling/import partner sync arhitekture.
 
 ---
 
@@ -410,45 +408,42 @@ Auth metoda za WP → Apros pozive (API key, OAuth, Basic auth). Postoji li IP w
 
 **Current Status**
 
-PARTIALLY ANSWERED
+RESOLVED
 
 **Confidence Level**
 
-LOW
+HIGH
 
 **Evidence Sources**
 
+- **Direktan Apros odgovor (2026-07-02)** — auth metoda potvrđena
 - Production Code (`CurlClient.php`, `BaseProvider.php`, `order.php`)
-- Plugin Analysis (Sekcija 4, Authentication Model — KRITIČNI NALAZ)
+- Plugin Analysis (Sekcija 4, Authentication Model — ažurirano)
 - Architecture Validation Audit (EG-03, P0-03, CO-03)
 
 **What We Know**
 
-- KRITIČNI NALAZ: `CurlClient.php` u produkciji ne šalje nikakve auth headere
-- `username` i `password` polja postoje u ACF konfiguraciji i `BaseProvider` metodama — ali `AprosProvider::fetch()` ih nikad ne poziva niti prosljeđuje `CurlClient`-u
-- `order.php` koristi `wp_remote_post()` bez autentikacije — isti pattern
-- Zaključak: ili Apros B2C API je zaštićen IP whitelistom, ili ne zahtijeva auth, ili auth postoji na mrežnoj razini
-- Developer feedback (Milenko Stojaković) implicira da je prethodni B2C radio bez eksplicitnog auth headera
+- **Apros je potvrdio (2026-07-02): auth metoda je API Key**, isti pristup kao postojeća Jekaa B2C integracija
+- Ranije KRITIČNI NALAZ: `CurlClient.php` u produkciji ne šalje nikakve auth headere unatoč tome što `username`/`password` polja postoje u konfiguraciji — ovo ostaje otvoreno pitanje za B2C kod (mogući previd ili mrežni auth sloj koji API Key čini redundantnim u B2C), ali ne mijenja B2B zahtjev: B2B implementacija mora slati API Key header
+- `order.php` koristi `wp_remote_post()` bez autentikacije — isti B2C pattern, isto zapažanje
 
 **What We Do NOT Know**
 
-- Zašto B2C radi bez auth headera (IP whitelist? Otvoreni API? Mrežni auth?)
-- Hoće li B2B API zahtijevati drugačiji auth model od B2C-a
-- Format auth mehanizma za B2B (API key? OAuth 2.0? Basic auth? JWT? Bearer token?)
-- Postoji li IP whitelist na Apros strani koji ograničava inbound pozive
-- Jesu li odvojeni credentials za read (products) vs. write (orders)?
+- Zašto B2C plugin ne šalje API Key unatoč potvrđenom auth modelu — nije kritično za B2B, ali vrijedi razjasniti radi izbjegavanja istog previda
+- Odvojeni credentials za read (products) vs. write (orders)?
+- Postoji li dodatno IP whitelist ograničenje uz API Key?
 
 **Why This Matters**
 
-Svaki outbound API poziv prema Apros-u je blokiran dok auth model nije poznat. Ako B2B zahtijeva OAuth 2.0, implementacijski scope se znatno povećava (token refresh, credential rotation). P0-03 bloker.
+Auth model kao arhitekturalni bloker je zatvoren — implementacija `CurlClient` auth header inject mehanizma (Korak 5/14) može biti finalizirana s API Key umjesto placeholder dizajna za više mogućih modela (OAuth 2.0 scenarij, koji bi značajno povećao scope, je isključen).
 
 **Can Implementation Proceed Without This?**
 
-NO — Faza 1 može kreirati CurlClient s auth header inject mehanizmom kao placeholder; ali nijedan realni API poziv ne može biti testiran ili finaliziran.
+YES — Korak 14 (auth implementacija) može biti finaliziran: `CurlClient::set_auth_header('ApiKey ' . $key)` pattern, credential storage u `wp-config.php` konstantama.
 
 **Required Next Action**
 
-Validate with Apros — auth mehanizam za B2B API pristup.
+No action required za osnovni auth model. Opcionalno razjasniti: odvojeni credentials read/write, dodatni IP whitelist zahtjev.
 
 ---
 
@@ -685,15 +680,15 @@ Validate with Apros — nizak prioritet; jednosmjeran model je siguran default.
 
 | AP-ID | Status | Confidence | Can Proceed | Next Action |
 |-------|--------|-----------|-------------|-------------|
-| AP-01 | PARTIALLY ANSWERED | LOW | NO | Need payload example + Validate with Apros |
+| AP-01 | PARTIALLY RESOLVED (payload pending) | MEDIUM/LOW | PARTIALLY | Need payload example |
 | AP-02 | ANSWERED | HIGH | YES | No action required |
-| AP-03 | OPEN | LOW | NO | Validate with Apros |
+| AP-03 | RECLASSIFIED (polling/import) | HIGH | YES | No action required |
 | AP-04 | PARTIALLY ANSWERED | MEDIUM | YES (Faza 1) | Need production verification (Faza 2) |
 | AP-05 | PARTIALLY ANSWERED | MEDIUM | PARTIALLY | Validate with Apros |
-| AP-06 | PARTIALLY ANSWERED | MEDIUM | NO | Need payload example + Validate with Apros |
-| AP-07 | PARTIALLY ANSWERED | LOW | NO | Need payload example + Validate with Apros |
-| AP-08 | OPEN | LOW | NO | Validate with Apros |
-| AP-09 | PARTIALLY ANSWERED | LOW | NO | Validate with Apros |
+| AP-06 | PARTIALLY RESOLVED (payload pending) | MEDIUM | PARTIALLY | Need payload example |
+| AP-07 | PARTIALLY RESOLVED (payload pending) | MEDIUM | PARTIALLY | Need payload example |
+| AP-08 | OUT OF SCOPE | N/A | YES | No action required |
+| AP-09 | RESOLVED | HIGH | YES | No action required |
 | AP-10 | OPEN | LOW | PARTIALLY | Validate with Apros |
 | AP-11 | ANSWERED | HIGH | YES | No action required |
 | AP-12 | PARTIALLY ANSWERED | LOW | PARTIALLY | Validate with Apros |
@@ -706,45 +701,41 @@ Validate with Apros — nizak prioritet; jednosmjeran model je siguran default.
 
 Samo pitanja koja zahtijevaju direktnu Apros potvrdu, preformulirana u najkraći mogući oblik.
 
-**Prioritet 1 — P0 blokeri (arhitektura nije moguća bez odgovora)**
+**✅ Zatvoreno odgovorom od 2026-07-02:** AP-09 (auth — API Key), AP-03 (approval flow — polling/import, reklasificirano). AP-08 je reklasificiran kao OUT OF SCOPE.
 
-1. **(AP-01)** Je li `wholesalePrice` u `articleList/get` ista vrijednost za sve partnere ili per-partner? Dostavite realni payload primjer s jednim domaćim partnerom (s rabatom) i jednim stranim (s finalnom cijenom).
+**Prioritet 1 — P0 payload primjeri (arhitektura poznata, finalizacija nije moguća bez payloada)**
 
-2. **(AP-09)** Kojom metodom WP autentificira pozive prema Apros-u? Postoji li IP whitelist? Zašto B2C plugin ne šalje auth headere?
+1. **(AP-01)** Arhitektura potvrđena (Model A domaći, Model C strani). Potreban realni payload primjer: `articleList/get` + ugovorni uvjeti za domaćeg partnera, `countryPriceList` za stranog partnera.
 
-3. **(AP-06)** Je li B2B order endpoint isti kao B2C (`/order/create`)? Prihvaća li `sif_kup`, `salesLocationId` i `deliveryLocationId`? Je li endpoint idempotent?
+2. **(AP-06)** Obavezna polja potvrđena (`sif_kup`/`partnerId`, `partnerDeliveryLocationId`, items+količine). Potreban: URL, HTTP metoda, success/error response format, potvrda idempotency.
 
-**Prioritet 2 — P1 blokeri (Faze 3–5 ne mogu početi bez odgovora)**
+**Prioritet 2 — P1 payload primjer (checkout/storage dizajn poznat, finalizacija čeka payload)**
 
-4. **(AP-03)** Šalje li Apros approval webhook `sif_kup`, rabate i `advance_only` u istom pozivu ili zasebno?
-
-5. **(AP-07)** Format, polja i trigger za listu dostavnih lokacija po partneru. Može li partner imati više lokacija? Je li Apros location ID stabilan između sync ciklusa?
-
-6. **(AP-08)** Stižu li `advance_only` i `free_shipping` u approval webhook-u? Može li se promijeniti za aktivnog partnera i koji je mehanizam ažuriranja?
+3. **(AP-07)** Model potvrđen (više lokacija, nema defaulta, endpoint `partnerDeliveryLocationList`). Potreban realni payload primjer s adresnim poljima i Apros location ID formatom.
 
 **Prioritet 3 — P2 operativni (implementacija može početi, ali ovo utječe na produkcijsku stabilnost)**
 
-7. **(AP-05)** Postoji li delta sync endpoint za artikle (changed-since timestamp ili change feed)? Koji je maksimalni broj artikala po API responsu? Postoje li rate limits?
+4. **(AP-05)** Postoji li delta sync endpoint za artikle (changed-since timestamp ili change feed)? Koji je maksimalni broj artikala po API responsu? Postoje li rate limits?
 
-8. **(AP-13)** Koji mehanizam ažurira rabat za aktivnog partnera — novi webhook ili periodični partner sync?
+5. **(AP-13)** Koji mehanizam ažurira rabat za aktivnog partnera — periodični partner sync (polling/import)?
 
-9. **(AP-10)** Kada Apros rezervira stanje — pri checkoutu ili tek pri ERP potvrdi narudžbe?
+6. **(AP-10)** Kada Apros rezervira stanje — pri checkoutu ili tek pri ERP potvrdi narudžbe?
 
-10. **(AP-12)** Može li Apros primiti narudžbu za artikal s nultim stanjem?
+7. **(AP-12)** Može li Apros primiti narudžbu za artikal s nultim stanjem?
 
-11. **(AP-14)** Šalje li Apros status update natrag prema WC (potvrđeno, isporučeno, stornirano)?
+8. **(AP-14)** Šalje li Apros status update natrag prema WC (potvrđeno, isporučeno, stornirano)?
 
 ---
 
 ## Remaining Questions Requiring Payload Examples
 
-Pitanja koja se ne mogu riješiti bez realnih payload primjera.
+Pitanja koja se ne mogu riješiti bez realnih payload primjera. Puna lista i traženi format: `docs/apros-session-final-pack.md` → "Still Required From Apros".
 
 | AP-ID | Što je potrebno |
 |-------|----------------|
-| **AP-01** | Realni `articleList/get` response za domaćeg partnera + realni `ugovorni uvjeti` response — s `wholesalePrice` i Rabat 1 vrijednostima u istom prikazu za istog partnera |
-| **AP-06** | B2B order payload primjer koji Apros prihvaća — s `sif_kup`, `salesLocationId`, `deliveryLocationId`, `billingOib`; + success i error response primjer |
-| **AP-07** | Realni delivery locations endpoint response za jednog partnera — s Apros location ID-em, svim adresnim poljima, i oznaka defaulta ako postoji |
+| **AP-01** | Realni `articleList/get` response za domaćeg partnera + realni ugovorni uvjeti response (Rabat 1) — arhitektura poznata (Model A); + `countryPriceList` primjer za stranog partnera (Model C) |
+| **AP-06** | B2B order payload primjer koji Apros prihvaća — s potvrđenim obaveznim poljima (`sif_kup`/`partnerId`, `partnerDeliveryLocationId`, items+količine) + success i error response primjer |
+| **AP-07** | Realni `partnerDeliveryLocationList` response za jednog partnera s više lokacija — svim adresnim poljima (nema defaulta, potvrđeno) |
 | **AP-04** | B2B `articleList/get` i `articleVariationList/get` payload primjer s `b2bArticle` i `wholesalePrice` poljem (Faza 2, nije bloker za Fazu 1) |
 
 ---
@@ -762,29 +753,30 @@ Pitanja koja se mogu riješiti interno bez Apros sesije.
 
 ## Final Classification
 
-**Answered:** 2 (AP-02, AP-11)
+**Resolved / Answered:** 4 (AP-02, AP-03, AP-09, AP-11)
 
-**Partially Answered:** 8 (AP-01, AP-04, AP-05, AP-06, AP-07, AP-09, AP-12, AP-14)
+**Partially Resolved (payload pending):** 3 (AP-01, AP-06, AP-07)
 
-**Open:** 4 (AP-03, AP-08, AP-10, AP-13)
+**Partially Answered:** 4 (AP-04, AP-05, AP-12, AP-14)
 
-**Out of Scope:** 0
+**Open:** 2 (AP-10, AP-13)
+
+**Out of Scope:** 1 (AP-08)
 
 ---
 
-### Most Critical Remaining Unknowns (rang po blokirajućoj težini)
+### Most Critical Remaining Unknowns (rang po preostaloj blokirajućoj težini, 2026-07-02)
 
 | Rang | AP-ID | Bloker | Razlog |
 |------|-------|--------|--------|
-| 1 | **AP-01** | P0 — Pricing engine | Konfliktni iskustveni signali; jedini put razrješenja je realni payload primjer; pogrešan odabir = kompletan pricing rework |
-| 2 | **AP-09** | P0 — Svi outbound API pozivi | CurlClient ne šalje auth; nijedan API poziv ne može biti finaliziran dok auth model nije poznat; OAuth scenarij multiplicira scope |
-| 3 | **AP-06** | P0 — Order export | B2B-specifična polja nevalidirana; idempotency nepoznat; duplirane narudžbe = poslovni incident |
-| 4 | **AP-03** | P1 — Onboarding flow | Bez znanja o webhook body-u, Faza 3 partner sync ne može biti arhitekturalno odlučen |
-| 5 | **AP-07** | P1 — Checkout UI | Delivery location storage model i checkout UI blokirani |
-| 6 | **AP-08** | P1 — Payment restrictions | `advance_only` mehanizam nepoznat; payment restrictions ne mogu biti finalizirane |
-| 7 | **AP-05** | P2 — Performance | Full sync na 10k artikala bez delta = memorijski intenzivna operacija svaki sat |
-| 8 | **AP-13** | P2 — Operativna stabilnost | Promjena rabata za aktivnog partnera bez mehanizma ažuriranja = zastarjele cijene u WC-u |
-| 9 | **AP-10** | P2 — UX edge case | Stock rezervacija timing utječe na out-of-stock messaging pri simultanim narudžbama |
-| 10 | **AP-12** | P2 — UX edge case | Backorder ponašanje za specifične kategorije nepoznato; default je implementabilan |
-| 11 | **AP-14** | P2 — My Account UX | Jednosmjeran default je implementabilan; dvosmjeran zahtijeva novi endpoint |
-| 12 | **AP-04** | LOW — Faza 2 validacija | Rizik drastično smanjen B2C produkcijskim kodom; B2B payload potvrda potrebna ali ne blokira Fazu 1 |
+| 1 | **AP-01** | P0 → payload — Pricing engine finalizacija | Arhitektura razriješena (Model A/C); realni payload primjer je jedino preostalo za finalnu implementaciju |
+| 2 | **AP-06** | P0 → payload — Order export finalizacija | Obavezna polja poznata; URL, response format i idempotency nedostaju; duplirane narudžbe = poslovni incident |
+| 3 | **AP-07** | P1 → payload — Checkout UI finalizacija | Model poznat (više lokacija, nema defaulta); egzaktna polja i trigger nedostaju |
+| 4 | **AP-05** | P2 — Performance | Full sync na 10k artikala bez delta = memorijski intenzivna operacija svaki sat |
+| 5 | **AP-13** | P2 — Operativna stabilnost | Mehanizam ažuriranja rabata za aktivnog partnera u polling modelu nije eksplicitno potvrđen |
+| 6 | **AP-10** | P2 — UX edge case | Stock rezervacija timing utječe na out-of-stock messaging pri simultanim narudžbama |
+| 7 | **AP-12** | P2 — UX edge case | Backorder ponašanje za specifične kategorije nepoznato; default je implementabilan |
+| 8 | **AP-14** | P2 — My Account UX | Jednosmjeran default je implementabilan; dvosmjeran zahtijeva novi endpoint |
+| 9 | **AP-04** | LOW — Faza 2 validacija | Rizik drastično smanjen B2C produkcijskim kodom; B2B payload potvrda potrebna ali ne blokira Fazu 1 |
+
+**Zatvoreno (više se ne pojavljuje kao bloker):** AP-02, AP-03 (polling/import razriješeno), AP-08 (out of scope), AP-09 (auth razriješeno), AP-11.

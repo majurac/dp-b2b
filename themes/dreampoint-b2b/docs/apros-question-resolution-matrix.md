@@ -1,6 +1,6 @@
 # Apros Question Resolution Matrix — DP-B2B
 
-**Datum:** 2026-06-08 | **Ažurirano:** 2026-07-02 (Apros Response Integration Update)
+**Datum:** 2026-06-08 | **Ažurirano:** 2026-07-03 (Documentation Reconciliation — Workshop Follow-up)
 **Status dokumenta:** Autoritativni izvor istine za AP-01 – AP-14  
 **Evidencijska hijerarhija:** direktan Apros odgovor → produkcijski kod → produkcijsko ponašanje → developer feedback → discovery nalazi → workshop pretpostavke
 
@@ -296,7 +296,7 @@ MEDIUM
 - Je li success/error response format za B2B identičan B2C formatu
 - Je li Apros endpoint server-side idempotent (može li se ista narudžba poslati dva puta bez duplikata)
 - Koja su opcionalna polja (npr. `billingOib`) uz potvrđena obavezna polja
-- Invoice splitting mehanizam — nije adresiran ovim odgovorom
+- **Invoice splitting mehanizam — status: PARTIALLY RESOLVED (zaseban aspekt AP-06).** Nije adresiran Apros odgovorom od 2026-07-02. **Trenutna radna pretpostavka: Apros vrši interno segmentiranje faktura** — WC šalje jednu narudžbu, Apros interno odlučuje o razdvajanju na više faktura. Ako se pretpostavka pokaže netočnom, AP-06 zahtijeva formalno proširenje. Vidi `docs/project-status-matrix.md` Sekciju 1.8 i DP-D4.
 
 **Why This Matters**
 
@@ -477,6 +477,8 @@ LOW
 - Kada točno Apros rezervira stock (dodavanje u korpu? checkout? ERP potvrda?)
 - Utječe li Apros rezervacija na WC stock messaging
 - Je li real-time stock provjera potrebna prije checkoutа
+
+**Napomena (2026-07-03) — razlika od DP-B06:** Ovo pitanje se odnosi isključivo na Apros-stranu rezervacije (ERP interna logika). Odvojeno od ovoga, Dream Point je na internom workshopu spomenuo mogući zahtjev za 1-satnu **cart-level** rezervaciju na WooCommerce strani — to je nova, zasebna poslovna odluka praćena kao **DP-B06** u `docs/project-status-matrix.md` (Sekcija 3.B), ne mijenja status ili prioritet ovog AP-10 pitanja.
 
 **Why This Matters**
 

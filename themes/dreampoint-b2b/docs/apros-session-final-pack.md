@@ -1,6 +1,6 @@
 # Apros Session — Final Preparation Pack
 
-**Datum:** 2026-06-08 | **Ažurirano:** 2026-07-02 (Apros Response Integration Update)
+**Datum:** 2026-06-08 | **Ažurirano:** 2026-07-03 (Documentation Reconciliation — Workshop Follow-up)
 **Svrha:** Minimalni skup pitanja potrebnih za deblokiranje implementacije  
 **Izvor istine:** `apros-question-resolution-matrix.md`, `b2b-erp-adaptation-blueprint.md`, `b2b-erp-plugin-analysis.md`
 
@@ -99,7 +99,7 @@ Realni B2B order payload primjer koji Apros prihvaća, s potvrđenim poljima. Su
 **Dodatno:**
 - Što se dogodi ako ista narudžba stigne dva puta (retry scenario)?
 - Koja su opcionalna polja uz potvrđena obavezna (npr. `billingOib`, `salesLocationId`)?
-- Invoice splitting mehanizam — nije adresiran ovim odgovorom
+- **Invoice splitting mehanizam — Status: PARTIALLY RESOLVED.** Nije adresiran ovim odgovorom. **Trenutna radna pretpostavka: Apros vrši interno segmentiranje faktura** (jedna WC narudžba → Apros interno odlučuje o razdvajanju). Pretpostavka zahtijeva formalnu Apros potvrdu.
 
 ---
 
@@ -143,7 +143,7 @@ Stižu li `advance_only` i `free_shipping` flagovi u approval webhook-u ili zase
 |-------|---------|------------------------|
 | AP-05 | Podržava li Apros delta sync za artikle? Maksimalni broj artikala po responsu? Rate limits? | Full sync se može implementirati odmah; delta je performansna optimizacija |
 | AP-13 | Koji mehanizam ažurira rabat za aktivnog partnera — webhook ili periodični sync? | Approval-time sync je siguran default za start |
-| AP-10 | Kada Apros rezervira stanje — pri checkoutu ili tek pri ERP potvrdi? | WC default (rezervacija pri narudžbi) je prihvatljiv za start |
+| AP-10 | Kada Apros rezervira stanje — pri checkoutu ili tek pri ERP potvrdi? | WC default (rezervacija pri narudžbi) je prihvatljiv za start. **Napomena (2026-07-03):** zasebno od ovog pitanja, Dream Point je otvorio internu poslovnu odluku o cart-level (WC-strana) rezervaciji — vidi DP-B06 u `docs/project-status-matrix.md`, ne zahtijeva Apros input |
 | AP-12 | Može li Apros primiti narudžbu za artikal s nultim stanjem? | Default no-backorder ponašanje je potvrđeno i implementabilan odmah |
 | AP-14 | Šalje li Apros status update natrag prema WC? | Jednosmjeran model je siguran default; inbound endpoint se može dodati naknadno |
 

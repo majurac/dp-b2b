@@ -71,6 +71,7 @@ Eksplicitno potvrđeno od strane klijenta (Dream Point) i/ili Apros-a na osnovu 
 
 - Nativno WooCommerce ponašanje prihvaćeno: **first completed order wins**
 - Nema custom mehanizma rezervacije zaliha
+- **Napomena (2026-07-03):** Ovaj nalaz je bio tretiran kao zaključen nakon workshopa Lipanj 2026, ali je naknadno ponovo otvoren — Dream Point je spomenuo mogući zahtjev za 1-satnu cart-level rezervaciju. Trenutni status i preporuka: `docs/project-status-matrix.md` → DP-B06 (Sekcija 3.B). Ovaj discovery nalaz ostaje povijesno točan kao zaključak tog workshopa; aktuelni status prati se u project-status-matrix.md, ne ovdje.
 
 ### Zalihe i skladišta
 
@@ -135,7 +136,7 @@ Pitanja koja blokiraju arhitekturalne odluke — ne mogu se riješiti bez pristu
 8. **Isti artikal u dva skladišta** — problem Lafaboo/Jekaa nije definiran; tko donosi odluku i koji je model?
 9. **Order idempotency** — vraća li Apros order ID u confirmation? Je li endpoint idempotent?
 10. **Pravni oblik vrijednosti** — koje su moguće vrijednosti "pravnog oblika" i kako se mapiraju na porezne kategorije?
-11. **Invoice splitting mehanizam** — Apros dijeli fakture; nije poznato po kojem kriteriju Apros određuje kada dolazi do razdvajanja; treba procijeniti je li AP-06 potrebno proširiti ili dodati novu validacijsku stavku
+11. **Invoice splitting mehanizam** — Apros dijeli fakture; nije poznato po kojem kriteriju Apros određuje kada dolazi do razdvajanja; treba procijeniti je li AP-06 potrebno proširiti ili dodati novu validacijsku stavku. **Status (2026-07-03): PARTIALLY RESOLVED — trenutna radna pretpostavka je da Apros vrši interno segmentiranje faktura** (vidi `docs/project-status-matrix.md` Sekciju 1.8, `docs/apros-question-resolution-matrix.md` AP-06)
 
 ---
 

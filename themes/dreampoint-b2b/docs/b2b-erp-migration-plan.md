@@ -793,6 +793,7 @@ Arhitekturalni blokeri su razriješeni. Ovi zadaci čekaju samo realne payload p
 |---------|--------|-------|
 | Partner storage model (user meta vs. company CPT) | DP-01 | Scenarij A (1 user) vs. Scenarij B (više korisnika) = fundamentalno različita storage arhitektura |
 | Sales location routing u order export-u | DP-02 | Jedini poznati izvor mapiranja je Josip / stari B2B sustav |
+| Stock reservation policy (cart-level hold) | DP-B06 (novo, 2026-07-03) | Dream Point je spomenuo mogući zahtjev za 1-satnu cart-level rezervaciju; native WC ostaje preporuka tima dok se ne potvrdi — vidi `docs/project-status-matrix.md` Sekciju 3.B |
 
 ### RESOLVED (workshop Lipanj 2026)
 
@@ -800,8 +801,9 @@ Arhitekturalni blokeri su razriješeni. Ovi zadaci čekaju samo realne payload p
 |--------|-------------|
 | MOQ / quantity rules (DP-B01) | Nema MOQ, nema stepova — native WC |
 | Payment metoda (DP-A03) | Single virman; deferred izvan WC |
-| Stock reservation | Native WC first-order-wins |
 | Backorder (AP-12) | Nema naručivanja bez zaliha |
+
+**Ispravka (2026-07-03):** Stock reservation je ranije bio naveden ovdje kao razriješen ("native WC first-order-wins"). Ta stavka je uklonjena iz ove tabele — Dream Point je naknadno otvorio pitanje 1-satne cart-level rezervacije, pa se tretira kao otvoren blocker (vidi tabelu "BLOCKED BY DREAM POINT" iznad, DP-B06).
 
 ### RESOLVED (Apros direktan odgovor, 2026-07-02)
 

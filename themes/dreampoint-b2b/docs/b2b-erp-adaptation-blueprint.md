@@ -440,6 +440,8 @@ Per-warehouse prikaz zahtijeva custom PDP komponentu. WC native stock prikazuje 
 
 **ASSUMPTION:** Stock sync je dio product sync cron-a (isti interval). Delta sync za stock je nevalidiran (V-08, V-07). Ako Apros podržava stock-only delta endpoint, odvojiti stock sync na viši frekvenciji (npr. svakih 15 minuta) od product sync (hourly).
 
+**Napomena — cart-level rezervacija (2026-07-03):** Ova sekcija opisuje warehouse *sync* stock, ne rezervaciju. Pitanje cart-level rezervacije zaliha (1-satni hold od dodavanja u košaricu) je otvorena poslovna odluka, praćena kao **DP-B06** u `docs/project-status-matrix.md` — trenutno nije dio arhitekture (native WC first-order-wins ostaje preporuka). Ako se cart-level rezervacija naknadno prihvati, to je nova komponenta koja zahtijeva vlastiti lock/expiry mehanizam, neovisan o warehouse sync modelu opisanom ovdje.
+
 ---
 
 ## 7. Order Export Architecture
@@ -541,12 +543,14 @@ Narudžbe se smještaju na prodajno mjesto prema vrsti robe:
 
 #### Invoice Splitting
 
-**Potvrđeno:** Apros vrši splitting faktura. Mehanizam po kojem Apros određuje kada dolazi do razdvajanja nije poznat.
+**Status: PARTIALLY RESOLVED.** Potvrđeno: Apros vrši splitting faktura. Mehanizam po kojem Apros određuje kada dolazi do razdvajanja nije poznat.
 
-**Arhitekturalne implikacije (nevalidirano — zahtijeva AP-06 proširenje):**
-- Ako je split isključivo interan u Apros-u i WC dobiva jedan standardni response → nema implikacija za WC
-- Ako Apros može vratiti više response-a ili zahtijeva split na WC strani → order export arhitektura se komplicira
-- Mora biti razriješeno u okviru AP-06 validacije
+**Trenutna radna pretpostavka (2026-07-03):** Apros vrši interno segmentiranje faktura — WC šalje jednu narudžbu (jedan standardni order payload), Apros interno odlučuje o razdvajanju na više faktura na svojoj strani, bez potrebe da WC to inicira ili prati. Ova pretpostavka nije formalno potvrđena od Apros-a.
+
+**Arhitekturalne implikacije (ovisne o potvrdi pretpostavke — zahtijeva AP-06 proširenje):**
+- Ako je pretpostavka točna (split isključivo interan u Apros-u, WC dobiva jedan standardni response) → nema implikacija za WC order export arhitekturu
+- Ako je pretpostavka netočna (Apros može vratiti više response-a ili zahtijeva split na WC strani) → order export arhitektura se komplicira, potreban je redesign payload buildera i response parsinga
+- Mora biti formalno razriješeno u okviru AP-06 validacije — vidi `docs/project-status-matrix.md` Sekciju 1.8, DP-D4
 
 #### Dostavna lokacija (Delivery Location)
 

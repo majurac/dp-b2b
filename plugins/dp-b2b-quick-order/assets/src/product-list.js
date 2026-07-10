@@ -3,9 +3,12 @@
 /**
  * Product list renderer.
  *
- * Fetches /products (paginated), renders rows into .dp-qo-tbody. Variable
- * products render a temporary loading row, replaced with one independent
- * row per variation once /products/{id}/variations resolves — no dropdown.
+ * Fetches /products (paginated), renders rows into .dp-qo-tbody. Simple
+ * products render as one `.dp-qo-row`. Variable products render as one
+ * `.dp-qo-row--variable` with the parent's info shown once and a
+ * `.dp-qo-row__variations` placeholder, populated in place with one
+ * `.dp-qo-variation-row` per variation once /products/{id}/variations
+ * resolves — no dropdown, no promotion to sibling top-level rows.
  * Integrates with WOOF/WBW filter URL changes: when WOOF updates the browser URL
  * with wpf_filter_pa_* or pr_min/pr_max params, re-fetches with those filters mapped
  * to Quick Order's server-side REST params.
@@ -23,8 +26,6 @@ export class ProductList {
     #orderDir     = 'asc';
     /** WOOF-sourced filter state. Reset to {} on each URL change parse. */
     #woofFilters  = {};
-    /** @type {Map<number, {name:string, image:string}>} Parent product meta, keyed by product id — used when expanding variation rows. */
-    #parentMeta   = new Map();
 
     /**
      * @param {object} config  window.dpQuickOrder
@@ -96,7 +97,6 @@ export class ProductList {
             this.#tbody.innerHTML = `<tr><td colspan="5" class="dp-qo-empty">Nema dostupnih proizvoda.</td></tr>`;
             return;
         }
-        this.#parentMeta.clear();
         this.#tbody.innerHTML = products.map(p => this.#rowHTML(p)).join('');
     }
 
@@ -105,10 +105,22 @@ export class ProductList {
         const thumbSrc    = product.image || this.#config.placeholderImg || '';
 
         if (isVariable) {
-            this.#parentMeta.set(Number(product.id), { name: product.name, image: thumbSrc });
+            const skuLabel  = escHtml(this.#config.i18n?.skuLabel ?? 'Kataloški broj:');
+            const thumbCell = thumbSrc
+                ? `<img src="${escHtml(thumbSrc)}" alt="" class="dp-qo-thumb" width="40" height="40" loading="lazy">`
+                : '';
             return `
-<tr class="dp-qo-row dp-qo-row--loading" data-product-id="${product.id}" data-type="variable">
-  <td colspan="5" class="dp-qo-loading">${escHtml(this.#config.i18n?.loadingVariations ?? 'Učitavanje varijacija...')}</td>
+<tr class="dp-qo-row dp-qo-row--variable" data-product-id="${product.id}" data-type="variable">
+  <td colspan="5">
+    <div class="dp-qo-row__product">
+      ${thumbCell}
+      <div class="dp-qo-row__product-info">
+        <strong class="dp-qo-name">${escHtml(product.name)}</strong>
+        <small class="dp-qo-sku">${skuLabel} ${escHtml(product.sku)}</small>
+      </div>
+    </div>
+    <div class="dp-qo-row__variations dp-qo-row__variations--loading">${escHtml(this.#config.i18n?.loadingVariations ?? 'Učitavanje varijacija...')}</div>
+  </td>
 </tr>`.trim();
         }
 
@@ -150,18 +162,46 @@ export class ProductList {
     <span class="dp-qo-stock ${stockClass}">${stockText}</span>
   </td>
   <td class="dp-qo-col-price">${priceHtml}</td>
-  <td class="dp-qo-col-qty">
-    <div class="dp-qo-qty-wrap">
-      <button class="dp-qo-qty-btn dp-qo-qty-minus" type="button" aria-label="Smanji količinu"${disableQty ? ' disabled' : ''}>−</button>
-      <input type="number"
-             class="dp-qo-qty"
-             data-row-key="${rowKey}"
-             value="0" min="0" step="1"
-             ${disableQty ? 'disabled' : ''}>
-      <button class="dp-qo-qty-btn dp-qo-qty-plus" type="button" aria-label="Povećaj količinu"${disableQty ? ' disabled' : ''}>+</button>
-    </div>
-  </td>
+  <td class="dp-qo-col-qty">${this.#qtyControlsHTML(rowKey, disableQty)}</td>
 </tr>`.trim();
+    }
+
+    /** Shared qty +/- controls markup, used by both simple-product/data rows and variation rows. */
+    #qtyControlsHTML(rowKey, disableQty) {
+        return `
+<div class="dp-qo-qty-wrap">
+  <button class="dp-qo-qty-btn dp-qo-qty-minus" type="button" aria-label="Smanji količinu"${disableQty ? ' disabled' : ''}>−</button>
+  <input type="number"
+         class="dp-qo-qty"
+         data-row-key="${rowKey}"
+         value="0" min="0" step="1"
+         ${disableQty ? 'disabled' : ''}>
+  <button class="dp-qo-qty-btn dp-qo-qty-plus" type="button" aria-label="Povećaj količinu"${disableQty ? ' disabled' : ''}>+</button>
+</div>`.trim();
+    }
+
+    /**
+     * Variation line rendered inside a parent's `.dp-qo-row__variations` container
+     * (brief: one top-level `.dp-qo-row` per parent product, variations stacked
+     * inside it — not promoted to sibling top-level rows). Shows only the
+     * attribute label, not the parent name (not repeated per variation).
+     */
+    #variationRowHTML({ rowKey, productId, variationId, label, sku, stockClass, stockText, priceHtml, price, disableQty }) {
+        const skuLabel = escHtml(this.#config.i18n?.skuLabel ?? 'Kataloški broj:');
+        return `
+<div class="dp-qo-variation-row"
+     data-product-id="${productId}"
+     data-variation-id="${variationId}"
+     data-row-key="${rowKey}"
+     data-price="${price}">
+  <div class="dp-qo-variation-row__label">
+    <span class="dp-qo-variation-row__attrs">${label}</span>
+    <small class="dp-qo-sku">${skuLabel} ${sku}</small>
+  </div>
+  <div class="dp-qo-variation-row__stock"><span class="dp-qo-stock ${stockClass}">${stockText}</span></div>
+  <div class="dp-qo-variation-row__price">${priceHtml}</div>
+  <div class="dp-qo-variation-row__qty">${this.#qtyControlsHTML(rowKey, disableQty)}</div>
+</div>`.trim();
     }
 
     /** Kick off parallel variation fetches for all variable rows on current page. */
@@ -171,14 +211,15 @@ export class ProductList {
     }
 
     /**
-     * Fetch variation details and replace the loading row with one independent
-     * row per variation (brief §7 — no dropdown). Reuses the parent's thumbnail
-     * for every variation row; variation-specific images are not fetched
-     * (`get_variation_details()` doesn't return them — avoids extra hydration
-     * cost per project performance rules).
+     * Fetch variation details and populate the parent row's
+     * `.dp-qo-row__variations` container with one `.dp-qo-variation-row` per
+     * variation (no dropdown). The parent `.dp-qo-row` itself is left in
+     * place — only its variations container's content changes.
      */
     async #loadVariationOptions(row) {
-        const productId = row.dataset.productId;
+        const productId    = row.dataset.productId;
+        const variationsEl = row.querySelector('.dp-qo-row__variations');
+        if (!variationsEl) return;
 
         let variations;
         try {
@@ -187,7 +228,8 @@ export class ProductList {
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             variations = await res.json();
         } catch {
-            row.innerHTML = `<td colspan="5" class="dp-qo-error">${escHtml(this.#config.i18n?.variationLoadError ?? 'Greška pri učitavanju varijacija.')}</td>`;
+            variationsEl.classList.remove('dp-qo-row__variations--loading');
+            variationsEl.innerHTML = `<div class="dp-qo-error">${escHtml(this.#config.i18n?.variationLoadError ?? 'Greška pri učitavanju varijacija.')}</div>`;
             return;
         }
 
@@ -196,25 +238,22 @@ export class ProductList {
             return;
         }
 
-        const meta      = this.#parentMeta.get(Number(productId)) ?? { name: '', image: '' };
-        const thumbCell = meta.image
-            ? `<img src="${escHtml(meta.image)}" alt="" class="dp-qo-thumb" width="40" height="40" loading="lazy">`
-            : '';
         const stockLabel = { instock: 'Na stanju', outofstock: 'Nema na stanju', onbackorder: 'Po narudžbi' };
 
         const rowsHtml = variations.map(v => {
             const rowKey     = `${productId}_${v.id}`;
             const stockClass = `dp-qo-stock--${escHtml(v.stock_status)}`;
             const stockText  = stockLabel[v.stock_status] ?? v.stock_status;
-            return this.#dataRowHTML({
+            return this.#variationRowHTML({
                 rowKey, productId: Number(productId), variationId: v.id,
-                name: `${escHtml(meta.name)} — ${escHtml(v.label)}`, sku: escHtml(v.sku),
+                label: escHtml(v.label), sku: escHtml(v.sku),
                 stockClass, stockText, priceHtml: v.price_html, price: v.price,
-                thumbCell, disableQty: v.stock_status === 'outofstock',
+                disableQty: v.stock_status === 'outofstock',
             });
         }).join('');
 
-        row.outerHTML = rowsHtml;
+        variationsEl.classList.remove('dp-qo-row__variations--loading');
+        variationsEl.innerHTML = rowsHtml;
         document.dispatchEvent(new CustomEvent('dp:qo:rows-rendered'));
     }
 

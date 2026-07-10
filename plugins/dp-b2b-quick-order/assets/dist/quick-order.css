@@ -134,6 +134,68 @@
 /* ── Loading placeholder row (variable product, before variations resolve) ── */
 .dp-qo-row--loading td { text-align: left; padding-left: 16px; }
 
+/* ── Variable product row: parent info once, variations stacked inside ──────
+   One top-level .dp-qo-row per parent product. Parent info (thumb/name/SKU)
+   sits in a fixed-width left column; variations stack vertically in the
+   remaining space, each retaining its own attrs/stock/price/qty. ─────────── */
+.dp-qo-row--variable > td {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 12px 10px;
+}
+
+.dp-qo-row__product {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    flex: 0 0 240px;
+    max-width: 240px;
+}
+.dp-qo-row__product-info { display: flex; flex-direction: column; }
+
+.dp-qo-row__variations {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+.dp-qo-row__variations--loading {
+    font-style: italic;
+    color: #aaa;
+    padding: 8px 0;
+}
+
+.dp-qo-variation-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+.dp-qo-variation-row:last-child { border-bottom: none; }
+
+.dp-qo-variation-row__label {
+    flex: 1 1 220px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+.dp-qo-variation-row__attrs { font-weight: 500; }
+.dp-qo-variation-row__stock { flex: 0 0 110px; }
+.dp-qo-variation-row__price { flex: 0 0 90px; text-align: right; }
+.dp-qo-variation-row__qty  { flex: 0 0 auto; }
+
+@media only screen and (max-width: 767.98px) {
+    .dp-qo-row--variable > td { flex-direction: column; gap: 12px; }
+    .dp-qo-row__product { flex: 1 1 auto; max-width: none; }
+    .dp-qo-variation-row { flex-wrap: wrap; row-gap: 6px; }
+    .dp-qo-variation-row__label,
+    .dp-qo-variation-row__stock,
+    .dp-qo-variation-row__price { flex: 1 1 auto; }
+    .dp-qo-variation-row__qty { flex: 0 0 100%; }
+}
+
 /* ── Visible focus indicator ──────────────────────────────────
    The theme's global `a, button, input, textarea { outline: none!important }`
    (sass/theme/_typography.scss) removes the native focus ring sitewide with

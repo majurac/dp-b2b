@@ -53,7 +53,13 @@ export class RowController {
 
     #onQtyInput(input) {
         if (input.disabled) return;
-        const row = input.closest('.dp-qo-row');
+        // The purchasable unit's own container — a simple product's `.dp-qo-row`,
+        // or a variable product's `.dp-qo-variation-row` nested inside the shared
+        // parent `.dp-qo-row`. Deliberately class-based, not `.closest('[data-row-key]')`:
+        // the qty `<input>` itself also carries `data-row-key` (read directly below,
+        // and used by hydrateAll()'s lookup), so an attribute-based closest() would
+        // match the input itself before reaching its container.
+        const row = input.closest('.dp-qo-row, .dp-qo-variation-row');
         const rowKey = input.dataset.rowKey;
         if (!row || !rowKey) return;
 

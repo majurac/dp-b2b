@@ -60,7 +60,7 @@ if (is_account_page() && !is_user_logged_in()) {
  * Newsletter Section
  * Hidden on cart, checkout, and account pages
  */
-if (!is_cart() && !is_checkout() && !is_account_page()) :
+if (!is_cart() && !is_checkout() && !is_account_page() && !dreampoint_b2b_is_quick_order_page()) :
 ?>
     <div class="newsletter">
         <div class="container">

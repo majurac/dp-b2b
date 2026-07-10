@@ -4,10 +4,12 @@
 FROZEN — DO NOT REFACTOR WITHOUT EXPLICIT APPROVAL
 
 Architecture status:
-IMPLEMENTED / LOCALLY VERIFIED (2026-07-10) — implementation plan executed
-and verified via Playwright against local XAMPP. Not yet staging-verified;
-update to STABLE / PRODUCTION-VALIDATED after a staging pass
-(`docs/operational/staging-quick-order-checklist.md`).
+STABLE / PRODUCTION-VALIDATED (2026-07-10) — implementation plan executed,
+verified via Playwright against local XAMPP, deployed to staging
+(`dreampoint.b2b.uncledev.cloud`) and re-verified end-to-end there, including
+>50-row batch chunking, mini-cart/Toastify fragment refresh, cart icon
+counter, and cache-busting. See `docs/active/status.md` for the full staging
+regression report reference.
 
 Canonical reference for the Quick Order local-state ordering workspace.
 Supersedes `docs/frozen/quick-order-sync-architecture.md` (real-time

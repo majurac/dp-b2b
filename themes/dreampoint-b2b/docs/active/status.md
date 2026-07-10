@@ -11,7 +11,14 @@ the Supersession Note in `docs/frozen/quick-order-sync-architecture.md`
 (historical). Verified locally via Playwright (vis_full test user): zero
 network requests on quantity change, pagination-persistent local state,
 single chunked submit, partial-failure rows retained, keyboard navigation,
-visible focus indicators on new controls. Not yet staging-verified.
+visible focus indicators on new controls. **Staging-verified 2026-07-10**
+(`dreampoint.b2b.uncledev.cloud`, commit `e7b98ab`): >50-row batch chunking
+(51 items → 2 sequential requests, 50+1), mini-cart fragment refresh +
+Toastify, cart icon counter increment, cache-busting (bumped
+`DP_QUICK_ORDER_VERSION` 1.0.1→1.0.2 after finding 7-day browser cache with a
+static version string), full golden-path E2E. Staging catalog has no variable
+products — variable-product rendering remains local-only verified. Not yet
+pushed to production.
 
 | System | Status | Stable | Staging Ready | Notes |
 |--------|--------|--------|---------------|-------|

@@ -101,6 +101,7 @@ if (!is_cart() && !is_checkout() && !is_account_page() && !dreampoint_b2b_is_qui
     <!-- /.newsletter -->
 <?php endif; ?>
 
+<?php if ( ! dreampoint_b2b_is_quick_order_page() ) : ?>
 <footer class="page-footer" role="contentinfo" itemscope itemtype="http://schema.org/WPFooter">
     <div class="container">
         <div class="main-footer">
@@ -314,6 +315,7 @@ if (!is_cart() && !is_checkout() && !is_account_page() && !dreampoint_b2b_is_qui
     <!-- /.container -->
 </footer>
 <!-- /.page-footer -->
+<?php endif; ?>
 
 </div><!-- #page -->
 

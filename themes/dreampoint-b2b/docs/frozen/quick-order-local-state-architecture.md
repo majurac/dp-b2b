@@ -24,6 +24,18 @@ staging-validated. This is a documentation correction, not an architecture
 change: the local-state model, footer computation, and submit flow in §2–§5
 were not affected by the grouping change and remain as written.
 
+**Revision — 2026-07-10 (real-column correction):** the grouped layout's
+first implementation collapsed a variable row into a single
+`<td colspan="5">` housing a flex-simulated `.dp-qo-row__product` /
+`.dp-qo-row__variations` layout — this broke native table column alignment
+with the rest of the table and was corrected before production use. §6 below
+now describes the corrected, staging-validated model: a variable row keeps
+the table's real `<td>` columns (no `colspan`), with per-variation content
+stacked vertically inside the existing Naziv/Stanje/Cijena/Kol. cells.
+`.dp-qo-row__product` and `.dp-qo-row__variations` no longer exist. As with
+the prior revision, this is a documentation/markup correction only — §2–§5
+are unaffected.
+
 ---
 
 ## 1. System Overview
@@ -162,15 +174,35 @@ Every variation of a variable product is independently purchasable and
 visible immediately, with its own quantity controls, no separate step to
 select it first.
 
-**Grouped layout:** a variable product renders as exactly one top-level
-`.dp-qo-row` (modifier `.dp-qo-row--variable`), not one row per variation.
-Parent product information (thumbnail, name, catalog number/SKU) is rendered
-once, in a `.dp-qo-row__product` block inside that row. Its variations are
-rendered inside a sibling `.dp-qo-row__variations` container within the same
-row, one `.dp-qo-variation-row` per variation, stacked vertically. Parent
-info is never repeated per variation.
+**Grouped layout — real table columns, no `colspan`:** a variable product
+renders as exactly one top-level `.dp-qo-row` (modifier
+`.dp-qo-row--variable`), not one row per variation. Critically, it uses the
+SAME five real `<td>` columns as a simple-product row and the table header
+(thumb, Naziv, Stanje, Cijena, Kol.) — there is no `<td colspan>` and no
+simulated table. Native table column widths still apply to variable rows,
+exactly as they do to simple-product rows.
 
-Each `.dp-qo-variation-row` is a fully independent purchasable unit and
+- **Thumb column:** parent thumbnail, rendered once.
+- **Naziv column:** parent name + catalog number/SKU (`.dp-qo-row__product-info`),
+  rendered once at the top of the cell, followed by a vertically-stacked list
+  (`.dp-qo-variation-labels`) with one line per variation — its attribute
+  label and SKU, not the parent name repeated.
+- **Stanje / Cijena / Kol. columns:** each holds its own vertically-stacked
+  list (`.dp-qo-variation-stocks` / `.dp-qo-variation-prices` /
+  `.dp-qo-variation-qtys`) with one line per variation — stock badge, price,
+  and qty controls respectively. A spacer matching the Naziv column's
+  once-shown product-info block keeps line 1 of these three lists aligned
+  with line 1 of the variation-labels list.
+- Every line across these four lists shares the class `.dp-qo-variation-line`
+  for consistent per-line height. Long names/SKUs are truncated
+  (`white-space: nowrap` + ellipsis) rather than wrapped — wrapping in only
+  one of the four stacked columns would grow that column's line height
+  without growing its siblings', breaking row-for-row alignment. The table's
+  existing horizontal scroll (`.dp-qo-table-wrap`) remains available for full
+  text.
+
+Each variation's qty-controls line (`.dp-qo-variation-row`, inside
+`.dp-qo-variation-qtys`) is the fully independent purchasable unit and
 retains its own:
 - `variation_id` (and parent `product_id`)
 - row key (`"${productId}_${variationId}"`) — its local-state identity
@@ -185,20 +217,26 @@ retains its own:
 - submit behavior — included in the batch submit exactly like a
   simple-product row (§4), via its own `product_id`/`variation_id`/`quantity`
 
+`RowController` requires no special-casing for this: it resolves the
+purchasable unit via `.closest('.dp-qo-row, .dp-qo-variation-row')`, which
+correctly stops at the qty line (not at the shared parent `.dp-qo-row`)
+regardless of how many other columns/lists exist alongside it.
+
 The `/products/{id}/variations` REST route (`class-product-query.php::
 get_variation_details()`) is unchanged and still avoids
 `get_available_variations()` — only the frontend rendering target changes:
-the parent's `.dp-qo-row__variations` placeholder ("Učitavanje varijacija...")
-is populated in place with the fetched variations; the parent `.dp-qo-row`
-itself is never replaced, only its variations container's content.
+the parent's four column lists (loading placeholder shown in the Naziv
+column: "Učitavanje varijacija...") are populated in place with the fetched
+variations; the parent `.dp-qo-row` and its five `<td>` columns are never
+replaced, only each list's inner content.
 
 Functionally, a variable product's variations behave exactly like N
 independent simple-product rows once loaded — same row-key/local-state/
-submit contract — they are simply grouped under a shared parent container in
-the DOM instead of rendered as flat siblings. This is a DOM/markup detail;
-it does not change the local-state model (§2), footer computation (§3), or
-submit flow (§4), all of which operate on row keys and are agnostic to DOM
-nesting.
+submit contract — they are simply rendered as stacked lines within the
+existing table columns instead of as flat sibling `<tr>`s. This is a
+DOM/markup detail; it does not change the local-state model (§2), footer
+computation (§3), or submit flow (§4), all of which operate on row keys and
+are agnostic to DOM structure.
 
 ---
 

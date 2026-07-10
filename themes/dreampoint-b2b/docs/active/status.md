@@ -47,7 +47,7 @@ remains the only deployment target.
 | CartSync (debounce, token, abort) | SUPERSEDED | — | — | Real-time per-keystroke cart writes removed. See `docs/frozen/quick-order-local-state-architecture.md`. |
 | Local Quick Order state + explicit submit | ACTIVE (locally verified) | Yes | No | See `docs/frozen/quick-order-local-state-architecture.md` §2–§4. Not yet tested on staging. |
 | Pagination | ACTIVE | Yes | Yes | In-place re-render. Quantities re-hydrate from local state across pages instead of resetting — verified via Playwright (set page 1 → page 2 → back to page 1, quantity persisted). See local-state doc §2. |
-| Variation handling | ACTIVE | Yes | No | Dropdown removed; each variation is an independent purchasable row, grouped inside its parent's single `.dp-qo-row`/`.dp-qo-row__variations` (not a sibling top-level row). See local-state doc §6. |
+| Variation handling | ACTIVE | Yes | No | Dropdown removed; each variation is an independent purchasable line, stacked inside its parent's single `.dp-qo-row` using the table's real Naziv/Stanje/Cijena/Kol. columns (no `colspan`, not a sibling top-level row). See local-state doc §6. |
 | Visibility integration | ACTIVE | Yes | Yes | Gate fires on `add_to_cart` only. No retroactive revalidation — intentional. Unaffected by the local-state transition (fires at submit time now instead of per keystroke, same gate). |
 | Sorting | ACTIVE | Yes | Yes | `qo_orderby` / `qo_order` params. Title and price sort, ASC/DESC toggle. Isolated from WOOF `orderby` detection. |
 | Filter integration (WOOF/WBW) | ACTIVE | Yes | Yes | Price range + pa_* attribute filters via REST. WOOF URL change propagation via pushState wrapper. Isolation guard strips wpf_query from QO WP_Query instances. |

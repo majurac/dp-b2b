@@ -49,4 +49,14 @@
         display: flex;
         align-items: center;
     }
+
+    // The theme's global `a, button, input, textarea { outline: none!important }`
+    // (theme/_typography.scss) removes the native focus ring sitewide with no
+    // replacement — a pre-existing, sitewide gap out of scope to fix here.
+    // Restore a visible indicator scoped to this header's own links only.
+    &__back:focus-visible,
+    &__logo:focus-visible {
+        outline: 2px solid $brand !important;
+        outline-offset: 2px;
+    }
 }

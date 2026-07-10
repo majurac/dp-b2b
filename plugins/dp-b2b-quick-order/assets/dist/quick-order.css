@@ -133,3 +133,19 @@
 
 /* ── Loading placeholder row (variable product, before variations resolve) ── */
 .dp-qo-row--loading td { text-align: left; padding-left: 16px; }
+
+/* ── Visible focus indicator ──────────────────────────────────
+   The theme's global `a, button, input, textarea { outline: none!important }`
+   (sass/theme/_typography.scss) removes the native focus ring sitewide with
+   no replacement — a pre-existing, sitewide gap out of scope to fix here.
+   These rules restore a visible indicator scoped to Quick Order's own
+   interactive elements only. */
+.dp-qo-qty:focus-visible,
+.dp-qo-qty-btn:focus-visible,
+.dp-qo-footer__add-to-cart:focus-visible,
+.dp-qo-footer__cart-link:focus-visible,
+.dp-qo-btn:focus-visible,
+.dp-qo-table th[data-sort]:focus-visible {
+    outline: 2px solid #025788 !important;
+    outline-offset: 2px;
+}

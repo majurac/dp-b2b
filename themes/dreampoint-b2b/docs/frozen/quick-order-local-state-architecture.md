@@ -4,10 +4,10 @@
 FROZEN — DO NOT REFACTOR WITHOUT EXPLICIT APPROVAL
 
 Architecture status:
-APPROVED (2026-07-10) — implementation pending. Update this line to
-STABLE / PRODUCTION-VALIDATED once the implementation plan is executed and
-staging-verified; do not assume validation from this document's existence
-alone.
+IMPLEMENTED / LOCALLY VERIFIED (2026-07-10) — implementation plan executed
+and verified via Playwright against local XAMPP. Not yet staging-verified;
+update to STABLE / PRODUCTION-VALIDATED after a staging pass
+(`docs/operational/staging-quick-order-checklist.md`).
 
 Canonical reference for the Quick Order local-state ordering workspace.
 Supersedes `docs/frozen/quick-order-sync-architecture.md` (real-time

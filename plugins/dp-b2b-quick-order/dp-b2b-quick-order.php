@@ -3,12 +3,14 @@
  * Plugin Name: DP B2B Quick Order
  * Description: Performance-oriented WooCommerce B2B Quick Order system for Dreampoint B2B.
  * Version: 1.0.3
- * Author: Dreampoint
+ * Author: UncleDev
+ * Author URI: https://uncledev.com
  * Text Domain: dp-b2b-quick-order
  * Domain Path: /languages
  * Requires at least: 6.0
  * Requires PHP: 8.3
  * WC requires at least: 8.0
+ * WC tested up to: 10.9
  */
 
 defined( 'ABSPATH' ) || exit;

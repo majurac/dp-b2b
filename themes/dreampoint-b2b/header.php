@@ -32,17 +32,53 @@ $company_phone = get_field('company_phone', 'option') ?: '';
 <div id="page" class="site">
     <a class="skip-link screen-reader-text" href="#primary-content"><?php esc_html_e('Preskoči na sadržaj', 'dreampoint-b2b'); ?></a>
 
-    <?php 
-        
-        /**
-         * Main Header
-         * Shows on all pages except login/register and entrance page
-         */
-        if ((!is_account_page() || is_user_logged_in())) : 
+    <?php
+        $is_quick_order = dreampoint_b2b_is_quick_order_page();
     ?>
+    <?php if ( $is_quick_order ) : ?>
+        <header id="header" class="dp-qo-header" role="banner">
+            <div class="dp-qo-header__inner">
+                <div class="dp-qo-header__left">
+                    <?php if ( ! empty( $company_logo['url'] ) ) : ?>
+                        <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="dp-qo-header__logo" aria-label="<?php esc_attr_e( 'Početna stranica', 'dreampoint-b2b' ); ?>">
+                            <img
+                                src="<?php echo esc_url( $company_logo['url'] ); ?>"
+                                alt="<?php echo esc_attr( $company_logo['alt'] ?: get_bloginfo( 'name' ) . ' Logo' ); ?>"
+                                width="<?php echo isset( $company_logo['width'] ) ? absint( $company_logo['width'] ) : ''; ?>"
+                                height="<?php echo isset( $company_logo['height'] ) ? absint( $company_logo['height'] ) : ''; ?>"
+                            >
+                        </a>
+                    <?php endif; ?>
+                    <a href="<?php echo esc_url( wc_get_page_permalink( 'shop' ) ); ?>" class="dp-qo-header__back">
+                        <i class="icon-arrow-left-long" aria-hidden="true"></i>
+                        <span><?php esc_html_e( 'Povratak u katalog', 'dreampoint-b2b' ); ?></span>
+                    </a>
+                </div>
+                <div class="dp-qo-header__center">
+                    <?php esc_html_e( 'QUICK ORDER', 'dreampoint-b2b' ); ?>
+                </div>
+                <div class="dp-qo-header__right">
+                    <?php
+                    if ( function_exists( 'dreampoint_b2b_woocommerce_cart_link' ) ) {
+                        dreampoint_b2b_woocommerce_cart_link();
+                    }
+                    ?>
+                </div>
+            </div>
+        </header>
+        <!-- Mini Cart (reused — cart icon above opens it, same as the main header) -->
+        <div class="my-custom-mini-cart-container widget_shopping_cart_content" role="complementary" aria-label="<?php esc_attr_e( 'košarica', 'dreampoint-b2b' ); ?>">
+            <?php
+            if ( function_exists( 'woocommerce_mini_cart' ) ) {
+                woocommerce_mini_cart();
+            }
+            ?>
+        </div>
+        <div class="inner-page inner-page--quick-order" id="primary-content">
+    <?php elseif ( ! is_account_page() || is_user_logged_in() ) : ?>
         <style>@media (max-width: 767px) {body {padding-bottom: 72px;}}</style>
         <div class="menu-overlay" aria-hidden="true"></div>
-        
+
 
     <?php
         // Check if notifications are enabled and exist

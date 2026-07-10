@@ -134,67 +134,86 @@
 /* ── Loading placeholder row (variable product, before variations resolve) ── */
 .dp-qo-row--loading td { text-align: left; padding-left: 16px; }
 
-/* ── Variable product row: parent info once, variations stacked inside ──────
-   One top-level .dp-qo-row per parent product. Parent info (thumb/name/SKU)
-   sits in a fixed-width left column; variations stack vertically in the
-   remaining space, each retaining its own attrs/stock/price/qty. ─────────── */
-.dp-qo-row--variable > td {
-    display: flex;
-    align-items: flex-start;
-    gap: 20px;
-    padding: 12px 10px;
+/* ── Variable product row: real table columns, parent info once ─────────────
+   One top-level .dp-qo-row per parent product, using the SAME 5 real <td>
+   columns as a simple-product row and the header (thumb/Naziv/Stanje/Cijena/
+   Kol.) — no colspan, no simulated table. Parent info (thumb + name/SKU)
+   renders once in the thumb/Naziv columns; Stanje/Cijena/Kol. (and the Naziv
+   column, below the parent info) each hold a vertically-stacked list with
+   one line per variation. Native table column widths still apply — only the
+   per-column content is a small vertical list instead of a single value. ── */
+:root {
+    /* Height reserved by the once-shown parent info block (Naziv column),
+       mirrored as an empty spacer at the top of Stanje/Cijena/Kol. so each
+       column's first variation line stays aligned with the others. */
+    --dp-qo-var-info-h: 40px;
 }
 
-.dp-qo-row__product {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    flex: 0 0 240px;
-    max-width: 240px;
-}
-.dp-qo-row__product-info { display: flex; flex-direction: column; }
+.dp-qo-row--variable > td { vertical-align: top; padding-top: 10px; padding-bottom: 10px; }
 
-.dp-qo-row__variations {
-    flex: 1 1 auto;
-    min-width: 0;
+.dp-qo-col-name--variable { display: flex; flex-direction: column; min-width: 170px; }
+.dp-qo-row__product-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: var(--dp-qo-var-info-h);
+    margin-bottom: 8px;
+}
+
+/* Each of the 4 stacked columns must keep the SAME height for line N so
+   they stay aligned row-by-row. Wrapping text in only one column (long
+   names/SKUs) would grow that column's line height without growing its
+   siblings' — truncate instead of wrapping; the existing table-wide
+   horizontal scroll (.dp-qo-table-wrap) remains available for full text. */
+.dp-qo-row--variable .dp-qo-name,
+.dp-qo-row--variable .dp-qo-sku,
+.dp-qo-row--variable .dp-qo-variation-line__attrs {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.dp-qo-variation-labels,
+.dp-qo-variation-stocks,
+.dp-qo-variation-prices,
+.dp-qo-variation-qtys {
     display: flex;
     flex-direction: column;
 }
-.dp-qo-row__variations--loading {
+
+/* Spacer matching .dp-qo-row__product-info's height, so variation line 1 in
+   Stanje/Cijena/Kol. aligns with variation line 1 in the Naziv column. */
+.dp-qo-variation-stocks::before,
+.dp-qo-variation-prices::before,
+.dp-qo-variation-qtys::before {
+    content: "";
+    display: block;
+    height: var(--dp-qo-var-info-h);
+    margin-bottom: 8px;
+}
+
+.dp-qo-variation-list--loading {
     font-style: italic;
     color: #aaa;
     padding: 8px 0;
 }
 
-.dp-qo-variation-row {
+.dp-qo-variation-line {
     display: flex;
     align-items: center;
-    gap: 16px;
-    padding: 8px 0;
+    min-height: 34px;
+    padding: 6px 0;
     border-bottom: 1px solid #eee;
 }
-.dp-qo-variation-row:last-child { border-bottom: none; }
-
-.dp-qo-variation-row__label {
-    flex: 1 1 220px;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
+.dp-qo-variation-labels .dp-qo-variation-line:last-child,
+.dp-qo-variation-stocks .dp-qo-variation-line:last-child,
+.dp-qo-variation-prices .dp-qo-variation-line:last-child,
+.dp-qo-variation-qtys .dp-qo-variation-line:last-child {
+    border-bottom: none;
 }
-.dp-qo-variation-row__attrs { font-weight: 500; }
-.dp-qo-variation-row__stock { flex: 0 0 110px; }
-.dp-qo-variation-row__price { flex: 0 0 90px; text-align: right; }
-.dp-qo-variation-row__qty  { flex: 0 0 auto; }
 
-@media only screen and (max-width: 767.98px) {
-    .dp-qo-row--variable > td { flex-direction: column; gap: 12px; }
-    .dp-qo-row__product { flex: 1 1 auto; max-width: none; }
-    .dp-qo-variation-row { flex-wrap: wrap; row-gap: 6px; }
-    .dp-qo-variation-row__label,
-    .dp-qo-variation-row__stock,
-    .dp-qo-variation-row__price { flex: 1 1 auto; }
-    .dp-qo-variation-row__qty { flex: 0 0 100%; }
-}
+.dp-qo-variation-line__attrs { display: block; font-weight: 500; }
 
 /* ── Visible focus indicator ──────────────────────────────────
    The theme's global `a, button, input, textarea { outline: none!important }`

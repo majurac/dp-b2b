@@ -4,11 +4,14 @@
  * Product list renderer.
  *
  * Fetches /products (paginated), renders rows into .dp-qo-tbody. Simple
- * products render as one `.dp-qo-row`. Variable products render as one
- * `.dp-qo-row--variable` with the parent's info shown once and a
- * `.dp-qo-row__variations` placeholder, populated in place with one
- * `.dp-qo-variation-row` per variation once /products/{id}/variations
- * resolves — no dropdown, no promotion to sibling top-level rows.
+ * products render as one `.dp-qo-row` using the table's real columns (thumb,
+ * name, stock, price, qty). Variable products also render as exactly one
+ * `.dp-qo-row--variable` using the SAME real columns — no `colspan`, no
+ * simulated table. Parent info (thumb/name/SKU) is shown once in the
+ * thumb/name columns; the stock/price/qty columns (and the name column,
+ * below the parent info) each hold a vertically-stacked list with one line
+ * per variation, populated in place once /products/{id}/variations resolves
+ * — no dropdown, no promotion to sibling top-level rows.
  * Integrates with WOOF/WBW filter URL changes: when WOOF updates the browser URL
  * with wpf_filter_pa_* or pr_min/pr_max params, re-fetches with those filters mapped
  * to Quick Order's server-side REST params.
@@ -109,18 +112,20 @@ export class ProductList {
             const thumbCell = thumbSrc
                 ? `<img src="${escHtml(thumbSrc)}" alt="" class="dp-qo-thumb" width="40" height="40" loading="lazy">`
                 : '';
+            const loadingText = escHtml(this.#config.i18n?.loadingVariations ?? 'Učitavanje varijacija...');
             return `
 <tr class="dp-qo-row dp-qo-row--variable" data-product-id="${product.id}" data-type="variable">
-  <td colspan="5">
-    <div class="dp-qo-row__product">
-      ${thumbCell}
-      <div class="dp-qo-row__product-info">
-        <strong class="dp-qo-name">${escHtml(product.name)}</strong>
-        <small class="dp-qo-sku">${skuLabel} ${escHtml(product.sku)}</small>
-      </div>
+  <td class="dp-qo-col-thumb">${thumbCell}</td>
+  <td class="dp-qo-col-name dp-qo-col-name--variable">
+    <div class="dp-qo-row__product-info">
+      <strong class="dp-qo-name">${escHtml(product.name)}</strong>
+      <small class="dp-qo-sku">${skuLabel} ${escHtml(product.sku)}</small>
     </div>
-    <div class="dp-qo-row__variations dp-qo-row__variations--loading">${escHtml(this.#config.i18n?.loadingVariations ?? 'Učitavanje varijacija...')}</div>
+    <div class="dp-qo-variation-labels dp-qo-variation-list--loading">${loadingText}</div>
   </td>
+  <td class="dp-qo-col-stock"><div class="dp-qo-variation-stocks"></div></td>
+  <td class="dp-qo-col-price"><div class="dp-qo-variation-prices"></div></td>
+  <td class="dp-qo-col-qty"><div class="dp-qo-variation-qtys"></div></td>
 </tr>`.trim();
         }
 
@@ -181,26 +186,45 @@ export class ProductList {
     }
 
     /**
-     * Variation line rendered inside a parent's `.dp-qo-row__variations` container
-     * (brief: one top-level `.dp-qo-row` per parent product, variations stacked
-     * inside it — not promoted to sibling top-level rows). Shows only the
-     * attribute label, not the parent name (not repeated per variation).
+     * One variation's line within the Naziv (attrs+SKU) column — no parent
+     * name repeated per variation.
      */
-    #variationRowHTML({ rowKey, productId, variationId, label, sku, stockClass, stockText, priceHtml, price, disableQty }) {
+    #variationLabelLineHTML(label, sku) {
         const skuLabel = escHtml(this.#config.i18n?.skuLabel ?? 'Kataloški broj:');
         return `
-<div class="dp-qo-variation-row"
+<div class="dp-qo-variation-line">
+  <span class="dp-qo-variation-line__attrs">${label}</span>
+  <small class="dp-qo-sku">${skuLabel} ${sku}</small>
+</div>`.trim();
+    }
+
+    /** One variation's line within the Stanje (stock) column. */
+    #variationStockLineHTML(stockClass, stockText) {
+        return `
+<div class="dp-qo-variation-line">
+  <span class="dp-qo-stock ${stockClass}">${stockText}</span>
+</div>`.trim();
+    }
+
+    /** One variation's line within the Cijena (price) column. */
+    #variationPriceLineHTML(priceHtml) {
+        return `<div class="dp-qo-variation-line">${priceHtml}</div>`;
+    }
+
+    /**
+     * One variation's line within the Kol. (qty) column — carries the
+     * variation's full dataset (product/variation id, row key, price) on
+     * the same `.dp-qo-variation-row` class RowController already resolves
+     * via `.closest('.dp-qo-row, .dp-qo-variation-row')`.
+     */
+    #variationQtyLineHTML({ rowKey, productId, variationId, price, disableQty }) {
+        return `
+<div class="dp-qo-variation-row dp-qo-variation-line"
      data-product-id="${productId}"
      data-variation-id="${variationId}"
      data-row-key="${rowKey}"
      data-price="${price}">
-  <div class="dp-qo-variation-row__label">
-    <span class="dp-qo-variation-row__attrs">${label}</span>
-    <small class="dp-qo-sku">${skuLabel} ${sku}</small>
-  </div>
-  <div class="dp-qo-variation-row__stock"><span class="dp-qo-stock ${stockClass}">${stockText}</span></div>
-  <div class="dp-qo-variation-row__price">${priceHtml}</div>
-  <div class="dp-qo-variation-row__qty">${this.#qtyControlsHTML(rowKey, disableQty)}</div>
+  ${this.#qtyControlsHTML(rowKey, disableQty)}
 </div>`.trim();
     }
 
@@ -211,15 +235,19 @@ export class ProductList {
     }
 
     /**
-     * Fetch variation details and populate the parent row's
-     * `.dp-qo-row__variations` container with one `.dp-qo-variation-row` per
-     * variation (no dropdown). The parent `.dp-qo-row` itself is left in
-     * place — only its variations container's content changes.
+     * Fetch variation details and populate the parent row's four real
+     * columns (Naziv/Stanje/Cijena/Kol.) each with one stacked line per
+     * variation (no dropdown, no colspan). The parent `.dp-qo-row` and its
+     * real `<td>` columns are left in place — only each column's inner list
+     * content changes.
      */
     async #loadVariationOptions(row) {
-        const productId    = row.dataset.productId;
-        const variationsEl = row.querySelector('.dp-qo-row__variations');
-        if (!variationsEl) return;
+        const productId = row.dataset.productId;
+        const labelsEl   = row.querySelector('.dp-qo-variation-labels');
+        const stocksEl   = row.querySelector('.dp-qo-variation-stocks');
+        const pricesEl   = row.querySelector('.dp-qo-variation-prices');
+        const qtysEl     = row.querySelector('.dp-qo-variation-qtys');
+        if (!labelsEl || !stocksEl || !pricesEl || !qtysEl) return;
 
         let variations;
         try {
@@ -228,8 +256,8 @@ export class ProductList {
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             variations = await res.json();
         } catch {
-            variationsEl.classList.remove('dp-qo-row__variations--loading');
-            variationsEl.innerHTML = `<div class="dp-qo-error">${escHtml(this.#config.i18n?.variationLoadError ?? 'Greška pri učitavanju varijacija.')}</div>`;
+            labelsEl.classList.remove('dp-qo-variation-list--loading');
+            labelsEl.innerHTML = `<div class="dp-qo-error">${escHtml(this.#config.i18n?.variationLoadError ?? 'Greška pri učitavanju varijacija.')}</div>`;
             return;
         }
 
@@ -238,22 +266,31 @@ export class ProductList {
             return;
         }
 
-        const stockLabel = { instock: 'Na stanju', outofstock: 'Nema na stanju', onbackorder: 'Po narudžbi' };
+        const stockLabel  = { instock: 'Na stanju', outofstock: 'Nema na stanju', onbackorder: 'Po narudžbi' };
+        const labelLines  = [];
+        const stockLines  = [];
+        const priceLines  = [];
+        const qtyLines    = [];
 
-        const rowsHtml = variations.map(v => {
+        variations.forEach(v => {
             const rowKey     = `${productId}_${v.id}`;
             const stockClass = `dp-qo-stock--${escHtml(v.stock_status)}`;
             const stockText  = stockLabel[v.stock_status] ?? v.stock_status;
-            return this.#variationRowHTML({
-                rowKey, productId: Number(productId), variationId: v.id,
-                label: escHtml(v.label), sku: escHtml(v.sku),
-                stockClass, stockText, priceHtml: v.price_html, price: v.price,
-                disableQty: v.stock_status === 'outofstock',
-            });
-        }).join('');
+            const disableQty = v.stock_status === 'outofstock';
 
-        variationsEl.classList.remove('dp-qo-row__variations--loading');
-        variationsEl.innerHTML = rowsHtml;
+            labelLines.push(this.#variationLabelLineHTML(escHtml(v.label), escHtml(v.sku)));
+            stockLines.push(this.#variationStockLineHTML(stockClass, stockText));
+            priceLines.push(this.#variationPriceLineHTML(v.price_html));
+            qtyLines.push(this.#variationQtyLineHTML({
+                rowKey, productId: Number(productId), variationId: v.id, price: v.price, disableQty,
+            }));
+        });
+
+        labelsEl.classList.remove('dp-qo-variation-list--loading');
+        labelsEl.innerHTML = labelLines.join('');
+        stocksEl.innerHTML = stockLines.join('');
+        pricesEl.innerHTML = priceLines.join('');
+        qtysEl.innerHTML   = qtyLines.join('');
         document.dispatchEvent(new CustomEvent('dp:qo:rows-rendered'));
     }
 

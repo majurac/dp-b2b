@@ -163,3 +163,12 @@ if ( ! function_exists( 'wp_body_open' ) ) :
 		do_action( 'wp_body_open' );
 	}
 endif;
+
+/**
+ * True on the Quick Order page. Guards against the plugin being inactive —
+ * DP_Quick_Order_Config may not exist if dp-b2b-quick-order is deactivated.
+ */
+function dreampoint_b2b_is_quick_order_page(): bool {
+	return class_exists( 'DP_Quick_Order_Config' )
+		&& is_page( DP_Quick_Order_Config::PAGE_SLUG );
+}

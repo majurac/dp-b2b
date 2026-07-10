@@ -1,5 +1,5 @@
 /* ── Layout ─────────────────────────────────────────────────── */
-.dp-quick-order { font-size: 14px; }
+.dp-quick-order { font-size: 14px; padding-bottom: 90px; } /* space for fixed footer */
 
 .dp-qo-table-wrap { overflow-x: auto; margin: 12px 0; }
 
@@ -22,10 +22,6 @@
 .dp-qo-name { display: block; font-weight: 500; }
 .dp-qo-sku  { display: block; color: #888; font-size: 12px; }
 
-/* ── Product name link ───────────────────────────────────────── */
-.dp-qo-name-link { text-decoration: none; color: inherit; }
-.dp-qo-name-link:hover .dp-qo-name { text-decoration: underline; }
-
 /* ── WPF filter area ─────────────────────────────────────────── */
 .dp-qo-filter-area { margin-bottom: 16px; }
 
@@ -35,75 +31,9 @@
 .dp-qo-stock--outofstock  { background: #fce4ec; color: #c62828; }
 .dp-qo-stock--onbackorder { background: #fff3e0; color: #e65100; }
 
-/* ── Variation select ────────────────────────────────────────── */
-.dp-qo-variation { max-width: 200px; padding: 4px 6px; border: 1px solid #ccc; border-radius: 3px; font-size: 13px; }
-
 /* ── Quantity input ──────────────────────────────────────────── */
-.dp-qo-qty { width: 64px; text-align: center; padding: 4px 6px; border: 1px solid #ccc; border-radius: 3px; font-size: 14px; }
+.dp-qo-qty { width: 52px; text-align: center; padding: 4px 6px; border: 1px solid #ccc; border-radius: 3px; font-size: 14px; }
 .dp-qo-qty:disabled { background: #f3f3f3; opacity: 0.5; cursor: not-allowed; }
-
-/* ── Row states: idle (default), pending, synced, error ──────── */
-.dp-qo-row.is-pending { background: #fffde7; }
-.dp-qo-row.is-synced  { background: #e8f5e9; }
-.dp-qo-row.is-error   { background: #fce4ec; }
-
-/* ── Status icon ─────────────────────────────────────────────── */
-.dp-qo-status-icon                        { display: inline-block; width: 18px; text-align: center; font-size: 15px; }
-.dp-qo-row.is-pending .dp-qo-status-icon  { color: #888; }
-.dp-qo-row.is-synced  .dp-qo-status-icon  { color: #2e7d32; }
-.dp-qo-row.is-error   .dp-qo-status-icon  { color: #c62828; }
-
-/* ── Pagination ──────────────────────────────────────────────── */
-.dp-qo-pagination { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
-
-.dp-qo-btn { padding: 5px 12px; border: 1px solid #ccc; background: #fff; border-radius: 3px; cursor: pointer; font-size: 13px; }
-.dp-qo-btn:hover { background: #f3f3f3; }
-
-.dp-qo-page-info { font-size: 13px; color: #666; }
-
-/* ── Cart footer ─────────────────────────────────────────────── */
-.dp-qo-footer {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 16px;
-    padding: 12px 0;
-    border-top: 2px solid #e2e2e2;
-    margin-top: 8px;
-}
-
-.dp-qo-footer__total { font-weight: 600; font-size: 15px; }
-
-.dp-qo-footer__cart-link {
-    display: inline-block;
-    padding: 8px 18px;
-    background: #222;
-    color: #fff;
-    text-decoration: none;
-    border-radius: 3px;
-    font-size: 13px;
-}
-.dp-qo-footer__cart-link:hover { background: #444; color: #fff; }
-
-/* ── Loading / empty / error states ─────────────────────────── */
-.dp-qo-loading, .dp-qo-empty, .dp-qo-error {
-    text-align: center;
-    padding: 24px;
-    font-style: italic;
-    color: #aaa;
-}
-.dp-qo-error { color: #c62828; }
-
-/* ── Access denied ───────────────────────────────────────────── */
-.dp-qo-access-denied { color: #666; font-style: italic; padding: 12px 0; margin: 0; }
-
-/* ── Neutral stock badge (variable before selection) ─────────── */
-.dp-qo-stock--neutral { background: #f5f5f5; color: #999; }
-
-/* ── Sortable column headers ─────────────────────────────────── */
-.dp-qo-table th[data-sort] { cursor: pointer; user-select: none; }
-.dp-qo-table th[data-sort]:hover { background: #efefef; }
-.dp-qo-sort-arrow { font-size: 11px; margin-left: 3px; }
 
 /* ── Qty +/- wrap ─────────────────────────────────────────────── */
 .dp-qo-qty-wrap { display: inline-flex; align-items: center; gap: 3px; }
@@ -119,4 +49,87 @@
 }
 .dp-qo-qty-btn:hover:not(:disabled) { background: #f3f3f3; }
 .dp-qo-qty-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.dp-qo-qty { width: 52px; }
+
+/* ── Pagination ──────────────────────────────────────────────── */
+.dp-qo-pagination { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
+
+.dp-qo-btn { padding: 5px 12px; border: 1px solid #ccc; background: #fff; border-radius: 3px; cursor: pointer; font-size: 13px; }
+.dp-qo-btn:hover { background: #f3f3f3; }
+
+.dp-qo-page-info { font-size: 13px; color: #666; }
+
+/* ── Fixed Quick Order footer ─────────────────────────────────── */
+.dp-qo-footer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 14px 24px;
+    background: #fff;
+    border-top: 2px solid #e2e2e2;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.dp-qo-footer__summary { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #444; }
+.dp-qo-footer__icon { font-size: 18px; }
+
+.dp-qo-footer__total { display: flex; flex-direction: column; align-items: flex-start; }
+.dp-qo-footer__total-label { font-size: 11px; color: #888; }
+.dp-qo-footer__subtotal-amount { font-weight: 600; font-size: 17px; }
+
+.dp-qo-footer__actions { display: flex; align-items: center; gap: 12px; }
+
+.dp-qo-footer__add-to-cart {
+    padding: 10px 22px;
+    background: #222;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    font-size: 13px;
+    cursor: pointer;
+}
+.dp-qo-footer__add-to-cart:hover:not(:disabled) { background: #444; }
+.dp-qo-footer__add-to-cart:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.dp-qo-footer__cart-link {
+    display: inline-block;
+    color: #222;
+    text-decoration: none;
+    font-size: 13px;
+    border-bottom: 1px solid currentColor;
+}
+.dp-qo-footer__cart-link:hover { color: #444; }
+
+@media only screen and (max-width: 767.98px) {
+    .dp-qo-footer {
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 10px 14px;
+    }
+    .dp-qo-footer__actions { width: 100%; justify-content: space-between; }
+}
+
+/* ── Loading / empty / error states ─────────────────────────── */
+.dp-qo-loading, .dp-qo-empty, .dp-qo-error {
+    text-align: center;
+    padding: 24px;
+    font-style: italic;
+    color: #aaa;
+}
+.dp-qo-error { color: #c62828; }
+
+/* ── Access denied ───────────────────────────────────────────── */
+.dp-qo-access-denied { color: #666; font-style: italic; padding: 12px 0; margin: 0; }
+
+/* ── Sortable column headers ─────────────────────────────────── */
+.dp-qo-table th[data-sort] { cursor: pointer; user-select: none; }
+.dp-qo-table th[data-sort]:hover { background: #efefef; }
+.dp-qo-sort-arrow { font-size: 11px; margin-left: 3px; }
+
+/* ── Loading placeholder row (variable product, before variations resolve) ── */
+.dp-qo-row--loading td { text-align: left; padding-left: 16px; }

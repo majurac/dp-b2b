@@ -1,6 +1,16 @@
 # Quick Order — Implementation Status
 
-Last updated: 2026-07-10 (local-state transformation implemented and Playwright-verified)
+Last updated: 2026-07-10 (variable-product E2E validated on staging via synthetic catalog generator; release candidate)
+
+**Release status:**
+
+| Stage | Status |
+|-------|--------|
+| Local implementation | COMPLETE |
+| Staging deployment | COMPLETE (commit `3e9dc1c`) |
+| Staging validation | COMPLETE (incl. variable products/variations — see synthetic catalog generator run, 2026-07-10) |
+| Release candidate | READY |
+| Production deployment | NOT APPLICABLE — no production environment provisioned for this project. `dreampoint.b2b.uncledev.cloud` (`dream9399`) is currently the only deployment target. Do not treat staging as production. |
 
 ---
 
@@ -16,9 +26,21 @@ visible focus indicators on new controls. **Staging-verified 2026-07-10**
 (51 items → 2 sequential requests, 50+1), mini-cart fragment refresh +
 Toastify, cart icon counter increment, cache-busting (bumped
 `DP_QUICK_ORDER_VERSION` 1.0.1→1.0.2 after finding 7-day browser cache with a
-static version string), full golden-path E2E. Staging catalog has no variable
-products — variable-product rendering remains local-only verified. Not yet
-pushed to production.
+static version string), full golden-path E2E.
+
+**Variable-product staging validation (2026-07-10, commit `3e9dc1c`):** staging
+catalog has no real variable products, so the existing synthetic catalog
+generator (`docs/historical/synthetic-b2b-catalog.md`) was run on staging
+(taxonomies + 200 simple + 10 variable/183 variations) to validate variable-
+product rendering, independent variation rows/qty controls, local subtotal,
+bulk add-to-cart, and WC cart contents end-to-end — including an
+organically-triggered partial-failure/stock-guard path (one row exceeded
+available stock, correctly rejected and retained locally while the rest of
+the batch synced). Catalog reset (`wp dp-b2b reset-catalog`) and cart cleanup
+ran afterward; staging is back to its pre-test state (6 original products).
+Release candidate is READY. **Production deployment is NOT APPLICABLE** — no
+production environment is provisioned for this project; `dreampoint.b2b.uncledev.cloud`
+remains the only deployment target.
 
 | System | Status | Stable | Staging Ready | Notes |
 |--------|--------|--------|---------------|-------|

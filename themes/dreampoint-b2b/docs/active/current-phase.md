@@ -25,7 +25,8 @@ Execution plan: (added once written — see `docs/superpowers/plans/`)
 - Local Quick Order state (quantity changes never touch WC cart)
 - Footer driven by local state (item count, row count, subtotal) instead of `data.totals`
 - Bulk "Dodaj u košaricu" submit, chunked over the existing 50-item batch cap
-- All variations rendered as independent rows (dropdown removed)
+- Variations rendered as independently purchasable rows grouped under their
+  parent product's single row (dropdown removed) — see local-state doc §6
 - Product links removed; SKU label reworded to "Kataloški broj:"
 - Minimal Quick-Order-specific header (conditional branch in existing header render, not a new template)
 - Fixed footer, no persistence across reload/navigation (by design)

@@ -15,6 +15,15 @@ Canonical reference for the Quick Order local-state ordering workspace.
 Supersedes `docs/frozen/quick-order-sync-architecture.md` (real-time
 debounce-to-cart model) — see that document's Supersession Note for why.
 
+**Revision — 2026-07-10 (variation rendering reconciliation):** §6 originally
+described variable-product variations as being promoted to sibling top-level
+rows. That model was superseded by a grouped layout (one top-level
+`.dp-qo-row` per parent, variations nested inside it) before production use —
+§6 below has been rewritten to describe the grouped model as implemented and
+staging-validated. This is a documentation correction, not an architecture
+change: the local-state model, footer computation, and submit flow in §2–§5
+were not affected by the grouping change and remain as written.
+
 ---
 
 ## 1. System Overview
@@ -148,20 +157,48 @@ silently discards everything not yet submitted via "Dodaj u košaricu".
 ## 6. Variation Rendering
 
 The `<select>` dropdown from the superseded architecture (`.dp-qo-variation`)
-is removed entirely. Every variation of a variable product renders as its own
-independent row immediately — same columns as a simple-product row (thumb,
-name, stock, price, quantity controls), no separate "select a variation first"
-step.
+is removed entirely — there is no separate "select a variation first" step.
+Every variation of a variable product is independently purchasable and
+visible immediately, with its own quantity controls, no separate step to
+select it first.
+
+**Grouped layout:** a variable product renders as exactly one top-level
+`.dp-qo-row` (modifier `.dp-qo-row--variable`), not one row per variation.
+Parent product information (thumbnail, name, catalog number/SKU) is rendered
+once, in a `.dp-qo-row__product` block inside that row. Its variations are
+rendered inside a sibling `.dp-qo-row__variations` container within the same
+row, one `.dp-qo-variation-row` per variation, stacked vertically. Parent
+info is never repeated per variation.
+
+Each `.dp-qo-variation-row` is a fully independent purchasable unit and
+retains its own:
+- `variation_id` (and parent `product_id`)
+- row key (`"${productId}_${variationId}"`) — its local-state identity
+- quantity input and +/- controls
+- stock state (in stock / out of stock / on backorder — controls disabled
+  when out of stock, same rule as a simple-product row)
+- validation/error state — a variation rejected at submit (§4.6) keeps its
+  own quantity and error display without affecting sibling variations of the
+  same parent, or any other row
+- pricing (unit price captured from the variation payload, same as a
+  simple-product row)
+- submit behavior — included in the batch submit exactly like a
+  simple-product row (§4), via its own `product_id`/`variation_id`/`quantity`
 
 The `/products/{id}/variations` REST route (`class-product-query.php::
 get_variation_details()`) is unchanged and still avoids
-`get_available_variations()` — only the frontend rendering target changes,
-from populating one `<select>`'s options to inserting N sibling `<tr>` rows in
-place of the parent's placeholder row.
+`get_available_variations()` — only the frontend rendering target changes:
+the parent's `.dp-qo-row__variations` placeholder ("Učitavanje varijacija...")
+is populated in place with the fetched variations; the parent `.dp-qo-row`
+itself is never replaced, only its variations container's content.
 
-Each variation row has its own row key (`"${productId}_${variationId}"`) and
-its own local-state entry — functionally, a variable product becomes N
-simple-product rows once variations are loaded.
+Functionally, a variable product's variations behave exactly like N
+independent simple-product rows once loaded — same row-key/local-state/
+submit contract — they are simply grouped under a shared parent container in
+the DOM instead of rendered as flat siblings. This is a DOM/markup detail;
+it does not change the local-state model (§2), footer computation (§3), or
+submit flow (§4), all of which operate on row keys and are agnostic to DOM
+nesting.
 
 ---
 

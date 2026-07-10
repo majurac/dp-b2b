@@ -27,8 +27,14 @@ Run before first real staging test session.
 
 ## Smoke Test (manual, pre-Playwright)
 
+> Updated 2026-07-10 for the local-state architecture
+> (`docs/frozen/quick-order-local-state-architecture.md`). Quantity changes no
+> longer fire network requests — only the explicit submit does.
+
 - [ ] Log in as B2B test user
 - [ ] Open Quick Order page — product list loads
-- [ ] Change a quantity — sync request fires (check browser Network tab)
-- [ ] Open WooCommerce cart — items reflect Quick Order state
+- [ ] Change a quantity — footer updates immediately, **no** network request fires (check browser Network tab)
+- [ ] Open WooCommerce cart in another tab — confirm it is unaffected by Quick Order quantity changes
+- [ ] Click "Dodaj u košaricu" — one (or chunked, if >50 rows) request(s) fire; WooCommerce cart now reflects submitted items; Quick Order state clears
+- [ ] Refresh the Quick Order page before submitting — confirm quantities reset to 0 (no persistence, by design)
 - [ ] Log in as B2C user — Quick Order page shows login prompt or is inaccessible

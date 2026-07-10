@@ -1,13 +1,44 @@
 # Quick Order — Cart Sync Architecture
 
 ## Status
-FROZEN — DO NOT REFACTOR WITHOUT EXPLICIT APPROVAL
+SUPERSEDED — see `docs/frozen/quick-order-local-state-architecture.md`
 
-Architecture status:
+Historical status (while active):
 STABLE / PRODUCTION-VALIDATED
 
-Operational reference for the Quick Order synchronization system.
+Operational reference for the Quick Order real-time synchronization system.
 Covers JS engine, PHP endpoint, concurrency model, and variation handling.
+
+This document is preserved for historical and architectural-reference purposes.
+Its content describes a system that is no longer the active runtime behavior of
+Quick Order — do not use it as current implementation guidance.
+
+---
+
+## Supersession Note
+
+**Approval date:** 2026-07-10
+**Superseded by:** `docs/frozen/quick-order-local-state-architecture.md`
+**Change type:** Product-level architecture change, not defect remediation. The
+real-time debounce-to-cart model documented below was stable and worked as
+designed — it is being replaced because the product requirement changed, not
+because it was broken.
+
+**Reason for change:** Quick Order is being transformed from a cart-driven
+interface (every quantity change immediately writes to the WooCommerce cart via
+debounced `POST /cart/sync`) into an independent ordering workspace. Quantity
+changes now mutate only local, ephemeral, in-page state. The WooCommerce cart
+is written to once, in a single explicit action, when the user clicks "Dodaj u
+košaricu".
+
+**What is preserved from this architecture:** The REST layer and PHP validation
+described in §2 ("Server-side validation"), §5 ("Variation Synchronization"),
+and the `sync_item()` logic in `class-cart-sync.php` are reused as the
+validated bulk-write path for the explicit "Dodaj u košaricu" action — see the
+new document for how they're invoked. The debounce engine, `SyncQueue`,
+`CartSync`'s per-keystroke dispatch, stale-token protocol, and optimistic-state
+reconciliation (all of §2–§4 below) are removed — they existed to make
+real-time sync safe, and there is no real-time sync left to protect.
 
 ---
 

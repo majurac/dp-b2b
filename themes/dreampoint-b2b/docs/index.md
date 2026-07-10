@@ -54,7 +54,8 @@ Active engineering guidance lives in:
 | Doc | System |
 |-----|--------|
 | `docs/frozen/checkout-logic.md` | Checkout — payment rules, billing prefill, WooCommerce Blocks billing data protection |
-| `docs/frozen/quick-order-sync-architecture.md` | CartSync — debounce engine, stale token model, variation replace flow |
+| `docs/frozen/quick-order-local-state-architecture.md` | Quick Order — local state workspace model (canonical, current) |
+| `docs/frozen/quick-order-sync-architecture.md` | CartSync — real-time debounce engine (SUPERSEDED 2026-07-10 — see local-state doc) |
 
 ---
 
@@ -90,7 +91,8 @@ Active engineering guidance lives in:
 
 | Plan | Status | Delivers |
 |------|--------|----------|
-| `docs/superpowers/plans/2026-05-12-quick-order-v1-1.md` | **Pending** | Admin bypass, variable stock fix, qty +/- buttons, cart totals footer |
+| `docs/superpowers/plans/2026-07-10-quick-order-local-state.md` | **Pending** | Transforms Quick Order into the local-state workspace model — see `docs/frozen/quick-order-local-state-architecture.md` |
+| `docs/superpowers/plans/2026-05-12-quick-order-v1-1.md` | **Executed** (table was stale — code already reflects all 5 tasks) | Admin bypass, variable stock fix, sorting, qty +/- buttons. Cart totals footer item is superseded by the local-state footer model (see `docs/frozen/quick-order-local-state-architecture.md` §3) rather than delivered as originally scoped. |
 
 ---
 
@@ -137,7 +139,9 @@ Executed specs: `docs/superpowers/specs/historical/`
 
 ## Deferred / Future Work
 
-- Cross-page cart hydration (V2 — documented as known limitation in frozen CartSync doc)
+- Cross-page cart hydration — moot under the local-state architecture (state
+  survives pagination in-page and is never persisted across navigations by
+  design; see `docs/frozen/quick-order-local-state-architecture.md` §2, §5)
 - Offline / network-failure queue persistence
 - Playwright E2E test suite for Quick Order flows
 - Matrix ordering, SKU search, saved order templates (documented in `CLAUDE.md` as future scope)

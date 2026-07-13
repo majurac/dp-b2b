@@ -1,20 +1,34 @@
 'use strict';
 
-import { QuickOrderState }  from './quick-order-state.js';
-import { FooterController } from './footer-controller.js';
-import { RowController }    from './row-controller.js';
-import { ProductList }      from './product-list.js';
-import { CartSubmit }       from './cart-submit.js';
+import { QuickOrderState }          from './quick-order-state.js';
+import { FooterController }         from './footer-controller.js';
+import { RowController }            from './row-controller.js';
+import { ProductList }              from './product-list.js';
+import { CartSubmit }               from './cart-submit.js';
+import { VariationChipsController } from './variation-chips.js';
 
 (function () {
     const config = window.dpQuickOrder;
     if (!config || !config.cartSyncUrl || !config.wpNonce || !config.productsUrl) return;
 
-    const state       = new QuickOrderState();
-    const footer      = new FooterController(state);
-    const rowCtrl     = new RowController(state, footer);
+    const state  = new QuickOrderState();
+    const footer = new FooterController(state);
+    const chips  = new VariationChipsController(state);
+
+    // Forward reference: chips' remove-click callback needs rowCtrl.hydrateAll(),
+    // but RowController's constructor needs chips — assigned right after
+    // construction, before any user interaction can fire the callback.
+    let rowCtrl;
+    chips.onRemove(rowKey => {
+        state.setQuantity(rowKey, 0);
+        rowCtrl.hydrateAll();
+        footer.render();
+        chips.render();
+    });
+
+    rowCtrl = new RowController(state, footer, chips);
     const productList = new ProductList(config);
-    const submit      = new CartSubmit(state, config);
+    const submit       = new CartSubmit(state, config);
 
     // Re-hydrate qty inputs from local state whenever rows (re)render —
     // pagination, sort, or a variation set arriving asynchronously.
@@ -44,6 +58,7 @@ import { CartSubmit }       from './cart-submit.js';
         state.clearKeys(addedKeys);
         footer.render();
         rowCtrl.hydrateAll();
+        chips.render();
 
         addBtn.textContent = originalLabel;
         addBtn.disabled = state.isEmpty();

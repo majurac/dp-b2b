@@ -41,6 +41,16 @@ export class QuickOrderState {
         return this.#rows.size;
     }
 
+    /**
+     * @returns {string[]} row keys with quantity > 0, in insertion order
+     * (JS `Map` iterates in insertion order by spec — this is deterministic,
+     * never sorted). Consumed by VariationChipsController so chips never
+     * reorder themselves as the user edits quantities.
+     */
+    getActiveRowKeys() {
+        return [...this.#rows.keys()];
+    }
+
     /** @returns {number} sum(quantity * unitPrice) — product-only, no VAT/shipping/coupons */
     getSubtotal() {
         let total = 0;

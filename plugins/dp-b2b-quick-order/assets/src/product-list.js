@@ -37,8 +37,6 @@ export class ProductList {
         this.#config       = config;
         this.#tbody        = document.querySelector('.dp-qo-tbody');
         this.#paginationEl = document.querySelector('.dp-qo-pagination');
-        this.#bindSortHeaders();
-        this.#updateSortIndicators();
         this.#bindWoofIntegration();
     }
 
@@ -65,7 +63,9 @@ export class ProductList {
         this.#totalPages = data.total_pages ?? 1;
         this.#renderRows(data.products ?? []);
         this.#renderPagination();
-        document.dispatchEvent(new CustomEvent('dp:qo:rows-rendered'));
+        // Skeleton render: variable-product parent rows exist but their
+        // variations (and resolved attributes) haven't been fetched yet — empty payload.
+        document.dispatchEvent(new CustomEvent('dp:qo:rows-rendered', { detail: { variationAttributes: [] } }));
         this.#loadAllVariations();
     }
 
@@ -182,6 +182,7 @@ export class ProductList {
          value="0" min="0" step="1"
          ${disableQty ? 'disabled' : ''}>
   <button class="dp-qo-qty-btn dp-qo-qty-plus" type="button" aria-label="Povećaj količinu"${disableQty ? ' disabled' : ''}>+</button>
+  <span class="dp-qo-qty-check" aria-hidden="true">✓</span>
 </div>`.trim();
     }
 
@@ -215,15 +216,19 @@ export class ProductList {
      * One variation's line within the Kol. (qty) column — carries the
      * variation's full dataset (product/variation id, row key, price) on
      * the same `.dp-qo-variation-row` class RowController already resolves
-     * via `.closest('.dp-qo-row, .dp-qo-variation-row')`.
+     * via `.closest('.dp-qo-row, .dp-qo-variation-row')`. `data-variation-label`
+     * is a debugging byproduct only — VariationChipsController's canonical
+     * label source is the `dp:qo:rows-rendered` event payload, not this
+     * attribute (see #loadVariationOptions below).
      */
-    #variationQtyLineHTML({ rowKey, productId, variationId, price, disableQty }) {
+    #variationQtyLineHTML({ rowKey, productId, variationId, price, disableQty, label }) {
         return `
 <div class="dp-qo-variation-row dp-qo-variation-line"
      data-product-id="${productId}"
      data-variation-id="${variationId}"
      data-row-key="${rowKey}"
-     data-price="${price}">
+     data-price="${price}"
+     data-variation-label="${label}">
   ${this.#qtyControlsHTML(rowKey, disableQty)}
 </div>`.trim();
     }
@@ -266,24 +271,31 @@ export class ProductList {
             return;
         }
 
-        const stockLabel  = { instock: 'Na stanju', outofstock: 'Nema na stanju', onbackorder: 'Po narudžbi' };
-        const labelLines  = [];
-        const stockLines  = [];
-        const priceLines  = [];
-        const qtyLines    = [];
+        const stockLabel          = { instock: 'Na stanju', outofstock: 'Nema na stanju', onbackorder: 'Po narudžbi' };
+        const labelLines          = [];
+        const stockLines          = [];
+        const priceLines          = [];
+        const qtyLines            = [];
+        const variationAttributes = [];
 
         variations.forEach(v => {
-            const rowKey     = `${productId}_${v.id}`;
-            const stockClass = `dp-qo-stock--${escHtml(v.stock_status)}`;
-            const stockText  = stockLabel[v.stock_status] ?? v.stock_status;
-            const disableQty = v.stock_status === 'outofstock';
+            const rowKey       = `${productId}_${v.id}`;
+            const stockClass   = `dp-qo-stock--${escHtml(v.stock_status)}`;
+            const stockText    = stockLabel[v.stock_status] ?? v.stock_status;
+            const disableQty   = v.stock_status === 'outofstock';
+            const escapedLabel = escHtml(v.label);
 
-            labelLines.push(this.#variationLabelLineHTML(escHtml(v.label), escHtml(v.sku)));
+            labelLines.push(this.#variationLabelLineHTML(escapedLabel, escHtml(v.sku)));
             stockLines.push(this.#variationStockLineHTML(stockClass, stockText));
             priceLines.push(this.#variationPriceLineHTML(v.price_html));
             qtyLines.push(this.#variationQtyLineHTML({
                 rowKey, productId: Number(productId), variationId: v.id, price: v.price, disableQty,
+                label: escapedLabel,
             }));
+            // v.attributes is already-resolved { label, value } pairs from
+            // class-product-query.php::get_variation_details() — passed
+            // through untouched, no re-parsing at this layer.
+            variationAttributes.push({ rowKey, attributes: v.attributes ?? [] });
         });
 
         labelsEl.classList.remove('dp-qo-variation-list--loading');
@@ -291,7 +303,7 @@ export class ProductList {
         stocksEl.innerHTML = stockLines.join('');
         pricesEl.innerHTML = priceLines.join('');
         qtysEl.innerHTML   = qtyLines.join('');
-        document.dispatchEvent(new CustomEvent('dp:qo:rows-rendered'));
+        document.dispatchEvent(new CustomEvent('dp:qo:rows-rendered', { detail: { variationAttributes } }));
     }
 
     #renderPagination() {
@@ -310,38 +322,16 @@ export class ProductList {
         });
     }
 
-    #bindSortHeaders() {
-        document.querySelectorAll('.dp-qo-table th[data-sort]').forEach(th => {
-            th.addEventListener('click', () => {
-                const col = th.dataset.sort;
-                if (this.#orderBy === col) {
-                    this.#orderDir = this.#orderDir === 'asc' ? 'desc' : 'asc';
-                } else {
-                    this.#orderBy  = col;
-                    this.#orderDir = 'asc';
-                }
-                this.#updateSortIndicators();
-                this.loadPage(1);
-            });
-        });
-    }
-
-    #updateSortIndicators() {
-        document.querySelectorAll('.dp-qo-table th[data-sort]').forEach(th => {
-            const arrow = th.querySelector('.dp-qo-sort-arrow');
-            if (!arrow) return;
-            arrow.textContent = th.dataset.sort === this.#orderBy
-                ? (this.#orderDir === 'asc' ? ' ↑' : ' ↓')
-                : '';
-        });
-    }
-
     /**
      * Intercept history.pushState and popstate so that when WOOF updates the browser
      * URL with filter params, Quick Order re-fetches its product list from the server.
+     * WBW's native Sort By control (view id=2, rendered in `.dp-qo-sort`) also goes
+     * through this same URL-based path — see #applyOrderbyParam().
      */
     #bindWoofIntegration() {
-        this.#woofFilters = this.#extractWoofFilters(new URLSearchParams(window.location.search));
+        const params = new URLSearchParams(window.location.search);
+        this.#woofFilters = this.#extractWoofFilters(params);
+        this.#applyOrderbyParam(params);
 
         const onUrlChange = () => this.#onWoofUrlChange();
 
@@ -358,11 +348,44 @@ export class ProductList {
         const params  = new URLSearchParams(window.location.search);
         const next    = this.#extractWoofFilters(params);
         const current = JSON.stringify(this.#woofFilters);
+        const orderbyChanged = this.#applyOrderbyParam(params);
 
-        if (JSON.stringify(next) !== current) {
+        if (JSON.stringify(next) !== current || orderbyChanged) {
             this.#woofFilters = next;
             this.loadPage(1);
         }
+    }
+
+    /**
+     * Reads WBW's native Sort By selection from the URL's public `orderby`
+     * query parameter (WooCommerce's own convention — WBW's Sort By widget,
+     * view id=2, writes this same param via history.pushState on change) and
+     * translates it into the existing #orderBy/#orderDir fields. No WBW
+     * DOM/JS API is touched — this only reads a stable, public URL param.
+     *
+     * WBW view id=2 is configured (WBW admin → Show All Filters → Sort by
+     * filter → Filters tab → Sort options) with exactly four enabled values:
+     * `title`, `title-desc`, `price`, `price-desc`. Any other value (e.g. an
+     * unconfigured `popularity`/`rand`/`sku` or no param at all) is ignored,
+     * leaving the current #orderBy/#orderDir unchanged.
+     *
+     * @param {URLSearchParams} params
+     * @returns {boolean} true if #orderBy/#orderDir changed
+     */
+    #applyOrderbyParam(params) {
+        const raw = params.get('orderby');
+        if (!raw) return false;
+
+        const isDesc = raw.endsWith('-desc');
+        const field  = isDesc ? raw.slice(0, -('-desc'.length)) : raw;
+        if (field !== 'title' && field !== 'price') return false;
+
+        const orderDir = isDesc ? 'desc' : 'asc';
+        if (field === this.#orderBy && orderDir === this.#orderDir) return false;
+
+        this.#orderBy  = field;
+        this.#orderDir = orderDir;
+        return true;
     }
 
     /**

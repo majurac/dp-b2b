@@ -11,16 +11,22 @@ export class RowController {
     #state;
     /** @type {import('./footer-controller.js').FooterController} */
     #footer;
+    /** @type {import('./variation-chips.js').VariationChipsController} */
+    #chips;
     /** @type {HTMLElement|null} */
     #tbody;
+    /** @type {WeakMap<HTMLElement, number>} checkmark element -> active fade-out timeout id */
+    #checkTimers = new WeakMap();
 
     /**
      * @param {import('./quick-order-state.js').QuickOrderState} state
      * @param {import('./footer-controller.js').FooterController} footer
+     * @param {import('./variation-chips.js').VariationChipsController} chips
      */
-    constructor(state, footer) {
+    constructor(state, footer, chips) {
         this.#state  = state;
         this.#footer = footer;
+        this.#chips  = chips;
         this.#tbody  = document.querySelector('.dp-qo-tbody');
         if (!this.#tbody) return;
         this.#bindTableEvents();
@@ -70,6 +76,41 @@ export class RowController {
 
         this.#state.setQuantity(rowKey, qty, { productId, variationId, unitPrice });
         this.#footer.render();
+        this.#chips.render();
+        this.#flashCheck(row, qty);
+    }
+
+    /**
+     * Flash the row's checkmark on a successful quantity change. Restarts
+     * the fade-out timer on rapid repeated changes instead of stacking
+     * animations or timers — the WeakMap lookup always clears any existing
+     * timeout for this element before scheduling a new one, so at most one
+     * timeout is ever active per checkmark. Keying by element (not row key)
+     * also means the timer is released automatically once the element
+     * leaves the DOM (pagination/sort/re-render) — no manual cleanup needed.
+     * Hides immediately, no animation, if quantity returns to 0.
+     * @param {HTMLElement} row
+     * @param {number} qty
+     */
+    #flashCheck(row, qty) {
+        const check = row.querySelector('.dp-qo-qty-check');
+        if (!check) return;
+
+        const existingTimer = this.#checkTimers.get(check);
+        if (existingTimer) clearTimeout(existingTimer);
+
+        if (qty <= 0) {
+            check.classList.remove('is-visible');
+            this.#checkTimers.delete(check);
+            return;
+        }
+
+        check.classList.add('is-visible');
+        const timer = setTimeout(() => {
+            check.classList.remove('is-visible');
+            this.#checkTimers.delete(check);
+        }, 1000);
+        this.#checkTimers.set(check, timer);
     }
 
     #onQtyButton(btn, delta) {

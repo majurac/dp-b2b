@@ -194,7 +194,7 @@ class DP_Quick_Order_Product_Query {
 	 * Never calls get_available_variations() — avoids full variation tree hydration.
 	 *
 	 * @param int $product_id Parent variable product ID.
-	 * @return list<array{id:int,sku:string,label:string,price:string,price_html:string,stock_status:string,stock_qty:int|null}>
+	 * @return list<array{id:int,sku:string,label:string,attributes:list<array{label:string,value:string}>,price:string,price_html:string,stock_status:string,stock_qty:int|null}>
 	 */
 	public function get_variation_details( int $product_id ): array {
 		$product = wc_get_product( $product_id );
@@ -212,7 +212,11 @@ class DP_Quick_Order_Product_Query {
 				continue;
 			}
 
-			$attr_parts = [];
+			// Resolved, human-readable label/value pairs — deterministic order
+			// (WC_Product_Variation::get_attributes()'s own iteration order).
+			// This is the single place attribute names/values are resolved;
+			// consumers (chip rendering) must not re-derive them from slugs.
+			$attributes = [];
 			foreach ( $variation->get_attributes() as $key => $value ) {
 				if ( '' === $value ) {
 					continue;
@@ -221,10 +225,13 @@ class DP_Quick_Order_Product_Query {
 				$taxonomy    = str_replace( 'attribute_', '', $key );
 				$term        = get_term_by( 'slug', $value, $taxonomy );
 				$value_label = $term instanceof WP_Term ? $term->name : $value;
-				$attr_parts[] = $attr_label . ': ' . $value_label;
+				$attributes[] = [
+					'label' => $attr_label,
+					'value' => $value_label,
+				];
 			}
-			$label = $attr_parts
-				? implode( ' / ', $attr_parts )
+			$label = $attributes
+				? implode( ' / ', array_map( static fn( array $a ): string => $a['label'] . ': ' . $a['value'], $attributes ) )
 				/* translators: %d: variation ID */
 				: sprintf( __( 'Variation #%d', 'dp-b2b-quick-order' ), $variation_id );
 
@@ -232,6 +239,7 @@ class DP_Quick_Order_Product_Query {
 				'id'           => $variation_id,
 				'sku'          => $variation->get_sku(),
 				'label'        => $label,
+				'attributes'   => $attributes,
 				'price'        => (string) $variation->get_price(),
 				'price_html'   => $variation->get_price_html(),
 				'stock_status' => $variation->get_stock_status(),

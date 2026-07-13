@@ -25,6 +25,85 @@
 /* ── WPF filter area ─────────────────────────────────────────── */
 .dp-qo-filter-area { margin-bottom: 16px; }
 
+/* ── Toolbar: WBW active-filter chips + Quick Order variation chips
+   (left group) + sort dropdown (right group). .selected-prod_atributes is
+   WBW's own subtree — styled only via layout on this shared ancestor,
+   never read from or written into directly. ── */
+.dp-qo-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.dp-qo-toolbar__filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.dp-qo-toolbar__label {
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #444;
+}
+
+.dp-qo-selected-variations {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+.dp-qo-selected-variations[hidden] { display: none; }
+
+.dp-qo-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px 4px 10px;
+    background: #f5f5f5;
+    border: 1px solid #e2e2e2;
+    border-radius: 14px;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #333;
+    white-space: nowrap;
+}
+
+.dp-qo-chip__remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: #888;
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+}
+.dp-qo-chip__remove:hover { background: #e2e2e2; color: #333; }
+
+/* .dp-qo-sort wraps WBW's native Sort By view (id=2) — layout only, WBW
+   controls its own internal markup/styling, never touched here. */
+.dp-qo-sort {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    font-size: 13px;
+    color: #444;
+}
+
 /* ── Stock badge ─────────────────────────────────────────────── */
 .dp-qo-stock { display: inline-block; font-size: 11px; padding: 2px 6px; border-radius: 3px; white-space: nowrap; }
 .dp-qo-stock--instock     { background: #e8f5e9; color: #2e7d32; }
@@ -37,6 +116,25 @@
 
 /* ── Qty +/- wrap ─────────────────────────────────────────────── */
 .dp-qo-qty-wrap { display: inline-flex; align-items: center; gap: 3px; }
+
+/* ── Quantity change checkmark ───────────────────────────────────
+   Space is always reserved (fixed width, opacity/transform-only
+   transition) so its appearance/disappearance never shifts layout. ── */
+.dp-qo-qty-check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    flex-shrink: 0;
+    color: #2e7d32;
+    font-size: 14px;
+    line-height: 1;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    pointer-events: none;
+}
+.dp-qo-qty-check.is-visible { opacity: 1; transform: scale(1); }
 .dp-qo-qty-btn {
     width: 26px; height: 26px;
     padding: 0;
@@ -226,7 +324,7 @@
 .dp-qo-footer__add-to-cart:focus-visible,
 .dp-qo-footer__cart-link:focus-visible,
 .dp-qo-btn:focus-visible,
-.dp-qo-table th[data-sort]:focus-visible {
+.dp-qo-chip__remove:focus-visible {
     outline: 2px solid #025788 !important;
     outline-offset: 2px;
 }

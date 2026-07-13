@@ -425,16 +425,24 @@ export class ProductList {
     /**
      * Extract Quick Order filter params from a WOOF-updated URL.
      *
-     * Category/brand param NAMES are not matched by a guessed prefix — WBW admin
-     * lets the base name for each filter instance be renamed to anything (e.g. on
-     * this install the category filter param is `wpf_filter_cat_list_1s` while the
-     * brand filter param is the unrelated `product_brand_list`; confirmed live,
-     * not a fixed convention). The only stable, native source of truth for "which
-     * URL param belongs to which taxonomy" is the `data-taxonomy` /
-     * `data-get-attribute` pair WBW itself renders on every `.wpfFilterWrapper`
-     * (`views/woofilters.php` — every filter type sets both). Reading that DOM
-     * contract directly — instead of pattern-matching param names — works
-     * regardless of how an admin has named/reconfigured any given filter instance.
+     * ONE consistent strategy for every taxonomy-based WBW filter (category, brand,
+     * product attributes) — none of their param NAMES are matched by a guessed
+     * prefix. WBW admin lets the base name for any filter instance be renamed to
+     * anything (e.g. on this install the category filter param is
+     * `wpf_filter_cat_list_1s` while the brand filter param is the unrelated
+     * `product_brand_list`; confirmed live, not a fixed convention). The only
+     * stable, native source of truth for "which URL param belongs to which
+     * taxonomy" is the `data-taxonomy` / `data-get-attribute` pair WBW itself
+     * renders on every `.wpfFilterWrapper` via its own shared
+     * `setCommonFitlerDataAttr()` helper (`views/woofilters.php` — category, brand,
+     * AND attribute widgets all go through this same helper, so all three carry
+     * identical, reliable metadata). Attribute widgets set `data-taxonomy` to the
+     * full `pa_*` taxonomy name (`generateAttributeFilterHtml()`,
+     * `wc_attribute_taxonomy_name_by_id()`), which is what routes their values into
+     * `result.attributes` below — same loop, same delimiter lookup, no separate
+     * prefix-matching branch. Reading this DOM contract directly — instead of
+     * pattern-matching param names — works regardless of how an admin has
+     * named/reconfigured any given filter instance.
      *
      * @param {URLSearchParams} params
      * @returns {{ price_min?: number, price_max?: number, stock_status?: string, category?: string[], brand?: string[], attributes?: object }}
@@ -465,17 +473,12 @@ export class ProductList {
                 result.category = [...(result.category ?? []), ...values];
             } else if (taxonomy === 'product_brand' || taxonomy === 'pwb-brand') {
                 result.brand = [...(result.brand ?? []), ...values];
+            } else if (taxonomy.startsWith('pa_')) {
+                const attrName = taxonomy.slice('pa_'.length);
+                result.attributes = result.attributes ?? {};
+                result.attributes[attrName] = [...(result.attributes[attrName] ?? []), ...values];
             }
         }
-
-        const attrs = {};
-        for (const [key, val] of params) {
-            if (!key.startsWith('wpf_filter_pa_')) continue;
-            const attrName = key.slice('wpf_filter_pa_'.length);
-            if (!attrName) continue;
-            attrs[attrName] = val.split(this.#delimiterForParam(key)).filter(Boolean);
-        }
-        if (Object.keys(attrs).length) result.attributes = attrs;
 
         return result;
     }

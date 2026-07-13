@@ -2,6 +2,13 @@
 
 Run before first real staging test session.
 
+## Authentication
+
+Staging WP Admin credentials: Canonical Secret Entry "Dreampoint B2B —
+Staging — WordPress Admin" in KeePassXC (`~/.claude/docs/server-runbook.md`
+§ Secrets). Never ask for these credentials in chat if the entry is
+available — open it locally, log in directly.
+
 ## DB Snapshot
 
 - [ ] Export local DB: `C:\xampp2\mysql\bin\mysqldump.exe -u root --password="" dp_b2b > dp_b2b_backup_YYYYMMDD.sql`

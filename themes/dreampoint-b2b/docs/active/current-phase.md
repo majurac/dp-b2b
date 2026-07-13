@@ -39,7 +39,7 @@ Execution plan: (added once written — see `docs/superpowers/plans/`)
 | CartSync real-time engine (superseded 2026-07-10) | `docs/frozen/quick-order-sync-architecture.md` |
 | Checkout logic (payment rules, billing) | `docs/frozen/checkout-logic.md` |
 | Visibility engine (bucket rules) | Theme `inc/` — see `CLAUDE.md` |
-| WOOF/WBW filter integration | Architecture locked, in production |
+| WOOF/WBW filter integration | `docs/frozen/quick-order-local-state-architecture.md` §11 (WBW Integration Doctrine) |
 
 Any change to a frozen system requires explicit plan approval. The local-state
 transformation itself was explicitly approved 2026-07-10 — it is not a

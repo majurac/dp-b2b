@@ -1,6 +1,6 @@
 # Quick Order — Implementation Status
 
-Last updated: 2026-07-10 (variable-product E2E validated on staging via synthetic catalog generator; release candidate)
+Last updated: 2026-07-13 (WBW filter integration hardened — unified category/brand/attribute DOM-metadata parsing, native `wpfAjaxSuccess` event; staging synthetic catalog made persistent — see policy note below)
 
 **Release status:**
 
@@ -37,10 +37,23 @@ bulk add-to-cart, and WC cart contents end-to-end — including an
 organically-triggered partial-failure/stock-guard path (one row exceeded
 available stock, correctly rejected and retained locally while the rest of
 the batch synced). Catalog reset (`wp dp-b2b reset-catalog`) and cart cleanup
-ran afterward; staging is back to its pre-test state (6 original products).
+ran afterward; staging was back to its pre-test state (6 original products)
+**as of 2026-07-10 — superseded, see policy note below.**
 Release candidate is READY. **Production deployment is NOT APPLICABLE** — no
 production environment is provisioned for this project; `dreampoint.b2b.uncledev.cloud`
 remains the only deployment target.
+
+**Staging dataset policy (2026-07-13, supersedes the reset described above):**
+the generated synthetic catalog is now a **persistent development dataset**,
+not a disposable per-test fixture. Staging currently carries the full
+generated set (216 products / 183 variations / 42 categories / 34 brands,
+plus the 6 original products) via `wp dp-b2b generate-catalog` (all three
+phases). **Do not run `wp dp-b2b reset-catalog` on staging** except (a) after
+ERP import becomes available, or (b) on explicit user instruction. Routine
+Quick Order development and regression testing should use this dataset as-is;
+only remove ad-hoc cart contents/test orders created during a session, never
+the catalog itself. See `docs/historical/synthetic-b2b-catalog.md` for
+generator mechanics.
 
 | System | Status | Stable | Staging Ready | Notes |
 |--------|--------|--------|---------------|-------|
@@ -50,7 +63,7 @@ remains the only deployment target.
 | Variation handling | ACTIVE | Yes | No | Dropdown removed; each variation is an independent purchasable line, stacked inside its parent's single `.dp-qo-row` using the table's real Naziv/Stanje/Cijena/Kol. columns (no `colspan`, not a sibling top-level row). See local-state doc §6. |
 | Visibility integration | ACTIVE | Yes | Yes | Gate fires on `add_to_cart` only. No retroactive revalidation — intentional. Unaffected by the local-state transition (fires at submit time now instead of per keystroke, same gate). |
 | Sorting | ACTIVE | Yes | Yes | `qo_orderby` / `qo_order` params. Title and price sort, ASC/DESC toggle. Isolated from WOOF `orderby` detection. |
-| Filter integration (WOOF/WBW) | ACTIVE | Yes | Yes | Price range + pa_* attribute filters via REST. WOOF URL change propagation via pushState wrapper. Isolation guard strips wpf_query from QO WP_Query instances. |
+| Filter integration (WOOF/WBW) | ACTIVE | Yes | Yes | Category, brand, price range, and pa_* attribute filters via REST — all three taxonomy-based filters (category/brand/attributes) now share one parsing pipeline driven by WBW's own `data-taxonomy`/`data-get-attribute`/`data-query-logic` DOM metadata, no hardcoded param-name/delimiter assumptions (2026-07-13 hardening — see `docs/frozen/quick-order-local-state-architecture.md` §11 doctrine). Filter-change detection via WBW's native `wpfAjaxSuccess` event (was a `history.pushState` wrapper). Isolation guard strips wpf_query from QO WP_Query instances. |
 | Cart totals footer | ACTIVE (locally verified) | Yes | No | Local-state subtotal/count footer (local-state doc §3), verified via Playwright to compute correctly (item count, row count, subtotal). No longer reads `data.totals` from a sync response. |
 | Variable stock neutral state | ACTIVE | Yes | Yes | Table was stale — this was delivered in the 2026-05-12 V1.1 plan. Neutral badge before variation selection is moot once all variations render as independently purchasable rows grouped under their parent (local-state doc §6), but the badge logic itself already exists. |
 | Qty +/- buttons | ACTIVE | Yes | Yes | Table was stale — this was delivered in the 2026-05-12 V1.1 plan (`product-list.js` / `row-sync.js` already implement +/- controls). |

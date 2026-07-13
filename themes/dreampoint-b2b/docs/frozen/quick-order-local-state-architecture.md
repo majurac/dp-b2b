@@ -63,6 +63,27 @@ and translates it into the same `#orderBy`/`#orderDir` fields feeding the same
 files touched. See
 `docs/superpowers/specs/2026-07-13-quick-order-toolbar-chips-design.md` §4.
 
+**Revision — 2026-07-13 (WBW integration hardening — doctrine established):**
+`product-list.js`'s WOOF/WBW integration was hardened after a live staging
+bug (category filter silently not applying) exposed that Quick Order had
+been assuming fixed WBW conventions that do not actually exist. See new §11
+for the resulting doctrine. Summary of what changed:
+- Filter-change detection: `history.pushState` monkey-patch → WBW's own
+  documented `wpfAjaxSuccess` DOM event (`popstate` kept independently, since
+  WBW's own `popstate` handler does a hard `location.reload()`).
+- Category, brand, and attribute param discovery: hardcoded prefix regexes
+  (`wpf_filter_cat_*`, `wpf_filter_product_brand_*`, `wpf_filter_pa_*`) → one
+  shared loop reading `data-taxonomy`/`data-get-attribute` off every
+  `.wpfFilterWrapper` (WBW's own `setCommonFitlerDataAttr()` contract,
+  identical for all three filter types).
+- Multi-value delimiter: hardcoded `|` → read per-instance from
+  `data-query-logic`.
+- Brand filtering, previously broken by the same hardcoded-prefix assumption
+  as category, now works via the same shared pipeline.
+
+No REST contract change, no local-state model change — this is entirely
+internal to how `ProductList` reads WBW's DOM/URL state.
+
 ---
 
 ## 1. System Overview
@@ -291,7 +312,7 @@ implementation plan for the exact conditional and file location.
 | `CartSync` (JS debounce/token/abort engine) | Removed |
 | `SyncQueue` (JS pending-map) | Removed — local state (§2) replaces its role, with no flush-to-network semantics |
 | `RowSync` (JS event delegation) | Rewritten — same event-delegation shape (input/change/click on `.dp-qo-tbody`), but writes to local state instead of calling `sync.schedule()` |
-| `ProductList` (JS row rendering, pagination, sort, WOOF) | Modified — row HTML changes (§6, product links removed, SKU label), pagination/sort/WOOF logic unchanged |
+| `ProductList` (JS row rendering, pagination, sort, WOOF) | Modified — row HTML changes (§6, product links removed, SKU label); pagination unchanged; sort and WOOF/WBW integration logic have since changed twice more (see the 2026-07-13 revision notes above and §11 — WBW-native sort, then WBW integration hardening) |
 | Footer (`data.totals` wiring) | Replaced — see §3 |
 | `dp:sync:start/success/error` custom events | Removed as a per-keystroke signal; the WC ecosystem bridge they fed is reused but invoked directly once at submit completion (§4.4), not via these events |
 
@@ -315,3 +336,48 @@ Unchanged from the superseded architecture's forward-looking scope: inline
 attribute-selector UX refinements, matrix ordering, SKU quick search, saved
 order templates, favorites/frequent products — all out of scope for this
 transformation.
+
+---
+
+## 11. WBW Integration Doctrine
+
+Established 2026-07-13 after a live staging bug (category filter silently
+not applying) traced back to Quick Order assuming fixed WBW parameter
+conventions that do not actually exist. WBW admin lets every filter
+instance's base param name, `_list` infix, slug-vs-id mode, and multi-value
+delimiter be reconfigured independently (`views/woofilters.php` —
+`getFilterSetting($filter, 'name', ...)`, `use_category_slug`,
+`f_extend_parent_filtering` / `f_mlist_with_children`, `data-query-logic`).
+Confirmed live on this install: category's real param is
+`wpf_filter_cat_list_1s`, brand's is the unrelated `product_brand_list` —
+proof no fixed naming convention can be assumed.
+
+**Doctrine:**
+- Quick Order must never assume a WBW URL parameter name, taxonomy-to-param
+  mapping, or multi-value delimiter. The canonical source of truth is the
+  metadata WBW itself renders on `.wpfFilterWrapper` elements —
+  `data-taxonomy`, `data-get-attribute`, `data-query-logic` — via WBW's own
+  `setCommonFitlerDataAttr()` helper, applied identically to every filter
+  type (category, brand, attributes, tags, custom fields).
+- Category, brand, and attribute filters share ONE parsing pipeline
+  (`#extractWoofFilters()` in `product-list.js`): iterate
+  `.wpfFilterWrapper[data-taxonomy][data-get-attribute]`, read the param
+  value via `data-get-attribute`, split it using the delimiter from
+  `data-query-logic` (`#delimiterForParam()`), and route the values by
+  `data-taxonomy` (`product_cat` → category, `product_brand`/`pwb-brand` →
+  brand, `pa_*` → attributes). No taxonomy gets its own bespoke parser.
+- **Native-first policy:** whenever WBW exposes a documented integration
+  mechanism, prefer it over custom logic. Applied so far: `wpfAjaxSuccess`
+  (WBW's own source documents it as a third-party integration hook, and
+  relies on it internally for its own builder-compatibility shims) instead
+  of a `history.pushState` monkey-patch; WBW's native `[wpf-selected-
+  filters]`/`[wpf-filters]` shortcodes instead of Quick Order-built filter
+  chips or a Quick Order-owned sort dropdown (see revision notes above).
+  Custom logic is justified only where WBW provides no public integration
+  point for the need — e.g. resolving a slug/term-id token to a concrete
+  term ID (`resolve_taxonomy_term_ids()` in `class-product-query.php`) has no
+  WBW equivalent exposed outside its own AJAX request lifecycle, so it stays
+  custom.
+- This section describes the current implementation, not an aspiration —
+  check any future WBW-facing Quick Order change against it before adding a
+  new hardcoded assumption about WBW's naming, delimiters, or state.

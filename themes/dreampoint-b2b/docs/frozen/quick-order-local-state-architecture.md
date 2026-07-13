@@ -36,6 +36,33 @@ stacked vertically inside the existing Naziv/Stanje/Cijena/Kol. cells.
 the prior revision, this is a documentation/markup correction only — §2–§5
 are unaffected.
 
+**Revision — 2026-07-13 (sort UI):** §8's disposition table originally
+described `ProductList`'s pagination/sort/WOOF logic as unchanged from the
+superseded architecture. Sort is no longer click-to-sort table headers — it
+is now a `<select>` dropdown (`dp_qo_get_sort_options()` in
+`inc/class-frontend.php`, bound in `product-list.js`'s `#bindSortDropdown()`)
+driving the same `qo_orderby`/`qo_order` REST params. This was an explicit,
+approved deviation, not a silent drift — the underlying REST contract,
+`#orderBy`/`#orderDir` state, and WOOF filter-bridge integration are
+unaffected. See
+`docs/superpowers/specs/2026-07-13-quick-order-toolbar-chips-design.md`.
+
+**Revision — 2026-07-13 (WBW-native sort, supersedes the note above):** the
+Quick Order-owned `<select>` dropdown described in the previous revision note
+was itself replaced, same day, before release — sort is now WBW Product
+Filter's own native "Sort By" control, a second synchronized WBW filter view
+(id=2, `[wpf-filters id=2]`) rendered in `.dp-qo-sort`, configured in the WBW
+admin with four sort options (`title`, `title-desc`, `price`, `price-desc`).
+`dp_qo_get_sort_options()` and `#bindSortDropdown()` no longer exist.
+`product-list.js`'s existing WOOF URL-change interception
+(`#bindWoofIntegration()`/`#onWoofUrlChange()`) gained `#applyOrderbyParam()`,
+which reads the public, standard WooCommerce `?orderby=` URL parameter (the
+same parameter WBW's Sort By widget itself writes via `history.pushState`)
+and translates it into the same `#orderBy`/`#orderDir` fields feeding the same
+`qo_orderby`/`qo_order` REST params — no new REST contract, no WBW plugin
+files touched. See
+`docs/superpowers/specs/2026-07-13-quick-order-toolbar-chips-design.md` §4.
+
 ---
 
 ## 1. System Overview

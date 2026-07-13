@@ -12,7 +12,7 @@ class DP_Quick_Order_Product_Query {
 	 * Uses fields=>ids first, then hydrates only the paginated result set —
 	 * never calls wc_get_product() across the full catalog.
 	 *
-	 * @param array{page: int, per_page: int, search: string, category: int, brand: int, price_min: float|null, price_max: float|null, attributes: array} $args
+	 * @param array{page: int, per_page: int, search: string, category: list<int|string>, brand: list<int|string>, price_min: float|null, price_max: float|null, attributes: array} $args
 	 * @return array{products: list<array>, total: int, total_pages: int}
 	 */
 	public function query( array $args ): array {
@@ -44,18 +44,27 @@ class DP_Quick_Order_Product_Query {
 		}
 
 		if ( ! empty( $args['category'] ) ) {
+			$category_ids = $this->resolve_taxonomy_term_ids( (array) $args['category'], 'product_cat' );
+			// A category filter was requested but nothing resolved (stale/unknown
+			// slug) — force zero matches via an impossible term ID rather than
+			// silently dropping the clause and returning the whole catalog.
 			$query_args['tax_query'][] = [
 				'taxonomy' => 'product_cat',
 				'field'    => 'term_id',
-				'terms'    => (int) $args['category'],
+				'terms'    => $category_ids ?: [ 0 ],
+				'operator' => 'IN',
 			];
 		}
 
 		if ( ! empty( $args['brand'] ) ) {
+			$brand_ids = $this->resolve_taxonomy_term_ids( (array) $args['brand'], 'product_brand' );
+			// Same reasoning as category above — an unresolvable brand token must
+			// not silently fall through to the unfiltered catalog.
 			$query_args['tax_query'][] = [
 				'taxonomy' => 'product_brand',
 				'field'    => 'term_id',
-				'terms'    => (int) $args['brand'],
+				'terms'    => $brand_ids ?: [ 0 ],
+				'operator' => 'IN',
 			];
 		}
 
@@ -126,6 +135,39 @@ class DP_Quick_Order_Product_Query {
 			'total'       => (int) $query->found_posts,
 			'total_pages' => (int) $query->max_num_pages,
 		];
+	}
+
+	/**
+	 * Resolve mixed taxonomy term identifiers (category or brand) to term IDs.
+	 * WBW's own filter-value format is instance/version-dependent — legacy
+	 * configs emit a bare numeric term ID, current configs emit a slug (from a
+	 * delimited multi-select list, already split by the caller). Accepting
+	 * either at this single layer keeps the tax_query itself simple (always
+	 * term_id) regardless of which format the frontend forwarded. Shared by
+	 * both `product_cat` and `product_brand` — WBW uses the identical engine
+	 * and value format for both filter types.
+	 *
+	 * @param list<int|string> $tokens
+	 * @param string           $taxonomy 'product_cat' or 'product_brand'.
+	 * @return list<int>
+	 */
+	private function resolve_taxonomy_term_ids( array $tokens, string $taxonomy ): array {
+		$ids = [];
+		foreach ( $tokens as $token ) {
+			$token = is_string( $token ) ? trim( $token ) : $token;
+			if ( '' === $token || null === $token ) {
+				continue;
+			}
+			if ( is_numeric( $token ) ) {
+				$ids[] = (int) $token;
+				continue;
+			}
+			$term = get_term_by( 'slug', sanitize_title( (string) $token ), $taxonomy );
+			if ( $term instanceof WP_Term ) {
+				$ids[] = (int) $term->term_id;
+			}
+		}
+		return array_values( array_unique( array_filter( $ids ) ) );
 	}
 
 	/**

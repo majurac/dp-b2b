@@ -96,21 +96,29 @@ class DP_Quick_Order_Cart_Sync {
 				return array_merge( $base, [ 'action' => 'removed' ] );
 			}
 
+			// Quick Order is independent of the WC cart until submit — an existing cart
+			// line is a quantity the user already committed to, not a value Quick Order
+			// owns. Submitting must therefore ADD the requested quantity on top of
+			// whatever is already in the cart, never overwrite it.
+			$current_quantity = (int) ( $cart->get_cart_item( $existing_key )['quantity'] ?? 0 );
+			$new_quantity      = $current_quantity + $quantity;
+
 			// Stock check for quantity updates on managed-stock products.
 			// get_manage_stock() returns true/'parent'/false; get_stock_quantity() resolves
-			// parent delegation automatically for variations.
+			// parent delegation automatically for variations. Checked against the
+			// resulting total, not the requested increment alone.
 			if ( $product->get_manage_stock() ) {
 				$stock_qty = (int) $product->get_stock_quantity();
-				if ( $stock_qty < $quantity ) {
+				if ( $stock_qty < $new_quantity ) {
 					return array_merge( $base, [
 						'action'           => 'out_of_stock',
-						'quantity_allowed' => max( 0, $stock_qty ),
+						'quantity_allowed' => max( 0, $stock_qty - $current_quantity ),
 					] );
 				}
 			}
 
-			$cart->set_quantity( $existing_key, $quantity );
-			return array_merge( $base, [ 'action' => 'updated', 'quantity' => $quantity ] );
+			$cart->set_quantity( $existing_key, $new_quantity );
+			return array_merge( $base, [ 'action' => 'updated', 'quantity' => $new_quantity ] );
 		}
 
 		if ( $quantity > 0 ) {

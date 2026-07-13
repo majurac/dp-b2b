@@ -86,8 +86,8 @@ export class ProductList {
         if (f.price_min > 0)                           params.set('price_min',    f.price_min);
         if (f.price_max > 0)                           params.set('price_max',    f.price_max);
         if (f.stock_status)                            params.set('stock_status', f.stock_status);
-        if (f.category > 0)                            params.set('category',     f.category);
-        if (f.brand > 0)                                params.set('brand',        f.brand);
+        if (f.category?.length)                        params.set('category',     JSON.stringify(f.category));
+        if (f.brand?.length)                            params.set('brand',        JSON.stringify(f.brand));
         if (f.attributes && Object.keys(f.attributes).length) {
             params.set('attributes', JSON.stringify(f.attributes));
         }
@@ -323,10 +323,28 @@ export class ProductList {
     }
 
     /**
-     * Intercept history.pushState and popstate so that when WOOF updates the browser
-     * URL with filter params, Quick Order re-fetches its product list from the server.
-     * WBW's native Sort By control (view id=2, rendered in `.dp-qo-sort`) also goes
-     * through this same URL-based path — see #applyOrderbyParam().
+     * React to WBW's own `wpfAjaxSuccess` DOM event — a plain, undocumented-as-typed
+     * but explicitly author-documented third-party integration hook (WBW's own source,
+     * `frontend.woofilters.js`, ships the exact usage example in an inline comment, and
+     * relies on the same event internally for its own Fusion Builder/Bricks/Divi/YITH/
+     * WooCommerce-Products-Per-Page compatibility shims). It fires after every completed
+     * filter/sort/Clear-All AJAX update — category, brand, price, sort and Clear All all
+     * funnel through WBW's single internal `.filtering()` pipeline before it dispatches,
+     * and WBW has already called `history.pushState()` with the new URL by that point —
+     * so `window.location.search` is guaranteed current when this listener runs.
+     *
+     * This replaces a previous `history.pushState` monkey-patch: reacting to WBW's own
+     * signal is more robust than wrapping a global browser API to detect it indirectly,
+     * and avoids any conflict with other code that also wraps `pushState`.
+     *
+     * `popstate` is kept for direct browser back/forward navigation — WBW's OWN
+     * `popstate` handler does a hard `location.reload()` (frontend.woofilters.js,
+     * ~line 1113), which would discard Quick Order's entire local state (frozen
+     * local-state architecture) on every back/forward; ours must stay independent
+     * of WBW's and only re-read the URL, never reload the page.
+     *
+     * WBW's native Sort By control (view id=2, rendered in `.dp-qo-sort`) goes through
+     * this same event/URL-based path — see #applyOrderbyParam().
      */
     #bindWoofIntegration() {
         const params = new URLSearchParams(window.location.search);
@@ -335,12 +353,7 @@ export class ProductList {
 
         const onUrlChange = () => this.#onWoofUrlChange();
 
-        const origPushState = history.pushState.bind(history);
-        history.pushState = (state, title, url) => {
-            origPushState(state, title, url);
-            onUrlChange();
-        };
-
+        document.addEventListener('wpfAjaxSuccess', onUrlChange);
         window.addEventListener('popstate', onUrlChange);
     }
 
@@ -389,9 +402,41 @@ export class ProductList {
     }
 
     /**
+     * Delimiter used to split a multi-value WBW filter param, sourced from the
+     * SAME DOM contract WBW's own frontend reads — `.wpfFilterWrapper[data-get-attribute]`
+     * and its `data-query-logic` attribute — rather than a hardcoded `|` or `,`.
+     * Mirrors WBW's own (private, non-exported) `getDelimiterForFilter()`
+     * (`frontend.woofilters.js` ~line 536) 1:1: `,` when the filter instance can't
+     * be found in the DOM, `,` for AND-logic, `|` for OR-logic (WBW's own default).
+     * That function itself isn't exposed for reuse, but the DOM attributes it
+     * reads are public rendered markup — reading them here (instead of guessing
+     * a fixed delimiter) keeps this parser correct regardless of how a given
+     * filter instance is configured in WBW admin.
+     * @param {string} paramKey
+     * @returns {string}
+     */
+    #delimiterForParam(paramKey) {
+        const el = document.querySelector(`.wpfFilterWrapper[data-get-attribute="${paramKey}"]`);
+        if (!el) return ',';
+        const logic = el.getAttribute('data-query-logic') || 'or';
+        return logic === 'and' ? ',' : '|';
+    }
+
+    /**
      * Extract Quick Order filter params from a WOOF-updated URL.
+     *
+     * Category and brand param matching is prefix-based (`wpf_filter_cat*` /
+     * `wpf_filter_product_brand*`), not a hardcoded exact name — WBW's own
+     * filter param name/value format is instance-configuration-dependent
+     * (observed: legacy single numeric term ID under `wpf_filter_cat_<id>`,
+     * current delimited slug list under `wpf_filter_cat_list_<id>s`; brand uses
+     * the identical engine/format). Both are collected as raw string tokens;
+     * numeric-vs-slug resolution happens server-side
+     * (DP_Quick_Order_Product_Query::resolve_taxonomy_term_ids()) so this parser
+     * doesn't need to know which format is live on a given WBW config.
+     *
      * @param {URLSearchParams} params
-     * @returns {{ price_min?: number, price_max?: number, stock_status?: string, category?: number, brand?: number, attributes?: object }}
+     * @returns {{ price_min?: number, price_max?: number, stock_status?: string, category?: string[], brand?: string[], attributes?: object }}
      */
     #extractWoofFilters(params) {
         const result = {};
@@ -406,24 +451,26 @@ export class ProductList {
             result.stock_status = stockStatus;
         }
 
+        const categoryTerms = [];
         for (const [key, val] of params) {
-            if (!/^wpf_filter_cat_\d+$/.test(key)) continue;
-            const termId = parseInt(val, 10);
-            if (termId > 0) { result.category = termId; break; }
+            if (!/^wpf_filter_cat/.test(key)) continue;
+            categoryTerms.push(...val.split(this.#delimiterForParam(key)).filter(Boolean));
         }
+        if (categoryTerms.length) result.category = categoryTerms;
 
+        const brandTerms = [];
         for (const [key, val] of params) {
-            if (!/^wpf_filter_product_brand_\d+$/.test(key)) continue;
-            const termId = parseInt(val, 10);
-            if (termId > 0) { result.brand = termId; break; }
+            if (!/^wpf_filter_product_brand/.test(key)) continue;
+            brandTerms.push(...val.split(this.#delimiterForParam(key)).filter(Boolean));
         }
+        if (brandTerms.length) result.brand = brandTerms;
 
         const attrs = {};
         for (const [key, val] of params) {
             if (!key.startsWith('wpf_filter_pa_')) continue;
             const attrName = key.slice('wpf_filter_pa_'.length);
             if (!attrName) continue;
-            attrs[attrName] = val.split('|').filter(Boolean);
+            attrs[attrName] = val.split(this.#delimiterForParam(key)).filter(Boolean);
         }
         if (Object.keys(attrs).length) result.attributes = attrs;
 

@@ -19,8 +19,8 @@ class DP_Quick_Order_Rest_Api {
 				'page'     => [ 'type' => 'integer', 'default' => 1, 'minimum' => 1 ],
 				'per_page' => [ 'type' => 'integer', 'default' => DP_Quick_Order_Config::PRODUCTS_PER_PAGE_DEFAULT, 'minimum' => 1, 'maximum' => DP_Quick_Order_Config::PRODUCTS_PER_PAGE_MAX ],
 				'search'   => [ 'type' => 'string', 'default' => '' ],
-				'category' => [ 'type' => 'integer', 'default' => 0 ],
-				'brand'    => [ 'type' => 'integer', 'default' => 0 ],
+				'category' => [ 'type' => 'string', 'default' => '' ],
+				'brand'    => [ 'type' => 'string', 'default' => '' ],
 				'qo_orderby' => [ 'type' => 'string', 'enum' => [ 'title', 'price' ], 'default' => 'title' ],
 				'qo_order'   => [ 'type' => 'string', 'enum' => [ 'asc', 'desc' ], 'default' => 'asc' ],
 				'price_min'    => [ 'type' => 'number', 'minimum' => 0, 'default' => null ],
@@ -56,12 +56,19 @@ class DP_Quick_Order_Rest_Api {
 			}
 		}
 
+		// Category and brand both accept a JSON array of mixed term IDs/slugs
+		// (current frontend format), or a bare numeric string (legacy single-
+		// term-ID callers) — resolution to concrete term IDs happens in
+		// DP_Quick_Order_Product_Query::resolve_taxonomy_term_ids().
+		$category = $this->decode_term_filter_param( $request->get_param( 'category' ) );
+		$brand    = $this->decode_term_filter_param( $request->get_param( 'brand' ) );
+
 		$results = $this->product_query->query( [
 			'page'         => $request->get_param( 'page' ),
 			'per_page'     => $request->get_param( 'per_page' ),
 			'search'       => $request->get_param( 'search' ),
-			'category'     => $request->get_param( 'category' ),
-			'brand'        => $request->get_param( 'brand' ),
+			'category'     => $category,
+			'brand'        => $brand,
 			'orderby'      => $request->get_param( 'qo_orderby' ),
 			'order'        => $request->get_param( 'qo_order' ),
 			'price_min'    => $request->get_param( 'price_min' ),
@@ -71,6 +78,24 @@ class DP_Quick_Order_Rest_Api {
 		] );
 
 		return rest_ensure_response( $results );
+	}
+
+	/**
+	 * Decode a category/brand REST param: a JSON array of mixed term IDs/slugs
+	 * (current frontend format), or a bare numeric string (legacy single-term-ID
+	 * callers). Returns [] for an empty or unparsable value.
+	 *
+	 * @return list<int|string>
+	 */
+	private function decode_term_filter_param( string $raw ): array {
+		if ( '' === $raw ) {
+			return [];
+		}
+		$decoded = json_decode( $raw, true );
+		if ( is_array( $decoded ) ) {
+			return $decoded;
+		}
+		return is_numeric( $raw ) ? [ $raw ] : [];
 	}
 
 	public function get_variations( WP_REST_Request $request ): WP_REST_Response|WP_Error {

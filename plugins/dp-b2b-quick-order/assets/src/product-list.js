@@ -425,15 +425,16 @@ export class ProductList {
     /**
      * Extract Quick Order filter params from a WOOF-updated URL.
      *
-     * Category and brand param matching is prefix-based (`wpf_filter_cat*` /
-     * `wpf_filter_product_brand*`), not a hardcoded exact name — WBW's own
-     * filter param name/value format is instance-configuration-dependent
-     * (observed: legacy single numeric term ID under `wpf_filter_cat_<id>`,
-     * current delimited slug list under `wpf_filter_cat_list_<id>s`; brand uses
-     * the identical engine/format). Both are collected as raw string tokens;
-     * numeric-vs-slug resolution happens server-side
-     * (DP_Quick_Order_Product_Query::resolve_taxonomy_term_ids()) so this parser
-     * doesn't need to know which format is live on a given WBW config.
+     * Category/brand param NAMES are not matched by a guessed prefix — WBW admin
+     * lets the base name for each filter instance be renamed to anything (e.g. on
+     * this install the category filter param is `wpf_filter_cat_list_1s` while the
+     * brand filter param is the unrelated `product_brand_list`; confirmed live,
+     * not a fixed convention). The only stable, native source of truth for "which
+     * URL param belongs to which taxonomy" is the `data-taxonomy` /
+     * `data-get-attribute` pair WBW itself renders on every `.wpfFilterWrapper`
+     * (`views/woofilters.php` — every filter type sets both). Reading that DOM
+     * contract directly — instead of pattern-matching param names — works
+     * regardless of how an admin has named/reconfigured any given filter instance.
      *
      * @param {URLSearchParams} params
      * @returns {{ price_min?: number, price_max?: number, stock_status?: string, category?: string[], brand?: string[], attributes?: object }}
@@ -451,19 +452,21 @@ export class ProductList {
             result.stock_status = stockStatus;
         }
 
-        const categoryTerms = [];
-        for (const [key, val] of params) {
-            if (!/^wpf_filter_cat/.test(key)) continue;
-            categoryTerms.push(...val.split(this.#delimiterForParam(key)).filter(Boolean));
-        }
-        if (categoryTerms.length) result.category = categoryTerms;
+        for (const wrapper of document.querySelectorAll('.wpfFilterWrapper[data-taxonomy][data-get-attribute]')) {
+            const taxonomy = wrapper.getAttribute('data-taxonomy');
+            const paramKey = wrapper.getAttribute('data-get-attribute');
+            const rawVal   = paramKey ? params.get(paramKey) : null;
+            if (!rawVal) continue;
 
-        const brandTerms = [];
-        for (const [key, val] of params) {
-            if (!/^wpf_filter_product_brand/.test(key)) continue;
-            brandTerms.push(...val.split(this.#delimiterForParam(key)).filter(Boolean));
+            const values = rawVal.split(this.#delimiterForParam(paramKey)).filter(Boolean);
+            if (!values.length) continue;
+
+            if (taxonomy === 'product_cat') {
+                result.category = [...(result.category ?? []), ...values];
+            } else if (taxonomy === 'product_brand' || taxonomy === 'pwb-brand') {
+                result.brand = [...(result.brand ?? []), ...values];
+            }
         }
-        if (brandTerms.length) result.brand = brandTerms;
 
         const attrs = {};
         for (const [key, val] of params) {

@@ -25,6 +25,39 @@
 /* ── WPF filter area ─────────────────────────────────────────── */
 .dp-qo-filter-area { margin-bottom: 16px; }
 
+/* ── Quick Order-owned catalog filters (Already Ordered/New/Best Seller) —
+   own block, always rendered above WBW's filter widgets; never styles or
+   touches WBW markup ── */
+.dp-qo-catalog-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin: 0 0 16px;
+    padding: 0;
+    border: 0;
+}
+
+.dp-qo-catalog-filters__legend {
+    width: 100%;
+    padding: 0;
+    margin: 0 0 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #444;
+}
+
+.dp-qo-catalog-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.dp-qo-catalog-filter__input {
+    margin: 0;
+}
+
 /* ── Toolbar: WBW active-filter chips + Quick Order variation chips
    (left group) + sort dropdown (right group). .selected-prod_atributes is
    WBW's own subtree — styled only via layout on this shared ancestor,

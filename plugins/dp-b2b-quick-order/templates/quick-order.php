@@ -1,5 +1,16 @@
 <?php
 defined( 'ABSPATH' ) || exit;
+
+// Initial checkbox state mirrors the exact REST boolean semantics
+// (rest_sanitize_boolean — the same function WP's REST schema layer uses
+// for a 'type' => 'boolean' arg) so the server-rendered first paint can
+// never disagree with what the REST endpoint would actually interpret.
+// Absent, '0', 'false', '', etc. are all correctly falsy — never checked.
+$dp_qo_active_filters = [
+	'qo_already_ordered' => isset( $_GET['qo_already_ordered'] ) && rest_sanitize_boolean( wp_unslash( $_GET['qo_already_ordered'] ) ),
+	'qo_new'             => isset( $_GET['qo_new'] ) && rest_sanitize_boolean( wp_unslash( $_GET['qo_new'] ) ),
+	'qo_best_seller'     => isset( $_GET['qo_best_seller'] ) && rest_sanitize_boolean( wp_unslash( $_GET['qo_best_seller'] ) ),
+];
 ?>
 <div id="dp-quick-order"
 	class="dp-quick-order"
@@ -10,9 +21,46 @@ defined( 'ABSPATH' ) || exit;
 		<div class="row">
 
 			<div class="col-lg-3">
+				<fieldset class="dp-qo-catalog-filters">
+					<legend class="dp-qo-catalog-filters__legend"><?php esc_html_e( 'Brzi filteri', 'dp-b2b-quick-order' ); ?></legend>
+
+					<label class="dp-qo-catalog-filter" for="dp-qo-filter-already-ordered">
+						<input
+							type="checkbox"
+							id="dp-qo-filter-already-ordered"
+							class="dp-qo-catalog-filter__input"
+							data-qo-filter="qo_already_ordered"
+							<?php checked( $dp_qo_active_filters['qo_already_ordered'] ); ?>
+						>
+						<span class="dp-qo-catalog-filter__label"><?php esc_html_e( 'Već naručeno', 'dp-b2b-quick-order' ); ?></span>
+					</label>
+
+					<label class="dp-qo-catalog-filter" for="dp-qo-filter-new">
+						<input
+							type="checkbox"
+							id="dp-qo-filter-new"
+							class="dp-qo-catalog-filter__input"
+							data-qo-filter="qo_new"
+							<?php checked( $dp_qo_active_filters['qo_new'] ); ?>
+						>
+						<span class="dp-qo-catalog-filter__label"><?php esc_html_e( 'Novo', 'dp-b2b-quick-order' ); ?></span>
+					</label>
+
+					<label class="dp-qo-catalog-filter" for="dp-qo-filter-best-seller">
+						<input
+							type="checkbox"
+							id="dp-qo-filter-best-seller"
+							class="dp-qo-catalog-filter__input"
+							data-qo-filter="qo_best_seller"
+							<?php checked( $dp_qo_active_filters['qo_best_seller'] ); ?>
+						>
+						<span class="dp-qo-catalog-filter__label"><?php esc_html_e( 'Best seller', 'dp-b2b-quick-order' ); ?></span>
+					</label>
+				</fieldset>
+
 				<?php if ( shortcode_exists( 'wpf-filters' ) ) : ?>
 				<div class="dp-qo-filter-area">
-					<?php echo do_shortcode( '[wpf-filters id="1"]' ); ?>
+					<?php echo do_shortcode( '[wpf-filters id="3"]' ); ?>
 				</div>
 				<?php endif; ?>
 			</div>
@@ -26,7 +74,7 @@ defined( 'ABSPATH' ) || exit;
 						<span class="dp-qo-toolbar__label"><?php esc_html_e( 'Aktivni filteri', 'dp-b2b-quick-order' ); ?></span>
 
 						<div class="selected-prod_atributes">
-							<?php echo do_shortcode('[wpf-selected-filters id=1]'); ?>
+							<?php echo do_shortcode('[wpf-selected-filters id=3]'); ?>
 							    <?php
 						    $attribute_taxonomies = wc_get_attribute_taxonomies();
 						    if ( ! empty( $attribute_taxonomies ) ) {

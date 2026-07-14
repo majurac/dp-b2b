@@ -44,4 +44,22 @@ class DP_Quick_Order_Config {
 
 	// Fetch timeout for cart sync requests (ms). Prevents stalled requests blocking the queue.
 	const CART_SYNC_TIMEOUT_MS = 10000;
+
+	// ── Catalog Filters (New / Best Seller / Already Ordered) ──────────────────
+
+	// "New" filter threshold — post_date must be within this many days of now.
+	// Single source of truth: never hardcode 30 elsewhere. Override via
+	// the `dp_qo_new_product_max_age_days` filter.
+	const NEW_PRODUCT_MAX_AGE_DAYS = 30;
+
+	// "Best Seller" filter threshold — total_sales must be >= this value.
+	// Single source of truth: never hardcode 10 elsewhere. Override via
+	// the `dp_qo_best_seller_min_sales` filter. Expected to need periodic
+	// re-tuning as real sales volume accumulates — a content decision, not code.
+	const BEST_SELLER_MIN_SALES = 10;
+
+	// "Already Ordered" per-user object-cache TTL — safety net only, real
+	// invalidation happens on woocommerce_order_status_changed.
+	const ALREADY_ORDERED_CACHE_TTL   = 12 * HOUR_IN_SECONDS;
+	const ALREADY_ORDERED_CACHE_GROUP = 'dp_quick_order';
 }

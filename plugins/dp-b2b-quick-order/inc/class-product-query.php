@@ -133,6 +133,29 @@ class DP_Quick_Order_Product_Query {
 			];
 		}
 
+		// "Best Seller" filter — native WC total_sales meta, configurable floor.
+		// No popularity sort, no top-N, no ACF, no duplicated/custom meta —
+		// total_sales is WooCommerce's own native counter, updated by core on
+		// order completion; this filter only ever reads it.
+		if ( ! empty( $args['best_seller'] ) ) {
+			$min_sales = apply_filters( 'dp_qo_best_seller_min_sales', DP_Quick_Order_Config::BEST_SELLER_MIN_SALES );
+
+			// Defensive: same validation shape as the "New" filter's max-age
+			// override (Task 2) — only a positive integer is valid; anything
+			// else (0, negative, non-numeric, non-integer-valued) falls back
+			// to the configured default instead of producing a broken or
+			// unbounded comparison.
+			$is_valid_min_sales = is_numeric( $min_sales ) && (int) $min_sales == $min_sales && (int) $min_sales > 0;
+			$min_sales          = $is_valid_min_sales ? (int) $min_sales : DP_Quick_Order_Config::BEST_SELLER_MIN_SALES;
+
+			$query_args['meta_query'][] = [
+				'key'     => 'total_sales',
+				'value'   => $min_sales,
+				'compare' => '>=',
+				'type'    => 'NUMERIC',
+			];
+		}
+
 		// Product attribute filters — each maps to a tax_query entry.
 		// $args['attributes'] is an assoc array: ['color' => ['red','blue'], 'size' => ['M']].
 		if ( ! empty( $args['attributes'] ) && is_array( $args['attributes'] ) ) {

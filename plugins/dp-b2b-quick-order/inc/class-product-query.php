@@ -4,7 +4,8 @@ defined( 'ABSPATH' ) || exit;
 class DP_Quick_Order_Product_Query {
 
 	public function __construct(
-		private readonly DP_Quick_Order_Visibility_Integration $visibility
+		private readonly DP_Quick_Order_Visibility_Integration $visibility,
+		private readonly DP_Quick_Order_Already_Ordered_Resolver $already_ordered
 	) {}
 
 	/**
@@ -175,6 +176,25 @@ class DP_Quick_Order_Product_Query {
 					'operator' => 'IN',
 				];
 			}
+		}
+
+		// "Already Ordered" filter — current customer's own order history.
+		// Parent-level rollup (business rule, spec §3 revised 2026-07-14):
+		// if ANY variation of a parent was previously ordered, the parent
+		// qualifies. The resolver already returns deduplicated PARENT
+		// product IDs (Task 4) — no row-key parsing or "collapse to parent"
+		// step needed at this layer. post__in filters WP_Query at the
+		// parent-post level only (product_variation is a different post
+		// type), so once a parent qualifies, prepare_product()/
+		// get_variation_details() below run completely unmodified and
+		// return ALL current variations, exactly as for any other filter —
+		// satisfying "render exactly as today."
+		if ( ! empty( $args['already_ordered'] ) ) {
+			$product_ids = $this->already_ordered->get_ordered_product_ids( get_current_user_id() );
+			// Empty result must force zero matches, not fall through to the
+			// unfiltered catalog — same convention as the category/brand
+			// resolution above.
+			$query_args['post__in'] = $product_ids ?: [ 0 ];
 		}
 
 		$this->visibility->apply_to_query( $query_args );

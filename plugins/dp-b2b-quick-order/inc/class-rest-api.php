@@ -28,6 +28,7 @@ class DP_Quick_Order_Rest_Api {
 				'stock_status' => [ 'type' => 'string', 'enum' => [ 'instock', 'outofstock', 'onbackorder', '' ], 'default' => '' ],
 				'qo_new' => [ 'type' => 'boolean', 'default' => false ],
 				'qo_best_seller' => [ 'type' => 'boolean', 'default' => false ],
+				'qo_already_ordered' => [ 'type' => 'boolean', 'default' => false ],
 				'attributes'   => [ 'type' => 'string', 'default' => '' ],
 			],
 		] );
@@ -78,6 +79,7 @@ class DP_Quick_Order_Rest_Api {
 			'stock_status' => $request->get_param( 'stock_status' ),
 			'new'          => (bool) $request->get_param( 'qo_new' ),
 			'best_seller'  => (bool) $request->get_param( 'qo_best_seller' ),
+			'already_ordered' => (bool) $request->get_param( 'qo_already_ordered' ),
 			'attributes'   => $attributes,
 		] );
 

@@ -50,6 +50,26 @@ BetaWorks, ClearFlow, DeltaForge.
 Each product is assigned a child category and brand by cycling through all generated terms.
 Deterministic stock (60% instock / 20% low stock / 10% outofstock / 10% backorder) and price (3 tiers: 2.99–19.99 / 20–99.99 / 100–499.99 EUR).
 
+**total_sales tiers** — built around the LIVE `DP_Quick_Order_Config::BEST_SELLER_MIN_SALES` threshold (falls back to `10` only if the Quick Order plugin is inactive), so a retuned threshold stays correct here without a second edit:
+
+| Tier | % of run | Value range | Relative to threshold |
+|------|---------|-------------|-----------------------|
+| high | 15% | threshold×5 – threshold×50 | clearly above |
+| exact | 5% | = threshold | boundary-inclusive |
+| moderate | 30% | 1 – threshold−1 | clearly below |
+| zero | 50% | 0 | clearly below |
+
+**Publish-date (post_date) offset tiers** — built around the LIVE `DP_Quick_Order_Config::NEW_PRODUCT_MAX_AGE_DAYS` window (falls back to `30` only if the Quick Order plugin is inactive). Computed with `current_time('timestamp')` (site-local "now") formatted via `gmdate()` — this pairing is deliberate: `WC_Data::set_date_prop()` treats a plain datetime string with no timezone marker as SITE-LOCAL, so using `time()` (UTC) there would silently shift the stored date by the site's UTC offset:
+
+| Tier | % of run | Offset range (days ago) | Relative to "New" window boundary |
+|------|---------|--------------------------|-----------------------------------|
+| clearly inside | 20% | 0 – threshold/2 | well within the window |
+| near boundary, inside | 5% | threshold/2+1 – threshold−1 | just inside |
+| near boundary, outside | 5% | threshold+1 – threshold+14 | just outside |
+| clearly outside | 70% | threshold+15 – threshold×4 | well outside the window |
+
+Both tiers are seeded from the same per-SKU `$seed = abs(crc32($sku))` used by `deterministic_stock()`/`deterministic_price()` (the publish-date tier uses `$seed + 1` so it draws an independent value from the total_sales tier for the same SKU).
+
 ### Phase 3 — Variable Products (implemented)
 
 10 variable products by default (cap 50, hard-fail). SKU: `DEV-VAR-001` → `DEV-VAR-N`.
@@ -116,6 +136,7 @@ Category children are deleted before parents via `ORDER BY tt.parent DESC` in th
 | Variation sync stress | Phase 3 — stress tier (49 vars/product) |
 | Optimistic rollback on out-of-stock | Phase 3 — variation-level stock mix |
 | Variation add_to_cart validation | Phase 3 — all stock states per product |
+| Quick Order New/Best Seller filters | Backdated post_date + total_sales tiers (Phase 2), thresholds sourced live from DP_Quick_Order_Config |
 
 ---
 

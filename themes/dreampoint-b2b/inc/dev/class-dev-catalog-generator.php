@@ -272,10 +272,22 @@ class Dreampoint_B2B_Dev_Catalog_Generator extends WP_CLI_Command {
 			$price = $this->deterministic_price( $seed );
 			$title = sprintf( '[DEV] %s — %04d', $cat_name, $i );
 
+			$total_sales   = $this->deterministic_total_sales( $seed );
+			$publish_days  = $this->deterministic_publish_offset_days( $seed );
+			// current_time('timestamp') + gmdate(): deliberate. WooCommerce's
+			// set_date_created() treats a plain datetime string (no timezone/
+			// offset) as SITE-LOCAL, not UTC (WC_Data::set_date_prop()). Do not
+			// "simplify" this to time()+gmdate() or a different date API without
+			// re-verifying that assumption — doing so may silently change the
+			// stored datetime semantics and introduce timezone/DST regressions.
+			$publish_date  = gmdate( 'Y-m-d H:i:s', current_time( 'timestamp' ) - ( $publish_days * DAY_IN_SECONDS ) );
+
 			$product = new WC_Product_Simple();
 			$product->set_name( $title );
 			$product->set_sku( $sku );
 			$product->set_regular_price( $price );
+			$product->set_total_sales( $total_sales );
+			$product->set_date_created( $publish_date );
 			$product->set_status( 'publish' );
 			$product->set_catalog_visibility( 'visible' );
 			$product->set_category_ids( [ $cat_id ] );
@@ -358,6 +370,71 @@ class Dreampoint_B2B_Dev_Catalog_Generator extends WP_CLI_Command {
 		}
 
 		return number_format( $cents / 100, 2, '.', '' );
+	}
+
+	/**
+	 * total_sales tiers built around the LIVE configured Best Seller
+	 * threshold (DP_Quick_Order_Config::BEST_SELLER_MIN_SALES) rather than a
+	 * hardcoded duplicate of it — if the threshold is ever retuned, this
+	 * generator stays correct without a second edit. Falls back to 10 only
+	 * if the Quick Order plugin isn't active (defensive — this generator is
+	 * dev-only tooling and must not hard-fail on an optional dependency).
+	 *
+	 * Tiers guarantee ALL THREE required cases are represented, not left to
+	 * chance: 15% high sellers (threshold×5–threshold×50, clearly above),
+	 * 5% EXACTLY at threshold (boundary-inclusive test — the value the
+	 * original two-tier design never produced), 30% moderate
+	 * (1–threshold-1, clearly below), 50% zero (clearly below).
+	 */
+	private function deterministic_total_sales( int $seed ): int {
+		$threshold = class_exists( 'DP_Quick_Order_Config' ) ? DP_Quick_Order_Config::BEST_SELLER_MIN_SALES : 10;
+
+		mt_srand( $seed );
+		$roll = mt_rand( 1, 100 );
+
+		if ( $roll <= 15 ) {
+			return mt_rand( $threshold * 5, $threshold * 50 );
+		}
+		if ( $roll <= 20 ) {
+			return $threshold;
+		}
+		if ( $roll <= 50 ) {
+			return mt_rand( 1, max( 1, $threshold - 1 ) );
+		}
+		return 0;
+	}
+
+	/**
+	 * Publish-date offset tiers built around the LIVE configured "New"
+	 * window (DP_Quick_Order_Config::NEW_PRODUCT_MAX_AGE_DAYS) rather than a
+	 * hardcoded duplicate — falls back to 30 only if the Quick Order plugin
+	 * isn't active.
+	 *
+	 * Tiers guarantee BOTH SIDES of the boundary are deliberately
+	 * represented, not left to chance across 200 products: 20% clearly
+	 * inside (0 to threshold/2 days ago), 5% near boundary INSIDE
+	 * (threshold/2+1 to threshold-1 days ago), 5% near boundary OUTSIDE
+	 * (threshold+1 to threshold+14 days ago), 70% clearly outside
+	 * (threshold+15 to threshold×4 days ago).
+	 *
+	 * @return int days to subtract from now for post_date
+	 */
+	private function deterministic_publish_offset_days( int $seed ): int {
+		$threshold = class_exists( 'DP_Quick_Order_Config' ) ? DP_Quick_Order_Config::NEW_PRODUCT_MAX_AGE_DAYS : 30;
+
+		mt_srand( $seed + 1 ); // +1 so this doesn't reuse the same draw as total_sales for the same SKU
+		$roll = mt_rand( 1, 100 );
+
+		if ( $roll <= 20 ) {
+			return mt_rand( 0, intdiv( $threshold, 2 ) );
+		}
+		if ( $roll <= 25 ) {
+			return mt_rand( intdiv( $threshold, 2 ) + 1, $threshold - 1 );
+		}
+		if ( $roll <= 30 ) {
+			return mt_rand( $threshold + 1, $threshold + 14 );
+		}
+		return mt_rand( $threshold + 15, $threshold * 4 );
 	}
 
 	// -------------------------------------------------------------------------

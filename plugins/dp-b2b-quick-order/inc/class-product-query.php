@@ -105,6 +105,34 @@ class DP_Quick_Order_Product_Query {
 			];
 		}
 
+		// "New" filter — post_date_gmt within the configured threshold.
+		// Uses post_date_gmt (always UTC), never post_date (site-local, per
+		// Settings > General timezone) — both sides of the comparison are
+		// UTC instants by construction, so there is no timezone offset to
+		// assume or correct for, regardless of the site's configured
+		// timezone. `time()` is likewise always a UTC unix timestamp.
+		if ( ! empty( $args['new'] ) ) {
+			$max_age_days = apply_filters( 'dp_qo_new_product_max_age_days', DP_Quick_Order_Config::NEW_PRODUCT_MAX_AGE_DAYS );
+
+			// Defensive: a filter callback may return anything. Only a
+			// positive integer is valid — anything else (0, negative,
+			// non-numeric, non-integer-valued like 5.5) falls back to the
+			// configured default rather than producing an inverted or
+			// unbounded date range.
+			$is_valid_max_age = is_numeric( $max_age_days ) && (int) $max_age_days == $max_age_days && (int) $max_age_days > 0;
+			$max_age_days     = $is_valid_max_age ? (int) $max_age_days : DP_Quick_Order_Config::NEW_PRODUCT_MAX_AGE_DAYS;
+
+			// Boundary is inclusive: a product published exactly at the
+			// cutoff instant (N days ago, to the second) IS "New"; one
+			// second earlier is not. `inclusive => true` makes WP_Date_Query
+			// emit `post_date_gmt >= cutoff` instead of its default `>`.
+			$query_args['date_query'][] = [
+				'column'    => 'post_date_gmt',
+				'after'     => gmdate( 'Y-m-d H:i:s', time() - ( $max_age_days * DAY_IN_SECONDS ) ),
+				'inclusive' => true,
+			];
+		}
+
 		// Product attribute filters — each maps to a tax_query entry.
 		// $args['attributes'] is an assoc array: ['color' => ['red','blue'], 'size' => ['M']].
 		if ( ! empty( $args['attributes'] ) && is_array( $args['attributes'] ) ) {

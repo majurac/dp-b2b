@@ -26,6 +26,7 @@ class DP_Quick_Order_Rest_Api {
 				'price_min'    => [ 'type' => 'number', 'minimum' => 0, 'default' => null ],
 				'price_max'    => [ 'type' => 'number', 'minimum' => 0, 'default' => null ],
 				'stock_status' => [ 'type' => 'string', 'enum' => [ 'instock', 'outofstock', 'onbackorder', '' ], 'default' => '' ],
+				'qo_new' => [ 'type' => 'boolean', 'default' => false ],
 				'attributes'   => [ 'type' => 'string', 'default' => '' ],
 			],
 		] );
@@ -74,6 +75,7 @@ class DP_Quick_Order_Rest_Api {
 			'price_min'    => $request->get_param( 'price_min' ),
 			'price_max'    => $request->get_param( 'price_max' ),
 			'stock_status' => $request->get_param( 'stock_status' ),
+			'new'          => (bool) $request->get_param( 'qo_new' ),
 			'attributes'   => $attributes,
 		] );
 

@@ -72,6 +72,7 @@ generator mechanics.
 | Offline / network failure handling | DEFERRED | No | No | Applies to the submit action only now (local-state doc §9) — no retry/queue persistence if a chunked submit fails partway. |
 | Performance guards | ACTIVE | Yes | Yes | `CART_SYNC_MAX_BATCH = 50` unchanged server-side; frontend chunks submits over 50 rows sequentially (`cart-submit.js`, local-state doc §4.2) — not yet exercised with a real >50-row selection locally (dev catalog page size is 50, so chunking logic is implemented but chunk-boundary behavior is unverified beyond code review). No object hydration, still true. AbortController/stale-token guards no longer apply — nothing is in-flight to race. |
 | Playwright E2E coverage | DEFERRED | No | No | Manual staging checklist only (`docs/operational/staging-quick-order-checklist.md`). No automated suite. |
+| Catalog filters (New/Best Seller/Already Ordered/In Stock) | ACTIVE (locally verified) | Yes | No | See `docs/active/quick-order-catalog-filters-spec.md`. In Stock fully native WBW; other three are Quick Order-owned, `qo_*` URL params. |
 
 ---
 

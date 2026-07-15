@@ -56,6 +56,10 @@ $dp_qo_active_filters = [
 						>
 						<span class="dp-qo-catalog-filter__label"><?php esc_html_e( 'Best seller', 'dp-b2b-quick-order' ); ?></span>
 					</label>
+
+					<button type="button" class="dp-qo-catalog-filters__clear">
+						<?php esc_html_e( 'Poništi', 'dp-b2b-quick-order' ); ?>
+					</button>
 				</fieldset>
 
 				<?php if ( shortcode_exists( 'wpf-filters' ) ) : ?>

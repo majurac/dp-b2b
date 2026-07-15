@@ -38,6 +38,7 @@ export class ProductList {
         this.#tbody        = document.querySelector('.dp-qo-tbody');
         this.#paginationEl = document.querySelector('.dp-qo-pagination');
         this.#bindWoofIntegration();
+        this.#bindQoOwnedFilters();
     }
 
     /**
@@ -91,6 +92,9 @@ export class ProductList {
         if (f.attributes && Object.keys(f.attributes).length) {
             params.set('attributes', JSON.stringify(f.attributes));
         }
+        if (f.qoNew)            params.set('qo_new', '1');
+        if (f.qoBestSeller)     params.set('qo_best_seller', '1');
+        if (f.qoAlreadyOrdered) params.set('qo_already_ordered', '1');
 
         return `${this.#config.productsUrl}?${params.toString()}`;
     }
@@ -349,6 +353,8 @@ export class ProductList {
     #bindWoofIntegration() {
         const params = new URLSearchParams(window.location.search);
         this.#woofFilters = this.#extractWoofFilters(params);
+        Object.assign(this.#woofFilters, this.#extractQoOwnedFilters(params));
+        this.#reflectQoCheckboxes();
         this.#applyOrderbyParam(params);
 
         const onUrlChange = () => this.#onWoofUrlChange();
@@ -362,11 +368,50 @@ export class ProductList {
         const next    = this.#extractWoofFilters(params);
         const current = JSON.stringify(this.#woofFilters);
         const orderbyChanged = this.#applyOrderbyParam(params);
+        Object.assign(next, this.#extractQoOwnedFilters(params)); // next is always a FRESH object — safe merge, no stale-key risk
 
         if (JSON.stringify(next) !== current || orderbyChanged) {
             this.#woofFilters = next;
+            this.#reflectQoCheckboxes();
             this.loadPage(1);
         }
+    }
+
+    /** Reflect current #woofFilters QO booleans onto the checkbox DOM elements. */
+    #reflectQoCheckboxes() {
+        document.querySelectorAll('.dp-qo-catalog-filter__input').forEach(cb => {
+            const key = { qo_new: 'qoNew', qo_best_seller: 'qoBestSeller', qo_already_ordered: 'qoAlreadyOrdered' }[cb.dataset.qoFilter];
+            cb.checked = !!this.#woofFilters[key];
+        });
+    }
+
+    /** Bind checkbox change + Clear All — the one genuinely custom event
+     * path in this file: WBW has no integration point for controls it
+     * doesn't render. Both handlers below only ever WRITE the URL, then
+     * call the same #onWoofUrlChange() used for WBW-originated changes —
+     * they never touch #woofFilters directly, so there is exactly one
+     * URL-to-state resync path in the whole file, not two. */
+    #bindQoOwnedFilters() {
+        document.querySelectorAll('.dp-qo-catalog-filter__input').forEach(cb => {
+            cb.addEventListener('change', () => {
+                const params = new URLSearchParams(window.location.search);
+                if (cb.checked) params.set(cb.dataset.qoFilter, '1');
+                else params.delete(cb.dataset.qoFilter);
+                history.pushState(null, '', `${window.location.pathname}?${params.toString()}`);
+                this.#onWoofUrlChange();
+            });
+        });
+
+        document.querySelector('.dp-qo-catalog-filters__clear')?.addEventListener('click', () => {
+            const params = new URLSearchParams(window.location.search);
+            ['qo_new', 'qo_best_seller', 'qo_already_ordered'].forEach(k => params.delete(k));
+            history.pushState(null, '', `${window.location.pathname}?${params.toString()}`);
+            this.#onWoofUrlChange();
+            // Real click on WBW's own rendered Clear All (if View 3 renders
+            // one) — reuses WBW's actual user-facing control and its real
+            // AJAX/wpfAjaxSuccess pipeline, never a private WBW method.
+            document.querySelector('.wpfClearButton')?.click();
+        });
     }
 
     /**
@@ -480,6 +525,21 @@ export class ProductList {
             }
         }
 
+        return result;
+    }
+
+    /**
+     * Extract Quick Order-owned filter params — never WBW-managed, no
+     * DOM-metadata lookup needed (Quick Order owns both the param name and
+     * the control that writes it, unlike the WBW-driven extraction above).
+     * @param {URLSearchParams} params
+     * @returns {{ qoNew?: boolean, qoBestSeller?: boolean, qoAlreadyOrdered?: boolean }}
+     */
+    #extractQoOwnedFilters(params) {
+        const result = {};
+        if (params.has('qo_new'))            result.qoNew = true;
+        if (params.has('qo_best_seller'))     result.qoBestSeller = true;
+        if (params.has('qo_already_ordered')) result.qoAlreadyOrdered = true;
         return result;
     }
 }

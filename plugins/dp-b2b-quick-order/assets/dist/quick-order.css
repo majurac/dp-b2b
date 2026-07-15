@@ -87,6 +87,16 @@
     outline-offset: 2px;
 }
 
+.dp-qo-catalog-filters__clear {
+    background: none;
+    border: 0;
+    padding: 0;
+    font-size: 13px;
+    text-decoration: underline;
+    color: #444;
+    cursor: pointer;
+}
+
 /* ── Toolbar: WBW active-filter chips + Quick Order variation chips
    (left group) + sort dropdown (right group). .selected-prod_atributes is
    WBW's own subtree — styled only via layout on this shared ancestor,

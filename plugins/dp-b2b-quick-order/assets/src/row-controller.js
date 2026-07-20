@@ -43,7 +43,9 @@ export class RowController {
         this.#tbody.querySelectorAll('[data-row-key]').forEach(row => {
             const input = row.querySelector('.dp-qo-qty');
             if (!input) return;
-            input.value = this.#state.getQuantity(row.dataset.rowKey);
+            const qty = this.#state.getQuantity(row.dataset.rowKey);
+            input.value = qty;
+            this.#applyAddedState(row, qty);
         });
     }
 
@@ -78,6 +80,28 @@ export class RowController {
         this.#footer.render();
         this.#chips.render();
         this.#flashCheck(row, qty);
+        this.#applyAddedState(row, qty);
+    }
+
+    /**
+     * Reflect whether `row` currently has a positive LOCAL quantity via the
+     * `.is-added` class — Quick Order local state only, never the WC cart
+     * (an item stays flagged here even before/without ever being submitted
+     * to the cart, and loses the flag the moment its local quantity returns
+     * to 0, regardless of cart contents). Single source of truth for this
+     * class, called from both the qty-change path (#onQtyInput — covers
+     * typing and the +/- buttons, which dispatch a real `input` event
+     * through the same delegated listener) and the hydrate/restore path
+     * (hydrateAll — covers initial render and any re-render where local
+     * state is re-applied to fresh DOM), so the two paths can never drift.
+     * `row` is always the purchasable unit's own container — a simple
+     * product's `.dp-qo-row` or a variable product's `.dp-qo-variation-row`
+     * — matching #flashCheck's row resolution above.
+     * @param {HTMLElement} row
+     * @param {number} qty
+     */
+    #applyAddedState(row, qty) {
+        row.classList.toggle('is-added', qty > 0);
     }
 
     /**

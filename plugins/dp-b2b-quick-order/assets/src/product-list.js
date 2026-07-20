@@ -39,6 +39,7 @@ export class ProductList {
         this.#paginationEl = document.querySelector('.dp-qo-pagination');
         this.#bindWoofIntegration();
         this.#bindQoOwnedFilters();
+        this.#bindFilterToggle();
     }
 
     /**
@@ -411,6 +412,28 @@ export class ProductList {
             // one) — reuses WBW's actual user-facing control and its real
             // AJAX/wpfAjaxSuccess pipeline, never a private WBW method.
             document.querySelector('.wpfClearButton')?.click();
+        });
+    }
+
+    /**
+     * Collapse/expand toggle for the Quick Order-owned filter fieldset —
+     * visually matches WBW's own +/- collapsible filter widgets (same
+     * affordance and click behavior), but is a fully independent
+     * implementation: no WBW DOM, classes, JS, or collapse state is read or
+     * reused. Scoped to this fieldset's own `.dp-qo-catalog-filters__content`
+     * only — never touches WBW's own widgets.
+     */
+    #bindFilterToggle() {
+        const toggle   = document.querySelector('.dp-qo-catalog-filters__toggle');
+        const fieldset = document.querySelector('.dp-qo-catalog-filters');
+        const icon     = toggle?.querySelector('.dp-qo-catalog-filters__toggle-icon');
+        if (!toggle || !fieldset) return;
+
+        toggle.addEventListener('click', () => {
+            const wasExpanded = toggle.getAttribute('aria-expanded') === 'true';
+            toggle.setAttribute('aria-expanded', String(!wasExpanded));
+            fieldset.classList.toggle('is-collapsed', wasExpanded);
+            if (icon) icon.textContent = wasExpanded ? '+' : '−';
         });
     }
 

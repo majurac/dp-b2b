@@ -34,6 +34,7 @@
    100% native <input type="checkbox"> — only appearance is overridden. ── */
 .dp-qo-catalog-filters {
     display: flex;
+    flex-direction: column;
     flex-wrap: wrap;
     gap: 8px 16px;
     margin: 0 0 16px;
@@ -45,9 +46,63 @@
     width: 100%;
     padding: 0;
     margin: 0 0 6px;
+}
+
+/* Real <button> as the entire legend content — native keyboard/focus support
+   for free, no non-interactive-element-plus-tabindex workaround. Mirrors WBW's
+   own title-row layout (label left, +/- affordance right) with zero shared
+   classes/DOM/JS. */
+.dp-qo-catalog-filters__toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    background: none;
     font-size: 13px;
     font-weight: 600;
     color: #444;
+    text-align: left;
+    cursor: pointer;
+}
+
+.dp-qo-catalog-filters__toggle:focus-visible {
+    outline: 2px solid #303030 !important;
+    outline-offset: 2px;
+}
+
+.dp-qo-catalog-filters__toggle-icon {
+    flex-shrink: 0;
+    margin-left: 8px;
+    font-size: 14px;
+    line-height: 1;
+}
+
+.dp-qo-catalog-filters__content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.dp-qo-catalog-filters.is-collapsed .dp-qo-catalog-filters__content {
+    display: none;
+}
+
+/* ── New "Filteri" section header (title + relocated Clear button) ──────── */
+.dp-qo-filters-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 0 10px;
+}
+
+.dp-qo-filters-header__title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #222;
 }
 
 .dp-qo-catalog-filter {

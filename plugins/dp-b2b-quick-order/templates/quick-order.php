@@ -21,45 +21,60 @@ $dp_qo_active_filters = [
 		<div class="row">
 
 			<div class="col-lg-3">
-				<fieldset class="dp-qo-catalog-filters">
-					<legend class="dp-qo-catalog-filters__legend"><?php esc_html_e( 'Brzi filteri', 'dp-b2b-quick-order' ); ?></legend>
-
-					<label class="dp-qo-catalog-filter" for="dp-qo-filter-already-ordered">
-						<input
-							type="checkbox"
-							id="dp-qo-filter-already-ordered"
-							class="dp-qo-catalog-filter__input"
-							data-qo-filter="qo_already_ordered"
-							<?php checked( $dp_qo_active_filters['qo_already_ordered'] ); ?>
-						>
-						<span class="dp-qo-catalog-filter__label"><?php esc_html_e( 'Već naručeno', 'dp-b2b-quick-order' ); ?></span>
-					</label>
-
-					<label class="dp-qo-catalog-filter" for="dp-qo-filter-new">
-						<input
-							type="checkbox"
-							id="dp-qo-filter-new"
-							class="dp-qo-catalog-filter__input"
-							data-qo-filter="qo_new"
-							<?php checked( $dp_qo_active_filters['qo_new'] ); ?>
-						>
-						<span class="dp-qo-catalog-filter__label"><?php esc_html_e( 'Novo', 'dp-b2b-quick-order' ); ?></span>
-					</label>
-
-					<label class="dp-qo-catalog-filter" for="dp-qo-filter-best-seller">
-						<input
-							type="checkbox"
-							id="dp-qo-filter-best-seller"
-							class="dp-qo-catalog-filter__input"
-							data-qo-filter="qo_best_seller"
-							<?php checked( $dp_qo_active_filters['qo_best_seller'] ); ?>
-						>
-						<span class="dp-qo-catalog-filter__label"><?php esc_html_e( 'Best seller', 'dp-b2b-quick-order' ); ?></span>
-					</label>
-
+				<div class="dp-qo-filters-header">
+					<span class="dp-qo-filters-header__title"><?php esc_html_e( 'Filteri', 'dp-b2b-quick-order' ); ?></span>
 					<button type="button" class="dp-qo-catalog-filters__clear">
-						<?php esc_html_e( 'Poništi', 'dp-b2b-quick-order' ); ?>
+						<?php esc_html_e( 'Poništi filtere', 'dp-b2b-quick-order' ); ?>
 					</button>
+				</div>
+
+				<fieldset class="dp-qo-catalog-filters">
+					<legend class="dp-qo-catalog-filters__legend">
+						<button
+							type="button"
+							class="dp-qo-catalog-filters__toggle"
+							aria-expanded="true"
+							aria-controls="dp-qo-catalog-filters-content"
+						>
+							<?php esc_html_e( 'Popularno', 'dp-b2b-quick-order' ); ?>
+							<span class="dp-qo-catalog-filters__toggle-icon" aria-hidden="true">−</span>
+						</button>
+					</legend>
+
+					<div class="dp-qo-catalog-filters__content" id="dp-qo-catalog-filters-content">
+						<label class="dp-qo-catalog-filter" for="dp-qo-filter-already-ordered">
+							<input
+								type="checkbox"
+								id="dp-qo-filter-already-ordered"
+								class="dp-qo-catalog-filter__input"
+								data-qo-filter="qo_already_ordered"
+								<?php checked( $dp_qo_active_filters['qo_already_ordered'] ); ?>
+							>
+							<span class="dp-qo-catalog-filter__label"><?php esc_html_e( 'Već naručeno', 'dp-b2b-quick-order' ); ?></span>
+						</label>
+
+						<label class="dp-qo-catalog-filter" for="dp-qo-filter-new">
+							<input
+								type="checkbox"
+								id="dp-qo-filter-new"
+								class="dp-qo-catalog-filter__input"
+								data-qo-filter="qo_new"
+								<?php checked( $dp_qo_active_filters['qo_new'] ); ?>
+							>
+							<span class="dp-qo-catalog-filter__label"><?php esc_html_e( 'Novo', 'dp-b2b-quick-order' ); ?></span>
+						</label>
+
+						<label class="dp-qo-catalog-filter" for="dp-qo-filter-best-seller">
+							<input
+								type="checkbox"
+								id="dp-qo-filter-best-seller"
+								class="dp-qo-catalog-filter__input"
+								data-qo-filter="qo_best_seller"
+								<?php checked( $dp_qo_active_filters['qo_best_seller'] ); ?>
+							>
+							<span class="dp-qo-catalog-filter__label"><?php esc_html_e( 'Best seller', 'dp-b2b-quick-order' ); ?></span>
+						</label>
+					</div>
 				</fieldset>
 
 				<?php if ( shortcode_exists( 'wpf-filters' ) ) : ?>

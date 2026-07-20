@@ -54,6 +54,14 @@ class Dreampoint_B2B_Dev_Catalog_Generator extends WP_CLI_Command {
 	 * [--count=<count>]
 	 * : Number of items to generate. Defaults: products=200, variables=10. Hard caps: products=1000, variables=50.
 	 *
+	 * [--refresh-metadata]
+	 * : Refresh deterministic total_sales and publish-date tiers on existing
+	 *   DEV-#### simple products (SKU pattern DEV-0001..DEV-9999). Does not
+	 *   create products. Ignores --phase when set — this is a standalone mode.
+	 *
+	 * [--dry-run]
+	 * : With --refresh-metadata, report what would change without saving anything.
+	 *
 	 * ## EXAMPLES
 	 *
 	 *     wp dp-b2b generate-catalog --phase=taxonomies
@@ -61,12 +69,19 @@ class Dreampoint_B2B_Dev_Catalog_Generator extends WP_CLI_Command {
 	 *     wp dp-b2b generate-catalog --phase=products --count=500
 	 *     wp dp-b2b generate-catalog --phase=variables
 	 *     wp dp-b2b generate-catalog --phase=variables --count=10
+	 *     wp dp-b2b generate-catalog --refresh-metadata
+	 *     wp dp-b2b generate-catalog --refresh-metadata --dry-run
 	 *
 	 * @subcommand generate-catalog
 	 * @when after_wp_load
 	 */
 	public function generate_catalog( array $args, array $assoc_args ): void {
 		$this->guard_production();
+
+		if ( isset( $assoc_args['refresh-metadata'] ) ) {
+			$this->run_refresh_metadata( $assoc_args );
+			return;
+		}
 
 		$phase = $assoc_args['phase'] ?? 'taxonomies';
 
@@ -328,6 +343,125 @@ class Dreampoint_B2B_Dev_Catalog_Generator extends WP_CLI_Command {
 		}
 
 		return [ 'created' => $created, 'skipped' => $skipped, 'stock' => $stock_tally ];
+	}
+
+	// -------------------------------------------------------------------------
+	// Phase-independent: metadata refresh
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Refreshes total_sales and date_created on existing DEV-#### simple
+	 * products using the same deterministic seed logic as generation.
+	 * Never creates products; never touches non-DEV-#### SKUs (DEV-VAR-*,
+	 * DEV-UGLY-*) or any field other than total_sales/date_created.
+	 */
+	private function run_refresh_metadata( array $assoc_args ): void {
+		$dry_run = isset( $assoc_args['dry-run'] );
+
+		WP_CLI::log( $dry_run
+			? 'Refreshing metadata (dry run — no changes will be saved)...'
+			: 'Refreshing metadata on existing DEV catalog products...'
+		);
+		WP_CLI::log( '' );
+
+		$product_ids     = $this->get_refreshable_product_ids();
+		$generated_total = $this->count_generated_products();
+		$qualifying      = count( $product_ids );
+		$skipped         = $generated_total - $qualifying;
+
+		WP_CLI::log( sprintf( 'Qualifying products (DEV-#### simple, _dp_generated=1): %d', $qualifying ) );
+		WP_CLI::log( sprintf( 'Skipped (generated but not DEV-#### simple products, e.g. DEV-VAR-*/DEV-UGLY-*): %d', $skipped ) );
+		WP_CLI::log( 'Fields refreshed: total_sales, date_created (post_date)' );
+		WP_CLI::log( '' );
+
+		if ( empty( $product_ids ) ) {
+			WP_CLI::warning( 'No qualifying products found. Run --phase=products first.' );
+			return;
+		}
+
+		$updated = 0;
+		$failed  = 0;
+
+		foreach ( $product_ids as $product_id ) {
+			$product = wc_get_product( $product_id );
+
+			if ( ! $product instanceof WC_Product ) {
+				$failed++;
+				continue;
+			}
+
+			$sku  = $product->get_sku();
+			$seed = abs( crc32( $sku ) );
+
+			$total_sales  = $this->deterministic_total_sales( $seed );
+			$publish_days = $this->deterministic_publish_offset_days( $seed );
+			// current_time('timestamp') + gmdate(): deliberate — see the same
+			// note in generate_simple_products(). Do not change without
+			// re-verifying WC_Data::set_date_prop() site-local semantics.
+			$publish_date = gmdate( 'Y-m-d H:i:s', current_time( 'timestamp' ) - ( $publish_days * DAY_IN_SECONDS ) );
+
+			if ( $dry_run ) {
+				WP_CLI::log( sprintf(
+					'  would-update  %s  total_sales=%d  date_created=%s',
+					$sku, $total_sales, $publish_date
+				) );
+				$updated++;
+				continue;
+			}
+
+			$product->set_total_sales( $total_sales );
+			$product->set_date_created( $publish_date );
+			$product->save();
+
+			WP_CLI::log( sprintf(
+				'  updated       %s  total_sales=%d  date_created=%s',
+				$sku, $total_sales, $publish_date
+			) );
+			$updated++;
+		}
+
+		WP_CLI::log( '' );
+
+		if ( $dry_run ) {
+			WP_CLI::success( sprintf( 'Dry run done — %d product(s) would be updated, %d failed to load.', $updated, $failed ) );
+			return;
+		}
+
+		WP_CLI::success( sprintf( 'Refresh done — %d product(s) updated, %d failed to load.', $updated, $failed ) );
+	}
+
+	/**
+	 * @return int[] Product IDs: post_type=product, _dp_generated=1, SKU
+	 *               matches DEV-#### exactly (8 chars total — excludes
+	 *               DEV-VAR-* and DEV-UGLY-* by length, not by name matching).
+	 */
+	private function get_refreshable_product_ids(): array {
+		global $wpdb;
+		$ids = $wpdb->get_col( $wpdb->prepare(
+			"SELECT DISTINCT p.ID FROM {$wpdb->posts} p
+			 INNER JOIN {$wpdb->postmeta} pm_gen ON p.ID = pm_gen.post_id
+			 INNER JOIN {$wpdb->postmeta} pm_sku ON p.ID = pm_sku.post_id
+			 WHERE p.post_type = 'product'
+			   AND pm_gen.meta_key = %s AND pm_gen.meta_value = %s
+			   AND pm_sku.meta_key = '_sku' AND pm_sku.meta_value LIKE 'DEV-____'
+			 ORDER BY p.ID",
+			self::GENERATED_KEY,
+			'1'
+		) );
+		return array_map( 'intval', $ids ?: [] );
+	}
+
+	/** @return int Count of _dp_generated=1 posts of type 'product' (any SKU pattern). */
+	private function count_generated_products(): int {
+		global $wpdb;
+		return (int) $wpdb->get_var( $wpdb->prepare(
+			"SELECT COUNT(DISTINCT p.ID) FROM {$wpdb->posts} p
+			 INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+			 WHERE p.post_type = 'product'
+			   AND pm.meta_key = %s AND pm.meta_value = %s",
+			self::GENERATED_KEY,
+			'1'
+		) );
 	}
 
 	// -------------------------------------------------------------------------

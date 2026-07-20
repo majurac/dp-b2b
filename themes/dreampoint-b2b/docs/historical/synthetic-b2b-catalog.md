@@ -107,6 +107,56 @@ All phases use slug-based existence checks before inserting. Re-running the same
 
 ---
 
+## Metadata Refresh
+
+Products created by an older generator run do not retroactively receive
+newly-added deterministic metadata (e.g. `total_sales` tiers, publish-date
+tiers) — the default `--phase=products` run skips any SKU that already
+exists. `--refresh-metadata` closes that idempotency gap without creating
+new products or touching anything else.
+
+```bash
+# Report + apply
+wp dp-b2b generate-catalog --refresh-metadata
+
+# Report only, no writes
+wp dp-b2b generate-catalog --refresh-metadata --dry-run
+```
+
+**Scope:** only products with `_dp_generated=1` whose SKU matches the
+Phase 2 `DEV-####` pattern (e.g. `DEV-0001`) — this excludes `DEV-VAR-*`
+and `DEV-UGLY-*` products by SKU length, not by name matching. `--phase`
+is ignored when `--refresh-metadata` is set — it is a standalone mode, not
+a fifth phase value.
+
+**Fields refreshed (only these two):**
+
+| Field | Recomputed from |
+|-------|------------------|
+| `total_sales` | `deterministic_total_sales(seed)` — same tiers as generation |
+| `date_created` (post_date) | `deterministic_publish_offset_days(seed)` relative to **refresh execution time**, not original generation time |
+
+**Fields deliberately preserved** (never written by refresh): name,
+description, images, stock (manual or generated), price (manual or
+generated), categories, brands, attributes, variations, visibility, and
+any other meta not listed above. This is what makes refresh safe to run
+against a catalog with manually-prepared QA scenarios.
+
+**Why refresh is time-relative:** the New-product filter compares
+`date_created` against "now" at query time. A catalog generated weeks ago
+drifts out of the New window even though the fixture's *intent* (some
+products clearly new, some clearly not) hasn't changed. Refresh
+re-anchors the same deterministic tier logic to the current moment so the
+New-filter fixtures stay meaningful without a full `reset-catalog` +
+regenerate cycle.
+
+**Idempotent:** running refresh twice in a row reproduces the same
+`total_sales` per SKU (seed is derived from the SKU, not from time) and
+recomputes `date_created` relative to whichever run executed last —
+running it repeatedly never creates, duplicates, or deletes anything.
+
+---
+
 ## Cleanup / Reset
 
 ```bash
@@ -121,6 +171,17 @@ wp dp-b2b reset-catalog --batch=20260511_1430
 **Deletion order (hard-coded):** variations → product parents → categories → brands.
 Category children are deleted before parents via `ORDER BY tt.parent DESC` in the ID query.
 `wp_delete_post($id, true)` is used for posts; `wp_delete_term()` for terms.
+
+---
+
+## Staging Persistence
+
+The staging synthetic catalog is persistent QA fixture data, not
+disposable scratch data. `reset-catalog` must not be run against staging
+without explicit instruction — it deletes generated products, variations,
+and (in non-batch mode) categories and brands. Use `--refresh-metadata`
+to bring time-relative fields up to date instead of resetting and
+regenerating.
 
 ---
 

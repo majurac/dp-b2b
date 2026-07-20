@@ -17,6 +17,25 @@ $dp_qo_active_filters = [
 	data-rest-url="<?php echo esc_attr( rest_url( DP_Quick_Order_Config::REST_NAMESPACE . '/' ) ); ?>"
 	data-nonce="<?php echo esc_attr( wp_create_nonce( DP_Quick_Order_Config::NONCE_ACTION ) ); ?>"
 >
+	<?php
+	/*
+	 * WBW AJAX compatibility placeholder — do not remove.
+	 *
+	 * WBW's native filter widgets (Brand, Sort By, In Stock, etc. — the
+	 * [wpf-filters] shortcodes below) look for a product-loop container to
+	 * inject their own AJAX response into. Quick Order renders its own
+	 * <table> instead of a WooCommerce ul.products loop, so without a target
+	 * WBW falls back to a full location.reload() before it ever dispatches
+	 * its own wpfAjaxSuccess event — which is what Quick Order's JS
+	 * (product-list.js) actually listens to. This element is configured as
+	 * the "Product List / Loader Selector" on WBW filter views 2 and 3 (WBW
+	 * admin > Filters > edit > Options tab) solely so that check finds a
+	 * target and stops reloading. Quick Order never reads its content —
+	 * WBW's injected HTML lands here and is discarded. See readme.md.
+	 */
+	?>
+	<div class="dp-qo-wbw-ajax-placeholder" hidden aria-hidden="true"></div>
+
 	<div class="container">
 		<div class="row">
 

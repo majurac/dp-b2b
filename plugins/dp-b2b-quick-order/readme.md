@@ -52,8 +52,22 @@ apply to a Quick Order query. Category/Brand/Price/Attribute/In-Stock
 selections made in WBW's widgets are read back out of the URL
 (`product-list.js`, keyed off WBW's own `data-taxonomy`/`data-get-attribute`
 DOM metadata — not hardcoded param names) and re-issued as Quick Order's
-own REST query params. See **Known limitations** below for the one real
-UX consequence of this split.
+own REST query params.
+
+**WBW AJAX compatibility placeholder.** WBW's own AJAX success handler
+looks for a product-loop container (`ul.products` by default) to inject
+its filtered HTML into; finding none on this page, it used to fall back
+to a full `location.reload()` before ever dispatching its own
+`wpfAjaxSuccess` event — the event `product-list.js` relies on to trigger
+its own REST refetch. `templates/quick-order.php` contains a hidden,
+empty `.dp-qo-wbw-ajax-placeholder` element for exactly this reason: WBW's
+"Product List / Loader Selector" setting (WBW admin, filter views 2 and 3,
+Options tab) points at it, so WBW's own container check succeeds and it
+proceeds through its normal AJAX path instead of reloading. WBW's response
+HTML lands in the placeholder and is never read — Quick Order's own REST
+rendering remains the only thing that updates the visible table. **Do not
+remove this element or repoint the WBW selector away from it** — doing so
+reintroduces the full-page-reload regression described below.
 
 ## Catalog Filters
 
@@ -207,18 +221,11 @@ workflow: `git push` locally, `git pull` on the server as the site user,
 - **Local state does not survive page navigation or reload** — by design
   (see Architecture above). Any in-progress, not-yet-submitted quantities
   are lost on refresh.
-- **WBW-triggered actions cause a full page reload, not an AJAX update.**
-  Clicking a native WBW control (Brand filter, Sort By) reloads the page;
-  Quick Order's own filters (Already Ordered/New/Best Seller) and the
-  qty/cart flow remain fully AJAX and preserve local state. Root cause
-  (investigated and confirmed, not assumed): WBW's AJAX success handler
-  looks for a native WooCommerce product-loop container (`ul.products` or
-  a few known theme-specific variants) to inject filtered HTML into: none
-  exists on this page, since Quick Order renders its own `<table>` instead
-  — WBW falls back to `location.reload()` when it can't find one. This is
-  not caused by an expired WBW license, a JS error, or a WBW
-  misconfiguration; it is WBW's own documented last-resort fallback
-  behavior for a product container it doesn't recognize. Not fixed here —
-  a viable next step (a hidden dummy `ul.products` container WBW can
-  target harmlessly, since Quick Order never reads WBW's injected HTML
-  anyway) is a separate, scoped follow-up.
+- ~~WBW-triggered actions cause a full page reload, not an AJAX
+  update.~~ **Resolved.** See "WBW AJAX compatibility placeholder" above —
+  WBW's own documented "Product List / Loader Selector" mechanism is now
+  pointed at a hidden, inert placeholder element so its container check
+  succeeds and it proceeds through its normal AJAX path (dispatching
+  `wpfAjaxSuccess`) instead of reloading. Quick Order's own filters
+  (Already Ordered/New/Best Seller) and the qty/cart flow were already
+  fully AJAX and unaffected either way.

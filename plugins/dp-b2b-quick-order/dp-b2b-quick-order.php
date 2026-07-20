@@ -20,6 +20,15 @@ define( 'DP_QUICK_ORDER_FILE', __FILE__ );
 define( 'DP_QUICK_ORDER_PATH', plugin_dir_path( __FILE__ ) );
 define( 'DP_QUICK_ORDER_URL', plugin_dir_url( __FILE__ ) );
 
+// HPOS (custom_order_tables) compatibility — the plugin only ever accesses
+// orders via wc_get_orders()/WC_Order and the cart via WC()->cart, never raw
+// SQL against order storage, so it is HPOS-agnostic by construction.
+add_action( 'before_woocommerce_init', function (): void {
+	if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', DP_QUICK_ORDER_FILE, true );
+	}
+} );
+
 spl_autoload_register( function ( string $class ): void {
 	if ( ! str_starts_with( $class, 'DP_Quick_Order_' ) ) {
 		return;

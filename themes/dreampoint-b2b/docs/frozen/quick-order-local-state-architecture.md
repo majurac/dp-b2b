@@ -4,12 +4,15 @@
 FROZEN — DO NOT REFACTOR WITHOUT EXPLICIT APPROVAL
 
 Architecture status:
-STABLE / PRODUCTION-VALIDATED (2026-07-10) — implementation plan executed,
-verified via Playwright against local XAMPP, deployed to staging
-(`dreampoint.b2b.uncledev.cloud`) and re-verified end-to-end there, including
->50-row batch chunking, mini-cart/Toastify fragment refresh, cart icon
-counter, and cache-busting. See `docs/active/status.md` for the full staging
-regression report reference.
+STABLE / PRODUCTION-VALIDATED (2026-07-10, re-validated 2026-07-21) —
+implementation plan executed, verified via Playwright against local XAMPP,
+deployed to staging (`dreampoint.b2b.uncledev.cloud`) and re-verified
+end-to-end there, including >50-row batch chunking, mini-cart/Toastify
+fragment refresh, cart icon counter, and cache-busting. Re-validated
+2026-07-21 alongside the catalog filters feature and the WBW AJAX
+container-check placeholder fix (see this section's 2026-07-21 revision
+note below). See `docs/active/status.md` for the full staging regression
+report reference.
 
 Canonical reference for the Quick Order local-state ordering workspace.
 Supersedes `docs/frozen/quick-order-sync-architecture.md` (real-time
@@ -83,6 +86,30 @@ for the resulting doctrine. Summary of what changed:
 
 No REST contract change, no local-state model change — this is entirely
 internal to how `ProductList` reads WBW's DOM/URL state.
+
+**Revision — 2026-07-21 (WBW AJAX container-check placeholder — §11
+addendum):** discovered that WBW's own AJAX success handler looks for a
+product-loop container (`ul.products` by default) to inject its filtered
+HTML into before ever dispatching `wpfAjaxSuccess` — the event §11's
+doctrine and `ProductList` already depend on. Quick Order renders its own
+`<table class="dp-qo-table">`, not a `ul.products` loop, so that container
+check always failed and WBW fell back to a full `location.reload()` on
+every Brand/Sort By/In Stock/native-Clear change, defeating the AJAX
+integration described above. Fixed via WBW's own documented "Product List /
+Loader Selector" admin setting (filter views 2 and 3, Options/Behavior tab)
+— pointed at a new hidden, inert `.dp-qo-wbw-ajax-placeholder` element in
+`templates/quick-order.php`, so WBW's container check succeeds and it
+proceeds through its normal AJAX path instead of reloading. WBW's response
+HTML lands in the placeholder and is never read; Quick Order's own REST
+rendering remains the only thing that updates the visible table. No JS
+logic changed — this is a native-first WBW admin configuration change plus
+one inert placeholder element, consistent with §11's native-first policy.
+Deployed to staging and end-to-end validated 2026-07-21 (commit `2d5c00a`):
+zero full-page reloads across Brand/Sort By/In Stock/native Clear,
+`wpfAjaxSuccess` fires on every change, placeholder stays hidden throughout.
+See `docs/active/status.md` for the full validation record and the plugin's
+`readme.md` → "WBW AJAX compatibility placeholder" for the current
+authoritative description.
 
 ---
 

@@ -41,8 +41,9 @@ Active engineering guidance lives in:
 
 | Doc | Covers |
 |-----|--------|
-| `docs/active/current-phase.md` | What is being built now, frozen system boundaries, current philosophy |
-| `docs/active/status.md` | Implementation status matrix per system |
+| `docs/active/current-phase.md` | Current phase status (Quick Order: COMPLETE, maintenance mode as of 2026-07-21), frozen system boundaries, current philosophy |
+| `docs/active/status.md` | Implementation status matrix per system — Quick Order milestone marked COMPLETE 2026-07-21 |
+| `docs/active/quick-order-catalog-filters-spec.md` | Catalog Filters (New/Best Seller/Already Ordered) design rationale — **implementation COMPLETE**, retained as historical design record; current behavior documented in the plugin's `readme.md` |
 
 ---
 
@@ -54,7 +55,7 @@ Active engineering guidance lives in:
 | Doc | System |
 |-----|--------|
 | `docs/frozen/checkout-logic.md` | Checkout — payment rules, billing prefill, WooCommerce Blocks billing data protection |
-| `docs/frozen/quick-order-local-state-architecture.md` | Quick Order — local state workspace model (canonical, current) |
+| `docs/frozen/quick-order-local-state-architecture.md` | Quick Order — local state workspace model (canonical, current). Milestone COMPLETE 2026-07-21 — see `docs/active/status.md`. |
 | `docs/frozen/quick-order-sync-architecture.md` | CartSync — real-time debounce engine (SUPERSEDED 2026-07-10 — see local-state doc) |
 
 ---
@@ -89,16 +90,27 @@ Active engineering guidance lives in:
 
 ## Active Execution Plans
 
-| Plan | Status | Delivers |
-|------|--------|----------|
-| `docs/superpowers/plans/2026-07-10-quick-order-local-state.md` | **Pending** | Transforms Quick Order into the local-state workspace model — see `docs/frozen/quick-order-local-state-architecture.md` |
-| `docs/superpowers/plans/2026-05-12-quick-order-v1-1.md` | **Executed** (table was stale — code already reflects all 5 tasks) | Admin bypass, variable stock fix, sorting, qty +/- buttons. Cart totals footer item is superseded by the local-state footer model (see `docs/frozen/quick-order-local-state-architecture.md` §3) rather than delivered as originally scoped. |
+None. Quick Order's planned development cycle is COMPLETE as of 2026-07-21
+(see `docs/active/status.md`) — all plans previously tracked here have been
+executed and moved to the Plan Archive table below.
 
 ---
 
 ## Plan Archive
 
-Executed plans: `docs/superpowers/plans/historical/`
+Executed plans (still physically located in `docs/superpowers/plans/`, not
+yet relocated to the `historical/` subfolder — status here is authoritative
+regardless of physical location):
+
+| Plan | Delivered |
+|------|-----------|
+| `docs/superpowers/plans/2026-05-12-quick-order-v1-1.md` | Admin bypass, variable stock fix, sorting, qty +/- buttons. Cart totals footer item is superseded by the local-state footer model (see `docs/frozen/quick-order-local-state-architecture.md` §3) rather than delivered as originally scoped. |
+| `docs/superpowers/plans/2026-07-10-quick-order-local-state.md` | Transformed Quick Order into the local-state workspace model — see `docs/frozen/quick-order-local-state-architecture.md` |
+| `docs/superpowers/plans/2026-07-13-quick-order-toolbar-chips.md` | Selected-variation chips, sort UI (superseded same day by native WBW Sort By — see the plan's own post-implementation note), qty checkmark |
+| `docs/superpowers/plans/2026-07-14-quick-order-catalog-filters.md` | New/Best Seller/Already Ordered catalog filters — see `docs/active/quick-order-catalog-filters-spec.md` |
+| `docs/superpowers/plans/2026-07-20-dev-catalog-metadata-refresh.md` | `--refresh-metadata` mode on the synthetic catalog generator |
+
+Older executed plans, relocated to `docs/superpowers/plans/historical/`:
 
 | Plan | Delivered |
 |------|-----------|
@@ -114,6 +126,12 @@ Executed specs: `docs/superpowers/specs/historical/`
 | Spec | Delivered |
 |------|-----------|
 | `2026-05-13-quick-order-ugly-dataset-design.md` | Ugly dataset generator design |
+
+Executed, not yet relocated (still in `docs/superpowers/specs/`):
+
+| Spec | Delivered |
+|------|-----------|
+| `docs/superpowers/specs/2026-07-13-quick-order-toolbar-chips-design.md` | As-shipped architecture for selected-variation chips, WBW-native Sort By, qty checkmark — see `docs/frozen/quick-order-local-state-architecture.md` 2026-07-13 revision notes |
 
 ---
 

@@ -338,6 +338,9 @@ function dreampoint_b2b_scripts(): void {
     if ( is_product() ) {
         wp_enqueue_style( 'dp-page-shop-single', get_template_directory_uri() . '/css/pages/shop-single.css', [ 'dp-style' ], _S_VERSION );
     }
+    if ( is_page_template( 'brands.php' ) || is_tax( 'product_brand' ) ) {
+        wp_enqueue_style( 'dp-page-brands', get_template_directory_uri() . '/css/pages/brands.css', [ 'dp-style' ], _S_VERSION );
+    }
     if ( function_exists( 'tinv_wishlist_is_wishlist' ) && tinv_wishlist_is_wishlist() ) {
         wp_enqueue_style( 'dp-page-wishlist', get_template_directory_uri() . '/css/pages/wishlist.css', [ 'dp-style' ], _S_VERSION );
     }

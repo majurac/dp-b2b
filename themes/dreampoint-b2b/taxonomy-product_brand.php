@@ -1,10 +1,21 @@
 <?php
 /**
- * The template for displaying a single product_brand taxonomy term page.
+ * Explicit template entry point for the Product Brand taxonomy archive.
  *
- * Thin delegator to the shared WooCommerce archive flow — Brand-specific
- * presentation is injected via the dreampoint_b2b_before_product_listing
- * hook (see inc/brand-hero.php), fired from header-shop-archive.php.
+ * Delegates rendering to the shared WooCommerce archive-product.php
+ * implementation, so Product Brand archives use the same catalog
+ * infrastructure — sidebar, toolbar, product loop, pagination, empty-state —
+ * as Shop, Product Category, and Product Tag archives, without duplicating
+ * that logic here.
+ *
+ * Brand-specific presentation (hero, gallery, ACF data) is injected into the
+ * shared flow through the dreampoint_b2b_before_product_listing hook
+ * (see inc/brand-hero.php), fired from header-shop-archive.php.
+ *
+ * This explicit entry point is retained deliberately — even though
+ * WooCommerce can resolve Product Brand archives through its own taxonomy
+ * template fallback — to keep the archive's rendering path discoverable,
+ * easy to debug, and maintainable within the theme's own file structure.
  *
  * @link https://developer.wordpress.org/themes/basics/template-hierarchy/
  *

@@ -185,15 +185,21 @@ $company_phone = get_field('company_phone', 'option') ?: '';
                                 </div>
                                 
                                 <!-- Search Button -->
-                                <div class="search-area toggle-search-area action-btn">
-                                    <button 
-                                        class="toggle-search" 
-                                        aria-label="<?php esc_attr_e('Otvori pretragu', 'dreampoint-b2b'); ?>"
-                                        aria-expanded="false"
-                                        aria-controls="search-popup"
-                                    >
-                                        <i class="icon-search" aria-hidden="true"></i>
+                               <div class="search-area sh">
+                                <button class="close-mobile-search" aria-label="<?php esc_attr_e( 'Zatvori mobilnu pretragu', 'dreampoint-b2b' ); ?>">
+                                        <i class="icon-xmark"></i>
                                     </button>
+                                    <form role="search" method="get" action="<?php echo esc_url(home_url('/')); ?>" autocomplete="off" class="custom-form">
+                                        <label class="screen-reader-text" for="s"><?php esc_html_e( 'Pretraži', 'dreampoint-b2b' ); ?>:</label>
+                                        <input type="text" value="<?php the_search_query(); ?>" name="s" id="s" placeholder="<?php _e('Traži', 'dreampoint-b2b') ?>" class="search-input" autocomplete="off" />
+                                        <button class="search-btn" type="submit" aria-label="<?php esc_attr_e( 'Gumb za pretragu', 'dreampoint-b2b' ); ?>">
+                                            <i class="icon-magnifing-glass"></i>
+                                        </button>
+                                        <!-- /.search-btn -->
+                                        <input type="hidden" name="post_type" value="product">
+                                    </form>
+                                    <div id="ajax-search-result">
+                                    </div>
                                 </div>
                                 <!-- /.search-area -->
                                 

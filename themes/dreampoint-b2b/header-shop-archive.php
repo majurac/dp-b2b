@@ -29,40 +29,18 @@
             <!-- /.col-lg-3 products-lhs-filter-wrap -->
             <div class="col-lg-9">
                 <div class="product-listing-wrap">
-                    <?php if (category_description()) :?>
-                    <div class="category-description">
-                        <?php echo category_description(); ?>
-                    </div>
-                    <!-- /.category-description -->
-                    <?php endif; ?>
                     <div class="sort-filter">
-                        <?php echo woocommerce_output_all_notices(); ?>
-
                         <div class="sort-area">
                             <?php
-                          
+                            get_template_part( 'template-parts/woocommerce-before-shop-loop' );
 
                             if ( woocommerce_product_loop() ) {
-                                /**
-                                 * Hook: woocommerce_before_shop_loop.
-                                 *
-                                 * @hooked woocommerce_output_all_notices - 10
-                                 * @hooked woocommerce_result_count - 20
-                                 * @hooked woocommerce_catalog_ordering - 30
-                                 */
-                                do_action( 'woocommerce_before_shop_loop' );
-
                                 woocommerce_product_loop_start();
                                 ?>
-                                
+
                                  <button class="button button--outline button--sm filter-btn"><?php esc_html_e( 'Filtriraj', 'dreampoint-b2b' ); ?></button>
                                 <?php
                                 woocommerce_product_loop_end();
-                            } else {
-                                // Add fallback content or a message for when no products are found
-                                ?>
-                                
-                                <?php
                             }
                             ?>
                         </div>

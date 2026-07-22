@@ -146,6 +146,7 @@ if ( class_exists( 'WooCommerce' ) ) {
     require get_template_directory() . '/inc/visibility.php';
     require get_template_directory() . '/inc/checkout-logic.php';
     require get_template_directory() . '/inc/ajax-handlers.php';
+    require get_template_directory() . '/inc/brand-hero.php';
 }
 
 require get_template_directory() . '/inc/nav-categories.php';

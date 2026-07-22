@@ -11,6 +11,8 @@
 
   get_header();
 
+  do_action( 'dreampoint_b2b_before_product_listing' );
+
 ?>
 
 <div id="products-page" class="block">

@@ -30,7 +30,7 @@
 | WooCommerce template overrides | `woocommerce/` folder |
 | JS source | `js/theme-scripts.js` → compiles to `js/theme.min.js` |
 | SCSS source | `sass/style.scss` → compiles to `style.css` |
-| WooCommerce CSS | `woocommerce.css` — written directly, not compiled from SCSS |
+| WooCommerce CSS | `sass/pages/woocommerce.scss` → compiles to `css/pages/woocommerce.css` (part of the `build:pages` directory compile, same as any other page stylesheet) |
 
 ---
 
@@ -38,18 +38,44 @@
 
 Node.js v24.14.1 LTS (upgraded April 2026). Build tools: sass@1.99.0, esbuild@0.21.5.
 
+### Canonical production build
+
 ```
-npm run watch:css   — SCSS watch with source map (development)
-npm run build:css   — compressed CSS without source map (production)
-npm run build:js    — esbuild: js/theme-scripts.js → js/theme.min.js
-npm run watch       — parallel CSS + JS watch
-npm run rtl         — generate RTL version
+npm run build
 ```
+
+This is the **single canonical command** for producing production assets. It runs, in order: `build:css`, `build:pages`, `build:blocks`, `build:vendors`, `build:js` — each a directory-to-directory (or single-entry) Sass/esbuild compile with `--style=compressed --no-source-map` (CSS) / `--minify` (JS). Only the output of `npm run build` may be committed as generated CSS/JS.
+
+| Script | Source → Output |
+|--------|------------------|
+| `build:css`     | `sass/style.scss` → `style.css` |
+| `build:pages`   | `sass/pages/` → `css/pages/` |
+| `build:blocks`  | `sass/blocks/` → `css/blocks/` |
+| `build:vendors` | `sass/vendors/` → `css/vendors/` |
+| `build:js`      | `js/theme-scripts.js` → `js/theme.min.js` |
+
+### Watch commands — local development only
+
+```
+npm run watch        — parallel watch:css + watch:pages + watch:blocks + watch:vendors + watch:js
+npm run watch:css    — sass/style.scss, expanded style + source map
+npm run watch:pages  — sass/pages/, expanded style + source map
+npm run watch:blocks — sass/blocks/, expanded style + source map
+npm run watch:vendors — sass/vendors/, expanded style + source map
+npm run watch:js     — esbuild --watch
+```
+
+`watch:*` output (expanded CSS, `.css.map` files) is for local iteration only. `*.css.map` is gitignored — never commit it, and never commit a `.css` file generated in watch mode. If a CSS file was edited or regenerated while `watch` was running, **run `npm run build` before committing** so the compressed, no-source-map canonical output replaces the watch-mode artifact.
+
+### Build determinism policy
+
+- `npm run build` is reproducible: given the same committed Sass sources, it always regenerates byte-identical compressed CSS/JS (verified — re-running against unchanged sources produces zero diff).
+- Committed generated CSS/JS must always be derivable from the currently committed Sass/JS sources. If a generated file and its source ever disagree (e.g. a generated asset was committed from an uncommitted local source edit), that is a build-determinism bug — regenerate via `npm run build` from committed sources, don't hand-patch the generated file.
+- `npm run rtl` (rtlcss on `style.css` → `style-rtl.css`) is a separate, manual pipeline — not part of `npm run build` or `npm run watch`, and not auto-verified by the determinism check above.
 
 Rules:
 - `js/theme-scripts.js` is the only source entry for `js/theme.min.js` (global JS, all pages)
 - `style.css` is compiled from `sass/style.scss` — do not edit directly
-- `woocommerce.css` is separate from main compilation — intentional
 - `sass/style.scss` header is corrected to "Dreampoint B2B"
 
 ---

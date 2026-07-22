@@ -30,6 +30,7 @@ themes/dreampoint-b2b/node_modules/
 plugins/dp-b2b-quick-order/node_modules/
 
 # ─── Claude Code / MCP session files ────────────────────────────────────────
+/.claude/
 themes/dreampoint-b2b/.claude/
 plugins/dp-b2b-quick-order/.claude/
 **/.playwright-mcp/

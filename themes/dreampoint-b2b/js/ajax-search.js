@@ -85,7 +85,8 @@ jQuery(document).ready(function ($) {
             type: 'GET',
             data: {
                 action: 'search_products',
-                searchTerm: searchTerm
+                searchTerm: searchTerm,
+                nonce: dpAjax.nonce
             },
             timeout: 10000,
             success: function (response) {

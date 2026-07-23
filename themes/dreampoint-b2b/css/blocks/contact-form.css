@@ -1,1 +1,159 @@
-.contact .contact-content{max-width:700px;margin-left:auto;margin-right:auto}.contact .contact-content .contact-intro h2{font-family:"Marcellus";font-style:normal;font-weight:400;font-size:32px;line-height:normal;letter-spacing:.04em;text-transform:uppercase}@media only screen and (max-width: 1199.98px){.contact .contact-content .contact-intro h2{font-size:28px}}@media only screen and (max-width: 767.98px){.contact .contact-content .contact-intro h2{font-size:24px}}.contact .contact-content .contact-intro h2+p{margin-top:20px}.contact .contact-content .contact-intro+.custom-form{margin-top:30px}.contact-form{position:relative}.contact-form .company-info{padding-top:40px;position:sticky;top:135px}@media only screen and (max-width: 767.98px){.contact-form .company-info{margin-bottom:32px}}.contact-form .company-info{max-width:365px;margin-left:auto;margin-right:auto}.contact-form .company-info .company-info-logo{text-align:center}.contact-form .company-info .company-info-logo img{display:block;margin-left:auto;margin-right:auto}.contact-form .company-info .company-info-logo+.company-info-items{margin-top:24px}.contact-form .company-info .company-info-items{text-align:center}.contact-form .company-info .company-info-items p{text-align:center;font-family:"Jost";font-style:normal;font-weight:300;font-size:18px;line-height:136%;letter-spacing:.01em;padding:0;margin:0}@media only screen and (max-width: 767.98px){.contact-form .company-info .company-info-items p{font-size:16px}}.contact-form .company-info .company-info-items p{color:#303030}.contact-form .company-info .company-info-items p strong{display:block;margin-left:auto;margin-right:auto}.contact-form .company-info .company-info-items p+p{margin-top:16px}.contact-form .form-intro h2{font-family:"Marcellus";font-style:normal;font-weight:400;font-size:32px;line-height:normal;letter-spacing:.04em;text-transform:uppercase}@media only screen and (max-width: 1199.98px){.contact-form .form-intro h2{font-size:28px}}@media only screen and (max-width: 767.98px){.contact-form .form-intro h2{font-size:24px}}.contact-form .form-intro h2{font-weight:600}.contact-form .form-intro h2+p{margin-top:8px}.contact-form .form-intro p{font-family:"Jost";font-style:normal;font-weight:300;font-size:24px;line-height:136%;letter-spacing:.01em;padding:0;margin:0}@media only screen and (max-width: 767.98px){.contact-form .form-intro p{font-size:20px}}.contact-form .form-intro+.contact-form-in{margin-top:40px}.contact-form .contact-form-in button[type=submit]{width:100%}.wpcf7-not-valid-tip{font-family:"Jost";font-style:normal;font-weight:300;font-size:18px;line-height:136%;letter-spacing:.01em;padding:0;margin:0}@media only screen and (max-width: 767.98px){.wpcf7-not-valid-tip{font-size:16px}}.wpcf7-not-valid-tip{font-size:1em;margin-top:5px}
+/*#525252*/
+.contact .contact-content {
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.contact .contact-content .contact-intro h2 {
+  font-family: "Marcellus";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 32px;
+  line-height: normal;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+@media only screen and (max-width: 1199.98px) {
+  .contact .contact-content .contact-intro h2 {
+    font-size: 28px;
+  }
+}
+@media only screen and (max-width: 767.98px) {
+  .contact .contact-content .contact-intro h2 {
+    font-size: 24px;
+  }
+}
+.contact .contact-content .contact-intro h2 + p {
+  margin-top: 20px;
+}
+.contact .contact-content .contact-intro + .custom-form {
+  margin-top: 30px;
+}
+
+.contact-form {
+  position: relative;
+}
+.contact-form .company-info {
+  padding-top: 40px;
+  position: sticky;
+  top: 135px;
+}
+@media only screen and (max-width: 767.98px) {
+  .contact-form .company-info {
+    margin-bottom: 32px;
+  }
+}
+.contact-form .company-info {
+  max-width: 365px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.contact-form .company-info .company-info-logo {
+  text-align: center;
+}
+.contact-form .company-info .company-info-logo img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+.contact-form .company-info .company-info-logo + .company-info-items {
+  margin-top: 24px;
+}
+.contact-form .company-info .company-info-items {
+  text-align: center;
+}
+.contact-form .company-info .company-info-items p {
+  text-align: center;
+  font-family: "Jost";
+  font-style: normal;
+  font-weight: 300;
+  font-size: 18px;
+  line-height: 136%;
+  letter-spacing: 0.01em;
+  padding: 0;
+  margin: 0;
+}
+@media only screen and (max-width: 767.98px) {
+  .contact-form .company-info .company-info-items p {
+    font-size: 16px;
+  }
+}
+.contact-form .company-info .company-info-items p {
+  color: #303030;
+}
+.contact-form .company-info .company-info-items p strong {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+.contact-form .company-info .company-info-items p + p {
+  margin-top: 16px;
+}
+.contact-form .form-intro h2 {
+  font-family: "Marcellus";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 32px;
+  line-height: normal;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+@media only screen and (max-width: 1199.98px) {
+  .contact-form .form-intro h2 {
+    font-size: 28px;
+  }
+}
+@media only screen and (max-width: 767.98px) {
+  .contact-form .form-intro h2 {
+    font-size: 24px;
+  }
+}
+.contact-form .form-intro h2 {
+  font-weight: 600;
+}
+.contact-form .form-intro h2 + p {
+  margin-top: 8px;
+}
+.contact-form .form-intro p {
+  font-family: "Jost";
+  font-style: normal;
+  font-weight: 300;
+  font-size: 24px;
+  line-height: 136%;
+  letter-spacing: 0.01em;
+  padding: 0;
+  margin: 0;
+}
+@media only screen and (max-width: 767.98px) {
+  .contact-form .form-intro p {
+    font-size: 20px;
+  }
+}
+.contact-form .form-intro + .contact-form-in {
+  margin-top: 40px;
+}
+.contact-form .contact-form-in button[type=submit] {
+  width: 100%;
+}
+
+.wpcf7-not-valid-tip {
+  font-family: "Jost";
+  font-style: normal;
+  font-weight: 300;
+  font-size: 18px;
+  line-height: 136%;
+  letter-spacing: 0.01em;
+  padding: 0;
+  margin: 0;
+}
+@media only screen and (max-width: 767.98px) {
+  .wpcf7-not-valid-tip {
+    font-size: 16px;
+  }
+}
+.wpcf7-not-valid-tip {
+  font-size: 1em;
+  margin-top: 5px;
+}
+
+/*# sourceMappingURL=contact-form.css.map */

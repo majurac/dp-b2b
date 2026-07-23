@@ -127,6 +127,12 @@ $company_phone = get_field('company_phone', 'option') ?: '';
                             <!-- /#navigation -->
                         </div>
                         <!-- /.col -->
+                         <div class="col">
+                            <a href="<?php echo esc_url( get_permalink( get_option('woocommerce_myaccount_page_id') ) ); ?>" class="my-acc-sm">
+                                <?php _e('Moj Račun', 'dreampoint-b2b'); ?>
+                            </a>
+                         </div>
+                         <!-- /.col -->
                     </div>
                     <!-- /.row -->
                 </div>
@@ -138,7 +144,7 @@ $company_phone = get_field('company_phone', 'option') ?: '';
                 <div class="container">
                     <div class="row">
                         <?php if (!empty($company_logo['url'])) : ?>
-                            <div class="col-mob2 col-md-4 col-lg-2 col-xl-2">
+                            <div class="col-mob2 col-md-2">
                                 <div id="logo">
                                     <a 
                                         href="<?php echo esc_url(home_url('/')); ?>" 
@@ -155,7 +161,7 @@ $company_phone = get_field('company_phone', 'option') ?: '';
                             </div>
                         <?php endif; ?>
 
-                        <div class="col-lg-7 col-xl-8 products-menu">
+                        <div class="col-md-4 products-menu">
                             <nav role="navigation" aria-label="<?php esc_attr_e('Glavni meni', 'dreampoint-b2b'); ?>" style="display:none;">
                                 <?php echo dreampoint_b2b_nav_categories_desktop(); ?>
                                 <?php 
@@ -172,8 +178,8 @@ $company_phone = get_field('company_phone', 'option') ?: '';
                         </div>
                         <!-- /.col-md-6 -->
                         
-                        <div class="col-md-8 col-lg-3 col-xl-2 action-btns-holder">
-                            <div class="action-btns">
+                        <div class="col-md-6 action-btns-holder">
+                           <div class="action-btns">
                                 <!-- Home Icon -->
                                 <div class="home-icon action-btn">
                                     <a 

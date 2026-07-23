@@ -348,7 +348,18 @@ body.admin-bar {
     }
 }
 
-.custom-pagination, .nav-links {
+.woocommerce-pagination {
+    position: relative;
+    width: 100%;
+    padding-left: 10px;
+    padding-right: 10px;
+    @include bp(sm-up) {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+.custom-pagination, .woocommerce-pagination ul.page-numbers {
     padding-top: 20px;
     border-top: 1px solid #EAECF0;
     text-align: center;
@@ -369,13 +380,13 @@ body.admin-bar {
             color: $text-primary;
             &.current {
                 color: $text-secondary-inverse;
-                background: $brand;
+                background: $text-secondary;
             }
         }
         &.prev, &.next {
             @include paragraph-normal;
             font-weight: 500;
-            color: $brand;
+            color: $text-secondary;
         }
         &.prev {
             margin-right: 15px;
@@ -389,12 +400,13 @@ body.admin-bar {
         &:not(.prev, .next) {
             &:hover {
                 color: $text-secondary-inverse;
-                background: $brand;
+                background: $text-secondary;
             }
         }
         
     }
 }
+
 
 .blogs, #blogs {
     .blog-categories {

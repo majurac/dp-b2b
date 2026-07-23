@@ -151,7 +151,7 @@ Executed, not yet relocated (still in `docs/superpowers/specs/`):
 | `docs/apros-question-resolution-matrix.md` | **Autoritativna AP matrica** — status AP-01 – AP-14, evidencija, što ostaje za Apros sesiju, što je zatvoreno; jedini dokument koji treba za pripremu Apros meetinga |
 | `docs/apros-session-final-pack.md` | **Finalni Apros meeting pack** — executive summary, P0/P1/P2 pitanja, traženi payload primjeri, interni blokeri, checklist; koristi se live na sestanku |
 | `docs/b2b-erp-migration-plan.md` | **Implementacijski migration plan** — component inventory, product/partner/pricing/order adapation, DB impact, implementacijski koraci s ovisnostima, CAN START NOW vs. BLOCKED scope |
-| `docs/decisions.md` | **Architectural Decision Records (ADR)** — pricing architecture, partner approval architecture; kontekst, odluka, posledice po odluci |
+| `docs/decisions.md` | **Architectural Decision Records (ADR)** — pricing architecture, partner approval architecture, WBW Product Filter Multi-type search compatibility layer; kontekst, odluka, posledice po odluci |
 
 ---
 

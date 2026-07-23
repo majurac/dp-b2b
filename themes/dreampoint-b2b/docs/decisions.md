@@ -92,6 +92,32 @@ Kao direktna posledica, `advance_only`/`free_shipping` propagacija (ranije AP-08
 
 ---
 
+## ADR-003 — WBW Product Filter Multi-Type Search Compatibility Layer
+
+**Datum:** 2026-07-23
+**Status:** Accepted
+**Vlasnik:** Catalog Filters (WBW Product Filter integration)
+
+### Context
+
+WBW Product Filter (Free/PRO, version 3.1.8 as verified) does not provide native search-box support for Category or Brand filter blocks when their Frontend Type is set to "Multi" (multi-select checkboxes) — the admin "Show search" option is not even exposed for that display type, and no search markup is rendered. This affects `[wpf-filters id=1]` (main shop archive) and `[wpf-filters id=3]` (Quick Order), both of which use Multi-type Category/Brand blocks.
+
+### Decision
+
+The theme implements a compatibility layer at `inc/wbw-multi-search-compat.php` that injects the missing search `<input>` markup server-side, reusing WBW's own existing frontend JavaScript and CSS unchanged. The layer intentionally hooks the official, documented WBW extension point `wpf_addHtmlAfterFilter` (via `DOMDocument`/`DOMXPath` post-processing) instead of patching, subclassing, or modifying any vendor plugin file. It is scoped only to filter ids 1 and 3.
+
+### Consequences
+
+- Zero vendor modifications — WBW/WBW-PRO can be updated freely without merge conflicts.
+- The compatibility layer includes a built-in duplicate-prevention check: if a `.wpfSearchWrapper` is already present on a block, injection is skipped automatically.
+- **Before modifying or removing `inc/wbw-multi-search-compat.php` in the future, first verify whether the installed WBW version now provides native Multi-type search support.** If native support exists and is functionally equivalent (including hierarchical unfolding/collapse behavior for Category), remove the compatibility layer instead of maintaining it further.
+
+### Related
+
+- `inc/wbw-multi-search-compat.php` — implementation and inline maintenance documentation (vendor line references, removal criteria)
+
+---
+
 ## Review Note — 2026-07-03 (Documentation Reconciliation)
 
 **Pregledano:** ADR-001 (Pricing Architecture) i ADR-002 (Partner Approval Architecture) pregledani nakon internog workshopa i dokumentacijske rekonsolidacije.

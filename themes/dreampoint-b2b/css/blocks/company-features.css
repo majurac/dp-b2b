@@ -1,1 +1,76 @@
-.features{padding:0}.features-content{padding-top:64px;padding-bottom:64px}@media only screen and (max-width: 767.98px){.features-content{padding-top:60px;margin-bottom:0px;row-gap:30px}}.features-content .item{display:flex;padding:0px 24px;column-gap:24px;flex-direction:column;text-align:center;max-width:300px;margin-left:auto;margin-right:auto}@media only screen and (max-width: 1199.98px){.features-content .item{padding:0 10px}}.features-content .item .features-icon{min-width:32px;width:46px;margin-left:auto;margin-right:auto;margin-bottom:16px}.features-content .item .features-text{flex-grow:1}.features-content .item .features-text h3,.features-content .item .features-text .features-title{font-family:"Marcellus";font-style:normal;font-weight:400;font-size:20px;line-height:25px;text-align:center;letter-spacing:.04em;text-transform:capitalize}@media only screen and (max-width: 1199.98px){.features-content .item .features-text h3,.features-content .item .features-text .features-title{font-size:18px;line-height:23px}}.features-content .item .features-text h3+p,.features-content .item .features-text .features-title+p{margin-top:5px}.features-content .item .features-text p{font-family:"Jost";font-style:normal;font-weight:300;font-size:18px;line-height:136%;letter-spacing:.01em;padding:0;margin:0}@media only screen and (max-width: 767.98px){.features-content .item .features-text p{font-size:16px}}
+/*#525252*/
+.features {
+  padding: 0;
+}
+.features-content {
+  padding-top: 64px;
+  padding-bottom: 64px;
+}
+@media only screen and (max-width: 767.98px) {
+  .features-content {
+    padding-top: 60px;
+    margin-bottom: 0px;
+    row-gap: 30px;
+  }
+}
+.features-content .item {
+  display: flex;
+  padding: 0px 24px;
+  column-gap: 24px;
+  flex-direction: column;
+  text-align: center;
+  max-width: 300px;
+  margin-left: auto;
+  margin-right: auto;
+}
+@media only screen and (max-width: 1199.98px) {
+  .features-content .item {
+    padding: 0 10px;
+  }
+}
+.features-content .item .features-icon {
+  min-width: 32px;
+  width: 46px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 16px;
+}
+.features-content .item .features-text {
+  flex-grow: 1;
+}
+.features-content .item .features-text h3, .features-content .item .features-text .features-title {
+  font-family: "Marcellus";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 25px;
+  text-align: center;
+  letter-spacing: 0.04em;
+  text-transform: capitalize;
+}
+@media only screen and (max-width: 1199.98px) {
+  .features-content .item .features-text h3, .features-content .item .features-text .features-title {
+    font-size: 18px;
+    line-height: 23px;
+  }
+}
+.features-content .item .features-text h3 + p, .features-content .item .features-text .features-title + p {
+  margin-top: 5px;
+}
+.features-content .item .features-text p {
+  font-family: "Jost";
+  font-style: normal;
+  font-weight: 300;
+  font-size: 18px;
+  line-height: 136%;
+  letter-spacing: 0.01em;
+  padding: 0;
+  margin: 0;
+}
+@media only screen and (max-width: 767.98px) {
+  .features-content .item .features-text p {
+    font-size: 16px;
+  }
+}
+
+/*# sourceMappingURL=company-features.css.map */

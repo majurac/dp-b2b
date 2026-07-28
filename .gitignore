@@ -18,6 +18,8 @@ plugins/*
 
 # Allow controlled custom plugins
 !plugins/dp-b2b-quick-order/
+!plugins/b2b-partner-importer/
+!plugins/b2b-komercijalist-notifications/
 
 # ─── Default themes (not needed in production) ───────────────────────────────
 themes/twenty*/
@@ -28,6 +30,9 @@ themes/dreampoint-b2b/node_modules/
 
 # ─── Plugin: devDependencies ─────────────────────────────────────────────────
 plugins/dp-b2b-quick-order/node_modules/
+
+# ─── Plugin: stray tool binaries (not plugin source) ─────────────────────────
+plugins/b2b-partner-importer/composer
 
 # ─── Claude Code / MCP session files ────────────────────────────────────────
 /.claude/

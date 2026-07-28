@@ -86,8 +86,9 @@ add_filter('woocommerce_account_menu_items', 'dreampoint_b2b_modify_account_menu
 function dreampoint_b2b_modify_account_menu($items) {
     $new_items = array(
         'dashboard'       => __('Lični podaci', 'dreampoint-b2b'),
-        'orders'          => __('Istorija narudžbi', 'dreampoint-b2b'),
-        'edit-address'    => __('Upravljanje adresama', 'dreampoint-b2b'),
+        'orders'          => __('Moje narudžbe', 'dreampoint-b2b'),
+        'edit-address'    => __('Adrese', 'dreampoint-b2b'),
+        'komercijalist'   => __( 'Prodajni predstavnik', 'dreampoint-b2b' ),
         'customer-logout' => __('Odjava', 'dreampoint-b2b'),
     );
     

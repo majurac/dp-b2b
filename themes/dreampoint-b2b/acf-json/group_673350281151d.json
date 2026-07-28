@@ -24,48 +24,6 @@
             "append": ""
         },
         {
-            "key": "field_69f31a9e3e954",
-            "label": "Product Inquiry Form ID",
-            "name": "product_inquiry_form_id",
-            "aria-label": "",
-            "type": "text",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "33.33",
-                "class": "",
-                "id": ""
-            },
-            "default_value": "",
-            "maxlength": "",
-            "allow_in_bindings": 0,
-            "placeholder": "",
-            "prepend": "",
-            "append": ""
-        },
-        {
-            "key": "field_691b0d12de633",
-            "label": "Contract Termination Form ID",
-            "name": "contract_termination_form_id",
-            "aria-label": "",
-            "type": "text",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "33.33",
-                "class": "",
-                "id": ""
-            },
-            "default_value": "",
-            "maxlength": "",
-            "allow_in_bindings": 1,
-            "placeholder": "",
-            "prepend": "",
-            "append": ""
-        },
-        {
             "key": "field_69f31ae7916ab",
             "label": "Subscribe Form ID",
             "name": "subscribe_form_id",
@@ -108,5 +66,5 @@
     "display_title": "",
     "allow_ai_access": false,
     "ai_description": "",
-    "modified": 1777539868
+    "modified": 1785147220
 }

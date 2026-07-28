@@ -197,7 +197,7 @@ $company_phone = get_field('company_phone', 'option') ?: '';
                                     </button>
                                     <form role="search" method="get" action="<?php echo esc_url(home_url('/')); ?>" autocomplete="off" class="custom-form">
                                         <label class="screen-reader-text" for="s"><?php esc_html_e( 'Pretraži', 'dreampoint-b2b' ); ?>:</label>
-                                        <input type="text" value="<?php the_search_query(); ?>" name="s" id="s" placeholder="<?php _e('Traži', 'dreampoint-b2b') ?>" class="search-input" autocomplete="off" />
+                                        <input type="text" value="<?php the_search_query(); ?>" name="s" id="s" placeholder="<?php _e('Pretražite naziv, SKU ili EAN', 'dreampoint-b2b') ?>" class="search-input" autocomplete="off" />
                                         <button class="search-btn" type="submit" aria-label="<?php esc_attr_e( 'Gumb za pretragu', 'dreampoint-b2b' ); ?>">
                                             <i class="icon-magnifing-glass"></i>
                                         </button>
@@ -362,23 +362,14 @@ $company_phone = get_field('company_phone', 'option') ?: '';
              * Shows breadcrumbs and page titles
              * Hidden on homepage and thank you page
              */
-            $hide_heading = is_front_page() || 
-                            is_home() || 
+            $hide_heading = is_front_page() ||
+                            is_home() ||
                             (function_exists('is_wc_endpoint_url') && is_wc_endpoint_url('order-received'));
             
-            if (!$hide_heading) : 
-            ?>
-            <?php
-            // Dohvati bg image unaprijed
-            $bg_image_url = '';
-            if ( is_category() || is_tax() ) {
-                $term = get_queried_object();
-                $bg_image_id  = get_term_meta( $term->term_id, 'bg_image', true );
-                $bg_image_url = $bg_image_id ? wp_get_attachment_image_url( $bg_image_id, 'full' ) : '';
-            }
+            if (!$hide_heading) :
             ?>
 
-            <div class="inner-heading<?php if ( $bg_image_url ) echo ' has-background'; ?>" <?php if ( $bg_image_url ) echo 'style="background-image: url(' . esc_url( $bg_image_url ) . ');"'; ?>>
+            <div class="inner-heading">
                 <div class="container">
                     <?php
                     /**
@@ -403,21 +394,33 @@ $company_phone = get_field('company_phone', 'option') ?: '';
 
                         } elseif (is_category()) {
                             echo '<h1>' . esc_html(single_cat_title('', false)) . '</h1>';
-                            $subtitle = get_term_meta($term->term_id, 'subtitle', true);
-                            if ($subtitle) echo '<h2 class="category-subtitle">' . esc_html($subtitle) . '</h2>';
 
                         } elseif (is_tax()) {
                             echo '<h1>' . esc_html(single_term_title('', false)) . '</h1>';
-                            $subtitle = get_term_meta($term->term_id, 'subtitle', true);
-                            if ($subtitle) echo '<h2 class="category-subtitle">' . esc_html($subtitle) . '</h2>';
 
                         } elseif (!is_product()) {
                             echo '<h1>' . esc_html(get_the_title()) . '</h1>';
                         }
                     }
+
+                    /**
+                     * Optional Intro Paragraph
+                     * Contact/FAQ page intro text and Brand archive intro text
+                     */
+                    if (is_page_template('contact.php') || is_page_template('faq.php')) {
+                        $intro_text = get_field('intro_text_contact');
+                        if ($intro_text) {
+                            echo '<div class="intro-text"><p>' . esc_html($intro_text) . '</p></div>';
+                        }
+                    } elseif (is_tax('product_brand')) {
+                        $intro_text_brands = get_field('intro_text_brands', 'option');
+                        if ($intro_text_brands) {
+                            echo '<div class="intro-text"><p>' . esc_html($intro_text_brands) . '</p></div>';
+                        }
+                    }
                     ?>
 
-                    <?php 
+                    <?php
                     /**
                      * My Account Intro
                      * Shows on account dashboard

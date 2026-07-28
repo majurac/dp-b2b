@@ -1,0 +1,17 @@
+{
+    "name": "uncledev/b2b-partner-importer",
+    "description": "WordPress plugin for importing B2B partners from Excel/CSV",
+    "type": "wordpress-plugin",
+    "require": {
+        "php": ">=7.4",
+        "phpoffice/phpspreadsheet": "^1.29"
+    },
+    "autoload": {
+        "psr-4": {
+            "UncleDev\\B2BImporter\\": "includes/"
+        }
+    },
+    "config": {
+        "vendor-dir": "includes/vendor"
+    }
+}

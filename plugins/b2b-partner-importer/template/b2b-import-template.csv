@@ -1,0 +1,3 @@
+OIB,Šifra partnera,Naziv tvrtke,Korisničko ime,Ime,Prezime,Email,Mobitel,Ulica,Kućni broj,Mjesto,Poštanski broj,Email komercijalista
+12345678901,TASK001,Primjer d.o.o.,primjer.korisnik,Ivan,Horvat,ivan.horvat@example.com,+385 91 123 4567,Ilica,123,Zagreb,10000,komercijalist@firma.hr
+23456789012,TASK002,Test Company d.o.o.,,Marko,Marić,marko.maric@test.com,+385 92 234 5678,Vukovarska,45,Split,21000,komercijalist2@firma.hr

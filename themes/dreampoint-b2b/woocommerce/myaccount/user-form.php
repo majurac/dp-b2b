@@ -1,13 +1,31 @@
+<?php 
+$user_id = get_current_user_id();
+$phone = get_user_meta($user_id, 'billing_phone', true);
+$billing_company = get_user_meta($user_id, 'billing_company', true);
+$company_oib = get_user_meta($user_id, 'billing_oib', true); // Fetch 'billing_oib'
+?>
 <div class="custom-form">
 	<form class="woocommerce-EditAccountForm edit-account" action="" method="post" <?php do_action( 'woocommerce_edit_account_form_tag' ); ?> >
 	
 		<?php do_action( 'woocommerce_edit_account_form_start' ); ?>
 
 		<div class="form-block-holder">
-			<div class="wod-title-holder">
-				<h2><?php esc_html_e( 'Lični podaci', 'dreampoint-b2b' ); ?></h2>
-			</div>
-			<!-- /.wod-title-holder -->
+			<div class="ma-holder">
+	            <div class="ma-header">
+		            <div class="wod-title-holder">
+						<h2><img src="<?php echo get_template_directory_uri(); ?>/img/ico/lock.svg" alt=""><?php esc_html_e( 'Podaci Tvrtke', 'dreampoint-b2b' ); ?></h2>
+					</div>
+					<!-- /.wod-title-holder -->
+	            </div>
+            	<!-- /.ma-header -->
+	            <div class="ma-info">
+	                <p><strong><?php esc_html_e('Naziv tvrtke', 'dreampoint-b2b'); ?></strong>: <?php echo esc_html($billing_company); ?></p>
+	                <p><strong><?php esc_html_e('Oib', 'dreampoint-b2b'); ?></strong>: <?php echo esc_html($company_oib); ?></p>
+	                <p><strong><?php esc_html_e('Phone', 'woocommerce'); ?></strong>: <?php echo esc_html($phone); ?></p>
+	            </div>
+	            <!-- /.ma-info -->
+	        </div>
+	        <!-- /.ma-holder -->
 			<p class="woocommerce-form-row woocommerce-form-row--first form-row form-row-first">
 	            <label for="account_first_name"><?php esc_html_e( 'First name', 'woocommerce' ); ?>&nbsp;<span class="required">*</span></label>
 	            <input type="text" class="woocommerce-Input woocommerce-Input--text input-text" name="account_first_name" id="account_first_name" autocomplete="given-name" value="<?php echo esc_attr( get_user_meta( $user->ID, 'billing_first_name', true ) ); ?>" />

@@ -1,0 +1,59 @@
+@import '../theme/vars';
+
+#faq-body {
+    max-width: 792px;
+    margin-left: auto;
+    margin-right: auto;
+    .accordion {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    .faq-wrap {
+        background: $white;
+        border-top: 1px solid $border-secondary;
+        &.active {
+            background: #F5F3F0;
+        }
+        h3 {
+            @include heading-6;
+            font-weight: 500;
+            color: $text-secondary;
+            padding: 16px;
+            padding-right: 50px;
+            position: relative;
+            cursor: pointer;
+            &:after {
+                font-family: icomoon;
+                content: "\e908";
+                @include centre(y);
+                right: 16px;
+                font-size: 18px;
+                color: $text-secondary;
+            }
+            &.active {
+                &:after {
+                    content: "\e907";
+                }
+            }
+        }
+        p, li {
+            @include paragraph-normal;
+            color: $text-primary;
+        }
+        p+p, ul+p, p + ul {
+            margin-top: 16px;
+        }
+        ul {
+            @include list-style;
+        }
+        ol {
+            @include order-style;
+        }
+        .content {
+            padding: 16px;
+            padding-top: 0;
+            display: none;
+        }
+    }
+}

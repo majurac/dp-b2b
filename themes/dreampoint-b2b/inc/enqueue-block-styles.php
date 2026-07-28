@@ -34,6 +34,7 @@ function dreampoint_b2b_enqueue_block_styles(): void {
         'acf/brands-section'               => 'brands',
         'acf/company-features-section'     => 'company-features',
         'acf/contact-form-section'         => 'contact-form',
+        'acf/contact-info-section'         => 'contact-info',
         'acf/featured-categories-section'  => 'featured-categories',
         'acf/featured-products-section'    => 'featured-products',
         'acf/gallery-section'              => 'gallery',

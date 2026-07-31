@@ -8,7 +8,7 @@ $title = get_field('title');
 // Query latest products
 $args = array(
     'post_type'      => 'product',
-    'posts_per_page' => 5,
+    'posts_per_page' => 6,
     'post_status'    => 'publish',
     'orderby'        => 'date',
     'order'          => 'DESC',

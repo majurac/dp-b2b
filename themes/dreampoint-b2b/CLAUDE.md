@@ -219,6 +219,13 @@ ignore it completely.
 - Orphaned or unused field groups must not be retained without purpose — remove them
 - Governance operations (export, deletion, sync) must not modify runtime behavior
 
+### Field Group Creation Doctrine
+
+- Do not introduce new permanent Theme Field Groups as JSON-only definitions. Always create/edit through the ACF admin UI, or import an existing JSON definition using ACF's native sync mechanism (`acf_import_field_group()` — the same call the admin "Sync available" action triggers). A hand-authored JSON file with no matching DB post (`ID = 0`) is a temporary/incomplete state, never the intended end state.
+- Every persistent field group must end up with BOTH: a `acf-field-group` database post AND a matching file in `acf-json/`. The JSON file remains the canonical, version-controlled source; the database post is the editable mirror the ACF admin UI operates on.
+- After introducing or syncing a field group, verify: it appears in **Custom Fields → Field Groups** without a permanent "Sync available" badge, Local JSON sync is functioning correctly, and no other field group targets the same location (duplicate) or exists without a matching JSON/DB counterpart (orphan).
+- Known pre-existing exceptions (JSON-only, `ID = 0`, not to be "fixed" proactively): `group_dp_bucket_fields` (Customer Bucket Rules — part of the frozen visibility system; do not touch without explicit request) and `group_685f00b0c4d10` (Page Intro Text). `group_udp_product_bundle` is registered via PHP by a plugin (`local => php`, not JSON) and is entirely out of theme scope.
+
 ### Local JSON Priority
 
 When a field group already exists in `acf-json/`, ACF treats the local JSON file as authoritative.

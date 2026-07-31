@@ -9,20 +9,26 @@ function display_commercialist_contact_info($user_id) {
         return; // No komercijalist selected, exit the function
     }
 
-    // Get the ACF fields for the selected komercijalist
+    // Get the commercialist's name and ACF fields
+    $commercialist_name  = get_the_title($selected_komercijalist_id);
     $commercialist_phone = get_field('phone_commercialist', $selected_komercijalist_id);
     $commercialist_email = get_field('email_commercialist', $selected_komercijalist_id);
 
     // Ensure both fields are available before displaying
     if ($commercialist_phone || $commercialist_email) {
-   
+
+        echo '<div class="commercialist-heading">';
+        echo '<div class="commercialist-name">' . esc_html($commercialist_name) . '</div>';
+        echo '<p>' . esc_html__('Sales Representative', 'dreampoint-b2b') . '</p>';
+        echo '</div>';
+
         if ($commercialist_phone) {
-            echo '<div class="item"><i class="icon-phone"></i><a href="tel:' . esc_attr($commercialist_phone) . '">' . esc_html($commercialist_phone) . '</a></div>';
+            echo '<p><a href="tel:' . esc_attr($commercialist_phone) . '">' . esc_html($commercialist_phone) . '</a></p>';
         }
         if ($commercialist_email) {
-            echo '<div class="item"><i class="icon-envelope"></i><a href="mailto:' . esc_attr($commercialist_email) . '">' . esc_html($commercialist_email) . '</a></div>';
+            echo '<p><a href="mailto:' . esc_attr($commercialist_email) . '">' . esc_html($commercialist_email) . '</a></p>';
         }
-       
+
     }
 }
 

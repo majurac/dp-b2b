@@ -31,8 +31,34 @@ function dreampoint_b2b_woocommerce_setup() {
 			),
 		)
 	);
+
+	dreampoint_b2b_seed_product_grid_options();
 }
 add_action( 'after_setup_theme', 'dreampoint_b2b_woocommerce_setup' );
+
+/**
+ * WooCommerce silently falls back to its own internal product grid defaults
+ * whenever woocommerce_catalog_columns / woocommerce_catalog_rows do not yet
+ * exist as options — a fresh database, or any environment provisioned via
+ * DB import + Git deploy rather than a real theme activation, may legitimately
+ * never have these options seeded.
+ *
+ * This helper seeds them exactly once, from the theme's declared product_grid
+ * defaults above, so that fallback never happens. Existing installations are
+ * never modified: add_option() only creates an option that is missing, it
+ * never touches one that already exists.
+ *
+ * This project intentionally relies on WooCommerce's native product grid
+ * mechanism (woocommerce_catalog_columns * woocommerce_catalog_rows) rather
+ * than a custom products-per-page implementation — this helper only
+ * guarantees that native mechanism has the values it needs to work.
+ *
+ * @return void
+ */
+function dreampoint_b2b_seed_product_grid_options(): void {
+	add_option( 'woocommerce_catalog_columns', wc_get_theme_support( 'product_grid::default_columns', 4 ) );
+	add_option( 'woocommerce_catalog_rows', wc_get_theme_support( 'product_grid::default_rows', 4 ) );
+}
 
 /**
  * WooCommerce specific scripts & stylesheets.

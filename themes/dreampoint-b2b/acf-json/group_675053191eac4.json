@@ -49,6 +49,36 @@
             "mime_types": "",
             "allow_in_bindings": 0,
             "preview_size": "medium"
+        },
+        {
+            "key": "field_6a9200a1b2c03",
+            "label": "Segment",
+            "name": "brand_segment",
+            "aria-label": "",
+            "type": "select",
+            "instructions": "Segment se koristi za navigaciju na stranici Brands. Ostavi prazno ako brend ne pripada nijednom segmentu.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "choices": {
+                "lifestyle": "Lifestyle",
+                "toys": "Toys",
+                "outdoor": "Outdoor"
+            },
+            "default_value": false,
+            "return_format": "value",
+            "multiple": 0,
+            "allow_null": 1,
+            "allow_in_bindings": 0,
+            "ui": 0,
+            "ajax": 0,
+            "placeholder": "",
+            "create_options": 0,
+            "save_options": 0
         }
     ],
     "location": [
@@ -72,5 +102,5 @@
     "display_title": "",
     "allow_ai_access": false,
     "ai_description": "",
-    "modified": 1784716992
+    "modified": 1785756094
 }

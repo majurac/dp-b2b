@@ -7,6 +7,43 @@
     padding-top: 0 !important;
   }
 }
+#brands-page .brand-segments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+@media only screen and (max-width: 767.98px) {
+  #brands-page .brand-segments {
+    gap: 6px;
+    margin-bottom: 20px;
+  }
+}
+#brands-page .brand-segments__tab {
+  appearance: none;
+  background: none;
+  border: 1px solid #BBBBBB;
+  border-radius: 100px;
+  color: #303030;
+  cursor: pointer;
+  padding: 8px 20px;
+  transition: 0.25s ease-in-out;
+}
+#brands-page .brand-segments__tab:hover {
+  border-color: #303030;
+}
+#brands-page .brand-segments__tab:focus-visible {
+  outline: 2px solid #7C4982;
+  outline-offset: 2px;
+}
+#brands-page .brand-segments__tab.is-active {
+  background: #111111;
+  border-color: #111111;
+  color: #FAFAFA;
+}
+#brands-page .brands-list .col.is-hidden {
+  display: none;
+}
 #brands-page .brands-list .row {
   row-gap: 24px;
   justify-content: center;

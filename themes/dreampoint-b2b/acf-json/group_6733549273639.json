@@ -188,6 +188,65 @@
             "new_lines": "br"
         },
         {
+            "key": "field_6a9021b3c9e01",
+            "label": "Contact Info - Title",
+            "name": "contact_info_title",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "allow_in_bindings": 0,
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_6a9021b3c9e02",
+            "label": "Contact Info - Text",
+            "name": "contact_info_text",
+            "aria-label": "",
+            "type": "textarea",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "allow_in_bindings": 0,
+            "rows": 2,
+            "placeholder": "",
+            "new_lines": ""
+        },
+        {
+            "key": "field_6a9021b3c9e03",
+            "label": "Contact Info - Button",
+            "name": "contact_info_button",
+            "aria-label": "",
+            "type": "link",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "return_format": "array",
+            "allow_in_bindings": 0
+        },
+        {
             "key": "field_67335492e8df9",
             "label": "Company Info",
             "name": "company_info",
@@ -799,5 +858,6 @@
     "show_in_rest": 0,
     "display_title": "",
     "allow_ai_access": false,
-    "ai_description": ""
+    "ai_description": "",
+    "modified": 1785752338
 }

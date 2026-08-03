@@ -5,7 +5,42 @@
     @include bp(sm-down) {
         padding-top: 0!important;
     }
+    .brand-segments {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 32px;
+        @include bp(sm-down) {
+            gap: 6px;
+            margin-bottom: 20px;
+        }
+        &__tab {
+            appearance: none;
+            background: none;
+            border: 1px solid $border-primary;
+            border-radius: 100px;
+            color: $text-primary;
+            cursor: pointer;
+            padding: 8px 20px;
+            transition: .25s ease-in-out;
+            &:hover {
+                border-color: $text-primary;
+            }
+            &:focus-visible {
+                outline: 2px solid $border-brand;
+                outline-offset: 2px;
+            }
+            &.is-active {
+                background: $background-brand;
+                border-color: $background-brand;
+                color: $text-primary-inverse;
+            }
+        }
+    }
     .brands-list {
+        .col.is-hidden {
+            display: none;
+        }
         .row {
             row-gap: 24px;
             justify-content: center;

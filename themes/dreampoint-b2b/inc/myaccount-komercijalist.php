@@ -19,7 +19,7 @@ function display_commercialist_contact_info($user_id) {
 
         echo '<div class="commercialist-heading">';
         echo '<div class="commercialist-name">' . esc_html($commercialist_name) . '</div>';
-        echo '<p>' . esc_html__('Sales Representative', 'dreampoint-b2b') . '</p>';
+        echo '<p>' . esc_html__('Prodajni predstavnik', 'dreampoint-b2b') . '</p>';
         echo '</div>';
 
         if ($commercialist_phone) {

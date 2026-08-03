@@ -100,6 +100,16 @@ Visibility behavior has been verified for:
 IMPORTANT:
 Do not touch visibility code unless explicitly requested.
 
+### Debugging Caveat — get_terms() on product_brand
+
+`product_brand` queries are filtered by this visibility engine through the `get_terms` filter (`inc/visibility/class-query-filter.php` → `filter_brand_terms()`). WP Admin and WP-CLI can therefore legitimately return different term counts for the same taxonomy.
+
+- An unauthenticated WP-CLI context (`get_current_user_id() = 0`) may receive an empty `product_brand` term set even when the taxonomy actually contains terms — a logged-in admin (`manage_options`) bypasses the filter and sees the full set.
+- This is expected behavior caused by the visibility layer, not missing taxonomy data or a wrong database.
+- When debugging Brands functionality, verify the execution context (logged-in admin vs. anonymous/CLI vs. a specific visibility test user) before assuming `product_brand` terms do not exist.
+
+Rule of thumb: an empty `product_brand` result is a visibility-context signal, not proof of missing data.
+
 ---
 
 ## Local Environment

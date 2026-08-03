@@ -583,6 +583,18 @@ function dreampoint_b2b_scripts(): void {
         wp_script_add_data( 'dreampoint-b2b-account-navigation', 'strategy', 'defer' );
     }
 
+    // --- JS: Navigacija segmenata na stranici Brands — samo na brands.php template-u ---
+    if ( is_page_template( 'brands.php' ) ) {
+        wp_enqueue_script(
+            'dreampoint-b2b-brands-navigation',
+            get_template_directory_uri() . '/js/brands-navigation.js',
+            [],
+            _S_VERSION,
+            true
+        );
+        wp_script_add_data( 'dreampoint-b2b-brands-navigation', 'strategy', 'defer' );
+    }
+
     // --- JS: FAQ accordion i tabovi — samo na faq.php template-u ---
     if ( is_page_template( 'faq.php' ) ) {
         wp_enqueue_script(
@@ -943,6 +955,79 @@ function dreampoint_b2b_product_features_shortcode(): string {
                     </div>
                 <?php endforeach; ?>
             </div>
+        </div>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+
+// ============================================================================
+// SHORTCODE — CONTACT INFO
+// ============================================================================
+
+/**
+ * Prikazuje kontakt informacije (naslov, tekst, dugme, komercijalist, radno vrijeme,
+ * telefon, email) iz ACF opcija (Theme Settings).
+ * Upotreba: [contact_info]
+ */
+add_shortcode( 'contact_info', 'dreampoint_b2b_contact_info_shortcode' );
+function dreampoint_b2b_contact_info_shortcode(): string {
+    $company_phone   = get_field( 'company_phone', 'option' );
+    $company_email   = get_field( 'company_email', 'option' );
+    $company_timings = get_field( 'company_timings', 'option' );
+    $contact_title   = get_field( 'contact_info_title', 'option' );
+    $contact_text    = get_field( 'contact_info_text', 'option' );
+    $contact_button  = get_field( 'contact_info_button', 'option' );
+
+    ob_start();
+    ?>
+    <div class="contact-info block">
+        <div class="container">
+            <div class="contact-content">
+                <div class="commercialist">
+                    <?php if ( $contact_title ) : ?>
+                        <h2><?php echo esc_html( $contact_title ); ?></h2>
+                    <?php endif; ?>
+                    <?php if ( $contact_text ) : ?>
+                        <p><?php echo wp_kses_post( $contact_text ); ?></p>
+                    <?php endif; ?>
+                    <?php if ( $contact_button ) : ?>
+                        <?php the_acf_link( $contact_button, 'button' ); ?>
+                    <?php endif; ?>
+                    <?php
+                        $current_user_id = get_current_user_id();
+
+                        // Provjeri da li je prikazan kontakt komercijaliste.
+                        ob_start();
+                        display_commercialist_contact_info( $current_user_id );
+                        $commercialist_output = ob_get_clean();
+
+                        if ( trim( $commercialist_output ) ) {
+                            // Prikaži kontakt komercijaliste.
+                            echo $commercialist_output;
+                        } else {
+                            // Fallback na opće kontakt podatke ako komercijalist nije dodijeljen.
+                            ?>
+                            <p><?php esc_html_e( 'Partner nema dodeljenog komercijalistu', 'dreampoint-b2b' ); ?></p>
+                            <?php
+                        }
+                    ?>
+                </div>
+                <!-- /.commercialist -->
+                <div class="contact-details">
+                    <div class="item">
+                        <p><strong><?php esc_html_e( 'Radno vrijeme', 'dreampoint-b2b' ); ?></strong></p>
+                        <p><?php echo wp_kses_post( $company_timings ); ?></p>
+                    </div>
+                    <div class="item">
+                        <p><strong><?php esc_html_e( 'Podrška kupcima', 'dreampoint-b2b' ); ?></strong></p>
+                        <p><a href="tel:<?php echo esc_attr( $company_phone ); ?>"><?php echo esc_html( $company_phone ); ?></a></p>
+                        <p><a href="mailto:<?php echo esc_attr( $company_email ); ?>"><?php echo esc_html( $company_email ); ?></a></p>
+                    </div>
+                </div>
+                <!-- /.contact-details -->
+            </div>
+            <!-- /.contact-content -->
         </div>
     </div>
     <?php

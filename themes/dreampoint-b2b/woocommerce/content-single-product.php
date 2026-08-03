@@ -328,6 +328,8 @@ $permalink = get_permalink($product_id);
         <!-- /.container -->
     </div>
     <!-- /#product-single-main -->
+
+    <?php echo do_shortcode('[product_features]'); ?>
     
     <!-- Recommended Products -->
     <div class="products-row-area slider-grid block" id="recomended-products">

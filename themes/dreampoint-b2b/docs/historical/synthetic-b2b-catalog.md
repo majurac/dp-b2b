@@ -70,6 +70,8 @@ Deterministic stock (60% instock / 20% low stock / 10% outofstock / 10% backorde
 
 Both tiers are seeded from the same per-SKU `$seed = abs(crc32($sku))` used by `deterministic_stock()`/`deterministic_price()` (the publish-date tier uses `$seed + 1` so it draws an independent value from the total_sales tier for the same SKU).
 
+**Sale price tier** — another deterministic product attribute alongside price, stock, and total_sales, added so the Discounted Products block (`wc_get_product_ids_on_sale()`) has real fixture data to query. Intentionally sparse: seeded independently via `crc32($sku . '_sale')` / `crc32($sku . '_sale_pct')` (same isolation technique as `deterministic_variation_price()`) so it does not correlate with the stock/price/total_sales draws for the same SKU. The exact threshold is an implementation detail — the functional target is approximately 6–8 discounted products across a default full generation run (200 simple + 10 variable). Discount depth is 10–40% off `regular_price`, applied via native WooCommerce `set_sale_price()`.
+
 ### Phase 3 — Variable Products (implemented)
 
 10 variable products by default (cap 50, hard-fail). SKU: `DEV-VAR-001` → `DEV-VAR-N`.
@@ -85,6 +87,8 @@ Both tiers are seeded from the same per-SKU `$seed = abs(crc32($sku))` used by `
 Attributes are **local** (not global taxonomy) — no `pa_*` taxonomy pollution.
 All variations have individual SKUs (`DEV-VAR-001-01` etc.), deterministic price (±15% delta from parent base), and variation-level stock states matching Phase 2 distribution.
 `WC_Product_Variable::sync()` is called after each product to update min/max price range.
+
+**Sale price tier (variable)** — same sparse deterministic attribute as the Phase 2 sale tier, evaluated once per parent SKU (`deterministic_variable_on_sale()`, ~2 of the default 10 parents). Variable products rely entirely on native WooCommerce sale handling: only the **first variation** of an on-sale parent receives a `sale_price` (`deterministic_variation_sale_price()`, 10–40% off that variation's price); the parent's own price range is synchronized exclusively through the existing `WC_Product_Variable::sync()` call — no custom parent pricing logic, no custom sale-visibility logic, and no variation is exposed as a standalone catalog product. The parent product ID is what `wc_get_product_ids_on_sale()` surfaces once a child variation is on sale and synced.
 
 ---
 

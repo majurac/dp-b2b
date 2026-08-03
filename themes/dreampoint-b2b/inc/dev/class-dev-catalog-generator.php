@@ -237,7 +237,7 @@ class Dreampoint_B2B_Dev_Catalog_Generator extends WP_CLI_Command {
 		WP_CLI::log( "Generating {$count} simple products..." );
 		WP_CLI::log( '' );
 
-		[ 'created' => $created, 'skipped' => $skipped, 'stock' => $stock_summary ] = $this->generate_simple_products( $count );
+		[ 'created' => $created, 'skipped' => $skipped, 'on_sale' => $on_sale, 'stock' => $stock_summary ] = $this->generate_simple_products( $count );
 
 		WP_CLI::log( '' );
 		WP_CLI::log( sprintf(
@@ -245,11 +245,12 @@ class Dreampoint_B2B_Dev_Catalog_Generator extends WP_CLI_Command {
 			$stock_summary['instock'], $stock_summary['low_stock'],
 			$stock_summary['outofstock'], $stock_summary['backorder']
 		) );
+		WP_CLI::log( sprintf( 'Discounted (sale price): %d created', $on_sale ) );
 		WP_CLI::success( sprintf( 'Products done — %d created, %d skipped.', $created, $skipped ) );
 	}
 
 	/**
-	 * @return array{created: int, skipped: int, stock: array{instock: int, low_stock: int, outofstock: int, backorder: int}}
+	 * @return array{created: int, skipped: int, on_sale: int, stock: array{instock: int, low_stock: int, outofstock: int, backorder: int}}
 	 */
 	private function generate_simple_products( int $count ): array {
 		$cat_ids   = $this->get_generated_child_cat_ids();
@@ -266,6 +267,7 @@ class Dreampoint_B2B_Dev_Catalog_Generator extends WP_CLI_Command {
 		$brand_count = count( $brand_ids );
 		$created     = 0;
 		$skipped     = 0;
+		$on_sale     = 0;
 		$stock_tally = [ 'instock' => 0, 'low_stock' => 0, 'outofstock' => 0, 'backorder' => 0 ];
 
 		for ( $i = 1; $i <= $count; $i++ ) {
@@ -282,10 +284,11 @@ class Dreampoint_B2B_Dev_Catalog_Generator extends WP_CLI_Command {
 			$brand_id = $brand_ids[ ( $i - 1 ) % $brand_count ];
 			$cat_name = $this->clean_dev_name( get_term( $cat_id, 'product_cat' )->name ?? 'Artikal' );
 
-			$seed  = abs( crc32( $sku ) );
-			$stock = $this->deterministic_stock( $seed );
-			$price = $this->deterministic_price( $seed );
-			$title = sprintf( '[DEV] %s — %04d', $cat_name, $i );
+			$seed       = abs( crc32( $sku ) );
+			$stock      = $this->deterministic_stock( $seed );
+			$price      = $this->deterministic_price( $seed );
+			$sale_price = $this->deterministic_sale_price( $sku, $price );
+			$title      = sprintf( '[DEV] %s — %04d', $cat_name, $i );
 
 			$total_sales   = $this->deterministic_total_sales( $seed );
 			$publish_days  = $this->deterministic_publish_offset_days( $seed );
@@ -301,6 +304,11 @@ class Dreampoint_B2B_Dev_Catalog_Generator extends WP_CLI_Command {
 			$product->set_name( $title );
 			$product->set_sku( $sku );
 			$product->set_regular_price( $price );
+
+			if ( $sale_price !== null ) {
+				$product->set_sale_price( $sale_price );
+			}
+
 			$product->set_total_sales( $total_sales );
 			$product->set_date_created( $publish_date );
 			$product->set_status( 'publish' );
@@ -327,7 +335,12 @@ class Dreampoint_B2B_Dev_Catalog_Generator extends WP_CLI_Command {
 			update_post_meta( $id, self::GENERATED_KEY, 1 );
 			update_post_meta( $id, self::BATCH_KEY, $this->batch_id );
 
-			WP_CLI::log( sprintf( '  +     %s  %s  %s  %s EUR', $sku, str_pad( $stock['status'], 12 ), str_pad( $price, 8 ), $title ) );
+			$price_label = $sale_price !== null ? "{$sale_price} EUR (was {$price})" : "{$price} EUR";
+			WP_CLI::log( sprintf( '  +     %s  %s  %s  %s', $sku, str_pad( $stock['status'], 12 ), str_pad( $price_label, 22 ), $title ) );
+
+			if ( $sale_price !== null ) {
+				$on_sale++;
+			}
 
 			$this->count_result( 'created', $created, $skipped );
 
@@ -342,7 +355,7 @@ class Dreampoint_B2B_Dev_Catalog_Generator extends WP_CLI_Command {
 			}
 		}
 
-		return [ 'created' => $created, 'skipped' => $skipped, 'stock' => $stock_tally ];
+		return [ 'created' => $created, 'skipped' => $skipped, 'on_sale' => $on_sale, 'stock' => $stock_tally ];
 	}
 
 	// -------------------------------------------------------------------------
@@ -507,6 +520,29 @@ class Dreampoint_B2B_Dev_Catalog_Generator extends WP_CLI_Command {
 	}
 
 	/**
+	 * Sale tier — another deterministic product attribute alongside price,
+	 * stock, and total_sales. Intentionally sparse: seeded independently of
+	 * the stock/price/total_sales draws for the same SKU via a distinct
+	 * hash suffix (same isolation technique as deterministic_variation_price()),
+	 * so it does not correlate with those tiers.
+	 *
+	 * @return string|null Sale price, or null if this SKU is not on sale.
+	 */
+	private function deterministic_sale_price( string $sku, string $regular_price ): ?string {
+		mt_srand( abs( crc32( $sku . '_sale' ) ) );
+		if ( mt_rand( 1, 100 ) > 3 ) { // sparse deterministic threshold — tuned to the functional target in Constraints
+			return null;
+		}
+
+		mt_srand( abs( crc32( $sku . '_sale_pct' ) ) );
+		$discount_pct = mt_rand( 10, 40 );
+
+		$sale = (float) $regular_price * ( 1 - $discount_pct / 100 );
+
+		return number_format( max( 0.01, $sale ), 2, '.', '' );
+	}
+
+	/**
 	 * total_sales tiers built around the LIVE configured Best Seller
 	 * threshold (DP_Quick_Order_Config::BEST_SELLER_MIN_SALES) rather than a
 	 * hardcoded duplicate of it — if the threshold is ever retuned, this
@@ -640,11 +676,12 @@ class Dreampoint_B2B_Dev_Catalog_Generator extends WP_CLI_Command {
 			$result['stock']['instock'], $result['stock']['low_stock'],
 			$result['stock']['outofstock'], $result['stock']['backorder']
 		) );
+		WP_CLI::log( sprintf( 'Discounted (sale price on first variation): %d parent product(s)', $result['on_sale'] ) );
 		WP_CLI::success( sprintf( 'Variables done — %d created, %d skipped.', $result['created'], $result['skipped'] ) );
 	}
 
 	/**
-	 * @return array{created: int, skipped: int, total_variations: int, tiers: array{small: int, medium: int, stress: int}, stock: array{instock: int, low_stock: int, outofstock: int, backorder: int}}
+	 * @return array{created: int, skipped: int, on_sale: int, total_variations: int, tiers: array{small: int, medium: int, stress: int}, stock: array{instock: int, low_stock: int, outofstock: int, backorder: int}}
 	 */
 	private function generate_variable_products( int $count ): array {
 		$cat_ids   = $this->get_generated_child_cat_ids();
@@ -661,6 +698,7 @@ class Dreampoint_B2B_Dev_Catalog_Generator extends WP_CLI_Command {
 		$brand_count = count( $brand_ids );
 		$created     = 0;
 		$skipped     = 0;
+		$on_sale     = 0;
 		$total_vars  = 0;
 		$tiers       = [ 'small' => 0, 'medium' => 0, 'stress' => 0 ];
 		$stock_tally = [ 'instock' => 0, 'low_stock' => 0, 'outofstock' => 0, 'backorder' => 0 ];
@@ -680,9 +718,10 @@ class Dreampoint_B2B_Dev_Catalog_Generator extends WP_CLI_Command {
 			$tier       = $this->resolve_tier( $i, $count );
 			$combos     = $this->get_tier_combinations( $tier );
 			$var_count  = count( $combos );
-			$title      = sprintf( '[DEV] %s — VAR %03d', $cat_name, $i );
-			$base_seed  = abs( crc32( $sku ) );
-			$base_price = $this->deterministic_price( $base_seed );
+			$title          = sprintf( '[DEV] %s — VAR %03d', $cat_name, $i );
+			$base_seed      = abs( crc32( $sku ) );
+			$base_price     = $this->deterministic_price( $base_seed );
+			$parent_on_sale = $this->deterministic_variable_on_sale( $sku );
 
 			$product = new WC_Product_Variable();
 			$product->set_name( $title );
@@ -714,6 +753,11 @@ class Dreampoint_B2B_Dev_Catalog_Generator extends WP_CLI_Command {
 				$variation->set_attributes( $this->build_variation_attributes( $combo ) );
 				$variation->set_sku( $var_sku );
 				$variation->set_regular_price( $var_price );
+
+				if ( $parent_on_sale && $j === 0 ) {
+					$variation->set_sale_price( $this->deterministic_variation_sale_price( $var_sku, $var_price ) );
+				}
+
 				$variation->set_manage_stock( $stock['managed'] );
 				$variation->set_stock_status( $stock['status'] );
 
@@ -750,15 +794,20 @@ class Dreampoint_B2B_Dev_Catalog_Generator extends WP_CLI_Command {
 			$tiers[ $tier ]++;
 			$created++;
 
+			if ( $parent_on_sale ) {
+				$on_sale++;
+			}
+
 			WP_CLI::log( sprintf(
-				'  +     %s  [%-6s]  %2d vars   %s',
-				$sku, $tier, $var_count, $title
+				'  +     %s  [%-6s]  %2d vars   %s%s',
+				$sku, $tier, $var_count, $title, $parent_on_sale ? '  [SALE]' : ''
 			) );
 		}
 
 		return [
 			'created'          => $created,
 			'skipped'          => $skipped,
+			'on_sale'          => $on_sale,
 			'total_variations' => $total_vars,
 			'tiers'            => $tiers,
 			'stock'            => $stock_tally,
@@ -855,6 +904,26 @@ class Dreampoint_B2B_Dev_Catalog_Generator extends WP_CLI_Command {
 		$delta_pct = mt_rand( -15, 15 );
 		$price     = $base * ( 1.0 + $delta_pct / 100.0 );
 		return number_format( max( 0.99, $price ), 2, '.', '' );
+	}
+
+	/**
+	 * Sale tier for variable products — same sparse deterministic attribute as
+	 * deterministic_sale_price(), evaluated once per parent SKU. Variable
+	 * products rely entirely on native WooCommerce sale handling: only the
+	 * first variation of an on-sale parent receives a sale_price; the parent's
+	 * own price range is synchronized exclusively via WC_Product_Variable::sync().
+	 */
+	private function deterministic_variable_on_sale( string $sku ): bool {
+		mt_srand( abs( crc32( $sku . '_sale' ) ) );
+		return mt_rand( 1, 100 ) <= 20; // sparse deterministic threshold — tuned to the functional target in Constraints
+	}
+
+	/** Sale price for one variation, seeded deterministically per variation SKU. */
+	private function deterministic_variation_sale_price( string $var_sku, string $var_price ): string {
+		mt_srand( abs( crc32( $var_sku . '_sale_pct' ) ) );
+		$discount_pct = mt_rand( 10, 40 );
+		$sale         = (float) $var_price * ( 1 - $discount_pct / 100 );
+		return number_format( max( 0.01, $sale ), 2, '.', '' );
 	}
 
 	// -------------------------------------------------------------------------

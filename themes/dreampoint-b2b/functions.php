@@ -895,6 +895,61 @@ function dreampoint_b2b_company_features_shortcode(): string {
 }
 
 // ============================================================================
+// SHORTCODE — PRODUCT FEATURES
+// ============================================================================
+
+/**
+ * Prikazuje prednosti proizvoda iz ACF opcija.
+ * Upotreba: [product_features]
+ */
+add_shortcode( 'product_features', 'dreampoint_b2b_product_features_shortcode' );
+function dreampoint_b2b_product_features_shortcode(): string {
+    $features_items = get_field( 'product_features_items', 'option' );
+
+    if ( empty( $features_items ) || ! is_array( $features_items ) ) return '';
+
+    ob_start();
+    ?>
+    <div class="product-features block">
+        <div class="container">
+            <div class="product-features-content">
+                <?php foreach ( $features_items as $item ) :
+                    $item_title       = $item['title'] ?? '';
+                    $item_description = $item['text']  ?? '';
+                    $item_image       = $item['image']  ?? null;
+
+                    if ( empty( $item_title ) && empty( $item_description ) ) continue;
+                ?>
+                    <div class="item">
+                        <?php if ( ! empty( $item_image['url'] ) ) : ?>
+                            <div class="features-icon">
+                                <img
+                                    src="<?php echo esc_url( $item_image['url'] ); ?>"
+                                    alt="<?php echo esc_attr( $item_image['alt'] ?: $item_title ?: __( 'Ikonica', 'dreampoint-b2b' ) ); ?>"
+                                    width="<?php echo isset( $item_image['width'] )  ? absint( $item_image['width'] )  : ''; ?>"
+                                    height="<?php echo isset( $item_image['height'] ) ? absint( $item_image['height'] ) : ''; ?>"
+                                    loading="lazy"
+                                >
+                            </div>
+                        <?php endif; ?>
+                        <div class="features-text">
+                            <?php if ( ! empty( $item_title ) ) : ?>
+                                <h3><?php echo esc_html( $item_title ); ?></h3>
+                            <?php endif; ?>
+                            <?php if ( ! empty( $item_description ) ) : ?>
+                                <p><?php echo esc_html( $item_description ); ?></p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+    <?php
+    return ob_get_clean();
+}
+
+// ============================================================================
 // ADMIN / EDITOR FIXES
 // ============================================================================
 

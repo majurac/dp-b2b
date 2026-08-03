@@ -241,6 +241,16 @@ Operational rule — before any field-group export, sync validation, or governan
 3. Pass the post ID to `acf_get_fields()` to retrieve fields from the database
 4. Do not assume `acf_get_field_group( $key )` represents a database-backed object
 
+### Updating Existing Theme Field Groups
+
+- When updating an existing permanent Theme Field Group, never rely on `acf_get_field_group( $key )` when Local JSON is enabled.
+- With Local JSON enabled, `acf_get_field_group( $key )` may resolve to the JSON-derived object (`ID = 0`) instead of the real database-backed Field Group.
+- Updates must always target the actual database-backed Field Group rather than the Local JSON-derived object.
+- After the database update, allow ACF to regenerate/synchronize the Local JSON — do not hand-edit the JSON file to reflect the change.
+- This prevents accidental duplicate Field Groups and preserves the DB-first → Local JSON mirror doctrine.
+
+This rule was introduced after a real-world duplicate Field Group incident on the DreamPoint B2B project: updating an existing Field Group by key (instead of by post ID) caused ACF to treat the Local JSON-derived object as authoritative, fail to recognize the existing database post, and create a second, empty, duplicate Field Group post under the same key. Future sessions should treat this as the reason the by-post-ID rule exists, not an abstract precaution.
+
 ---
 
 ## Quick Order System (Phase 6)

@@ -1422,4 +1422,88 @@ class Dreampoint_B2B_Dev_Catalog_Generator extends WP_CLI_Command {
 		}
 		return $combos;
 	}
+
+	// -------------------------------------------------------------------------
+	// Phase: brand-fixtures — fixture attachment helper
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Looks up a Media Library attachment previously created from a specific
+	 * fixture file, by the relative-path marker set in
+	 * ensure_fixture_attachment(). Not subject to the visibility engine's
+	 * get_terms filter (that filter only touches product_brand term queries
+	 * and product-post-type queries — see class-query-filter.php
+	 * should_filter(), which checks $query->get('post_type') === 'product').
+	 *
+	 * @return int Attachment ID, or 0 if no matching attachment exists.
+	 */
+	private function find_attachment_by_fixture_source( string $relative_path ): int {
+		$posts = get_posts( [
+			'post_type'      => 'attachment',
+			'post_status'    => 'inherit',
+			'posts_per_page' => 1,
+			'fields'         => 'ids',
+			'meta_key'       => '_dp_brand_fixture_source',
+			'meta_value'     => $relative_path,
+			'no_found_rows'  => true,
+		] );
+
+		return $posts ? (int) $posts[0] : 0;
+	}
+
+	/**
+	 * Ensures a Media Library attachment exists for a given fixture file
+	 * under dev-fixtures/, reusing a prior upload (matched by relative-path
+	 * marker) instead of re-uploading. Uses the standard native WordPress
+	 * media-upload recipe (wp_upload_bits -> wp_insert_attachment ->
+	 * wp_generate_attachment_metadata) — the same one media_sideload_image()
+	 * uses internally, driven from a local file's bytes instead of a
+	 * downloaded remote URL, so this works fully offline.
+	 *
+	 * @return array{0: int, 1: bool} [attachment_id (0 on failure), reused]
+	 */
+	private function ensure_fixture_attachment( string $relative_path ): array {
+		$existing_id = $this->find_attachment_by_fixture_source( $relative_path );
+
+		if ( $existing_id ) {
+			return [ $existing_id, true ];
+		}
+
+		$full_path = dirname( __DIR__, 2 ) . '/dev-fixtures/' . $relative_path;
+
+		if ( ! file_exists( $full_path ) ) {
+			WP_CLI::warning( "  FAIL  fixture asset missing on disk: {$relative_path}" );
+			return [ 0, false ];
+		}
+
+		$filename = basename( $relative_path );
+		$bits     = file_get_contents( $full_path );
+		$upload   = wp_upload_bits( $filename, null, $bits );
+
+		if ( ! empty( $upload['error'] ) ) {
+			WP_CLI::warning( "  FAIL  upload failed for {$relative_path}: {$upload['error']}" );
+			return [ 0, false ];
+		}
+
+		$filetype = wp_check_filetype( $upload['file'] );
+
+		$attachment_id = wp_insert_attachment( [
+			'post_mime_type' => $filetype['type'],
+			'post_title'     => sanitize_file_name( pathinfo( $filename, PATHINFO_FILENAME ) ),
+			'post_status'    => 'inherit',
+		], $upload['file'] );
+
+		if ( ! $attachment_id || is_wp_error( $attachment_id ) ) {
+			WP_CLI::warning( "  FAIL  attachment insert failed for {$relative_path}" );
+			return [ 0, false ];
+		}
+
+		require_once ABSPATH . 'wp-admin/includes/image.php';
+		$metadata = wp_generate_attachment_metadata( $attachment_id, $upload['file'] );
+		wp_update_attachment_metadata( $attachment_id, $metadata );
+
+		update_post_meta( $attachment_id, '_dp_brand_fixture_source', $relative_path );
+
+		return [ (int) $attachment_id, false ];
+	}
 }

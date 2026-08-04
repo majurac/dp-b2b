@@ -19,6 +19,9 @@ wp dp-b2b generate-catalog --phase=products --count=500
 # Phase 3 — variable products (default 10, cap 50)
 wp dp-b2b generate-catalog --phase=variables
 wp dp-b2b generate-catalog --phase=variables --count=10
+
+# Phase 4 — brand fixtures (canonical development brand dataset)
+wp dp-b2b generate-catalog --phase=brand-fixtures
 ```
 
 ---
@@ -90,6 +93,75 @@ All variations have individual SKUs (`DEV-VAR-001-01` etc.), deterministic price
 
 **Sale price tier (variable)** — same sparse deterministic attribute as the Phase 2 sale tier, evaluated once per parent SKU (`deterministic_variable_on_sale()`, ~2 of the default 10 parents). Variable products rely entirely on native WooCommerce sale handling: only the **first variation** of an on-sale parent receives a `sale_price` (`deterministic_variation_sale_price()`, 10–40% off that variation's price); the parent's own price range is synchronized exclusively through the existing `WC_Product_Variable::sync()` call — no custom parent pricing logic, no custom sale-visibility logic, and no variation is exposed as a standalone catalog product. The parent product ID is what `wc_get_product_ids_on_sale()` surfaces once a child variation is on sale and synced.
 
+### Phase 4 — Brand Fixtures (implemented)
+
+Recreates the canonical 21-brand real (non-`[DEV]`) `product_brand` development
+dataset used to test the Brands page (segment navigation, brand hero image/logo).
+Unlike Phases 1–3, this is a **fixed, hardcoded list** — not randomly generated,
+not derived from live DB state at run time. See
+`docs/superpowers/specs/2026-08-04-brand-fixtures-design.md` for the full design
+rationale.
+
+**21 brands**, each with `name`, `description`, optional `brand_segment` (ACF),
+optional logo (`thumbnail_id` term meta), optional `brand_image` (ACF). Some brands
+intentionally lack one or more of these fields — this is the real, current state of
+the dataset and is reproduced faithfully, not "completed":
+
+| Slug | Segment | Has logo | Has brand_image |
+|---|---|---|---|
+| `24bottles` | lifestyle | yes | yes |
+| `a-fan-of` | lifestyle | yes | yes |
+| `chillys` | — | yes | no |
+| `design-letters-aps` | lifestyle | yes | yes |
+| `djeco` | — | yes | no |
+| `dock-bay` | lifestyle | yes | yes |
+| `eat-my-socks` | — | yes | yes |
+| `flow-amsterdam` | toys | yes | yes |
+| `fresk` | toys | yes | yes |
+| `gaston-luga` | lifestyle | no | yes |
+| `go-baby-go` | toys | yes | yes |
+| `izipizi` | lifestyle | yes | yes |
+| `janod` | — | yes | no |
+| `la-coque-francaise` | lifestyle | yes | yes |
+| `leatherman` | outdoor | yes | yes |
+| `ledlenser` | outdoor | yes | yes |
+| `leuchtturm1917` | lifestyle | yes | yes |
+| `notabag` | lifestyle | yes | yes |
+| `nuuna` | lifestyle | yes | yes |
+| `printworks` | — | yes | yes |
+| `secrid` | lifestyle | yes | yes |
+
+**Fixture assets — permanent, git-committed data:**
+
+```
+dev-fixtures/
+  brands/
+    <slug>/
+      logo.<ext>          (omitted where the brand has no logo)
+      brand-image.<ext>   (omitted where the brand has no brand_image)
+```
+
+These files are part of the canonical development dataset, in the same sense as the
+hardcoded category/brand name arrays in Phase 1 — they are **not** temporary
+uploads, not build output, and must not be gitignored or treated as disposable.
+Media Library attachments are created from them using the native WordPress
+media-upload recipe (`wp_upload_bits()` → `wp_insert_attachment()` →
+`wp_generate_attachment_metadata()`), fully offline — no network access, no
+dependency on production/corporate-site availability.
+
+**Idempotency:** existence check is by `product_brand` slug (direct SQL, bypassing
+the visibility engine's `get_terms` filter — same technique as
+`get_generated_brand_ids()`). If a fixture's slug already exists, the entire brand
+is skipped — term, media, and ACF fields are left untouched. Attachment creation is
+separately deduplicated via a `_dp_brand_fixture_source` postmeta marker holding the
+asset's path relative to `dev-fixtures/`, so re-running the phase never creates
+duplicate Media Library attachments.
+
+**Deliberately outside the `_dp_generated`/`reset-catalog` lifecycle:** Brand
+Fixtures terms are real brand data — three of them (`chillys`, `djeco`, `janod`)
+have real, non-`[DEV]` products currently assigned. They are **not** tagged with
+`_dp_generated`/`_dp_generation_batch` and `reset-catalog` never touches them.
+
 ---
 
 ## Data Markers
@@ -102,6 +174,12 @@ Every generated term includes:
 | `_dp_generation_batch` | `YYYYMMDD_HHmm` | Batch tracing / partial reset |
 
 Names carry `[DEV]` prefix for visual identification in WP Admin.
+
+**Brand Fixtures (Phase 4) uses a separate, informational-only marker:**
+`_dp_brand_fixture` term meta (`= 1`). This is *not* part of the
+`_dp_generated`/`_dp_generation_batch` cleanup-targeting system above — it exists
+only so a human can identify a fixture-created brand in wp-admin/WP-CLI.
+`reset-catalog` does not read it.
 
 ---
 
@@ -202,14 +280,16 @@ regenerating.
 | Optimistic rollback on out-of-stock | Phase 3 — variation-level stock mix |
 | Variation add_to_cart validation | Phase 3 — all stock states per product |
 | Quick Order New/Best Seller filters | Backdated post_date + total_sales tiers (Phase 2), thresholds sourced live from DP_Quick_Order_Config |
+| Brands page segment navigation / hero image / logo | Phase 4 — 21-brand canonical fixture dataset |
 
 ---
 
 ## File Locations
 
 ```
-inc/dev/dev-tools.php                  — WP-CLI bootstrap (loaded only in CLI context)
+inc/dev/dev-tools.php                    — WP-CLI bootstrap (loaded only in CLI context)
 inc/dev/class-dev-catalog-generator.php  — generator class
+dev-fixtures/brands/<slug>/              — Phase 4 fixture assets (permanent, git-committed)
 ```
 
 Loaded from `functions.php` only when `defined('WP_CLI') && WP_CLI`.

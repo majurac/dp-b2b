@@ -91,16 +91,17 @@ get_header();
                             <a href="<?php echo esc_url($link); ?>">
                                 <?php if ($logo_url) : ?>
                                     <img src="<?php echo esc_url($logo_url); ?>" alt="<?php echo esc_attr($brand->name); ?>" class="brand-logo">
-                                    <?php else :
+                                <?php endif; ?>
+                                <?php if ($acf_image_url) : ?>
+                                    <img src="<?php echo esc_url($acf_image_url); ?>" alt="<?php echo esc_attr($brand->name); ?>" class="brand-image">
+                                    <?php elseif (!$logo_url) :
+                                    // Neither logo nor brand_image exists — fall back to the WC placeholder.
                                     // Get default placeholder and replace 150x150 with 384x282
                                     $placeholder_url = str_replace( '150x150', '384x282', wc_placeholder_img_src() );
                                 ?>
                                     <img src="<?php echo esc_url( $placeholder_url ); ?>"
                                          width="384" height="282"
                                          alt="<?php echo esc_attr( get_the_title() ); ?>"  class="brand-image" />
-                                <?php endif; ?>
-                                <?php if ($acf_image_url) : ?>
-                                    <img src="<?php echo esc_url($acf_image_url); ?>" alt="<?php echo esc_attr($brand->name); ?>" class="brand-image">
                                 <?php endif; ?>
                             </a>
                         </div>

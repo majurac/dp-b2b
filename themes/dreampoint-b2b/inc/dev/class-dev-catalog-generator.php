@@ -49,6 +49,7 @@ class Dreampoint_B2B_Dev_Catalog_Generator extends WP_CLI_Command {
 	 *   - products
 	 *   - variables
 	 *   - ugly
+	 *   - brand-fixtures
 	 * ---
 	 *
 	 * [--count=<count>]
@@ -71,6 +72,7 @@ class Dreampoint_B2B_Dev_Catalog_Generator extends WP_CLI_Command {
 	 *     wp dp-b2b generate-catalog --phase=variables --count=10
 	 *     wp dp-b2b generate-catalog --refresh-metadata
 	 *     wp dp-b2b generate-catalog --refresh-metadata --dry-run
+	 *     wp dp-b2b generate-catalog --phase=brand-fixtures
 	 *
 	 * @subcommand generate-catalog
 	 * @when after_wp_load
@@ -97,6 +99,9 @@ class Dreampoint_B2B_Dev_Catalog_Generator extends WP_CLI_Command {
 				break;
 			case 'ugly':
 				$this->run_ugly();
+				break;
+			case 'brand-fixtures':
+				$this->run_brand_fixtures();
 				break;
 			default:
 				WP_CLI::error( "Unknown phase: {$phase}" );
@@ -1421,6 +1426,320 @@ class Dreampoint_B2B_Dev_Catalog_Generator extends WP_CLI_Command {
 			$combos = $expanded;
 		}
 		return $combos;
+	}
+
+	// -------------------------------------------------------------------------
+	// Phase: brand-fixtures
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Canonical Brand Fixtures dataset — 21 real (non-[DEV]) product_brand
+	 * records reproducing the current Brands-page development dataset,
+	 * including its intentionally incomplete state (missing logo/brand_image
+	 * on some brands, missing brand_segment on others — see the approved
+	 * design spec, docs/superpowers/specs/2026-08-04-brand-fixtures-design.md).
+	 * This is a deliberate, fixed content decision, not a live mirror of
+	 * local DB state — additions/removals here must be intentional edits.
+	 *
+	 * @return array<int, array{slug:string,name:string,description:string,segment:?string,logo:?string,image:?string}>
+	 */
+	private function get_brand_fixtures(): array {
+		return [
+			[
+				'slug'        => '24bottles',
+				'name'        => '24Bottles',
+				'description' => '24Bottles je talijanski brend koji spaja moderan dizajn, održivost i funkcionalnost. Njihove boce, termosice i dodatci izrađeni su od visokokvalitetnih, dugotrajnih materijala i osmišljeni kako bi smanjili upotrebu plastike za jednokratnu upotrebu. Svaki proizvod kombinira estetiku i praktičnost, potičući ekološki osviješten način života uz dozu stila.',
+				'segment'     => 'lifestyle',
+				'logo'        => 'brands/24bottles/logo.webp',
+				'image'       => 'brands/24bottles/brand-image.webp',
+			],
+			[
+				'slug'        => 'a-fan-of',
+				'name'        => 'A Fan Of',
+				'description' => 'A FAN OF je brend iz Barcelone koji spaja tradiciju i suvremeni dizajn kroz elegantne ručno rađene lepeze. Svaka lepeza izrađena je u Španjolskoj od održivih materijala poput prirodnog drveta i 100% pamuka s eko-certificiranim bojama. Brend njeguje lokalnu proizvodnju, kvalitetu i odgovoran pristup, donoseći dašak mediteranskog šarma u svakodnevne trenutke.',
+				'segment'     => 'lifestyle',
+				'logo'        => 'brands/a-fan-of/logo.webp',
+				'image'       => 'brands/a-fan-of/brand-image.webp',
+			],
+			[
+				'slug'        => 'chillys',
+				'name'        => 'Chilly\'s',
+				'description' => '',
+				'segment'     => null,
+				'logo'        => 'brands/chillys/logo.jpg',
+				'image'       => null,
+			],
+			[
+				'slug'        => 'design-letters-aps',
+				'name'        => 'Design Letters ApS',
+				'description' => 'Design Letters je danski brend koji unosi skandinavsku estetiku u svakodnevne predmete kroz minimalistički dizajn i prepoznatljiva slova inspirirana tipografijom Arne Jacobsena.',
+				'segment'     => 'lifestyle',
+				'logo'        => 'brands/design-letters-aps/logo.webp',
+				'image'       => 'brands/design-letters-aps/brand-image.webp',
+			],
+			[
+				'slug'        => 'djeco',
+				'name'        => 'Djeco',
+				'description' => '',
+				'segment'     => null,
+				'logo'        => 'brands/djeco/logo.jpg',
+				'image'       => null,
+			],
+			[
+				'slug'        => 'dock-bay',
+				'name'        => 'DOCK & BAY',
+				'description' => 'Dock & Bay je britanski brend poznat po šarenim, ekološki prihvatljivim proizvodima za plažu i putovanja. Njihovi ručnici, torbe i ostali dodatci izrađeni su od 100 % recikliranih plastičnih boca, lagani su, brzosušeći i otporni na pijesak. Dock & Bay spaja praktičnost, održivost i veseo dizajn, čineći svaki trenutak na plaži ili putovanju jednostavnijim i ugodnijim.',
+				'segment'     => 'lifestyle',
+				'logo'        => 'brands/dock-bay/logo.webp',
+				'image'       => 'brands/dock-bay/brand-image.webp',
+			],
+			[
+				'slug'        => 'eat-my-socks',
+				'name'        => 'Eat My Socks',
+				'description' => 'Eat My Socks je kreativni modni brend iz Barcelone poznat po zabavnim i originalnim čarapama i modnim dodacima koji svakodnevne stvari pretvaraju u neočekivane i vizualno privlačne proizvode. Brend je osnovan 2021. godine i njegov fokus je na jedinstvenom dizajnu - čarape se često presavijaju i pakiraju tako da oponašaju oblike poput hrane (sushi, burger, pizza i sl.), što ih čini idealnim kao smiješan, šarolik i upečatljiv modni detalj ili poklon.',
+				'segment'     => null,
+				'logo'        => 'brands/eat-my-socks/logo.webp',
+				'image'       => 'brands/eat-my-socks/brand-image.webp',
+			],
+			[
+				'slug'        => 'flow-amsterdam',
+				'name'        => 'Flow Amsterdam',
+				'description' => '',
+				'segment'     => 'toys',
+				'logo'        => 'brands/flow-amsterdam/logo.png',
+				'image'       => 'brands/flow-amsterdam/brand-image.png',
+			],
+			[
+				'slug'        => 'fresk',
+				'name'        => 'Fresk',
+				'description' => '',
+				'segment'     => 'toys',
+				'logo'        => 'brands/fresk/logo.png',
+				'image'       => 'brands/fresk/brand-image.png',
+			],
+			[
+				'slug'        => 'gaston-luga',
+				'name'        => 'Gaston luga',
+				'description' => 'Gaston Luga je švedski lifestyle brend iz Stockholma koji spaja skandinavsku estetiku, funkcionalnost i održivost. Njihove torbe i dodatci izrađeni su od recikliranog PET materijala. Kombinirajući minimalistički dizajn s praktičnim detaljima, proizvodi Gaston Luga savršeni su za urbani život i svakodnevne potrebe.',
+				'segment'     => 'lifestyle',
+				'logo'        => null,
+				'image'       => 'brands/gaston-luga/brand-image.webp',
+			],
+			[
+				'slug'        => 'go-baby-go',
+				'name'        => 'Go baby go',
+				'description' => '',
+				'segment'     => 'toys',
+				'logo'        => 'brands/go-baby-go/logo.png',
+				'image'       => 'brands/go-baby-go/brand-image.png',
+			],
+			[
+				'slug'        => 'izipizi',
+				'name'        => 'Izipizi',
+				'description' => 'Izipizi je francuski brend poznat po modernim, šarenim i udobnim naočalama za sunce i čitanje koje spajaju stil i pristupačnost za sve uzraste. Njihovi modeli odlikuju se laganim i fleksibilnim okvirima, unisex dizajnom te raznolikošću boja i stilova. Izipizi naočale pružaju zaštitu, udobnost i veseli estetski dojam u svakodnevnim situacijama, bilo da čitate, uživate na suncu ili radite za računalom.',
+				'segment'     => 'lifestyle',
+				'logo'        => 'brands/izipizi/logo.webp',
+				'image'       => 'brands/izipizi/brand-image.webp',
+			],
+			[
+				'slug'        => 'janod',
+				'name'        => 'Janod',
+				'description' => '',
+				'segment'     => null,
+				'logo'        => 'brands/janod/logo.webp',
+				'image'       => null,
+			],
+			[
+				'slug'        => 'la-coque-francaise',
+				'name'        => 'LA COQUE FRANCAISE',
+				'description' => 'La Coque Française je francuski brend koji spaja modu i tehnologiju, nudeći elegantne i funkcionalne dodatke za pametne telefone. Njihovi proizvodi uključuju zaštite za telefone s modernim uzorcima, praktične lance i vezice za nošenje, dodatke poput zaštite za ekran te modne sitnice poput torbica i nakita za naočale. Svi proizvodi dizajnirani su i tiskani u Francuskoj, a brend se ponosi kreativnim, šarenim i personaliziranim kolekcijama koje kombiniraju stil i praktičnost.',
+				'segment'     => 'lifestyle',
+				'logo'        => 'brands/la-coque-francaise/logo.webp',
+				'image'       => 'brands/la-coque-francaise/brand-image.webp',
+			],
+			[
+				'slug'        => 'leatherman',
+				'name'        => 'Leatherman',
+				'description' => '',
+				'segment'     => 'outdoor',
+				'logo'        => 'brands/leatherman/logo.png',
+				'image'       => 'brands/leatherman/brand-image.png',
+			],
+			[
+				'slug'        => 'ledlenser',
+				'name'        => 'Ledlenser',
+				'description' => '',
+				'segment'     => 'outdoor',
+				'logo'        => 'brands/ledlenser/logo.png',
+				'image'       => 'brands/ledlenser/brand-image.png',
+			],
+			[
+				'slug'        => 'leuchtturm1917',
+				'name'        => 'Leuchtturm1917',
+				'description' => 'Leuchtturm1917 je njemački brend s više od stoljeća tradicije, poznat po vrhunski izrađenim bilježnicama, rokovnicima i planerima. Njihovi proizvodi odlikuju se kvalitetnim papirom, promišljenim detaljima poput numeriranih stranica i džepića te bogatom paletom boja. Leuchtturm1917 potiče ideju da je pisanje rukom oblik razmišljanja i stvaranja, nudeći savršenu ravnotežu između funkcionalnosti i inspiracije.',
+				'segment'     => 'lifestyle',
+				'logo'        => 'brands/leuchtturm1917/logo.webp',
+				'image'       => 'brands/leuchtturm1917/brand-image.webp',
+			],
+			[
+				'slug'        => 'notabag',
+				'name'        => 'Notabag',
+				'description' => 'Notabag je inovativan brend koji spaja praktičnost torbe i udobnost ruksaka u jednom proizvodu. Jednostavnim potezom traka torba se pretvara u ruksak, što je čini idealnom za svakodnevnu upotrebu, vožnju biciklom ili putovanja. Izrađena je od izdržljivih, laganih i vodootpornih materijala, kombinirajući pamuk i najlon visoke kvalitete. Notabag promiče održiv način života, potičući smanjenje upotrebe jednokratnih vrećica.',
+				'segment'     => 'lifestyle',
+				'logo'        => 'brands/notabag/logo.webp',
+				'image'       => 'brands/notabag/brand-image.webp',
+			],
+			[
+				'slug'        => 'nuuna',
+				'name'        => 'NUUNA',
+				'description' => 'Nuuna je njemački brend koji stvara premium bilježnice koje spajaju vrhunski dizajn, kvalitetu i osobni izraz. Svaka bilježnica izrađena je od pažljivo odabranih materijala poput reciklirane kože ili veganskih alternativa, s koricama koje krase jedinstveni umjetnički motivi otisnuti sitotiskom. Zahvaljujući šivanom uvezu, stranice ravno leže, a visokokvalitetni papir s diskretnom sivom mrežom idealan je za pisanje, crtanje ili planiranje.',
+				'segment'     => 'lifestyle',
+				'logo'        => 'brands/nuuna/logo.webp',
+				'image'       => 'brands/nuuna/brand-image.webp',
+			],
+			[
+				'slug'        => 'printworks',
+				'name'        => 'PRINTWORKS',
+				'description' => 'Printworks je švedski dizajnerski lifestyle brend osnovan 2017. godine u Stockholmu, poznat po svom prepoznatljivom spoju estetike i funkcionalnosti. Fokus brenda je stvaranje lijepih i pažljivo dizajniranih predmeta za dom i svakodnevni život - od foto‑albuma i društvenih igara, do slagalica, dekorativnih predmeta i praktičnih dodataka - koji potiču druženja, stvaranje uspomena i kvalitetno provođenje vremena s obitelji i prijateljima.',
+				'segment'     => null,
+				'logo'        => 'brands/printworks/logo.webp',
+				'image'       => 'brands/printworks/brand-image.webp',
+			],
+			[
+				'slug'        => 'secrid',
+				'name'        => 'SECRID',
+				'description' => 'Secrid je nizozemski brend poznat po inovativnim novčanicima s RFID zaštitom, koji štite kartice od krađe podataka i oštećenja. Njihovi proizvodi spajaju funkcionalnost, vrhunsku sigurnost i moderan dizajn, nudeći praktično i elegantno rješenje za svakodnevnu upotrebu.',
+				'segment'     => 'lifestyle',
+				'logo'        => 'brands/secrid/logo.webp',
+				'image'       => 'brands/secrid/brand-image.webp',
+			],
+		];
+	}
+
+	/**
+	 * Term ID for a product_brand slug, or 0 if not found. Direct SQL:
+	 * bypasses get_terms filter hooks (visibility engine filters
+	 * unauthenticated WP-CLI user to []) — same technique as
+	 * get_generated_brand_ids() elsewhere in this file.
+	 */
+	private function find_brand_term_id_by_slug( string $slug ): int {
+		global $wpdb;
+		$term_id = $wpdb->get_var( $wpdb->prepare(
+			"SELECT t.term_id FROM {$wpdb->terms} t
+			 INNER JOIN {$wpdb->term_taxonomy} tt ON t.term_id = tt.term_id
+			 WHERE tt.taxonomy = %s AND t.slug = %s",
+			'product_brand',
+			$slug
+		) );
+		return (int) $term_id;
+	}
+
+	/**
+	 * Creates one Brand Fixtures term, including its media and ACF fields.
+	 * Only called when find_brand_term_id_by_slug() has already confirmed
+	 * the slug does not exist — no existence re-check here.
+	 *
+	 * @param array{slug:string,name:string,description:string,segment:?string,logo:?string,image:?string} $fixture
+	 * @return array{0:int,1:int,2:int} [term_id (0 on failure), assets_created, assets_reused]
+	 */
+	private function create_brand_fixture_term( array $fixture ): array {
+		$assets_created = 0;
+		$assets_reused  = 0;
+		$logo_id        = 0;
+		$image_id       = 0;
+
+		if ( $fixture['logo'] !== null ) {
+			[ $logo_id, $reused ] = $this->ensure_fixture_attachment( $fixture['logo'] );
+			$reused ? $assets_reused++ : $assets_created++;
+		}
+
+		if ( $fixture['image'] !== null ) {
+			[ $image_id, $reused ] = $this->ensure_fixture_attachment( $fixture['image'] );
+			$reused ? $assets_reused++ : $assets_created++;
+		}
+
+		$result = wp_insert_term( $fixture['name'], 'product_brand', [
+			'slug'        => $fixture['slug'],
+			'description' => $fixture['description'],
+		] );
+
+		if ( is_wp_error( $result ) ) {
+			WP_CLI::warning( "  FAIL  {$fixture['name']}: " . $result->get_error_message() );
+			return [ 0, $assets_created, $assets_reused ];
+		}
+
+		$term_id = (int) $result['term_id'];
+		$applied = [];
+
+		if ( $logo_id ) {
+			update_term_meta( $term_id, 'thumbnail_id', $logo_id );
+			$applied[] = 'logo';
+		}
+		if ( $image_id ) {
+			update_field( 'brand_image', $image_id, 'product_brand_' . $term_id );
+			$applied[] = 'image';
+		}
+		if ( $fixture['segment'] !== null ) {
+			update_field( 'brand_segment', $fixture['segment'], 'product_brand_' . $term_id );
+			$applied[] = 'segment=' . $fixture['segment'];
+		}
+
+		add_term_meta( $term_id, '_dp_brand_fixture', 1, true );
+
+		WP_CLI::log( sprintf(
+			'  +     %s (id=%d)  %s',
+			$fixture['name'], $term_id, $applied ? implode( '+', $applied ) : '(no logo/image/segment)'
+		) );
+
+		return [ $term_id, $assets_created, $assets_reused ];
+	}
+
+	/**
+	 * @return array{created:int, skipped:int, assets_created:int, assets_reused:int}
+	 */
+	private function generate_brand_fixtures(): array {
+		$created        = 0;
+		$skipped        = 0;
+		$assets_created = 0;
+		$assets_reused  = 0;
+
+		foreach ( $this->get_brand_fixtures() as $fixture ) {
+			if ( $this->find_brand_term_id_by_slug( $fixture['slug'] ) ) {
+				WP_CLI::log( "  skip  {$fixture['name']}" );
+				$skipped++;
+				continue;
+			}
+
+			[ $term_id, $brand_assets_created, $brand_assets_reused ] = $this->create_brand_fixture_term( $fixture );
+
+			if ( ! $term_id ) {
+				continue; // failure already logged inside create_brand_fixture_term()
+			}
+
+			$created++;
+			$assets_created += $brand_assets_created;
+			$assets_reused  += $brand_assets_reused;
+		}
+
+		return [
+			'created'        => $created,
+			'skipped'        => $skipped,
+			'assets_created' => $assets_created,
+			'assets_reused'  => $assets_reused,
+		];
+	}
+
+	private function run_brand_fixtures(): void {
+		WP_CLI::log( 'Brand Fixtures — canonical development dataset:' );
+		WP_CLI::log( '' );
+
+		$result = $this->generate_brand_fixtures();
+
+		WP_CLI::log( '' );
+		WP_CLI::success( sprintf(
+			'Brand Fixtures done — brands: %d created, %d skipped | assets: %d created, %d reused.',
+			$result['created'], $result['skipped'], $result['assets_created'], $result['assets_reused']
+		) );
 	}
 
 	// -------------------------------------------------------------------------

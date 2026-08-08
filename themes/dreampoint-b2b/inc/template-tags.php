@@ -172,3 +172,25 @@ function dreampoint_b2b_is_quick_order_page(): bool {
 	return class_exists( 'DP_Quick_Order_Config' )
 		&& is_page( DP_Quick_Order_Config::PAGE_SLUG );
 }
+
+/**
+ * Returns the Quick Order page URL. Guards against the plugin being inactive —
+ * DP_Quick_Order_Config may not exist if dp-b2b-quick-order is deactivated.
+ *
+ * @return string|null Null if the plugin is unavailable or the page cannot be resolved.
+ */
+function dreampoint_b2b_get_quick_order_url(): ?string {
+	if ( ! class_exists( 'DP_Quick_Order_Config' ) ) {
+		return null;
+	}
+
+	$page = get_page_by_path( DP_Quick_Order_Config::PAGE_SLUG );
+
+	if ( ! $page ) {
+		return null;
+	}
+
+	$url = get_permalink( $page );
+
+	return $url ?: null;
+}

@@ -15,6 +15,7 @@
     "build:pages":  "sass sass/pages/:css/pages/ --style=compressed --silence-deprecation=import --no-source-map",
     "build:blocks": "sass sass/blocks/:css/blocks/ --style=compressed --silence-deprecation=import --no-source-map",
     "build:vendors": "sass sass/vendors/:css/vendors/ --style=compressed --silence-deprecation=import --no-source-map",
+    "build:file":   "sass --style=compressed --silence-deprecation=import --no-source-map",
     "build:js":     "esbuild js/theme-scripts.js --bundle --minify --outfile=js/theme.min.js",
     "build":        "npm-run-all build:css build:pages build:blocks build:vendors build:js",
     "watch:css":    "sass --watch sass/style.scss:style.css --style=expanded --source-map --silence-deprecation=import",

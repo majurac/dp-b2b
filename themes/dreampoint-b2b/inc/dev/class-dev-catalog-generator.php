@@ -1621,6 +1621,16 @@ class Dreampoint_B2B_Dev_Catalog_Generator extends WP_CLI_Command {
 	 * bypasses get_terms filter hooks (visibility engine filters
 	 * unauthenticated WP-CLI user to []) — same technique as
 	 * get_generated_brand_ids() elsewhere in this file.
+	 *
+	 * This is an intentional architectural decision, not a performance
+	 * optimization. The B2B visibility layer (inc/visibility/class-query-filter.php)
+	 * hooks get_terms and filters product_brand results to an empty set for
+	 * any request context without an authenticated manage_options user —
+	 * which a plain WP-CLI invocation (no --user=admin) is. Do not replace
+	 * this with get_term_by()/get_terms(): under that unauthenticated
+	 * WP-CLI context it would incorrectly report every existing brand as
+	 * "not found", causing this idempotent phase to attempt recreating
+	 * brands that already exist.
 	 */
 	private function find_brand_term_id_by_slug( string $slug ): int {
 		global $wpdb;

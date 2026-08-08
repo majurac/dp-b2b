@@ -1,0 +1,282 @@
+@import '../theme/vars';
+
+
+// =============================
+// THANK YOU PAGE INTRO
+// =============================
+.ty-intro {
+    text-align: center;
+    margin-bottom: 8px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+
+    .ty-icon {
+        margin-bottom: 8px;
+    }
+
+    h1 {
+        @include heading-1;
+        color: $text-primary;
+    }
+
+    p {
+        @include paragraph-large;
+        font-weight: 400;
+        color: #344054;
+        margin-top: 16px;
+    }
+}
+
+.woocommerce-thankyou-order-details {
+    li strong {
+        margin-left: auto !important;
+        margin-right: auto !important;
+        padding: 4px 12px !important;
+    }
+}
+
+
+// =============================
+// ORDER OVERVIEW (meta: date, status, total, email)
+// =============================
+.woocommerce-order-overview {
+    display: flex;
+    margin-bottom: 56px;
+
+    @include bp(sm-down) {
+        flex-direction: column;
+    }
+
+    li {
+        flex-grow: 1;
+        @include paragraph-normal;
+        color: #101828;
+        text-align: center;
+
+        @include bp(sm-up) {
+            width: 25%;
+        }
+
+        strong {
+            display: block;
+            margin-top: 8px;
+            @include paragraph-normal;
+            font-weight: 500;
+            color: #0C111D;
+
+            @include bp(sm-down) {
+                margin-left: auto;
+                margin-right: auto;
+            }
+        }
+
+        + li {
+            @include bp(sm-up)   { margin-left: 15px; }
+            @include bp(sm-down) { margin-top: 15px; }
+        }
+
+        &.woocommerce-order-overview__email {
+            display: none;
+        }
+    }
+}
+
+
+// =============================
+// BACS BANK DETAILS
+// =============================
+.woocommerce-bacs-bank-details {
+    li + li {
+        margin-top: 12px;
+    }
+
+    .order_details {
+        margin-top: 16px;
+    }
+}
+
+
+// =============================
+// SECTION HEADINGS
+// =============================
+h2.woocommerce-order-details__title,
+h2.wc-bacs-bank-details-heading {
+    display: flex;
+    @include heading-5;
+    font-weight: 500;
+    color: #0C111D;
+}
+
+.wod-title-holder {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+
+    &:after {
+        content: "";
+        display: flex;
+        flex: 1;
+        height: 1px;
+        width: 100%;
+        background: #d0d5dd;
+    }
+}
+
+
+// =============================
+// ORDER DETAILS TABLE
+// =============================
+.woocommerce-table--order-details {
+    display: flex;
+    position: relative;
+    margin-top: 16px;
+
+    @include bp(sm-down) {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    &:after {
+        @include centre(x);
+        content: '';
+        display: block;
+        width: 1px;
+        height: 100%;
+        background: #D0D5DD;
+        top: 0;
+
+        @include bp(sm-down) {
+            display: none;
+        }
+    }
+
+    thead {
+        display: none;
+    }
+
+    tbody {
+        row-gap: 10px;
+
+        @include bp(sm-up) {
+            padding-right: 24px;
+        }
+
+        .order_item {
+            display: flex;
+            justify-content: space-between;
+
+            @include bp(sm-down) {
+                gap: 12px;
+            }
+        }
+    }
+
+    tfoot {
+        @include bp(sm-up) {
+            padding-left: 24px;
+        }
+
+        tr {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+
+            &.order_total-row {
+                padding-top: 16px;
+                margin-top: 24px;
+                border-top: 1px solid #D0D5DD;
+
+                th, td { font-size: 16px; }
+                td     { font-weight: 500; }
+            }
+
+            + tr {
+                margin-top: 8px;
+            }
+        }
+
+        th, td {
+            @include bp(sm-up) {
+                width: 50%;
+            }
+        }
+
+        td {
+            @include paragraph-normal;
+            font-weight: 500;
+            text-align: right;
+            color: #101828;
+        }
+    }
+
+    tbody, tfoot {
+        display: flex;
+        flex-direction: column;
+        text-align: left;
+
+        @include bp(sm-up) {
+            width: 50%;
+            padding-bottom: 28px;
+        }
+    }
+
+    .wc-item-meta {
+        li {
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            gap: 5px;
+        }
+
+        p {
+            font-size: 16px;
+        }
+    }
+
+    td, th {
+        @include paragraph-normal;
+        color: #101828;
+
+        a { color: inherit; }
+    }
+
+    .includes_tax       { display: none; }
+    .payment_method-row { display: none; }
+
+    .cart_subtotal-row              { order: 1; }
+    .woocommerce-table__row--total-save { order: 2; }
+    .shipping-row                   { order: 3; }
+    .order_total-row                { order: 4; }
+}
+
+
+// =============================
+// ORDER CONFIRMATION WRAPPER
+// =============================
+.woocommerce-order {
+    padding-bottom: 86px;
+    max-width: 980px !important;
+
+    @include bp(lg)      { padding-bottom: 60px; }
+    @include bp(md)      { padding-bottom: 50px; }
+    @include bp(sm-down) { padding-bottom: 32px; }
+
+    .action-btn-holder {
+        margin-top: 56px;
+        text-align: center;
+
+        @include bp(md-down) {
+            margin-top: 32px;
+        }
+
+        .button {
+            display: inline-flex;
+        }
+    }
+
+    section + section {
+        margin-top: 24px;
+    }
+}

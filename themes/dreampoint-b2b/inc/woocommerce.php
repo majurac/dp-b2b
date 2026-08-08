@@ -250,18 +250,47 @@ add_action( 'pre_get_posts', function( WP_Query $q ): void {
 
 	dreampoint_b2b_akcija_page_detected( true );
 
-	$on_sale_ids = wc_get_product_ids_on_sale();
-
 	$q->set( 'post_type', 'product' );
 	$q->set( 'post_status', 'publish' );
-	$q->set( 'posts_per_page', (int) get_option( 'posts_per_page', 12 ) );
-	$q->set( 'post__in', $on_sale_ids ?: [ 0 ] );
+
+	// Falsy value — WC_Query::product_query() (prio 10, runs after this
+	// hook) only applies its native per-page default (woocommerce_catalog_
+	// columns × _rows, same as shop/category archives) when posts_per_page
+	// is not already truthy. A hardcoded value here would silently diverge
+	// from the rest of the catalog's per-page count.
+	$q->set( 'posts_per_page', 0 );
+
+	// Clear page-identity query vars — WP_Query::get_posts() builds
+	// "AND ID = $reqpage" from $this->queried_object_id (cached during
+	// parse_query(), before this hook runs) whenever 'pagename' is still
+	// set, regardless of post_type/is_archive overrides below. Without
+	// this, the query is pinned to the Akcija page's own post ID and
+	// always returns zero rows.
+	$q->set( 'pagename', '' );
+	$q->set( 'page_id', 0 );
+	$q->queried_object    = null;
+	$q->queried_object_id = null;
 
 	$q->is_singular          = false;
 	$q->is_page              = false;
 	$q->is_archive           = true;
 	$q->is_post_type_archive = true;
 }, 8 );
+
+/**
+ * WC_Query::product_query() (pre_get_posts prio 10, runs after the hook
+ * above) unconditionally overwrites post__in from this filter — a direct
+ * $q->set('post__in', ...) in the prio-8 hook above would be discarded.
+ * This is WC's own native extension point for restricting the shop loop,
+ * so it composes correctly with ordering, pagination and stock filters.
+ */
+add_filter( 'loop_shop_post_in', function( array $post_in ): array {
+	if ( ! dreampoint_b2b_akcija_page_detected() ) {
+		return $post_in;
+	}
+	$on_sale_ids = wc_get_product_ids_on_sale();
+	return $on_sale_ids ?: [ 0 ];
+} );
 
 add_filter( 'template_include', function( string $template ): string {
 	if ( ! dreampoint_b2b_akcija_page_detected() ) {

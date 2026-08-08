@@ -166,10 +166,10 @@ These items remain open due to external dependencies. Do NOT mark as resolved un
 | 4 | Font preload list (`dreampoint_b2b_font_preloads()`) | MEDIUM | Open | Final site design / above-fold font selection |
 | 5 | `update_post_meta_cache = false` — verify WPF filters | MEDIUM | Open | Requires staging deploy |
 | 6 | GTM snippet in `footer.php` | LOW | Open | GTM account data / final site design |
-| 7 | `woocommerce/archive-product-discounted.php` deletion | LOW | Open | Confirm `/akcija/` page works on staging |
+| 7 | `woocommerce/archive-product-discounted.php` deletion | LOW | Done — file already absent from disk, no git-tracked deletion found (predates current history or was never tracked) | — |
 | 8 | `footer-shop.php` — verify intent | LOW | Open | Design clarification |
 | 9 | Define `DP_ERP_WEBHOOK_SECRET` in `wp-config.php` on all environments | REQUIRED | Open | Required before ERP webhook is usable |
 | 10 | Test B2B registration flow + both emails | REQUIRED | Open | Requires staging |
-| 11 | Test `/akcija/` page — WPF filter, sorting, pagination | REQUIRED | Open | Requires staging |
+| 11 | Test `/akcija/` page — WPF filter, sorting, pagination | REQUIRED | Verified locally (2026-08-04) — 2 blocking bugs found and fixed in `inc/woocommerce.php` (page pinned to zero results; on-sale restriction discarded by native WC query). Per-page mismatch also fixed. `orderby=price` site-wide sorting bug (found during this validation, reproduced on `/shop/`, unrelated to this page) root-caused and fixed same day — see `docs/decisions.md` ADR-004. See `docs/dev-context.md` → "Akcija (Discounted Products) Page". | Staging re-verification still required — local only |
 
 Full detail on items 1–8: `docs/dev-context.md` → "Staging TODOs" and "Cleanup Status".

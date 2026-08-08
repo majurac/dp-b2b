@@ -149,6 +149,7 @@ if ( class_exists( 'WooCommerce' ) ) {
     require get_template_directory() . '/inc/ajax-handlers.php';
     require get_template_directory() . '/inc/brand-hero.php';
     require get_template_directory() . '/inc/wbw-multi-search-compat.php';
+    require get_template_directory() . '/inc/wbw-price-indexing-compat.php';
     require get_template_directory() . '/inc/contact-form.php';
 }
 
@@ -335,6 +336,9 @@ function dreampoint_b2b_scripts(): void {
     }
     if ( is_account_page() ) {
         wp_enqueue_style( 'dp-page-myaccount', get_template_directory_uri() . '/css/pages/myaccount.css', [ 'dp-style' ], _S_VERSION );
+    }
+    if ( is_wc_endpoint_url( 'order-received' ) || is_wc_endpoint_url( 'view-order' ) ) {
+        wp_enqueue_style( 'dp-page-order-details', get_template_directory_uri() . '/css/pages/order-details.css', [ 'dp-style' ], _S_VERSION );
     }
     if ( is_shop() || is_product_category() || is_product_tag() || is_tax( 'product_brand' ) ) {
         wp_enqueue_style( 'dp-page-shop-archive', get_template_directory_uri() . '/css/pages/shop-archive.css', [ 'dp-style' ], _S_VERSION );

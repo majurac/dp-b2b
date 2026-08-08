@@ -102,9 +102,4 @@ defined( 'ABSPATH' ) || exit;
 
 <style>
 	.woocommerce-silkypress-input-field-block {display: none;}
-	.woocommerce-order {
-		max-width: 864px;
-		margin-left: auto;
-		margin-right: auto;
-	}
 </style>

@@ -96,70 +96,6 @@ if ( is_shop() || is_product_category() || is_tax('product_brand') ) :
                 </a>
 
             <?php endif; ?>
-
-            
-            <!-- Action Buttons (Add to Cart / Wishlist / Inquiry) -->
-            <div class="action-holder">
-                <?php 
-                /**
-                 * Add to Cart Button Logic
-                 * Different buttons for variable/simple/out-of-stock products
-                 */
-                if ($out_of_stock) : 
-                    // Out of stock - View product link
-                ?>
-                    <a 
-                        href="<?php echo esc_url($permalink); ?>" 
-                        class="add-cart-variable categories-btn out-of-stock-btn" 
-                        aria-label="<?php echo esc_attr(sprintf(__('Proizvod %s nije na stanju', 'dreampoint-b2b'), $product_name)); ?>"
-                        title="<?php echo esc_attr(__('Nije na stanju', 'dreampoint-b2b')); ?>"
-                    >
-                        <span class="hide-sm"><?php esc_html_e('Nije na stanju', 'dreampoint-b2b'); ?></span> 
-                        <i class="icon-chevron-right" aria-hidden="true"></i>
-                    </a>
-                    
-                <?php elseif ($is_variable) : 
-                    // Variable product - View options link
-                ?>
-                    <a 
-                        href="<?php echo esc_url($permalink); ?>" 
-                        class="add-cart-variable categories-btn" 
-                        aria-label="<?php echo esc_attr(sprintf(__('Pogledaj opcije za %s', 'dreampoint-b2b'), $product_name)); ?>"
-                        title="<?php echo esc_attr(__('Pogledaj opcije', 'dreampoint-b2b')); ?>"
-                    >
-                        <span class="hide-sm"><?php esc_html_e('Pogledaj opcije', 'dreampoint-b2b'); ?></span> 
-                        <i class="icon-chevron-right hide-lg" aria-hidden="true"></i>
-                    </a>
-                    
-                <?php else : 
-                    // Simple product - AJAX add to cart
-                ?>
-                    <a 
-                        href="<?php echo esc_url($product->add_to_cart_url()); ?>" 
-                        class="ajax_add_to_cart add_to_cart_button add-to-cart categories-btn" 
-                        data-product_id="<?php echo esc_attr($product_id); ?>" 
-                        data-product_sku="<?php echo esc_attr($sku); ?>" 
-                        data-quantity="1"
-                        aria-label="<?php echo esc_attr(sprintf(__('Dodaj %s u košaricu', 'dreampoint-b2b'), $product_name)); ?>"
-                        title="<?php echo esc_attr(__('Dodaj u košaricu', 'dreampoint-b2b')); ?>"
-                        rel="nofollow"
-                    >
-                        <span class="hide-sm"><?php esc_html_e('Dodaj u košaricu', 'dreampoint-b2b'); ?></span>
-                        <span class="add_to_cart_text screen-reader-text"><?php esc_html_e('Dodaj u košaricu', 'dreampoint-b2b'); ?></span>
-                        <i class="icon-shopping-bag hide-lg" aria-hidden="true"></i>
-                    </a>
-                <?php endif; ?>
-
-                <!-- Wishlist Button -->
-                <?php if (function_exists('tinv_get_option')) : ?>
-                    <div class="add-to-fav">
-                        <?php 
-                        echo do_shortcode('[ti_wishlists_addtowishlist product_id="' . absint($product_id) . '"]'); 
-                        ?>
-                    </div>
-                <?php endif; ?>
-            </div>
-            <!-- /.action-holder -->  
         </div>
         <!-- /.photo-holder -->
 
@@ -175,21 +111,90 @@ if ( is_shop() || is_product_category() || is_tax('product_brand') ) :
                     <?php echo esc_html($product_name); ?>
                 </span>
             </a>
+
+            <div class="price-action">
+                <!-- Action Buttons (Add to Cart / Wishlist / Inquiry) -->
+                <div class="action-holder">
+                    <?php 
+                    /**
+                     * Add to Cart Button Logic
+                     * Different buttons for variable/simple/out-of-stock products
+                     */
+                    if ($out_of_stock) : 
+                        // Out of stock - View product link
+                    ?>
+                        <a 
+                            href="<?php echo esc_url($permalink); ?>" 
+                            class="add-cart-variable categories-btn out-of-stock-btn" 
+                            aria-label="<?php echo esc_attr(sprintf(__('Proizvod %s nije na stanju', 'dreampoint-b2b'), $product_name)); ?>"
+                            title="<?php echo esc_attr(__('Nije na stanju', 'dreampoint-b2b')); ?>"
+                        >
+                            <span class="hide-sm"><?php esc_html_e('Nije na stanju', 'dreampoint-b2b'); ?></span> 
+                            <i class="icon-chevron-right" aria-hidden="true"></i>
+                        </a>
+                        
+                    <?php elseif ($is_variable) : 
+                        // Variable product - View options link
+                    ?>
+                        <a 
+                            href="<?php echo esc_url($permalink); ?>" 
+                            class="add-cart-variable categories-btn" 
+                            aria-label="<?php echo esc_attr(sprintf(__('Pogledaj opcije za %s', 'dreampoint-b2b'), $product_name)); ?>"
+                            title="<?php echo esc_attr(__('Pogledaj opcije', 'dreampoint-b2b')); ?>"
+                        >
+                            <span class="hide-sm"><?php esc_html_e('Pogledaj opcije', 'dreampoint-b2b'); ?></span> 
+                            <i class="icon-chevron-right hide-lg" aria-hidden="true"></i>
+                        </a>
+                        
+                    <?php else : 
+                        // Simple product - AJAX add to cart
+                    ?>
+                        <a 
+                            href="<?php echo esc_url($product->add_to_cart_url()); ?>" 
+                            class="ajax_add_to_cart add_to_cart_button add-to-cart categories-btn" 
+                            data-product_id="<?php echo esc_attr($product_id); ?>" 
+                            data-product_sku="<?php echo esc_attr($sku); ?>" 
+                            data-quantity="1"
+                            aria-label="<?php echo esc_attr(sprintf(__('Dodaj %s u košaricu', 'dreampoint-b2b'), $product_name)); ?>"
+                            title="<?php echo esc_attr(__('Dodaj u košaricu', 'dreampoint-b2b')); ?>"
+                            rel="nofollow"
+                        >
+                            <span class="hide-sm" style="display: none;"><?php esc_html_e('Dodaj u košaricu', 'dreampoint-b2b'); ?></span>
+                            <span class="add_to_cart_text screen-reader-text"><?php esc_html_e('Dodaj u košaricu', 'dreampoint-b2b'); ?></span>
+                            <i class="icon-shopping-bag" aria-hidden="true"></i>
+                        </a>
+                    <?php endif; ?>
+
+                    <!-- Wishlist Button -->
+                    <?php if (function_exists('tinv_get_option')) : ?>
+                        <div class="add-to-fav">
+                            <?php 
+                            echo do_shortcode('[ti_wishlists_addtowishlist product_id="' . absint($product_id) . '"]'); 
+                            ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+                <!-- /.action-holder --> 
+                 <div class="price-holder">
+                    <?php if ($product->get_price() && $product->is_in_stock()) : ?>
+                        <span class="price-container <?php echo $product->is_on_sale() ? 'onsale' : ''; ?>" itemprop="offers" itemscope itemtype="http://schema.org/Offer">
+                            <?php echo wp_kses_post($product->get_price_html()); ?>
+                            <meta itemprop="availability" content="https://schema.org/InStock">
+                        </span>
+                    <?php elseif (!$product->is_in_stock()) : ?>
+                        <span class="price-container out-of-stock-price" itemprop="offers" itemscope itemtype="http://schema.org/Offer">
+                            <span class="out-of-stock-label"><?php esc_html_e('Nema na stanju', 'dreampoint-b2b'); ?></span>
+                            <meta itemprop="availability" content="https://schema.org/OutOfStock">
+                        </span>
+                    <?php endif; ?>
+                 </div>
+                 <!-- /.price-holder --> 
+            </div>
+            <!-- /.price-action -->
             
-            <?php if ($product->get_price() && $product->is_in_stock()) : ?>
-                <span class="price-container <?php echo $product->is_on_sale() ? 'onsale' : ''; ?>" itemprop="offers" itemscope itemtype="http://schema.org/Offer">
-                    <?php echo wp_kses_post($product->get_price_html()); ?>
-                    <meta itemprop="availability" content="https://schema.org/InStock">
-                </span>
-            <?php elseif (!$product->is_in_stock()) : ?>
-                <span class="price-container out-of-stock-price" itemprop="offers" itemscope itemtype="http://schema.org/Offer">
-                    <span class="out-of-stock-label"><?php esc_html_e('Nema na stanju', 'dreampoint-b2b'); ?></span>
-                    <meta itemprop="availability" content="https://schema.org/OutOfStock">
-                </span>
-            <?php endif; ?>
         </div>
         <!-- /.content-holder -->
-        
+
         <!-- Accessible link overlay (for screen readers) -->
         <a 
             href="<?php echo esc_url($permalink); ?>" 

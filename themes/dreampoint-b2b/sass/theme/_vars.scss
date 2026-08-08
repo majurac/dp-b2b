@@ -504,12 +504,15 @@ $header-height: 135px;
         box-shadow: 0px 0px 0px 1px $brand;
 
     }
-    /*&:disabled {
+    &:disabled,
+    &[disabled] {
         background: $white;
         color: $text-disabled;
+        border-color: $text-disabled;
+        box-shadow: none;
         cursor: not-allowed;
         pointer-events: none;
-    }*/
+    }
 }
 
 @mixin button-outline {
@@ -528,13 +531,6 @@ $header-height: 135px;
         border-color: $brand;
         box-shadow: 0px 0px 0px 1px $brand;
 
-    }
-    &:disabled {
-        /*background: $white;
-        color: $text-brand-disabled;
-        border-color: $text-brand-disabled;
-        cursor: not-allowed;
-        pointer-events: none;*/
     }
 }
 

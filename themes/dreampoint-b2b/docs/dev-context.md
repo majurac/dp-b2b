@@ -67,6 +67,21 @@ npm run watch:js     — esbuild --watch
 
 `watch:*` output (expanded CSS, `.css.map` files) is for local iteration only. `*.css.map` is gitignored — never commit it, and never commit a `.css` file generated in watch mode. If a CSS file was edited or regenerated while `watch` was running, **run `npm run build` before committing** so the compressed, no-source-map canonical output replaces the watch-mode artifact.
 
+### Single-file compile — ad-hoc developer tool
+
+```
+npm run build:file -- <source.scss>:<output.css>
+```
+
+Compiles one arbitrary Sass file with the same options as the canonical build (`--style=compressed --silence-deprecation=import --no-source-map`), without recompiling the rest of its directory. Useful when iterating on a single page/block stylesheet without triggering a full `build:pages`/`build:blocks` batch recompile.
+
+Example:
+```
+npm run build:file -- sass/pages/order-details.scss:css/pages/order-details.css
+```
+
+`build:file` exists purely to speed up local iteration by recompiling a single stylesheet instead of an entire directory. It is a development convenience only. Before committing, always regenerate the canonical CSS using the project's standard build command (`npm run build` or the appropriate `build:*` batch script).
+
 ### Build determinism policy
 
 - `npm run build` is reproducible: given the same committed Sass sources, it always regenerates byte-identical compressed CSS/JS (verified — re-running against unchanged sources produces zero diff).
@@ -171,14 +186,19 @@ Lighthouse warns about this — ignore it. Acceptable trade-off.
 ## Akcija (Discounted Products) Page
 
 - URL: `/akcija/`
-- WordPress page with slug `akcija` must exist in WP admin
+- WordPress page with slug `akcija` must exist in WP admin (DB content — not synced by git deploy, see "WordPress Deploy / DB Sync Notes" in the project `CLAUDE.md`)
 - Implementation: `pre_get_posts` (priority 8) transforms main query into WC product archive filtered to `wc_get_product_ids_on_sale()`
 - WPF filter and native WC sorting work automatically
 - `template_include` serves `archive-product.php`
 - `is_woocommerce` filter ensures WC context
 - `dreampoint_b2b_akcija_page_detected()` — static flag helper; reason: `is_page()` returns false after `pre_get_posts`
 - `pre_get_posts` priority 8 — WC hooks (priority 9–10) see the modified query
-- **Note:** `woocommerce/archive-product-discounted.php` is on disk but no longer loaded. Can be deleted after confirming `/akcija/` works.
+- `woocommerce/archive-product-discounted.php` no longer exists on disk (already removed) — no cleanup action pending
+- **2026-08-04 fix — page pinned to zero results:** the original hook flipped `is_page`/`is_archive` flags but never cleared `pagename`/`page_id`. `WP_Query::get_posts()` builds `AND wp_posts.ID = $reqpage` from `$this->queried_object_id` (cached during `parse_query()`, before `pre_get_posts` runs) whenever `pagename` is still set, independent of the flag overrides — this pinned every query to the Akcija page's own post ID, always returning zero rows. Fix: also `$q->set('pagename', ''); $q->set('page_id', 0); $q->queried_object = null; $q->queried_object_id = null;` inside the same hook.
+- **2026-08-04 fix — on-sale restriction discarded:** `WC_Query::product_query()` (pre_get_posts prio 10, runs after the hook above) unconditionally overwrites `post__in` from the `loop_shop_post_in` filter — a direct `$q->set('post__in', ...)` in the prio-8 hook was silently discarded, so the page showed the full catalog instead of only on-sale products. Fix: hook `loop_shop_post_in` (scoped to `dreampoint_b2b_akcija_page_detected()`) to return `wc_get_product_ids_on_sale()` — this is WC's own native extension point for restricting the shop loop.
+- **2026-08-04 fix — per-page mismatch:** the hook hardcoded `posts_per_page` from `get_option('posts_per_page', 12)` (WP's generic Reading Settings value), diverging from the rest of the catalog's per-page count (`woocommerce_catalog_columns × _rows`). Fix: set `posts_per_page` to `0` (falsy) so `WC_Query::product_query()` applies its native `loop_shop_per_page` default instead.
+- **Verified 2026-08-04 (local):** on-sale-only filtering, visibility composition (`full_access`, `no_access`, `rule_based`/category-restricted all correct), native per-page count, PHP syntax. Product-listing `orderby=price` did not sort correctly — confirmed as a pre-existing, site-wide condition (reproduces identically on `/shop/`), unrelated to this page. **Root-caused and fixed same day** — see `docs/decisions.md` ADR-004: WBW Product Filter's own price-ordering override was reading its own denormalized index (`wpf_meta_data`), which was missing ~51% of products due to a `woocommerce_new_product` hook coverage gap in WBW itself (not this page, not the visibility engine). Fixed via a one-time official WBW index rebuild + a permanent theme-side compatibility hook (`inc/wbw-price-indexing-compat.php`), no vendor files modified.
+- **Scoping note:** `dreampoint_b2b_akcija_page_detected()` is intentionally request-scoped, not query-scoped — once the main query sets it `true`, `loop_shop_post_in` applies the on-sale restriction to *any* WC product query for the rest of that request. This is safe today because the page only renders the one main product listing. Future maintenance note: if this page ever renders additional WooCommerce product queries (related products, featured products, upsell widgets, etc.), review the `loop_shop_post_in` scoping before introducing them.
 
 ---
 

@@ -109,8 +109,7 @@ $company_phone = get_field('company_phone', 'option') ?: '';
         </div>
         <!-- /.notification-bar -->
         <?php endif; ?>
-        <header id="header" role="banner">
-            <?php if ( !wp_is_mobile() ) : ?>
+          <?php if ( !wp_is_mobile() ) : ?>
             <div id="top-header" class="hide-md-sm">
                 <div class="container">
                     <div class="row">
@@ -140,6 +139,8 @@ $company_phone = get_field('company_phone', 'option') ?: '';
             </div>
             <!-- /#top-header -->
             <?php endif; ?>
+        <header id="header" role="banner">
+          
             <div id="main-header">
                 <div class="container">
                     <div class="row">
@@ -208,6 +209,12 @@ $company_phone = get_field('company_phone', 'option') ?: '';
                                     </div>
                                 </div>
                                 <!-- /.search-area -->
+                                <?php $quick_order_url = dreampoint_b2b_get_quick_order_url(); ?>
+                                <?php if ( $quick_order_url ) : ?>
+                                <div class="quick-order-btn">
+                                    <a href="<?php echo esc_url( $quick_order_url ); ?>" class="button button--sm"><?php esc_html_e( 'Quick Order', 'dreampoint-b2b' ); ?></a>
+                                </div>
+                                <?php endif; ?>
                                 
                                 <!-- Wishlist -->
                                 <?php if (function_exists('tinv_get_option')) : ?>
@@ -217,7 +224,7 @@ $company_phone = get_field('company_phone', 'option') ?: '';
                                 <?php endif; ?>
                                 
                                 <!-- User Account -->
-                                <div class="user-area action-btn">
+                                <div class="user-area action-btn" style="display: none;">
                                     <a 
                                         href="<?php echo esc_url(get_permalink(get_option('woocommerce_myaccount_page_id'))); ?>" 
                                         aria-label="<?php esc_attr_e('Moj nalog', 'dreampoint-b2b'); ?>"
@@ -234,6 +241,7 @@ $company_phone = get_field('company_phone', 'option') ?: '';
                                     }
                                     ?>
                                 </div>
+                                
                             </div>
                             <!-- /.action-btns -->
                             

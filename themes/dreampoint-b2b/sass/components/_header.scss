@@ -578,6 +578,7 @@
         margin-top: 0;
     }
     .search-btn {
+        @include btn-reset;
         @include centre(y);
         left: 16px;
         padding: 0;

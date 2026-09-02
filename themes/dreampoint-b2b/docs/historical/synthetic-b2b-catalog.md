@@ -265,6 +265,20 @@ and (in non-batch mode) categories and brands. Use `--refresh-metadata`
 to bring time-relative fields up to date instead of resetting and
 regenerating.
 
+**2026-09-02 — synthetic products removed from staging.** Once the Apros ERP
+import (`wp-content/plugins/uncle-dev-importer`) went live on staging
+(2026-08-19), the synthetic products were no longer needed. With explicit
+authorization, `wp dp-b2b reset-catalog --batch=20260713_1138` was run against
+staging: **210 parent products + 183 variations deleted**. Batch mode was used
+deliberately so the `[DEV]` product categories, `[DEV]` brands, and Brand
+Fixtures were left intact. WBW then held 1998 orphan `wp_wpf_meta_data` rows
+(WBW hooks no delete event) — cleared by one official
+`WooBeWoo_PF_Frame::_()->getModule('meta')->getModel()->recalcMetaValues()`
+full rebuild (13606 → 11608 rows, orphans 1998 → 0). No WooCommerce or Apros
+data was modified. Full record: `docs/decisions.md` ADR-006. The generator
+itself is unchanged and can regenerate the dataset on any environment where it
+is needed.
+
 ---
 
 ## Testing Purpose

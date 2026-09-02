@@ -69,6 +69,17 @@ only remove ad-hoc cart contents/test orders created during a session, never
 the catalog itself. See `docs/historical/synthetic-b2b-catalog.md` for
 generator mechanics.
 
+**Superseded 2026-09-02 — synthetic PRODUCTS removed from staging (ERP import
+is now live):** the `2026-07-13` "do not reset" condition (a) has been met.
+The Apros ERP import (`wp-content/plugins/uncle-dev-importer`) populated staging
+with real product data on 2026-08-19, so the synthetic products were removed
+via `wp dp-b2b reset-catalog --batch=20260713_1138` — **210 parent products +
+183 variations** deleted. The `[DEV]` product categories (24) and brands (30)
+and all Brand Fixtures were **retained** (batch mode never touches terms).
+Staging's product catalog is now the ERP dataset. Full record + the
+`recalcMetaValues()` WBW orphan-row cleanup that followed:
+`docs/decisions.md` ADR-006.
+
 **Staging validation — 2026-07-21 (commit `2d5c00a`):** full Playwright
 regression against `dreampoint.b2b.uncledev.cloud/quick-order/` after
 deploying the WBW AJAX container-check placeholder fix and configuring

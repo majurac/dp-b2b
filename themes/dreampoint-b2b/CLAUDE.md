@@ -110,6 +110,14 @@ Do not touch visibility code unless explicitly requested.
 
 Rule of thumb: an empty `product_brand` result is a visibility-context signal, not proof of missing data.
 
+### Debugging Caveat — multiple `_price` postmeta rows on variable products
+
+`COUNT(_price) > 1` for a `product` post is **not** corruption by itself — check `product_type` before treating it as an anomaly.
+
+- **Variable parent:** WooCommerce (`WC_Product_Variable_Data_Store_CPT::sync_price()`, WC 11.0.1) stores **one `_price` postmeta row per distinct visible-variation price**, sorted, and intentionally deletes the parent's `_regular_price` / `_sale_price`. Multiple `_price` rows plus absent parent regular/sale price is the correct native state.
+- **Simple product:** multiple `_price` rows may be anomalous and worth investigating.
+- Full analysis (and why a 2026-09 audit briefly misclassified 16 Apros variable parents as corrupted): `docs/decisions.md` ADR-006.
+
 ---
 
 ## Local Environment

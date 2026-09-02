@@ -144,7 +144,7 @@
         }
 
         &__option {
-            padding-left: 32px !important;
+            padding: 0 0 0 32px !important;
 
             &--checked-option-highlighted {
                 border: 2px solid $brand !important;
@@ -191,12 +191,15 @@
     // -------------------------
     // PAYMENT
     // -------------------------
-    .payment {
+    #shipping-option, #payment-method {
 
         .wc-block-components-radio-control-accordion-option {
             border: 1px solid $text-primary !important;
             border-radius: 8px;
-            padding: 16px;
+            padding: 16px!important;
+            &:after {
+                display: none;
+            }
         }
 
         .wc-block-components-radio-control-accordion-option--checked-option-highlighted {

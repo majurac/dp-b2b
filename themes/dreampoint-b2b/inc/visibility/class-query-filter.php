@@ -175,6 +175,14 @@ class Dreampoint_B2B_Query_Filter {
 			return $terms;
 		}
 
+		// Explicit shared-surface opt-in (ADR-009, Phase A) — mirrors the
+		// WP_Query check in should_filter(). Only this exact value bypasses
+		// customer-specific product_brand filtering; unknown/absent values
+		// fail closed. No current caller sets this; dormant until Phase B.
+		if ( isset( $args['dp_visibility_context'] ) && 'shared_surface' === $args['dp_visibility_context'] ) {
+			return $terms;
+		}
+
 		$user_id = get_current_user_id();
 		$context = $this->engine->get_context( $user_id );
 
@@ -341,6 +349,14 @@ class Dreampoint_B2B_Query_Filter {
 
 		// ERP integration sets this flag to see the full catalog.
 		if ( ! empty( $query->get( 'dp_skip_visibility' ) ) ) {
+			return false;
+		}
+
+		// Explicit shared-surface opt-in (ADR-009, Phase A). Only this exact
+		// value bypasses customer-specific visibility — an unknown/invalid
+		// value fails closed and normal filtering continues. No current
+		// caller sets this; the primitive is dormant until Phase B.
+		if ( 'shared_surface' === $query->get( 'dp_visibility_context' ) ) {
 			return false;
 		}
 

@@ -44,6 +44,7 @@ Active engineering guidance lives in:
 | `docs/active/current-phase.md` | Current phase status (Quick Order: COMPLETE, maintenance mode as of 2026-07-21), frozen system boundaries, current philosophy |
 | `docs/active/status.md` | Implementation status matrix per system — Quick Order milestone marked COMPLETE 2026-07-21 |
 | `docs/active/quick-order-catalog-filters-spec.md` | Catalog Filters (New/Best Seller/Already Ordered) design rationale — **implementation COMPLETE**, retained as historical design record; current behavior documented in the plugin's `readme.md` |
+| `docs/active/homepage-segment-landing-architecture.md` | FINAL Homepage + Segment Landing (Lifestyle/Toys/Outdoor) structure and shared-visibility rule — **design record, NOT implemented**. Requires ADR-009's visibility-exemption plan before implementation. |
 
 ---
 
@@ -151,7 +152,7 @@ Executed, not yet relocated (still in `docs/superpowers/specs/`):
 | `docs/apros-question-resolution-matrix.md` | **Autoritativna AP matrica** — status AP-01 – AP-14, evidencija, što ostaje za Apros sesiju, što je zatvoreno; jedini dokument koji treba za pripremu Apros meetinga |
 | `docs/apros-session-final-pack.md` | **Finalni Apros meeting pack** — executive summary, P0/P1/P2 pitanja, traženi payload primjeri, interni blokeri, checklist; koristi se live na sestanku |
 | `docs/b2b-erp-migration-plan.md` | **Implementacijski migration plan** — component inventory, product/partner/pricing/order adapation, DB impact, implementacijski koraci s ovisnostima, CAN START NOW vs. BLOCKED scope |
-| `docs/decisions.md` | **Architectural Decision Records (ADR)** — pricing architecture, partner approval architecture, WBW Product Filter Multi-type search compatibility layer; kontekst, odluka, posledice po odluci |
+| `docs/decisions.md` | **Architectural Decision Records (ADR)** — pricing architecture, partner approval architecture, WBW Product Filter Multi-type search compatibility layer, stock reservation business decision (ADR-007), TEST Apros ERP access + read-only findings (ADR-008), Homepage/Segment Landing visibility gap (ADR-009); kontekst, odluka, posledice po odluci |
 
 ---
 

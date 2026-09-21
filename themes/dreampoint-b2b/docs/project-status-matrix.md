@@ -63,6 +63,8 @@
 
 **Promjena u odnosu na prethodni rang:** AP-09 (auth) i AP-03 (approval) su ispali sa liste — resolved. AP-08 ispao — out of scope. BL-03/BL-04/BL-05 (stari nazivi) su zamijenjeni preciznijim AP-01/AP-06/AP-07 stavkama. **BL-01 je jedini blocker koji je bio #1 i prije i ostaje #1 sada** — ništa u ovoj rundi odgovora nije promijenilo njegov status.
 
+**Ažuriranje 2026-09-21 (TEST Apros pristup + read-only inspekcija, `docs/decisions.md` ADR-008):** BL-01 (rang 1) je efektivno RESOLVED — TEST pristup postoji. AP-06 (rang 2, idempotency) je DJELOMIČNO RESOLVED — payload/response oblik i idempotency mehanizam potvrđeni read-only inspekcijom. AP-07 (rang 5) je DJELOMIČNO RESOLVED — šema dostavnih lokacija (`recipient_code`, više lokacija po partneru) potvrđena. DP-01 (rang 4) je suštinski RESOLVED na nivou šeme — trenutni model (1 WP user : 1 partner_code : N delivery lokacija) prirodno podržava oba klijentska scenarija naloga. PL-01 (rang 7) i WH-01 (rang 8) OSTAJU otvoreni — inspekcija je pokazala da se partner sync trenutno radi ručnim CSV importom (ne live Apros endpoint), a warehouse stock se mapira kao jedan flattened broj bez per-warehouse strukture. DP-02/BL-06 (rang 6) — provenance potvrđena kao stvarna (nije stale), djelomično rasvijetljena kroz warehouse-splitting odgovor (vidi ADR-008), ali specifično "Josip" mapiranje ostaje formalno nepotvrđeno.
+
 ### 0.4 New Top 5 Unknowns (post Apros-response)
 
 1. **BL-01 — Kada i kako Dream Point/integrator dobija Apros sandbox pristup?** Bez datuma za ovo, cijeli payload-zavisni rad (rang 2, 3, 5, 7, 8 iznad) nema realan timeline.
@@ -466,15 +468,15 @@ Odabir scenarija direktno mijenja storage arhitekturu (user meta vs. Company CPT
 
 ---
 
-**DP-B06 — Rezervacija zaliha na razini košarice** ⚠️ OTVORENA POSLOVNA ODLUKA (novo — workshop 2026-07-03)
+**DP-B06 — Rezervacija zaliha na razini košarice** ✅ POSLOVNA ODLUKA ZATVORENA (2026-09-21) — tehnička implementacija OTVORENA
 
-**Pitanje:** Dream Point je spomenuo mogući zahtjev za 1-satnu rezervaciju zaliha od trenutka dodavanja artikla u košaricu.
+**Status:** Klijent je putem `B2B odgovori na pitanja.docx` eksplicitno potvrdio: 1-satna cart-level rezervacija je MANDATORY poslovni zahtjev, klijent prihvaća trošak eventualnog plaćenog plugina, korisnik mora vidjeti vlastiti countdown. Preporuka tima ispod ("zadrži native WC default") je **SUPERSEDED** — zadržana radi istorijskog konteksta, više nije važeća preporuka.
 
-**Preporuka tima:** Zadržati nativno WooCommerce ponašanje — rezervacija tek pri kreiranju narudžbe (first-completed-order-wins), bez custom mehanizma. Cart-level rezervacija (lock artikla na 1h dok je u nečijoj košarici) nije trenutno dio arhitekture i predstavlja **značajno povećanje kompleksnosti**: potreban je expiry/lock mehanizam, race condition handling na simultanim narudžbama, cron/cleanup job za istekle rezervacije, i UI countdown u košarici.
+~~**Preporuka tima:** Zadržati nativno WooCommerce ponašanje — rezervacija tek pri kreiranju narudžbe (first-completed-order-wins), bez custom mehanizma.~~ *(superseded 2026-09-21 — vidi `docs/decisions.md` ADR-007)*
 
-**Status:** Ranije (workshop Lipanj 2026) tretirano kao zatvoreno s native WC defaultom — **to je bilo preuranjeno**. Ponovo je otvoreno kao poslovna odluka koja zahtijeva eksplicitnu Dream Point potvrdu, visok prioritet zbog potencijalnog scope povećanja.
+Puna analiza (plugin research, Quick Order compatibility, preostali tehnički otvoreni koraci): `docs/decisions.md` ADR-007.
 
-**Impact ako ostane bez odgovora:** Implementira se native WC default (kao do sada planirano). Ako Dream Point naknadno insistira na cart-level rezervaciji, potreban je zaseban estimate i moguće odgađanje rollout datuma.
+**Preostaje otvoreno (tehnički detalj, ne poslovna odluka):** izbor konkretnog mehanizma/plugina, expiry/lock semantika, race condition handling, cron cleanup, UI countdown, sinhronizacija sa AP-10 (Apros-side rezervacija).
 
 **Napomena o razlici od AP-10:** AP-10 (Apros pitanje, Sekcija 2) odnosi se na to kada Apros interno rezervira stanje na svojoj strani (checkout vs. ERP potvrda naruđbe) — ostaje zasebno OPEN pitanje za Apros sesiju, nepromijenjeno ovim workshopom. DP-B06 je WooCommerce cart-level UX/poslovna odluka, ne zahtijeva Apros input — rješava je isključivo Dream Point.
 
@@ -602,8 +604,8 @@ Odabir scenarija direktno mijenja storage arhitekturu (user meta vs. Company CPT
 
 | ID | Bloker | Rizik |
 |----|--------|-------|
-| BL-01 | Apros API pristup (sandbox) ne postoji | ⛔ KRITIČAN — bez ovoga nijedna payload validacija nije moguća |
-| BL-04 | Order endpoint — puni format payload-a/response-a nepoznat | 🟡 SREDNJI — obavezna polja poznata (`sif_kup`/`partnerId`, `partnerDeliveryLocationId`, stavke+količine), payload primjer nedostaje |
+| BL-01 | Apros API pristup (sandbox) ne postoji | ✅ EFEKTIVNO RESOLVED (2026-09-21) — TEST Apros ERP pristup uspostavljen; `apros-pricing`, `uncle-dev-importer`, `b2b-partner-importer` aktivni na stagingu. Vidi `docs/decisions.md` ADR-008. Produkcijski pristup nije potvrđen. |
+| BL-04 | Order endpoint — puni format payload-a/response-a nepoznat | 🟢 DJELOMIČNO RESOLVED (2026-09-21) — puni payload oblik i idempotency mehanizam potvrđeni read-only inspekcijom (`uncle-dev-importer/order.php`). Pismena Apros potvrda i dalje nedostaje. Vidi ADR-008. |
 
 **Downgradirani/razriješeni blokeri (2026-07-02):**
 
@@ -665,7 +667,7 @@ Odabir scenarija direktno mijenja storage arhitekturu (user meta vs. Company CPT
 2. **Order endpoint format** — obavezna polja poznata, ali URL, HTTP metoda i response format nedostaju; može zahtijevati specifičnu transformaciju koja komplicira checkout flow
 3. **Partner sync arhitektura (polling/import)** — zamjena webhook dizajna cron-based pollingom je arhitekturalna promjena za Fazu 3; mora biti odražena u migration planu prije implementacije
 4. **Role sistem** — ako klijent zahtijeva role/approval flow nakon početka UX faze → rework IA-e
-5. **Split shipment logika** — nije definirano ko (WooCommerce ili Apros) razdvaja narudžbe; obje strane moraju biti usklađene
+5. ~~**Split shipment logika** — nije definirano ko (WooCommerce ili Apros) razdvaja narudžbe; obje strane moraju biti usklađene~~ **CLOSED 2026-09-21** — klijent potvrdio: Apros interno dijeli po home warehouse-u, webshop šalje jednu konsolidovanu narudžbu, ne obavlja vlastiti split. Read-only inspekcija (`docs/decisions.md` ADR-008) potvrđuje: `order.php` prima `{numberErp, warehouseId}` niz dokumenata od Apros-a — mehanizam postoji i već je djelomično hendlan u kodu.
 6. **Scope creep** — B2B sistemi historijski rastu; quick reorder, CSV import, approval flow, **cart-level stock rezervacija (DP-B06)** su potencijalni dodaci koji moraju biti zaključani u scope-u rano
 
 ---

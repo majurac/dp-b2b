@@ -345,3 +345,187 @@ No independent evidence of any Apros defect exists. The 16 products are fully ex
 - Stock reservation (DP-B06) je WooCommerce cart-level UX odluka koja ne zahtijeva ERP arhitekturalnu promjenu niti Apros input. Nije formalizirano kao ADR jer odluka nije donesena — status je OTVORENO. Vidi `docs/project-status-matrix.md` Sekciju 3.B.
 
 Oba će biti formalizirana kao novi ADR-ovi tek kad budu stvarno odlučeni (invoice splitting nakon Apros potvrde; stock reservation nakon Dream Point odluke).
+
+---
+
+## ADR-007 — Stock Reservation (DP-B06): Poslovna odluka zatvorena, tehnički scope otvoren
+
+**Datum:** 2026-09-21
+**Status:** Accepted (poslovna odluka) — tehnička implementacija NIJE dizajnirana ni implementirana
+**Vlasnik:** Cart/Checkout UX
+
+### Context
+
+DP-B06 je ranije (workshop Lipanj 2026) tretiran kao zatvoren s native WC defaultom, zatim ponovo otvoren 2026-07-03 kao poslovna odluka koja čeka eksplicitnu Dream Point potvrdu (`docs/project-status-matrix.md` §3.B). Timski prijedlog u tom trenutku je bio **zadržati native WooCommerce ponašanje** i eksplicitno izbjeći cart-level rezervaciju zbog dodane kompleksnosti (expiry/lock mehanizam, race conditions, cron cleanup, UI countdown).
+
+Klijent je putem `B2B odgovori na pitanja.docx` sada eksplicitno potvrdio: 1-satna cart-level rezervacija je **mandatory poslovni zahtjev**, klijent prihvaća trošak eventualnog plaćenog plugina, i korisnik mora vidjeti koliko dugo je artikal rezerviran specifično za njega. Očekivani konceptualni model (preferenca, ne dokazana tehnička činjenica): JEDNA rezervacija po cart/session-u = jedan 60-minutni prozor, ne nezavisni tajmeri po stavci.
+
+### Investigation — plugin research
+
+Pretraga cjelokupne kanonske projektne dokumentacije (`docs/*.md`, uključujući `project-status-matrix.md`, `b2b-erp-migration-plan.md`, `decisions.md`) **ne sadrži nijedan konkretan naziv stock-reservation plugina** (npr. "Reserve Stock for WooCommerce") ni bilo kakvu prethodnu evaluaciju takvog plugina. Jedini prethodno dokumentirani stav tima bio je suprotan — eksplicitna preporuka da se cart-level rezervacija IZBJEGNE. Prethodna pretpostavka da je specifičan plugin već razmatran nije potvrđena postojećom dokumentacijom — ako takva evaluacija postoji, nije zapisana u ovom projektu.
+
+### Plugin odabir — Reserved Stock Pro (Puri.io), potvrđeno 2026-09-21
+
+Klijent je finalizirao odabir konkretnog mehanizma: **Reserved Stock Pro for WooCommerce** (Puri.io, `puri.io/plugin/reserved-stock-pro-for-woocommerce/`). Klijent će kupiti plugin — cijena nije bloker.
+
+**Arhitekturalni princip (obavezujući za implementaciju):**
+
+- **Reserved Stock Pro = reservation engine i source of truth.** Sva stvarna rezervacija, expiry i release logika živi unutar plugina.
+- **DreamPoint B2B tema = presentation/UI slot oko tog stanja**, samo gdje native plugin prikaz ne odgovara traženom dizajnu.
+- **Zabranjeno:** paralelni reservation engine, nezavisan autoritativan JS tajmer, drugi source of truth za expiry, frontend logika koja produžava/restartuje rezervacije nezavisno od plugina. Custom UI je dozvoljen, ali mora PRIKAZATI stvarno stanje plugina, ne izmišljati vlastito.
+
+**Verified plugin capability (WebSearch/WebFetch, `puri.io/docs/reserved-stock-pro/`, 2026-09-21):**
+
+- **Jedan unificiran cart-level tajmer je NATIVE ponašanje**, ne custom rad: *"All stock-managed products are synced and will expire at the same time from the cart."* — direktno odgovara klijentskom zahtjevu za jednu koherentnu rezervaciju po cart-u umjesto per-item tajmera. Native shortcode `[rsp_countdown]` + filteri `rsp_countdown_options` / `rsp_default_countdown_css` / `rsp_default_countdown_location` postoje za customizaciju/repozicioniranje prikaza.
+- **Integracija:** paralelna custom DB tabela `rsp_reserved_stock` — NE modifikuje product meta direktno; stvarno smanjenje WC zaliha se dešava tek na promjenu WC order statusa (on-hold/processing/completed). Ovo je usklađeno s "ne dirati native WC stock logiku bez razloga".
+- **Release/cleanup — tri putanje:** (1) validacija na sledećem page load-u nakon isteka, (2) early cleanup na cart akcijama (removal, qty change, purchase), (3) WP-Cron `rsp_reserved_stock_twice_daily` (svakih 12h).
+- **Nuansa relevantna za Quick Order:** plugin **PRODUŽAVA (resetuje na puni interval) cijeli cart-level tajmer kad se dodaje NOVI proizvod** u već-rezervisanu košaricu; ne produžava se na promjenu količine ili uklanjanje. Pošto Quick Order chunk-uje submit u sekvencijalne `/cart/sync` pozive (`quick-order-local-state-architecture.md` §4), višestruki chunk-ovi u jednom logičkom submit-u mogu okidati ovo "extend on add" ponašanje više puta zaredom — vjerovatno bezopasno (korisnik doživljava jedan submit), ali **REQUIRES PLUGIN VERIFICATION** nakon instalacije da potvrdi da rezultat ostaje jedan koherentan tajmer, ne artefakt od resetovanja.
+- **Cache interakcija:** plugin eksplicitno izlaže `rsp_enable_page_cache_plugin_integrations` i `reserved_stock_pro_disable_object_cache` filtere — **relevantno za ovaj projekat** (LiteSpeed Cache + Redis Object Cache su u stack-u, `CLAUDE.md`). Cache konfiguracija za ove filtere nije verifikovana i mora biti dio implementacionog plana, ne pretpostavljena.
+
+### UX specifikacija — 4 stanja (designer reference, 2026-09-21)
+
+Klijent/designer je isporučio namjeravani UX kao tekstualni opis stanja (screenshots nisu fizički priloženi ovoj sesiji — ako budu dostavljeni kao fajlovi, treba ih dodati kao design evidence uz ovaj odlomak). Klasifikacija po zahtjevu:
+
+| Stanje | Opis | Klasifikacija |
+|---|---|---|
+| 1 — Aktivna rezervacija | "Proizvodi u vašoj košarici su rezervisani." + prominentni countdown (npr. `59:42`) + apsolutno vrijeme isteka (npr. `Vrijedi do 13:07`) + instrukcija | FINAL BUSINESS/UX REQUIREMENT (jedan cart-level tajmer) — **VERIFIED PLUGIN CAPABILITY** (native, vidi gore) |
+| 2 — Rezervacija uskoro ističe | Warning state, countdown (npr. `09:58`), apsolutno vrijeme, jača instrukcija, CTA "Idi na naplatu" | DESIGN REFERENCE — prag (≈10 min u primjeru) **NIJE finalno poslovno pravilo**, ne hard-kodirati bez potvrde; da li plugin native izlaže konfigurabilan warning-threshold nije potvrđeno iz dokumentacije — **REQUIRES PLUGIN VERIFICATION** |
+| 3 — Rezervacija istekla / provjera dostupnosti | "Rezervacija je istekla." + "Provjeravamo dostupnost..." — privremeni processing state | DESIGN REFERENCE. Plugin **VERIFIED** da radi validaciju na page-load nakon isteka; native postojanje ODVOJENOG "processing/checking" UI koraka (a ne trenutne tihe validacije) **REQUIRES PLUGIN VERIFICATION** |
+| 4 — Košarica ažurirana nakon provjere, novi `60:00` | "Korpa je ažurirana... Neke količine su prilagođene..." + svježa puna rezervacija | DESIGN REFERENCE. **REQUIRES PLUGIN VERIFICATION** — eksplicitno NE pretpostavljati. Dostupna dokumentacija kaže samo da plugin *"compares the stock quantity and the reserved quantity to check what's available"* nakon isteka — ovo je audit/comparison korak, NE potvrđena garancija da automatski re-rezerviše preostale dostupne količine i pokreće nov pun 60-minutni period. Ako plugin to native ne radi, potrebna je custom orkestracija — **mora biti eksplicitno prijavljeno prije implementacije**, ne tiho pretpostavljeno. |
+
+**Cart-level prezentacija:** jedan koherentan countdown za cijelu rezervaciju/cart sesiju — ne nezavisni tajmeri po proizvodu (osim ako budući eksplicitno potvrđen zahtjev to zatraži). Ovo NE zahtijeva izmjenu kako plugin internally čuva rezervacije po proizvodu/varijaciji/kupcu — samo user-facing prezentacija mora biti jedinstvena, izvedena iz plugin-ovog autoritativnog stanja (verifikovati siguran način izvođenja pre implementacije — direktna funkcija za cart-level expiry timestamp nije pronađena u javnoj developer dokumentaciji; `[rsp_countdown]`/`rsp_countdown_options` je najbliži native put).
+
+### Quick Order compatibility — CONFIRMED
+
+`docs/frozen/quick-order-local-state-architecture.md` §4–§5: Quick Order stavke ulaze u pravu WC košaricu isključivo na eksplicitni "Dodaj u košaricu" submit (`/cart/sync` REST ruta). Prije submit-a, lokalno stanje se nigdje ne perzistira (§5 — refresh/navigacija briše sve nesubmitovano). Posljedica: bilo koji mehanizam rezervacije vezan za "artikal je u WC košarici" će se prirodno pokrenuti tek na Quick Order submit trenutku — **nema potrebe mijenjati frozen local-state arhitekturu** niti umjetno pokretati rezervaciju ranije, osim ako se naknadno eksplicitno zatraži drugačije poslovno ponašanje specifično za Quick Order.
+
+### Napomena o razlici od AP-10
+
+AP-10 (kada Apros interno rezervira stanje na svojoj strani — checkout vs. ERP potvrda) ostaje **zasebno, nepromijenjeno otvoreno** Apros pitanje. Ovaj ADR zatvara isključivo WooCommerce-stranu poslovnu odluku (DP-B06).
+
+### Decision
+
+1-satna cart-level rezervacija zaliha je **CONFIRMED — BUSINESS DECISION**, mandatory. **Plugin je odabran: Reserved Stock Pro (Puri.io)** — CONFIRMED — ARCHITECTURE, klijent kupuje. Reserved Stock Pro je engine/source-of-truth; tema je presentation-layer, uz obavezujući princip "nema paralelnog engine-a" (vidi gore). Jedan koherentan cart-level countdown je FINAL zahtjev i potvrđen kao native plugin ponašanje. UX 4-stanja specifikacija je zabilježena (vidi tabelu gore) sa eksplicitnom distinkcijom šta je verifikovano naspram šta zahtijeva provjeru nakon instalacije. **Nijedna implementacija nije izvršena** — plugin nije instaliran ni na jednom environmentu u ovoj sesiji.
+
+### Consequences
+
+- DP-B06 se briše sa liste otvorenih poslovnih odluka; ostaje kao otvorena TEHNIČKA implementacija (instalacija, konfiguracija threshold-a za State 2, verifikacija State 3/4 ponašanja, cache integracija).
+- Timski prijedlog "zadrži native WC default" iz `project-status-matrix.md` §3.B je **superseded** ovim ADR-om — treba ažurirati taj odlomak da ne prikazuje stariju preporuku kao trenutno važeću.
+- **Pre implementacije, obavezna verifikacija na stvarno instaliranom pluginu** (ne samo javna dokumentacija): (a) State 4 post-expiry re-reservation ponašanje, (b) da li postoji native konfigurabilan "expiring soon" threshold, (c) ponašanje "extend on add" tajmera tokom Quick Order chunk-ovanog submit-a, (d) LiteSpeed/Redis cache integracija filteri.
+- Ako verifikacija pokaže da plugin nativno NE radi State 4 re-rezervaciju kako je dizajnirano, potrebna je custom orkestracija — mora biti prijavljena i odobrena kao zaseban plan prije koda, ne tiho implementirana.
+
+### Related
+
+- `docs/project-status-matrix.md` §3.B (DP-B06, zahtijeva ažuriranje statusa)
+- `docs/frozen/quick-order-local-state-architecture.md` §4–§5
+- AP-10 (Apros-side rezervacija, zasebno otvoreno)
+
+---
+
+## ADR-008 — TEST Apros ERP pristup uspostavljen; Read-Only nalazi implementacije
+
+**Datum:** 2026-09-21
+**Status:** Accepted — investigacija kompletna, BEZ izmjena plugin/DB/ERP stanja
+**Vlasnik:** ERP integracija (Apros) — Discovery
+
+### Context
+
+BL-01 (Apros API/sandbox pristup ne postoji) je bio rangiran kao #1 kritični bloker (`project-status-matrix.md` §0.3) koji blokira svaku payload validaciju. Drugi developer je uspostavio TEST Apros ERP pristup i instalirao/konfigurisao tri plugina na stagingu (`dreampoint.b2b.uncledev.cloud`):
+
+- `apros-pricing` — B2B pricing (fiksne country cijene, brend rabati, dostavne lokacije)
+- `uncle-dev-importer` (već referenciran u ADR-006) — katalog + order export prema Apros-u
+- `b2b-partner-importer` — **prethodno nedokumentiran u ovom projektu**, otkriven ovom investigacijom
+
+Sva tri su tretirana kao STRICT PROTECTED BOUNDARY — isključivo read-only inspekcija koda (bez SQL upita nad bazom, bez izvršavanja importa/sync-a, bez izmjena konfiguracije), izvršena preko SSH read-only pristupa (`ssh hetzner`, `find`/`grep`/`sed -n` nad plugin PHP fajlovima).
+
+### BL-01 status
+
+**Efektivno RESOLVED za TEST/sandbox svrhe** — konekcija i kredencijali postoje, plugin kod je funkcionalan na stagingu. Produkcijski/finalni Apros pristup (izvan TEST okruženja) nije potvrđen ovim nalazom.
+
+### Nalazi — CONFIRMED — CURRENT TEST IMPLEMENTATION (za razliku od CONFIRMED — APROS SPECIFICATION)
+
+**AP-01 (pricing):** `apros-pricing.php` implementira TAČNO ADR-001 prioritet: (1) fiksna country cijena — konačna, rabat se ne primjenjuje; (2) brend rabat na wholesale cijenu; (3) wholesale cijena. Brend rabati se čuvaju po partneru u custom tabeli `{prefix}apros_brand_discounts` (`partner_code`, `brand_id`, `discount_percent`), **ručno konfigurisani kroz wp-admin UI** (`apros-pricing-admin.php`, sekcija "Brend rabati" / "Rabat (%)") — nije uočen live sync iz Apros `partnerBrandDiscountList`-a. Sam kod eksplicitno komentariše: *"Prioritet (potvrđeno sa korisnikom, čeka i pismenu potvrdu klijenta/Apros)"* — i implementacija sama priznaje da AP-01 nije formalno zatvoren. `countryPriceListCode` (ne sirovi ISO kod) je stvarno polje korišteno za country pricing lookup.
+
+**AP-07 (delivery locations):** CONFIRMED šema — custom tabela `{prefix}apros_delivery_locations` (`recipient_code`, `name`, `address`, `city`, `postal_code`, `email`), po `partner_code`, podržava više redova po partneru (`apros_get_partner_delivery_locations()`). Order payload šalje `partnerDeliveryLocationId` (= `recipient_code`), sa fallback-om na prvu lokaciju ako order nema eksplicitno postavljenu (`order.php`) — ovaj fallback je safety-net na nivou slanja narudžbe ERP-u, **nije potvrđeno** da odražava checkout UI pre-fill ponašanje; "nema pamćenja zadnje lokacije" zahtjev nije verifikovan naspram stvarnog checkout template koda (izvan scope-a protected plugina).
+
+**DP-01 (sif_kup kardinalitet):** CONFIRMED na nivou šeme — trenutna arhitektura već podržava OBA klijentska scenarija bez daljnjeg redizajna: jedan WP korisnik ima tačno jedan `apros_partner_code` (singularni user meta), a taj partner_code može imati N redova u `apros_delivery_locations` (Scenarij A — jedan nalog, više lokacija). Zasebni WP korisnici sa zasebnim partner_code vrijednostima prirodno pokrivaju Scenarij B. Status podignut sa PARTIALLY RESOLVED na suštinski riješeno na nivou šeme — preostaje potvrditi da Apros uvijek izdaje zaseban sif_kup po branch-u/nalogu u Scenariju B.
+
+**AP-06 (order export), pronađeno opportunistički u `uncle-dev-importer/order.php`:** Pun payload oblik: `number`, `date`, `partnerCode`, `partnerDeliveryLocationId`, `paymentTypeId`, `shippingMethodId`, billing/shipping polja, `items`. **Idempotency CONFIRMED** — endpoint je idempotentan po `number`; odgovor "already been imported" se tretira kao uspjeh, ne kao duplikat. Response format: niz dokumenata `{numberErp, warehouseId}` — Apros može vratiti više ERP brojeva narudžbe, po jedan per skladište, spremljeno u order meta `_erp_documents` i kao order note. Ovo zatvara na nivou TEST implementacije historijski najveći finansijski rizik (duplirane narudžbe) — pismena Apros potvrda tog ponašanja i dalje nije dokumentovana.
+
+**Warehouse splitting — nijansa naspram klijentskog odgovora:** `{numberErp, warehouseId}` niz je direktan dokaz da Apros VRAĆA webshopu itemizirane per-warehouse dokumente — ovo je nijansa naspram klijentske izjave "webshop ne prima split-rezultat notifikaciju": importer kod DE FACTO prima i bilježi per-warehouse split rezultat (za order-note/referencu), iako to možda nije izloženo krajnjem kupcu u UI-ju. Zabilježeno kao otvorena nijansa, ne tiho razriješeno.
+
+**PL-01 (partner list format): NIJE razriješeno ovom inspekcijom.** `b2b-partner-importer` je ručni Excel/CSV upload alat s admin-triggered importom i automatskim matchanjem komercijalista — ne poziva live Apros partner-list API endpoint. ADR-002-ova cron-polling arhitektura trenutno NIJE ono što je u pogonu; partneri se danas ručno seed-uju. PL-01 (stvarni Apros partner-list endpoint format) ostaje otvoreno.
+
+**WH-01 (warehouse stock payload): NIJE razriješeno.** `AprosProvider.php` mapira jedan flattened `stock` integer (`$raw['stock']`) — nije uočena per-warehouse struktura u ovoj kodnoj putanji. Nije potvrđeno da li Apros-ov sirovi payload ima per-warehouse detalj koji se agregira uzvodno, ili TEST integracija to jednostavno još ne izlaže.
+
+**DP-02/BL-06 (sales location routing) — provenance provjerena:** Potvrđeno kao stvaran, ne zastario bloker — konzistentno referenciran kroz 6+ nezavisnih dokumenata (`b2b-erp-adaptation-blueprint.md`, `apros-session-final-pack.md`, `b2b-architecture-validation-audit.md` [EG-07, HIGH severity], `apros-question-resolution-matrix.md`, `erp-discovery-findings.md`, `project-status-matrix.md`) kao zavisan o "Josip / stari B2B sustav (ZGData)" — stvaran, imenovan izvor institucionalnog znanja iz legacy sistema, ne dokumentaciona greška. Uočeno numeričko poklapanje: salesLocationId kodovi (3=Igračke/Toys, 5=Lifestyle) tačno odgovaraju ranije potvrđenim ID-jevima skladišta za iste kategorije (memory: 4 skladišta — 1 Glavno, 3 Igračke, 4 Naočale, 5 Lifestyle). Ovo je cirkumstancijalni dokaz (INFERRED, ne potvrđeno) da "sales location routing" i "warehouse splitting" mogu biti isti Apros mehanizam — što bi, u kombinaciji sa novim klijentskim odgovorom da Apros automatski dijeli po skladištu, značajno smanjilo ovaj bloker. Nije pronađeno u pregledanom kodu (nijedno `salesLocationId` polje nije uočeno ni u jednom od tri plugina). Preporuka: eksplicitno potvrditi prije nego se Josip-zavisnost povuče sa liste blokera.
+
+### Consequences
+
+- Nijedna plugin/config/data izmjena nije napravljena. Nijedan SQL upit nije izvršen direktno nad bazom — nazivi tabela/kolona su pročitani iz PHP source koda, ne upitani uživo.
+- `docs/project-status-matrix.md` §0/§5 zahtijeva ažuriranje statusa BL-01, AP-01, AP-06, AP-07, DP-01 (vidi taj dokument).
+- Novootkriveni `b2b-partner-importer` plugin treba biti dodan u sve buduće reference protected boundary liste uz `apros-pricing` i `uncle-dev-importer`.
+
+### Related
+
+- ADR-001 (Pricing Architecture), ADR-002 (Partner Approval Architecture), ADR-006 (uncle-dev-importer prvi put dokumentovan)
+- `docs/project-status-matrix.md` §0, §5
+- `docs/erp-discovery-findings.md`
+
+---
+
+## ADR-009 — Homepage vs. Segment Landing vidljivost: identifikovan arhitekturalni gap (NIJE implementirano)
+
+**Datum:** 2026-09-21
+**Status:** Accepted (dokumentovan gap i preporučen pravac) — **implementacija NIJE odobrena niti izvršena**
+**Vlasnik:** Vidljivost engine (frozen) / Homepage-Segment Landing arhitektura
+
+### Context
+
+Klijent je finalizirao (`B2B odgovori na pitanja.docx`, §5.1 EDIT superseduje raniji prijedlog personalizovanog homepage-a): Homepage i tri Segment Landing stranice (Lifestyle/Toys/Outdoor) moraju prikazivati kompletan sadržaj, neograničen customer-bucket pravilima. Segment Landing MORA biti filtriran PO SEGMENTU (ne po customer bucket-u) — segment filtering ≠ customer/bucket filtering. Customer-specifična vidljivost počinje tek dublje u katalogu.
+
+### Investigation — CONFIRMED empirijski (lokalno, Playwright, `vis_none` test korisnik, `TestVis2025!`)
+
+Prijava kao `vis_none` (nulta catalog vidljivost) na trenutnu homepage stranicu, upoređeno sa admin sesijom:
+
+- `blocks/templates/latest-products.php`, `blocks/templates/bestseller.php`, `blocks/templates/discounted-products.php` — svaki pokreće `new WP_Query(['post_type' => 'product', ...])` direktno. `inc/visibility/class-query-filter.php` → `should_filter()` presreće SVAKI WP_Query s eksplicitnim `post_type => product`, bezuslovno — nema page-context izuzetka. **CONFIRMED**: sekcije "Novo u ponudi" i "Akcija" su prikazale prazne poruke ("Nisu pronađeni...") za `vis_none`, dok su za admin bile pune.
+- `blocks/featured-products.php` (ACF `selected_products` relationship polje) — **CONFIRMED**: cijeli blok "Istaknuti proizvodi" je nestao za `vis_none` (ACF-ovo razrešavanje relationship polja prolazi kroz isti filtrirani query put).
+- `blocks/templates/brands.php` — **CONFIRMED**: koristi `get_terms(['taxonomy' => 'product_brand', ...])`, presretnuto od `filter_brand_terms()` (registrovan na `get_terms` hook); cijeli "Naša zastupništva" brand carousel je nestao za `vis_none`.
+- `blocks/company-features.php`, `blocks/templates/featured-brand.php`, `blocks/templates/featured-categories.php` — **CONFIRMED neosjetljivi**: render isključivo ACF tekst/slika/link polja, bez product ili `product_brand` upita — vidljivost engine ih ne može dotaći bez obzira na kontekst stranice. `featured-categories.php` linkuje na `product_cat` termine ali nikad ne poziva `get_terms()` sam, a enginov `get_terms` filter je scoped isključivo na `product_brand` — `product_cat` nije presretnut.
+- Sales Representative sekcija: **već implementirana** (`inc/myaccount-komercijalist.php` → `display_commercialist_contact_info()`, pozvana iz `functions.php`), nezavisna od vidljivost engine-a — čita per-user `assigned_komercijalist` meta koji pokazuje na "Komercijalist" CPT, s gracioznim fallback-om ("Partner nema dodeljenog komercijalistu"). Već prisutna u trenutnom homepage "Tu smo za vas" bloku i na My Account "Komercijalist" tabu; **nije potvrđeno** da je prisutna na Contact/Kontakt stranici (novi klijentski zahtjev).
+
+### Decision — finalizovano nakon tri kruga refinement-a (2026-09-21)
+
+**Nijedna izmjena koda nije napravljena — ADR ostaje na nivou odobrenog dizajna.** ADR bilježi potvrđen arhitekturalni gap (isto kao gore) i propisuje **isključivo generičku primitivu**, ne konkretnu Homepage/Segment-Landing aktivaciju:
+
+**Naziv:** `dp_visibility_context` = string vrijednost `'shared_surface'` (NE `'homepage_shared'` — preimenovano jer isti mehanizam koristi i Homepage i Segment Landing; `shared_surface` opisuje SEMANTIKU upita, ne konkretnu stranicu).
+
+**Puna odgovornost ADR-009 (i ništa više od ovoga):**
+> Eksplicitno postavljen `dp_visibility_context = 'shared_surface'` na jednom `WP_Query`/`get_terms()` pozivu znači da customer-specifična bucket/custom-offer vidljivost ne smije ograničiti rezultat TOG upita. Odsustvo tog eksplicitnog konteksta znači da se postojeće ponašanje ne mijenja.
+
+**Eksplicitno ODBAČENO (namjerno, ne previđeno):**
+- **Page-ID registar/allowlist** (npr. `dreampoint_b2b_shared_visibility_page_ids`) — vidljivost primitiva ne smije biti vezana za identitet WP stranice; Homepage/Segment Landing još nisu u finalnom obliku i page ID-jevi se razlikuju po environment-u. Semantika pripada UPITU, ne stranici koja ga sadrži.
+- `is_front_page()`/slug/title detekcija — implicitna, širokopojasna, odbačena iz istog razloga kao i prije.
+- Bilo kakva segment-filtering logika (brand_segment reuse, Lifestyle/Toys/Outdoor query grane, nova šema) — eksplicitno VAN SCOPE-a ovog ADR-a. `brand_segment` (`acf-json/group_675053191eac4.json`) je potvrđeno vlasništvo Brands-page navigacije, NIJE dokazano dovoljan kao autoritativni product-segment model — ta odluka čeka zasebnu buduću fazu.
+- Masovna izmjena postojećih blokova "za svaki slučaj" — reusable blok mora ostati neutralan po defaultu; kontekst mu mora eksplicitno proslijediti njegov POZIVALAC (buduća Homepage/Segment-Landing render logika), ne obrnuto.
+
+**Fazna podjela (namjerna, potvrđena kao tehnički zvučna):**
+
+- **Faza A (ovaj ADR, odobreno za implementaciju):** SAMO `inc/visibility/class-query-filter.php` — `should_filter()` prepoznaje `dp_visibility_context = 'shared_surface'` na `WP_Query`-ju (rani `return false`, odmah posle postojeće `dp_skip_visibility` provjere); `filter_brand_terms()` prepoznaje ekvivalentan ključ u `$args` trećem parametru koji `get_terms()` već prosljeđuje (bez izmjene poziva). Nijedan blok se ne mijenja. Pošto nijedan trenutni pozivalac ne postavlja ovaj flag, Faza A je u produkciji potpuno dormant/no-op — nulti vidljiv efekat, testabilna izolovano.
+- **Faza B (buduća, van scope-a ovog ADR-a):** kad Homepage/Segment-Landing rendering arhitektura stvarno postoji, njen pozivalac eksplicitno prosljeđuje `shared_surface` semantiku relevantnim blokovima/upitima. Za `featured-products.php` konkretno: konverzija sa `get_field('selected_products')` (formatted, prolazi kroz ACF-ov `acf_get_posts()` → filtrirani `WP_Query`, potvrđeno u `class-acf-field-relationship.php:764-769` + `api-helpers.php:1165-1205`) na `get_field('selected_products', false, false)` (sirovi ID niz, potvrđeno u `api-template.php:26-75` da preskače cijeli `acf_format_value()` lanac) + sopstveni `WP_Query` — **potrebna je TEK kad blok stvarno treba konzumirati `shared_surface`**, ne prije. Do tada `featured-products.php` ostaje nepromijenjen. Ovo je namjerno stateless rešenje (nema global/static markera, nema ACF vendor hook-a) — razmotren i odbačen `acf/acf_get_posts/args` hook jer prima samo `$args` bez field-identity konteksta.
+
+**Napomena o testiranju:** Projekat trenutno **nema PHPUnit/WP_UnitTestCase infrastrukturu** (nema `phpunit.xml`, `tests/` foldera, niti composer PHPUnit zavisnosti — provjereno u `composer.json`). Uvođenje PHPUnit-a bi bila NOVA zavisnost koja zahtijeva eksplicitno odobrenje. Za Fazu A, preporučena verifikacija bez novih alata: privremena, jednokratna `wp eval` provjera (read-only, deterministička, u skladu sa postojećom `wp eval` konvencijom projekta) koja konstruiše `WP_Query`/`get_terms()` sa i bez `dp_visibility_context` argumenta i potvrđuje očekivano ponašanje — ne ostavlja trag u kodu.
+
+### Consequences
+
+- Segment Landing (i bilo koja buduća shared površina) NE MOGU sigurno ponovno koristiti trenutne homepage blokove doslovno bez Faze B rada — ali sama Faza A ne blokira ništa niti zahtijeva da to bude riješeno sada.
+- Bilo kakva izmena `inc/visibility/class-query-filter.php` (uključujući Fazu A) zahtijeva eksplicitno odobren implementacioni plan prije koda (frozen sistem pravilo, `docs/active/current-phase.md`) — Faza A je OVIM ADR-om odobrena za implementaciju; Faza B zahtijeva NOVU odluku kad Homepage/Segment-Landing arhitektura bude definisana.
+- FINALNA homepage/segment-landing struktura i sadržajna specifikacija dokumentovane su zasebno: `docs/active/homepage-segment-landing-architecture.md` (ta specifikacija i dalje važi za SADRŽAJ; ovaj ADR pokriva samo vidljivost-primitivu).
+- Nijedan trenutni blok se ne mijenja kao dio ovog ADR-a.
+
+### Related
+
+- `inc/visibility/class-query-filter.php`
+- `docs/frozen/*` (Frozen Systems tabela, `docs/active/current-phase.md`)
+- `docs/active/homepage-segment-landing-architecture.md` (nova, FINAL struktura)
+- ADR-008 (ERP boundary, ista sesija)

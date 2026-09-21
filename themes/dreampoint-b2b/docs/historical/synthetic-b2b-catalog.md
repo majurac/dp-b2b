@@ -1,5 +1,7 @@
 # Synthetic B2B Catalog — Development Tool
 
+**RETIRED for staging as of 2026-09-21.** Real TEST Apros ERP-synced catalog data is now the authoritative staging dataset (see `docs/decisions.md` ADR-008). Do NOT run `generate-catalog` on staging, do NOT create new synthetic products/categories/brands there, and do NOT fall back to synthetic data when real ERP data is available. `reset-catalog` should not be run again as routine cleanup now that `_dp_generated` content is already zero — only on explicit future instruction. The generator/CLI code itself is left in place, unmodified, as inactive historical/local-development tooling — it remains usable on localhost where no ERP import exists.
+
 Development-only stress-test data generator. Exercises visibility engine, Quick Order, filtering, variation sync, and pagination with realistic fake catalog data.
 
 **Never run in production.** Hard-fails if `WP_ENVIRONMENT_TYPE === 'production'`.

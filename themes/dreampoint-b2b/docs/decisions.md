@@ -442,6 +442,8 @@ Sva tri su tretirana kao STRICT PROTECTED BOUNDARY — isključivo read-only ins
 
 **Efektivno RESOLVED za TEST/sandbox svrhe** — konekcija i kredencijali postoje, plugin kod je funkcionalan na stagingu. Produkcijski/finalni Apros pristup (izvan TEST okruženja) nije potvrđen ovim nalazom.
 
+**Ažurirano 2026-09-22 (Apros Sandbox Live E2E Confirmation, `docs/decisions.md` ADR-010):** Apros je eksterno, eksplicitno potvrdio da je konfigurisan staging endpoint njihov sandbox/staging environment (ne izvedeno iz zvanične ZGData API PDF dokumentacije, koja tu designaciju sama ne sadrži — zaseban, kasniji eksterni nalaz). Sandbox status je time u potpunosti RESOLVED, ne samo "efektivno". Live E2E narudžba (#23358) je uspješno prihvaćena na tom endpointu (ERP broj 4244). Produkcijski pristup i dalje nije adresiran ovim nalazom — nezavisno pitanje, nije relevantno za TEST/sandbox rad.
+
 ### Nalazi — CONFIRMED — CURRENT TEST IMPLEMENTATION (za razliku od CONFIRMED — APROS SPECIFICATION)
 
 **AP-01 (pricing):** `apros-pricing.php` implementira TAČNO ADR-001 prioritet: (1) fiksna country cijena — konačna, rabat se ne primjenjuje; (2) brend rabat na wholesale cijenu; (3) wholesale cijena. Brend rabati se čuvaju po partneru u custom tabeli `{prefix}apros_brand_discounts` (`partner_code`, `brand_id`, `discount_percent`), **ručno konfigurisani kroz wp-admin UI** (`apros-pricing-admin.php`, sekcija "Brend rabati" / "Rabat (%)") — nije uočen live sync iz Apros `partnerBrandDiscountList`-a. Sam kod eksplicitno komentariše: *"Prioritet (potvrđeno sa korisnikom, čeka i pismenu potvrdu klijenta/Apros)"* — i implementacija sama priznaje da AP-01 nije formalno zatvoren. `countryPriceListCode` (ne sirovi ISO kod) je stvarno polje korišteno za country pricing lookup.
@@ -551,7 +553,7 @@ Prijava kao `vis_none` (nulta catalog vidljivost) na trenutnu homepage stranicu,
 ## ADR-010 — Delivery-Location Checkout: potvrđen NON-COMPLIANT gap + odobrena hibridna remediation arhitektura (implementacija NIJE izvršena)
 
 **Datum:** 2026-09-22 (revidirano isti dan — vidi Revizija ispod; implementirano i djelomično validirano na stagingu isti dan — vidi Staging Acceptance ispod)
-**Status:** Accepted — implementirano (`inc/checkout-delivery-location.php`, commit `8577565`) i deployovano na staging. 2+ grana validirana na realnim staging Apros podacima. 0/1-lokacija grane i finalna `_apros_delivery_location_id` persistencija na stvarno kompletiranoj narudžbi ostaju code-review + izolovana lokalna simulacija, bez live staging dokaza (vidi Staging Acceptance). Woo Blocks browser-side restoration nijansa, otvorena istim testom, razriješena je zasebnom WC 11.1.1 source-tracing istragom istog dana — SATISFIED BY DESIGN, live E2E potvrda i dalje pending — vidi ispod.
+**Status:** Accepted — implementirano (`inc/checkout-delivery-location.php`, commit `8577565`) i deployovano na staging. 2+ grana validirana na realnim staging Apros podacima. **Finalna `_apros_delivery_location_id` persistencija i new-order empty-selection reset su sada LIVE E2E CONFIRMED preko stvarno kompletirane Apros sandbox narudžbe (#23358, 2026-09-22) — vidi "Apros Sandbox Live E2E Confirmation" ispod.** 0/1-lokacija grane ostaju code-review + izolovana lokalna simulacija (nema prirodnih 0/1-lokacija partnera na stagingu).
 **Vlasnik:** Checkout / Delivery Locations (AP-07)
 
 ### Revizija (isti dan, 2026-09-22)
@@ -604,7 +606,7 @@ Cijela implementacija ostaje u project-owned theme kodu; protected plugin-ovi (`
 
 ### Preostalo pitanje koje zahtijeva Apros/klijent potvrdu
 
-- **`partnerDeliveryLocationId = null` semantika na Apros strani** — payload strukturno već podržava `null` (postojeći kod, 0-lokacija slučaj i historijski svaki dosadašnji red koda prije ove ADR), ali nema dokaza kako Apros interno obrađuje/interpretira tu vrijednost. Označeno `REQUIRES APROS CONFIRMATION` — NIJE bloker za implementaciju 1-lokacija i 2+ grana, koje ne zavise od ovog odgovora. I dalje neriješeno nakon Staging Acceptance prolaza (2026-09-22) — namjerno nije testirano jer bi zahtijevalo slanje narudžbe Apros-u. Nezavisno pitanje, ne miješati sa Woo Blocks browser-side restoration nijansom ispod.
+- **`partnerDeliveryLocationId = null` semantika na Apros strani** — payload strukturno već podržava `null` (postojeći kod, 0-lokacija slučaj i historijski svaki dosadašnji red koda prije ove ADR), ali nema dokaza kako Apros interno obrađuje/interpretira tu vrijednost. Označeno `REQUIRES APROS CONFIRMATION` — NIJE bloker za implementaciju 1-lokacija i 2+ grana, koje ne zavise od ovog odgovora. **I dalje neriješeno i nakon Apros Sandbox Live E2E Confirmation-a (2026-09-22, vidi ispod)** — taj test je namjerno poslao stvarni `recipientCode` (1), ne `null`; null-scenario ostaje namjerno netestiran (zahtijevao bi zaseban test sa 0-lokacija partnerom, van scope-a ovog prolaza). Nezavisno pitanje, ne miješati sa Woo Blocks browser-side restoration nijansom niti sa sandbox environment potvrdom ispod.
 - **Proizvoljna/nova jednokratna Woo shipping adresa** (koncept ranije neformalno pominjan kao `+ Dodaj novu adresu`) — ostaje van scope-a ove implementacije. Nije potvrđen kao poslovni zahtjev (zasebna istraga, ista sesija) i ne smije se tretirati kao autoritativan zahtjev na osnovu bilo kojeg Figma koncepta. Odluka o ovome čeka Apros odgovor o `shippingAddress` vs. `partnerDeliveryLocationId` semantici (zasebno pitanje, van scope-a ovog ADR-a).
 
 ### Staging Acceptance (2026-09-22)
@@ -623,7 +625,7 @@ Implementacija (`inc/checkout-delivery-location.php`) je napisana, lokalno simul
 **Implementirano, ali samo code-review + izolovana lokalna simulacija (NIJE live staging dokaz):**
 - 0-lokacija fail-closed grana (`RouteException`) — ne postoji prirodan 0-lokacija partner na stagingu za live test
 - 1-lokacija tiha persistencija — ne postoji prirodan 1-lokacija partner na stagingu za live test
-- Finalna `_apros_delivery_location_id` persistencija u STVARNO kompletiranoj narudžbi — namjerno netestirano jer bi kompletiranje narudžbe (bacs/cod) odmah okinulo `woocommerce_thankyou` ERP sync pokušaj u `uncle-dev-importer/order.php`, što je eksplicitno zabranjeno za ovaj prolaz
+- ~~Finalna `_apros_delivery_location_id` persistencija u STVARNO kompletiranoj narudžbi — namjerno netestirano...~~ **→ RAZRIJEŠENO (Apros Sandbox Live E2E Confirmation, 2026-09-22, isti dan) — nakon eksterne Apros potvrde sandbox statusa, ovo je live testirano preko narudžbe #23358. Vidi sekciju ispod.**
 
 **Browser-side restoration nijansa — RAZRIJEŠENO izvornom istragom (2026-09-22, zaseban WC 11.1.1 source-tracing prolaz):**
 
@@ -634,9 +636,31 @@ WooCommerce Blocks-ov vlastiti `localStorage` cart cache (`storeApiCartData`/`st
 3. **Zašto Woo-ov uspješan-checkout lifecycle sprječava ovo za stvarno novu narudžbu:** `wc_clear_cart_after_payment()` (`template_redirect`, prioritet 20) prazni korpu na order-received stranici; u ISTOM request-u, kasnije hook-ovan `WC_Cart_Session::maybe_set_cart_cookies()` (`wp` prio 99 / `shutdown` prio 0) detektuje praznu korpu i BRIŠE oba relevantna kolačića (`woocommerce_items_in_cart`, `woocommerce_cart_hash`). Bez tih kolačića, `Wi()`-jev prvi uslov odmah ne prolazi — keš se nikad ne čita, WC Blocks vrši svjež `/wc/store/v1/cart` fetch koji odražava zaista novu, praznu korpu/draft narudžbu.
 4. **Nikakav custom localStorage-brisanje workaround nije potreban** na osnovu trenutnog dokaza — mehanizam je već strukturno riješen native WC lifecycle-om.
 
-**Razlika arhitektura/izvor vs. live dokaz:** Ponašanje opisano u tačkama 1-3 je **SATISFIED BY DESIGN** — potvrđeno direktnim čitanjem instaliranog WC 11.1.1 koda (client JS + server PHP, tri nezavisna sloja koja se moraju sva poklopiti). **Live E2E potvrda i dalje NIJE izvedena** — stvarno kompletiranje TEST narudžbe, praćeno otvaranjem nove narudžbe i provjerom da je selektor prazan, bi zatvorilo posljednju empirijsku prazninu, ali NIJE potrebno sada niti je izvedeno u ovom ili prethodnom prolazu (namjerno izbjegnuto — kompletiranje narudžbe bi okinulo ERP sync pokušaj). Status: **SATISFIED BY DESIGN — LIVE E2E CONFIRMATION STILL PENDING** (ne miješati sa "riješeno i live-potvrđeno").
+**Razlika arhitektura/izvor vs. live dokaz:** Ponašanje opisano u tačkama 1-3 je **SATISFIED BY DESIGN** — potvrđeno direktnim čitanjem instaliranog WC 11.1.1 koda (client JS + server PHP, tri nezavisna sloja koja se moraju sva poklopiti). **→ AŽURIRANO (Apros Sandbox Live E2E Confirmation, 2026-09-22, isti dan):** live E2E potvrda je naknadno izvedena (narudžba #23358) nakon eksterne Apros potvrde sandbox statusa. Status: **SATISFIED BY DESIGN — LIVE E2E CONFIRMED.** Detalji u sekciji ispod.
 
 **User Switching (staging operational tooling, ne aplikacioni kod):** Za browser acceptance test korišten je `User Switching` plugin (John Blackbourn, slug `user-switching`, v1.12.2 pri instalaciji) — instaliran i aktiviran isključivo na DreamPoint B2B stagingu radi impersoniranja TEST partner naloga bez potrebe za njihovim lozinkama. Pristup ograničen na `edit_users` capability (admin-only po defaultu; potvrđeno da customer role tog capability nema). Lozinka partner naloga nije mijenjana. Plugin namjerno ostaje instaliran/aktivan na stagingu za buduće acceptance testove — dokumentovan u `~/.claude/docs/server-runbook.md` (dp-b2b sekcija), ne u ovom theme repo-u (nije aplikacioni/theme kod).
+
+### Apros Sandbox Live E2E Confirmation (2026-09-22, isti dan, nakon Staging Acceptance-a)
+
+**Provenance eksternog environment fakta:** Apros je eksterno, eksplicitno potvrdio (2026-09-22, van ovog dokumenta — usmena/pisana komunikacija sa klijentom, ne sam PDF) da je konfigurisan `https://tockasna-b2b-api.zgdata.hr/api3/{API-KEY}/` njihov sandbox/staging endpoint. **Napomena o provenance-u:** zvanična ZGData API PDF dokumentacija (v1.0, primljena i rekonsilovana ranije istog dana) SAMA NE sadrži environment designaciju (potvrđeno u toj rekonsilijaciji) — sandbox potvrda je zaseban, kasniji, eksterni Apros nalaz, ne izvedena iz PDF-a. Ovo razrješava ranije zabilježen blocker `APROS TEST ORDER E2E BLOCKED — TEST ENDPOINT NOT CONCLUSIVELY VERIFIED`.
+
+**Live sandbox test (jedna kontrolisana narudžba):**
+- Partner: `svijet-medija-d-o-o` (user_id 7, `apros_partner_code` 2870), impersoniran preko User Switching, lozinka nepromijenjena
+- Proizvod: CLEANSING CLOTH (post ID 5874, šifra `P-51136`), količina 1, redovna cijena, na zalihi
+- Odabrana lokacija: "Kaptol - Centar Kaptol — Nova Ves 17, 10000 Zagreb" (`recipientCode` = 1)
+- Woo narudžba **#23358**, status On hold (BACS), kreirana 2026-09-22 12:34:06
+
+**Lanac persistencije — empirijski potvrđeno:**
+- Native Woo Additional Checkout Field: `_wc_other/dreampoint-b2b/delivery-location = 1`
+- Integration bridge: `_apros_delivery_location_id = 1`
+- Oba se poklapaju sa odabranim `recipientCode = 1`
+- Apros sandbox je prihvatio narudžbu: order note *"ERP Synced. ERP broj: 4244 (skladište 0)"*, `_erp_documents` = `{numberErp: 4244, warehouseId: 0}`, `_erp_sync_status = success:4244`
+
+**Napomena o preciznosti dokaza (outbound payload):** Perzistencioni lanac je empirijski verifikovan preko `_apros_delivery_location_id = 1`; već verifikovan integracioni kod (`order.php`) deterministički mapira tu vrijednost u outbound `partnerDeliveryLocationId`, a sandbox je prihvatio narudžbu. **Sirovo outbound HTTP request body NIJE nezavisno uhvaćeno/logovano tokom ovog testa** — `partnerDeliveryLocationId = 1` se navodi kao deterministički izveden zaključak iz koda + uspješnog sandbox prihvatanja, ne kao direktno posmatrana HTTP request evidencija.
+
+**New-order reset — sada LIVE E2E CONFIRMED:** Nakon uspješnog kompletiranja #23358, WooCommerce je prirodno ispraznio korpu (potvrđeno: "No products in the cart" na order-received stranici). U ISTOJ autentifikovanoj browser sesiji, nova korpa je započeta (bez ručnog brisanja cookies/localStorage), novi Block Checkout otvoren — selektor je prikazao prazan placeholder ("Select a dostavna lokacija"), Kaptol NIJE bio predizabran. Ovo je live dokaz koji je nedostajao WC 11.1.1 source-tracing zaključku.
+
+**Šta OVAJ test NE razrješava (namjerno ostaje otvoreno):** opšta AP-06 order API specifikacija (URL/response šema van ovog jednog primjera), formalna `order/create` request/response šema, opšta idempotency semantika, shipping-address precedence između `partnerDeliveryLocationId` i `shipping*` polja (shipping adresa u #23358 je namjerno poklopljena sa Kaptol adresom — nema dokaza o conflicting-address ponašanju), null `partnerDeliveryLocationId` semantika, stabilnost `recipientCode`-a između sync ciklusa, per-warehouse stock dostupnost. 0-lokacija i 1-lokacija grane ostaju code-review + lokalna simulacija (nema prirodnih staging partnera za te slučajeve).
 
 ### Consequences
 

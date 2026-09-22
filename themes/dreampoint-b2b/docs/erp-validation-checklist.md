@@ -342,7 +342,9 @@ Ova pitanja poboljšavaju kvalitetu integracije ali ne blokiraju implementaciju.
 **Impact if answer differs:**
 Bez sandbox-a, integracija se mora testirati na produkcijskim podacima, što uvodi rizik lažnih narudžbi ili neispravnih partner podataka.
 
-**Status (2026-09-22):** I dalje POTPUNO OTVORENO. Primljena je zvanična ZGData API dokumentacija (`API DOKUMENTACIJA — Dreampoint - B2B integracija`, v1.0) koja definiše osnovni URL `https://tockasna-b2b-api.zgdata.hr/api3/{API-KEY}/`, ali **nijedna rečenica u tom dokumentu ne označava taj endpoint kao TEST, sandbox, staging ili production.** Ovo pitanje ostaje jedini preostali eksterni blocker prije bilo kakve stvarne narudžbe prema tom endpointu — vidi zaseban nalaz `APROS TEST ORDER E2E BLOCKED — TEST ENDPOINT NOT CONCLUSIVELY VERIFIED` (2026-09-22).
+**Status (2026-09-22, ranije istog dana):** I dalje POTPUNO OTVORENO. Primljena je zvanična ZGData API dokumentacija (`API DOKUMENTACIJA — Dreampoint - B2B integracija`, v1.0) koja definiše osnovni URL `https://tockasna-b2b-api.zgdata.hr/api3/{API-KEY}/`, ali **nijedna rečenica u tom dokumentu ne označava taj endpoint kao TEST, sandbox, staging ili production.** Ovo pitanje ostaje jedini preostali eksterni blocker prije bilo kakve stvarne narudžbe prema tom endpointu — vidi zaseban nalaz `APROS TEST ORDER E2E BLOCKED — TEST ENDPOINT NOT CONCLUSIVELY VERIFIED` (2026-09-22).
+
+**Status (2026-09-22, kasnije istog dana) — ✅ RESOLVED:** Apros je eksterno, eksplicitno potvrdio da je konfigurisan endpoint njihov sandbox/staging environment (potvrda dobijena van ZGData API PDF-a, koji tu designaciju sam ne sadrži). Live E2E test narudžbe (#23358) je potvrdio da sandbox prihvata i uspješno obrađuje narudžbe (ERP broj 4244 vraćen). Pitanje odvojenosti sandbox/produkcijskih podataka nije eksplicitno pismeno adresirano, ali Apros-ova sandbox designacija se prihvata kao dovoljna za nastavak kontrolisanog TEST rada. Vidi `docs/decisions.md` ADR-010 § "Apros Sandbox Live E2E Confirmation".
 
 ---
 

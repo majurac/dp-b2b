@@ -532,11 +532,21 @@ Prijava kao `vis_none` (nulta catalog vidljivost) na trenutnu homepage stranicu,
 
 ---
 
-## ADR-010 — Delivery-Location Checkout Selector: potvrđen NON-COMPLIANT gap + odobrena remediation arhitektura (implementacija NIJE izvršena)
+## ADR-010 — Delivery-Location Checkout: potvrđen NON-COMPLIANT gap + odobrena hibridna remediation arhitektura (implementacija NIJE izvršena)
 
-**Datum:** 2026-09-22
-**Status:** Accepted (dokumentovan gap + odobrena arhitektura plana) — implementacija NIJE izvršena, PHP/JS kod nije mijenjan
+**Datum:** 2026-09-22 (revidirano isti dan — vidi Revizija ispod)
+**Status:** Accepted (dokumentovan gap + odobrena hibridna arhitektura plana) — implementacija NIJE izvršena, PHP/JS kod nije mijenjan
 **Vlasnik:** Checkout / Delivery Locations (AP-07)
+
+### Revizija (isti dan, 2026-09-22)
+
+Originalna verzija ovog ADR-a predlagala je UNIVERZALAN eksplicitan Apros delivery-location selektor za svaki checkout, bez obzira na broj dostupnih lokacija partnera. Naknadna istraga (ista sesija — poređenje `apros_get_partner_delivery_locations()` šeme, native Woo billing/shipping polja, i kompletnog outgoing `uncle-dev-importer/order.php` payload-a) pokazala je da:
+
+- payload već šalje punu billing I shipping adresu kao potpuno odvojena polja, nezavisno od `partnerDeliveryLocationId`;
+- `recipient_code` nema deterministički, sigurno izvodiv odnos prema Woo adresnim poljima (nema zajedničkog ključa, ERP tabela nema `country` kolonu, šema ne garantuje jedinstvenost adrese po `recipient_code`) — mapiranje adrese → `recipient_code` NIJE pouzdano izvodivo bez fuzzy matchinga, koji je eksplicitno odbačen;
+- za partnera s **0 ili tačno 1** dostavnom lokacijom, ovaj problem uopšte ne postoji — nema šta da se mapira niti bira, pa prisiljavanje kupca da vidi ERP-specifičan selektor u tom slučaju nepotrebno izlaže internu integracionu terminologiju.
+
+Ovo je promijenilo odluku iz "univerzalan selektor" u **hibridnu arhitekturu** ispod — selektor se prikazuje ISKLJUČIVO kada je stvarno neophodan (2+ lokacije).
 
 ### Context
 
@@ -555,35 +565,42 @@ Ovaj nalaz razrešava nesigurnost koju je ADR-008 prvi zabilježio ("nije potvr�
 
 `apros_partner_code` user meta, ručno postavljen kroz WP Admin → Users → Edit User ("Apros Pricing" sekcija), sačuvan funkcijom `apros_pricing_save_user_fields()` u protected `apros-pricing` plugin-u. Ovo je jedini postojeći izvor partner_code-a za ulogovanog korisnika — buduća implementacija ga mora ponovo koristiti, ne kreirati paralelni mapping.
 
-### Decision — odobrena remediation arhitektura (implementacija NIJE izvršena)
+### Decision — odobrena HIBRIDNA remediation arhitektura (implementacija NIJE izvršena)
 
-Cijela implementacija ostaje u project-owned theme kodu; protected plugin-ovi (`apros-pricing`, `uncle-dev-importer`, `b2b-partner-importer`) se NE mijenjaju.
+Cijela implementacija ostaje u project-owned theme kodu; protected plugin-ovi (`apros-pricing`, `uncle-dev-importer`, `b2b-partner-importer`) se NE mijenjaju. Woo billing/shipping ostaje autoritativan, kupcu vidljiv delivery-address workflow u svim slučajevima — `partnerDeliveryLocationId` je interna integraciona vrijednost koja se dodaje SAMO kada je stvarno potrebna.
 
-1. **Mehanizam:** WooCommerce native "Additional Checkout Fields" API (`woocommerce_register_additional_checkout_field()`, dostupno od WC 8.9+; instalirana verzija 11.1.1) — jedini mehanizam koji radi identično za klasični i Block checkout, s native `required` podrškom i uniformnom server-side validacijom (`woocommerce_validate_additional_field` filter), umjesto starijeg ad-hoc dual-hook obrasca koji `inc/checkout-logic.php` koristi za payment-rule validaciju.
-2. **Lokacija polja:** `location => 'order'` (ne `'address'`) — polje se odnosi na cijelu narudžbu, ne na billing/shipping adresu, i renderuje se jednom, ne duplirano.
-3. **Options:** popunjavaju se pozivom postojeće javne funkcije `apros_get_partner_delivery_locations( $partner_code )` (definisana u `apros-pricing`, legalno pozivanje iz teme bez izmjene plugin fajla) — `$partner_code` iz `apros_partner_code` user meta ulogovanog korisnika.
-4. **Bridging na postojeći contract:** theme kod eksplicitno kopira validiranu vrijednost iz WC-ovog native additional-field storage-a u tačno isti meta ključ koji `uncle-dev-importer/order.php` već čita — `_apros_delivery_location_id` — na hook-u koji pokriva i klasični i Blocks checkout (isti dual-hook obrazac koji `inc/checkout-logic.php` već koristi, npr. `woocommerce_checkout_create_order` + `woocommerce_store_api_checkout_update_order_from_request`). Time se `_apros_delivery_location_id` uvijek eksplicitno postavlja prije nego što `order.php` fallback ikad dobije priliku da se aktivira — fallback ostaje netaknut kao isključivo legacy/exception safety-net.
-5. **Validacija:** server-side, preko `woocommerce_validate_additional_field` — odbacuje bilo koji `recipient_code` koji nije u trenutnom rezultatu `apros_get_partner_delivery_locations($partner_code)` za PRIJAVLJENOG korisnika (sprječava proizvoljne/stale/tuđe ID-jeve). Frontend validacija sama nije dovoljna.
-6. **Isti-checkout preservation:** obezbjeđuje native WC Blocks checkout store automatski — eksplicitan izbor preživljava AJAX/shipping-rate recalculation u ISTOJ sesiji. Bez custom localStorage-a ili druge perzistencije. Cross-order reuse ostaje nemoguć jer se native checkout state ne prenosi između odvojenih checkout posjeta/narudžbi.
-7. **UI:** ponovo koristi postojeće checkout stilove (`sass/pages/checkout.scss`, isti obrazac kao `js/checkout-b2b-info.js` / `.dp-b2b-billing-info` sekcije) — prazno/placeholder initial stanje, bez unaprijed izabrane opcije, error state kroz native WC Blocks validation UI.
+**Grananje po broju dostavnih lokacija partnera** (`apros_get_partner_delivery_locations($partner_code)`, `$partner_code` iz postojećeg `apros_partner_code` user meta — jedini izvor, ponovo se koristi, ne kreira se paralelan mapping):
 
-### Otvorene poslovne odluke (eksplicitno označene, nisu izmišljene)
+1. **0 lokacija:** Checkout ostaje potpuno Woo-native. Nema ERP-specifičnog selektora. `_apros_delivery_location_id` se ne postavlja — `partnerDeliveryLocationId` ostaje `null` u payload-u, isto kao i danas. Apros-strana obrada `null` vrijednosti je `REQUIRES APROS CONFIRMATION` (vidi ispod) — ovo NIJE bloker za implementaciju 2+ grane.
+2. **Tačno 1 lokacija:** Checkout ostaje potpuno Woo-native — nema dodatnog selektora. Theme kod tiho postavlja tu jedinu `recipient_code` vrijednost kao `_apros_delivery_location_id`, bez ikakvog adresnog poklapanja (nije potrebno — postoji samo jedna moguća vrijednost). Ovo NIJE "zapamćen/default" izbor kupca — to je jedini mogući ERP recipient za tog partnera, strukturno identičan pri svakoj narudžbi, pa ne krši "no-reuse" pravilo (nema prethodnog izbora koji bi bio "reuse-ovan").
+3. **2+ lokacije:** Eksplicitan izbor kupca je obavezan za SVAKU novu narudžbu, prazno initial stanje, nikad prethodni izbor. Prikazuje se korisniku-razumljiva informacija (naziv/adresa/grad) — ERP terminologija (`recipient_code`, `partnerDeliveryLocationId`) se NIKAD ne izlaže kupcu. Server-side validacija obavezna (vidi ispod).
 
-- **Tačno jedna dostupna lokacija:** BUSINESS DECISION REQUIRED — AP-07 odgovor potvrđuje "nema default lokacije, korisnik bira" za slučaj VIŠE lokacija, ali ne adresira eksplicitno da li se jedina dostupna lokacija smije auto-selektovati (manje frikcije) ili i dalje zahtijeva eksplicitan klik (dosljedno s "svaka narudžba počinje bez izabrane lokacije").
-- **Nula dostupnih lokacija:** BUSINESS DECISION REQUIRED — nijedan kanonski dokument ne definiše UX za partnera bez ijedne uvezene dostavne lokacije (blokirati checkout? fallback na billing adresu? poruka za kontakt s adminom?).
+**Eksplicitno odbačeno (namjerno, ne previđeno):** mapiranje proizvoljnog Woo billing/shipping adresnog stringa na `recipient_code` za 2+ slučaj. Istraga (ista sesija) pokazala je da ne postoji zajednički deterministički ključ između Woo adresnih polja i `apros_delivery_locations` šeme (ERP tabela nema `country` kolonu, nema garancije jedinstvenosti adrese po `recipient_code`, `address` je slobodan tekst uvezen iz Apros-a nezavisno od kupčevog unosa) — fuzzy matching je eksplicitno odbačen kao rješenje.
 
-Dok se ove dvije odluke ne donesu, bezbjedan privremeni default za implementaciju (ako se odluči da se ne čeka) jeste tretirati oba slučaja identično kao "više lokacija" — uvijek eksplicitan izbor, bez auto-selekcije — jer je to jedino ponašanje koje je već kanonski potvrđeno kao usklađeno.
+**Implementacioni mehanizam (za 2+ granu):**
+
+1. WooCommerce native "Additional Checkout Fields" API (`woocommerce_register_additional_checkout_field()`, dostupno od WC 8.9+; instalirana verzija 11.1.1), `location => 'order'` (cijela narudžba, ne adresa) — jedini registruje se SAMO kada partner ima 2+ lokacije (uslovna registracija na osnovu `apros_get_partner_delivery_locations()` rezultata za trenutnog korisnika).
+2. **Nema potrebe za dual classic/Blocks hook obrascem** koji `inc/checkout-logic.php` koristi za payment-rule validaciju — taj obrazac je bio nužan specifično zato što je `woocommerce_checkout_process` (klasičan, pre-order-creation validacijski hook) classic-only i ne okida se u Store API toku. Additional Checkout Fields API je, za razliku od toga, dizajniran kao JEDINSTVEN mehanizam preko oba checkout tipa — `woocommerce_validate_additional_field` (validacija) i storage/persist put rade preko istog, zajedničkog WC core order-creation puta (`WC_Checkout::create_order()`) koji koriste i klasični checkout i Store API/Blocks ruta. Pošto projekat koristi Block-based Checkout (potvrđeno), plan koristi TAČNO JEDAN integracioni hook, bez redundantne classic-only kompatibilnosti — tačan hook/meta-key naziv za WC 11.1.1 treba potvrditi čitanjem instaliranog core koda neposredno prije implementacije (nije blokirajuće, implementacioni detalj).
+3. **Bridging na postojeći contract:** theme kod kopira validiranu vrijednost iz WC-ovog native additional-field storage-a u tačno isti meta ključ koji `uncle-dev-importer/order.php` već čita — `_apros_delivery_location_id`. Time se ta vrijednost uvijek eksplicitno postavlja (za 1-lokaciju granu direktno, za 2+ granu nakon validiranog izbora) prije nego što `order.php` fallback ikad dobije priliku da se aktivira — fallback ostaje netaknut kao isključivo legacy/exception safety-net (npr. buduće edge-case scenarije van ove tri grane).
+4. **Validacija (2+ grana):** server-side, preko `woocommerce_validate_additional_field` — odbacuje bilo koji `recipient_code` koji nije u trenutnom rezultatu `apros_get_partner_delivery_locations($partner_code)` za PRIJAVLJENOG korisnika (sprječava proizvoljne/stale/tuđe ID-jeve). Frontend validacija sama nije dovoljna.
+5. **Isti-checkout preservation (2+ grana):** obezbjeđuje native WC Blocks checkout store automatski — eksplicitan izbor preživljava AJAX/shipping-rate recalculation u ISTOJ sesiji, bez custom localStorage-a. Cross-order reuse ostaje nemoguć jer se native checkout state ne prenosi između odvojenih checkout posjeta/narudžbi.
+6. **UI (2+ grana):** ponovo koristi postojeće checkout stilove (`sass/pages/checkout.scss`, isti obrazac kao `js/checkout-b2b-info.js` / `.dp-b2b-billing-info` sekcije) — prazno/placeholder initial stanje, korisniku-razumljiv prikaz (naziv/adresa/grad), error state kroz native WC Blocks validation UI.
+
+### Preostalo pitanje koje zahtijeva Apros/klijent potvrdu
+
+- **`partnerDeliveryLocationId = null` semantika na Apros strani** — payload strukturno već podržava `null` (postojeći kod, 0-lokacija slučaj i historijski svaki dosadašnji red koda prije ove ADR), ali nema dokaza kako Apros interno obrađuje/interpretira tu vrijednost. Označeno `REQUIRES APROS CONFIRMATION` — NIJE bloker za implementaciju 1-lokacija i 2+ grana, koje ne zavise od ovog odgovora.
 
 ### Consequences
 
 - Nijedna izmjena `apros-pricing`, `uncle-dev-importer` ili `b2b-partner-importer` nije potrebna niti planirana.
-- Predložen nov, samostalan theme fajl (`inc/checkout-delivery-location.php`), uključen u `functions.php` pored postojećeg `inc/checkout-logic.php` (isti WooCommerce-conditional include blok) — `inc/checkout-logic.php` se sam NE modifikuje (frozen fajl, izbjegava se dodatni approval gate za nepovezanu funkcionalnost).
-- Implementacija ne može startovati dok se ne donesu dvije gore navedene poslovne odluke, ili dok se eksplicitno ne prihvati privremeni "uvijek eksplicitan izbor" default naveden gore.
-- Tačan WC 11.1.1 interni format order-meta ključa za native additional-field storage treba potvrditi čitanjem instaliranog WC core koda neposredno prije implementacije — nije blokirajuće, samo implementacioni detalj za potvrdu.
-- Nijedan kod nije mijenjan ovom odlukom — ADR dokumentuje samo potvrđeni gap i odobrenu arhitekturu plana.
+- Predložen nov, samostalan theme fajl (`inc/checkout-delivery-location.php`), uključen u `functions.php` pored postojećeg `inc/checkout-logic.php` (isti WooCommerce-conditional include blok) — `inc/checkout-logic.php` se sam NE modifikuje (frozen fajl, izbjegava se dodatni approval gate za nepovezanu funkcionalnost; i nije mu ni potrebna dual-hook logika koju taj fajl koristi za drugu svrhu).
+- Implementacija može startovati odmah za sve tri grane (0/1/2+) — nijedna od preostalih "BUSINESS DECISION REQUIRED" stavki iz prethodne verzije ovog ADR-a više ne blokira implementaciju: hibridna arhitektura ih je razriješila arhitekturalno (0 i 1 lokacija više ne zahtijevaju nikakvu poslovnu odluku o auto-selekciji — ponašanje je determinističko po definiciji).
+- Tačan WC 11.1.1 interni format order-meta ključa za native additional-field storage i tačan naziv jedinstvenog order-creation hook-a treba potvrditi čitanjem instaliranog WC core koda neposredno prije implementacije — nije blokirajuće, samo implementacioni detalj za potvrdu.
+- Nijedan kod nije mijenjan ovom odlukom — ADR dokumentuje samo potvrđeni gap i odobrenu hibridnu arhitekturu plana.
 
 ### Related
 
 - ADR-008 (read-only nalazi protected plugin implementacije, ista sesija) — ovaj ADR razrešava njegovu preostalu nesigurnost o checkout UI pre-fill ponašanju
 - `docs/project-status-matrix.md` AP-07 (ažuriran ovom sesijom)
-- `inc/checkout-logic.php` / `docs/frozen/checkout-logic.md` (obrazac za dual-hook classic+Blocks validaciju, ponovo iskorišten ovdje)
+- `inc/checkout-logic.php` / `docs/frozen/checkout-logic.md` (referentni primjer classic+Blocks razlike u hook ponašanju — razlog zašto TA specifična dual-hook potreba ovdje NE postoji, vidi Decision iznad)
+- Woo-native delivery mapping istraga (ista sesija) — poređenje `apros_get_partner_delivery_locations()` šeme, Woo adresnih polja i `uncle-dev-importer/order.php` payload-a; osnova za odbacivanje adresa→recipient_code mapiranja i za hibridnu 0/1/2+ granu

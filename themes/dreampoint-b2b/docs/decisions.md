@@ -534,8 +534,8 @@ Prijava kao `vis_none` (nulta catalog vidljivost) na trenutnu homepage stranicu,
 
 ## ADR-010 — Delivery-Location Checkout: potvrđen NON-COMPLIANT gap + odobrena hibridna remediation arhitektura (implementacija NIJE izvršena)
 
-**Datum:** 2026-09-22 (revidirano isti dan — vidi Revizija ispod)
-**Status:** Accepted (dokumentovan gap + odobrena hibridna arhitektura plana) — implementacija NIJE izvršena, PHP/JS kod nije mijenjan
+**Datum:** 2026-09-22 (revidirano isti dan — vidi Revizija ispod; implementirano i djelomično validirano na stagingu isti dan — vidi Staging Acceptance ispod)
+**Status:** Accepted — implementirano (`inc/checkout-delivery-location.php`, commit `8577565`) i deployovano na staging. 2+ grana validirana na realnim staging Apros podacima. 0/1-lokacija grane i finalna `_apros_delivery_location_id` persistencija na stvarno kompletiranoj narudžbi ostaju code-review + izolovana lokalna simulacija, bez live staging dokaza (vidi Staging Acceptance). Jedna nova nejasnoća otvorena istim testom (Woo Blocks browser-side restoration) — vidi ispod.
 **Vlasnik:** Checkout / Delivery Locations (AP-07)
 
 ### Revizija (isti dan, 2026-09-22)
@@ -583,12 +583,39 @@ Cijela implementacija ostaje u project-owned theme kodu; protected plugin-ovi (`
 2. **Nema potrebe za dual classic/Blocks hook obrascem** koji `inc/checkout-logic.php` koristi za payment-rule validaciju — taj obrazac je bio nužan specifično zato što je `woocommerce_checkout_process` (klasičan, pre-order-creation validacijski hook) classic-only i ne okida se u Store API toku. Additional Checkout Fields API je, za razliku od toga, dizajniran kao JEDINSTVEN mehanizam preko oba checkout tipa — `woocommerce_validate_additional_field` (validacija) i storage/persist put rade preko istog, zajedničkog WC core order-creation puta (`WC_Checkout::create_order()`) koji koriste i klasični checkout i Store API/Blocks ruta. Pošto projekat koristi Block-based Checkout (potvrđeno), plan koristi TAČNO JEDAN integracioni hook, bez redundantne classic-only kompatibilnosti — tačan hook/meta-key naziv za WC 11.1.1 treba potvrditi čitanjem instaliranog core koda neposredno prije implementacije (nije blokirajuće, implementacioni detalj).
 3. **Bridging na postojeći contract:** theme kod kopira validiranu vrijednost iz WC-ovog native additional-field storage-a u tačno isti meta ključ koji `uncle-dev-importer/order.php` već čita — `_apros_delivery_location_id`. Time se ta vrijednost uvijek eksplicitno postavlja (za 1-lokaciju granu direktno, za 2+ granu nakon validiranog izbora) prije nego što `order.php` fallback ikad dobije priliku da se aktivira — fallback ostaje netaknut kao isključivo legacy/exception safety-net (npr. buduće edge-case scenarije van ove tri grane).
 4. **Validacija (2+ grana):** server-side, preko `woocommerce_validate_additional_field` — odbacuje bilo koji `recipient_code` koji nije u trenutnom rezultatu `apros_get_partner_delivery_locations($partner_code)` za PRIJAVLJENOG korisnika (sprječava proizvoljne/stale/tuđe ID-jeve). Frontend validacija sama nije dovoljna.
-5. **Isti-checkout preservation (2+ grana):** obezbjeđuje native WC Blocks checkout store automatski — eksplicitan izbor preživljava AJAX/shipping-rate recalculation u ISTOJ sesiji, bez custom localStorage-a. Cross-order reuse ostaje nemoguć jer se native checkout state ne prenosi između odvojenih checkout posjeta/narudžbi.
+5. **Isti-checkout preservation (2+ grana):** obezbjeđuje native WC Blocks checkout store automatski — eksplicitan izbor preživljava AJAX/shipping-rate recalculation u ISTOJ sesiji, bez custom localStorage-a napisanog od strane ove implementacije. **Ispravka (2026-09-22, Staging Acceptance):** tvrdnja "cross-order reuse ostaje nemoguć" je bila TAČNA na server-side nivou (potvrđeno — nema customer-meta niti order-meta persistencije, vidi Staging Acceptance), ali NETAČNA/nepotpuna na browser-UX nivou — WooCommerce Blocks-ov VLASTITI `localStorage`-based cart cache (nezavisan od ove implementacije) vizuelno vraća prethodni izbor pri reload-u checkout-a unutar iste browser sesije. Ova nijansa je otvorena kao neriješena stavka, ne kao tiho razriješena — vidi Staging Acceptance sekciju ispod.
 6. **UI (2+ grana):** ponovo koristi postojeće checkout stilove (`sass/pages/checkout.scss`, isti obrazac kao `js/checkout-b2b-info.js` / `.dp-b2b-billing-info` sekcije) — prazno/placeholder initial stanje, korisniku-razumljiv prikaz (naziv/adresa/grad), error state kroz native WC Blocks validation UI.
 
 ### Preostalo pitanje koje zahtijeva Apros/klijent potvrdu
 
-- **`partnerDeliveryLocationId = null` semantika na Apros strani** — payload strukturno već podržava `null` (postojeći kod, 0-lokacija slučaj i historijski svaki dosadašnji red koda prije ove ADR), ali nema dokaza kako Apros interno obrađuje/interpretira tu vrijednost. Označeno `REQUIRES APROS CONFIRMATION` — NIJE bloker za implementaciju 1-lokacija i 2+ grana, koje ne zavise od ovog odgovora.
+- **`partnerDeliveryLocationId = null` semantika na Apros strani** — payload strukturno već podržava `null` (postojeći kod, 0-lokacija slučaj i historijski svaki dosadašnji red koda prije ove ADR), ali nema dokaza kako Apros interno obrađuje/interpretira tu vrijednost. Označeno `REQUIRES APROS CONFIRMATION` — NIJE bloker za implementaciju 1-lokacija i 2+ grana, koje ne zavise od ovog odgovora. I dalje neriješeno nakon Staging Acceptance prolaza (2026-09-22) — namjerno nije testirano jer bi zahtijevalo slanje narudžbe Apros-u. Nezavisno pitanje, ne miješati sa Woo Blocks browser-side restoration nijansom ispod.
+- **Proizvoljna/nova jednokratna Woo shipping adresa** (koncept ranije neformalno pominjan kao `+ Dodaj novu adresu`) — ostaje van scope-a ove implementacije. Nije potvrđen kao poslovni zahtjev (zasebna istraga, ista sesija) i ne smije se tretirati kao autoritativan zahtjev na osnovu bilo kojeg Figma koncepta. Odluka o ovome čeka Apros odgovor o `shippingAddress` vs. `partnerDeliveryLocationId` semantici (zasebno pitanje, van scope-a ovog ADR-a).
+
+### Staging Acceptance (2026-09-22)
+
+Implementacija (`inc/checkout-delivery-location.php`) je napisana, lokalno simulirana (izolovani `wp eval-file` testovi, sve tri grane: 0/1/2+), commit-ovana (`8577565`), pushed i deployovana na staging (`git pull`, staging HEAD potvrđen na `8577565`) u istoj sesiji. Nakon deploya izvršen je READ-ONLY staging acceptance pass koristeći stvarnog partnera (partner_code 2870, 8 realnih Apros dostavnih lokacija) preko `User Switching` plugina (vidi ispod).
+
+**Implementirano i validirano na realnim staging podacima (browser, 2+ grana):**
+- Selektor se renderuje unutar "Additional order information" sekcije native WC Blocks checkout-a
+- Svih 8 stvarnih Apros lokacija partnera 2870 prikazano, ispravno formatirano (`{name} — {address}, {postal_code} {city}`)
+- Nula ERP terminologije vidljivo kupcu (nema `recipient_code`, nema internih ID-jeva)
+- Initial stanje prazno pri prvom učitavanju checkout-a
+- Native required-validacija blokira submit bez izbora (potvrđeno: pokušaj submit-a bez izbora NIJE kreirao narudžbu — DB provjereno prije/poslije, broj narudžbi na stagingu nepromijenjen)
+- Izbor stvarne lokacije uklanja validacionu grešku
+- No-partner-code regresija (admin nalog): selektor se ispravno NE renderuje, checkout nepromijenjen, 0 novih console grešaka
+
+**Implementirano, ali samo code-review + izolovana lokalna simulacija (NIJE live staging dokaz):**
+- 0-lokacija fail-closed grana (`RouteException`) — ne postoji prirodan 0-lokacija partner na stagingu za live test
+- 1-lokacija tiha persistencija — ne postoji prirodan 1-lokacija partner na stagingu za live test
+- Finalna `_apros_delivery_location_id` persistencija u STVARNO kompletiranoj narudžbi — namjerno netestirano jer bi kompletiranje narudžbe (bacs/cod) odmah okinulo `woocommerce_thankyou` ERP sync pokušaj u `uncle-dev-importer/order.php`, što je eksplicitno zabranjeno za ovaj prolaz
+
+**Novootkrivena, NERIJEŠENA nijansa (vidi ispravku u tački 5 Implementacionog mehanizma iznad):**
+
+WooCommerce Blocks-ov vlastiti `localStorage` cart cache (`storeApiCartData`/`storeApiCartHash`, WC-nativan mehanizam, nezavisan od ove implementacije) vizuelno vraća prethodno izabranu lokaciju pri reload-u checkout stranice unutar iste browser sesije — čak i nakon uklanjanja/ponovnog dodavanja stavke u korpu. Server-side provjereno da NIJE u pitanju stvarna persistencija: nijedna narudžba nije postojala u bazi tokom testa, pa `_apros_delivery_location_id`/`_wc_other/...` meta nije ni moglo biti upisano — ovo je čisto browser/klijent-side UX keš, ne server-side "zapamćen izbor".
+
+Ovo NIJE isto što i "cross-order persistence" na server nivou (ta tvrdnja ostaje tačna — dokazano i kodom i testom), ali JEST relevantno za stroži poslovni zahtjev: svaka STVARNO nova narudžba mora vizuelno početi bez izabrane lokacije, bez obzira na mehanizam. Da li WC Blocks-ov localStorage cache preživljava preko granice stvarno kompletirane/nove narudžbe (za razliku od pukog reload-a unutar iste nekompletirane checkout sesije, koji je jedino što je ovim testom stvarno provjereno) — **nije utvrđeno**. Namjerno NIJE dizajnirano rješenje niti pretpostavljeno da je globalno brisanje localStorage-a odgovor — prvo treba utvrditi tačnu lifecycle granicu "nova narudžba" vs. "ista aktivna cart/checkout sesija", zatim odabrati najuži Woo-nativni mehanizam ako se pokaže da je remedijacija stvarno potrebna. Status: **DEFERRED — zahtijeva zasebnu istragu prije bilo kakve izmjene koda.**
+
+**User Switching (staging operational tooling, ne aplikacioni kod):** Za browser acceptance test korišten je `User Switching` plugin (John Blackbourn, slug `user-switching`, v1.12.2 pri instalaciji) — instaliran i aktiviran isključivo na DreamPoint B2B stagingu radi impersoniranja TEST partner naloga bez potrebe za njihovim lozinkama. Pristup ograničen na `edit_users` capability (admin-only po defaultu; potvrđeno da customer role tog capability nema). Lozinka partner naloga nije mijenjana. Plugin namjerno ostaje instaliran/aktivan na stagingu za buduće acceptance testove — dokumentovan u `~/.claude/docs/server-runbook.md` (dp-b2b sekcija), ne u ovom theme repo-u (nije aplikacioni/theme kod).
 
 ### Consequences
 

@@ -198,7 +198,7 @@ $header-height: 135px;
 
 
 @mixin paragraph-large {
-    font-family: 'Jost';
+    font-family: 'Montserrat';
     font-style: normal;
     font-weight: 300;
     font-size: 24px;
@@ -212,7 +212,7 @@ $header-height: 135px;
 }
 
 @mixin paragraph-normal {
-    font-family: 'Jost';
+    font-family: 'Montserrat';
     font-style: normal;
     font-weight: 300;
     font-size: 18px;
@@ -227,7 +227,7 @@ $header-height: 135px;
 
 
 @mixin caption-m {
-    font-family: 'Jost';
+    font-family: 'Montserrat';
     font-style: normal;
     font-weight: 300;
     font-size: 16px;
@@ -241,7 +241,7 @@ $header-height: 135px;
 
 
 @mixin heading-1 {
-    font-family: 'Marcellus';
+    font-family: 'Petrona';
     font-style: normal;
     font-weight: 400;
     font-size: 60px;
@@ -257,7 +257,7 @@ $header-height: 135px;
 }
 
 @mixin heading-2 {
-    font-family: 'Marcellus';
+    font-family: 'Petrona';
     font-style: normal;
     font-weight: 400;
     font-size: 48px;
@@ -273,7 +273,7 @@ $header-height: 135px;
 }
 
 @mixin heading-3 {
-    font-family: 'Marcellus';
+    font-family: 'Petrona';
     font-style: normal;
     font-weight: 400;
     font-size: 32px;
@@ -289,7 +289,7 @@ $header-height: 135px;
 }
 
 @mixin heading-4 {
-    font-family: 'Marcellus';
+    font-family: 'Petrona';
     font-style: normal;
     font-weight: 400;
     font-size: 26px;
@@ -303,7 +303,7 @@ $header-height: 135px;
 }
 
 @mixin heading-5 {
-    font-family: 'Jost';
+    font-family: 'Montserrat';
     font-style: normal;
     font-weight: 500;
     font-size: 18px;
@@ -316,7 +316,7 @@ $header-height: 135px;
 }
 
 @mixin heading-6 {
-    font-family: 'Jost';
+    font-family: 'Montserrat';
     font-style: normal;
     font-weight: 500;
     font-size: 18px;
@@ -329,7 +329,7 @@ $header-height: 135px;
 }
 
 @mixin button-text-large {
-    font-family: 'Jost';
+    font-family: 'Montserrat';
     font-style: normal;
     font-weight: 500;
     font-size: 20px;
@@ -344,7 +344,7 @@ $header-height: 135px;
 
 
 @mixin button-text {
-    font-family: 'Jost';
+    font-family: 'Montserrat';
     font-style: normal;
     font-weight: 400;
     font-size: 14px;
@@ -359,7 +359,7 @@ $header-height: 135px;
 }
 
 @mixin extra {
-    font-family: 'Marcellus';
+    font-family: 'Petrona';
     font-style: normal;
     font-weight: 400;
     font-size: 44px;
@@ -376,7 +376,7 @@ $header-height: 135px;
 }
 
 @mixin card {
-    font-family: 'Marcellus';
+    font-family: 'Petrona';
     font-style: normal;
     font-weight: 400;
     font-size: 20px;
@@ -390,7 +390,7 @@ $header-height: 135px;
 }
 
 @mixin card-sm {
-    font-family: 'Marcellus';
+    font-family: 'Petrona';
     font-style: normal;
     font-weight: 400;
     font-size: 16px;
@@ -401,7 +401,7 @@ $header-height: 135px;
 }
 
 @mixin card-price {
-    font-family: 'Jost';
+    font-family: 'Montserrat';
     font-style: normal;
     font-weight: 400;
     font-size: 18px;
@@ -414,7 +414,7 @@ $header-height: 135px;
 }
 
 @mixin card-price-sm {
-    font-family: 'Jost';
+    font-family: 'Montserrat';
     font-style: normal;
     font-weight: 400;
     font-size: 16px;
@@ -655,7 +655,7 @@ $header-height: 135px;
                 background: $white;
                 li {
                     a {
-                        font-family: 'Jost';
+                        font-family: 'Montserrat';
                         font-style: normal;
                         font-weight: 500;
                         font-size: 16px;

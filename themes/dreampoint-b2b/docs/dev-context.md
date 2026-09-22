@@ -234,10 +234,11 @@ The block checkout content is wrapped in `.container.custom-form` via a `the_con
 ## Fonts
 
 Font files are in the `fonts/` directory:
-- `Jost-Light.woff2`
-- `Jost-Medium.woff2`
-- `Jost-Regular.woff2`
-- `Marcellus-Regular.woff2`
+- `Montserrat-Bold.woff2`
+- `Montserrat-Medium.woff2`
+- `Montserrat-Regular.woff2`
+- `Montserrat-SemiBold.woff2`
+- `Petrona-SemiBold.woff2`
 
 `dreampoint_b2b_font_preloads()` in `functions.php` — currently has empty `$fonts` array. Populate with woff2 paths for fonts visible in first render (max 3–4) before staging deploy.
 
@@ -398,7 +399,7 @@ For other languages: replace with `icl_object_id`.
 
 ### Still needs attention
 - `footer-shop.php` — incomplete template, ends div structure without header pair — verify intent before deploy
-- Font preload list — empty in `functions.php`; fonts confirmed in `fonts/`: `Jost-Light.woff2`, `Jost-Medium.woff2`, `Jost-Regular.woff2`, `Marcellus-Regular.woff2`
+- Font preload list — empty in `functions.php`; fonts confirmed in `fonts/`: `Montserrat-Bold.woff2`, `Montserrat-Medium.woff2`, `Montserrat-Regular.woff2`, `Montserrat-SemiBold.woff2`, `Petrona-SemiBold.woff2`
 
 ---
 

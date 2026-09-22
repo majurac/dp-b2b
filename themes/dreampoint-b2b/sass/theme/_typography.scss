@@ -1,34 +1,44 @@
 @font-face {
-    font-family: 'Marcellus';
-    src: url('fonts/Marcellus-Regular.woff2') format('woff2');
-    font-weight: normal;
+    font-family: 'Montserrat';
+    src: url('fonts/Montserrat-Bold.woff2') format('woff2');
+    font-weight: bold;
     font-style: normal;
     font-display: swap;
 }
 
 @font-face {
-    font-family: 'Jost';
-    src: url('fonts/Jost-Medium.woff2') format('woff2');
+    font-family: 'Montserrat';
+    src: url('fonts/Montserrat-Medium.woff2') format('woff2');
     font-weight: 500;
     font-style: normal;
     font-display: swap;
 }
 
 @font-face {
-    font-family: 'Jost';
-    src: url('fonts/Jost-Light.woff2') format('woff2');
-    font-weight: 300;
+    font-family: 'Montserrat';
+    src: url('fonts/Montserrat-Regular.woff2') format('woff2');
+    font-weight: normal;
     font-style: normal;
     font-display: swap;
 }
 
 @font-face {
-    font-family: 'Jost';
-    src: url('fonts/Jost-Regular.woff2') format('woff2');
-    font-weight: normal;
+    font-family: 'Montserrat';
+    src: url('fonts/Montserrat-SemiBold.woff2') format('woff2');
+    font-weight: 600;
     font-style: normal;
     font-display: swap;
 }
+
+@font-face {
+    font-family: 'Petrona';
+    src: url('fonts/Petrona-SemiBold.woff2') format('woff2');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+
 
 
 @font-face {
@@ -177,7 +187,7 @@ body {
     line-height: 1;
     font: {
         size: 16px;
-        family: 'Jost';
+        family: 'Montserrat';
     }
     color: $text-primary;
     -webkit-text-size-adjust: 100%; //fix for iOS 
@@ -238,7 +248,7 @@ h5,
 h6 {
     padding: 0;
     margin: 0;
-    font-weight: 400;
+    font-weight: 600;
 }
 h1 {
     @include heading-1;

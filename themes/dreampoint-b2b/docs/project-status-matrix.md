@@ -476,7 +476,9 @@ Odabir scenarija direktno mijenja storage arhitekturu (user meta vs. Company CPT
 
 Puna analiza (plugin research, Quick Order compatibility, preostali tehnički otvoreni koraci): `docs/decisions.md` ADR-007.
 
-**Preostaje otvoreno (tehnički detalj, ne poslovna odluka):** izbor konkretnog mehanizma/plugina, expiry/lock semantika, race condition handling, cron cleanup, UI countdown, sinhronizacija sa AP-10 (Apros-side rezervacija).
+**CLOSED:** poslovna odluka (mandatory 1-satna cart-level rezervacija) i izbor konkretnog plugina (Reserved Stock Pro, Puri.io) — vidi `docs/decisions.md` ADR-007.
+
+**Preostaje otvoreno (tehnički rad, ne odluka):** instalacija/konfiguracija plugina, verifikacija State 2 warning-threshold ponašanja, verifikacija State 3/4 ponašanja, interakcija s Quick Order chunked `/cart/sync` submit-om, LiteSpeed/Redis cache integracija, finalna presentation/UI implementacija zasnovana na stvarnom stanju plugina.
 
 **Napomena o razlici od AP-10:** AP-10 (Apros pitanje, Sekcija 2) odnosi se na to kada Apros interno rezervira stanje na svojoj strani (checkout vs. ERP potvrda naruđbe) — ostaje zasebno OPEN pitanje za Apros sesiju, nepromijenjeno ovim workshopom. DP-B06 je WooCommerce cart-level UX/poslovna odluka, ne zahtijeva Apros input — rješava je isključivo Dream Point.
 

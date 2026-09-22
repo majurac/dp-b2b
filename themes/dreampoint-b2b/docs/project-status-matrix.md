@@ -333,6 +333,8 @@ Bez odgovora na ova pitanja nije moguće donijeti ni jednu implementacionu odluk
 
 **Odgovor Apros-a (2026-07-02):** Partner može imati više dostavnih lokacija. **Nema default lokacije** — korisnik bira lokaciju pri naručivanju. Endpoint: `partnerDeliveryLocationList`. Puni payload primjer (adresna polja, stabilnost location ID-a između sync ciklusa) i dalje nedostaje.
 
+**Checkout UI status (potvrđeno 2026-09-22, read-only istraga lokalno + staging):** ❌ **NON-COMPLIANT** s finalnim poslovnim pravilom (svaka nova narudžba mora početi bez izabrane lokacije). Checkout selector trenutno **ne postoji nigdje** — ni u temi, ni u `apros-pricing` plugin-u koji samo čeka `$_POST['apros_delivery_location']` bez da ga ijedno UI popuni. Posljedica: `uncle-dev-importer/order.php` danas UVIJEK aktivira fallback na prvu dostavnu lokaciju partnera za SVAKU narudžbu, bez eksplicitnog izbora kupca. Odobrena remediation arhitektura (implementacija NIJE izvršena): `docs/decisions.md` ADR-010.
+
 **Pogođena oblast:** Checkout shipping selection, delivery address UX
 
 ---

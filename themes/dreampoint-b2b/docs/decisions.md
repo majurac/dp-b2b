@@ -456,9 +456,25 @@ Sva tri su tretirana kao STRICT PROTECTED BOUNDARY — isključivo read-only ins
 
 **PL-01 (partner list format): NIJE razriješeno ovom inspekcijom.** `b2b-partner-importer` je ručni Excel/CSV upload alat s admin-triggered importom i automatskim matchanjem komercijalista — ne poziva live Apros partner-list API endpoint. ADR-002-ova cron-polling arhitektura trenutno NIJE ono što je u pogonu; partneri se danas ručno seed-uju. PL-01 (stvarni Apros partner-list endpoint format) ostaje otvoreno.
 
+**PL-01 — ažurirano 2026-09-22 (zvanična ZGData API dokumentacija primljena):** API capability sada **RESOLVED/zvanično potvrđeno** — `partnerList/get` postoji, puna šema dokumentovana (`partnerCode`, `name`, `address`, `city`, `postalCode`, `taxId`, `email`, `partnerLegalFormCode`). **Konzumacija od strane trenutne integracije ostaje NEPROMIJENJENA** — `b2b-partner-importer` je i dalje isključivo ručni Excel/CSV alat; nema dokaza da automatski poziva ovaj endpoint. Ne miješati "endpoint postoji" sa "naš kod ga koristi".
+
 **WH-01 (warehouse stock payload): NIJE razriješeno.** `AprosProvider.php` mapira jedan flattened `stock` integer (`$raw['stock']`) — nije uočena per-warehouse struktura u ovoj kodnoj putanji. Nije potvrđeno da li Apros-ov sirovi payload ima per-warehouse detalj koji se agregira uzvodno, ili TEST integracija to jednostavno još ne izlaže.
 
+**WH-01 — ažurirano 2026-09-22 (zvanična ZGData API dokumentacija primljena):** Zvanična dokumentacija potvrđuje da `articleList/get` izlaže jedno flattened `stock` decimal polje ("Raspoloživa količina na zalihi") — konzistentno sa postojećim kodom. **Ovo NE dokazuje da per-warehouse endpoint/capability ne postoji negdje drugdje** — dokument jednostavno ne dokumentuje takav endpoint u ovoj verziji. Per-warehouse dostupnost ostaje not established by this document, ne opovrgnuta.
+
 **DP-02/BL-06 (sales location routing) — provenance provjerena:** Potvrđeno kao stvaran, ne zastario bloker — konzistentno referenciran kroz 6+ nezavisnih dokumenata (`b2b-erp-adaptation-blueprint.md`, `apros-session-final-pack.md`, `b2b-architecture-validation-audit.md` [EG-07, HIGH severity], `apros-question-resolution-matrix.md`, `erp-discovery-findings.md`, `project-status-matrix.md`) kao zavisan o "Josip / stari B2B sustav (ZGData)" — stvaran, imenovan izvor institucionalnog znanja iz legacy sistema, ne dokumentaciona greška. Uočeno numeričko poklapanje: salesLocationId kodovi (3=Igračke/Toys, 5=Lifestyle) tačno odgovaraju ranije potvrđenim ID-jevima skladišta za iste kategorije (memory: 4 skladišta — 1 Glavno, 3 Igračke, 4 Naočale, 5 Lifestyle). Ovo je cirkumstancijalni dokaz (INFERRED, ne potvrđeno) da "sales location routing" i "warehouse splitting" mogu biti isti Apros mehanizam — što bi, u kombinaciji sa novim klijentskim odgovorom da Apros automatski dijeli po skladištu, značajno smanjilo ovaj bloker. Nije pronađeno u pregledanom kodu (nijedno `salesLocationId` polje nije uočeno ni u jednom od tri plugina). Preporuka: eksplicitno potvrditi prije nego se Josip-zavisnost povuče sa liste blokera.
+
+### Zvanična ZGData API dokumentacija primljena (2026-09-22)
+
+Klijent/integrator je dostavio zvaničnu tehničku dokumentaciju: **"API DOKUMENTACIJA — Dreampoint - B2B integracija", verzija 1.0, Zagreb Data d.o.o., Zagreb 2026.** Dokument je pisana Apros/ZGData referenca za `https://tockasna-b2b-api.zgdata.hr/api3/{API-KEY}/` (API ključ redigovan — nikad se ne upisuje u dokumentaciju).
+
+**Ovo je viša evidencijska razina od prethodnih izvora** (usmeni odgovori, email korespondencija, kod-inspekcija) jer je formalna, pisana, endpoint-po-endpoint API referenca — ali pokriva ISKLJUČIVO katalog/partner/pricing GET endpointe: `classificationList`, `brandList`, `articleList`, `articleImageList`, `articleVariationList`, `articleVariationImageList`, `attributeList`, `attributeItemList`, `articleAttributeList`, `articleVariationAttributeList`, `partnerBrandDiscountList`, `countryPriceList`, `partnerList`, `partnerDeliveryLocationList`, `partnerLegalFormCodes`.
+
+**Eksplicitno NE dokumentuje** (odsustvo ≠ dokaz nepostojanja, samo "not established by this document"): `order/create`, outbound order payload, `partnerDeliveryLocationId` unutar tog payload-a, response format, idempotency, shipping-address precedence, null delivery-location semantika, per-warehouse stock breakdown, niti bilo kakvu **environment designaciju** (TEST/sandbox/staging/production) za sam endpoint.
+
+Detaljna rekonsilijacija po AP-ID stavci: `docs/project-status-matrix.md` (AP-01, AP-06, AP-07) i PL-01/WH-01 bullet-i iznad u ovom ADR-u.
+
+**Apros TEST/sandbox safety pitanje ostaje POTPUNO NEPROMIJENJENO** — dokument ne sadrži nijednu izjavu koja bi identifikovala konfigurisan endpoint kao izolovano test okruženje odvojeno od produkcijskih posljedica. Vidi zaseban E2E safety gate nalaz (2026-09-22): `APROS TEST ORDER E2E BLOCKED — TEST ENDPOINT NOT CONCLUSIVELY VERIFIED`.
 
 ### Consequences
 

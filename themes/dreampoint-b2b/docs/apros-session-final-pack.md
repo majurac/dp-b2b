@@ -153,7 +153,7 @@ Stižu li `advance_only` i `free_shipping` flagovi u approval webhook-u ili zase
 
 > Ovo je autoritativna, konsolidirana lista svega što nedostaje za finalizaciju implementacije nakon odgovora od 2026-07-02. Arhitekturalni blokeri su razriješeni — sve što slijedi su payload primjeri i formalne potvrde, ne arhitekturalne odluke.
 
-### 1. Pricing Payload Examples (AP-01) — P0 KRITIČNO
+### 1. Pricing Payload Examples (AP-01) — P0 KRITIČNO — ✅ RESOLVED (2026-09-22, zvanična ZGData API dokumentacija)
 
 **Svrha:** Finalizacija pricing engine implementacije — arhitektura poznata (Model A domaći / Model C strani), payload primjer nedostaje  
 **Traženi primjer:**
@@ -170,6 +170,8 @@ countryPriceList response za stranog partnera:
 ```
 
 **Zašto je važno:** Bez egzaktnih field naziva i realnih vrijednosti pricing engine ne može biti implementiran niti testiran. Verbalni opis arhitekture je dobiven; payload primjer nije.
+
+**Razrješenje (2026-09-22):** `API DOKUMENTACIJA — Dreampoint - B2B integracija` (v1.0, ZGData) dostavlja zvaničnu šemu i primjer odgovora za `articleList/get` (uključujući `articleId`, `code`, `wholesalePrice`, `brandId`) i `partnerBrandDiscountList/get` — vidi stavke 3 i 4 ispod za detalje. **Napomena o preciznosti:** zvanična `articleList/get` šema ne sadrži polje pod imenom "b2bArticle" (originalno traženo) — dostupna polja su `visible`, `isNew`, `isSpecialOffer`; ako je "b2bArticle flag" i dalje poslovno potreban kao zaseban koncept, to ostaje van scope-a ove dokumentacije.
 
 ---
 
@@ -191,23 +193,29 @@ Error response: format nepoznat (B2C referenca: { "result": "Error", "message": 
 
 **Zašto je važno:** Order export je highest-risk operacija; duplirane narudžbe su poslovni incident. Bez success/error response formata ne može se implementirati retry/idempotency logika.
 
+**Stanje (2026-09-22):** I dalje POTPUNO OTVORENO. Zvanična ZGData API dokumentacija primljena 2026-09-22 pokriva isključivo katalog/partner/pricing GET endpointe — eksplicitno NE dokumentuje `order/create`, order payload, response format niti idempotency. Ovaj zahtjev ostaje nepromijenjen.
+
 ---
 
-### 3. countryPriceList Payload (dio AP-01) — P0 KRITIČNO
+### 3. countryPriceList Payload (dio AP-01) — P0 KRITIČNO — ✅ RESOLVED (2026-09-22, zvanična ZGData API dokumentacija)
 
 **Svrha:** Implementacija Model C pricing sloja za strane kupce  
 **Traženi primjer:** Realni `countryPriceList` response — format po državi, koje države su pokrivene, da li je cijena neto/bruto, veza na `articleId`.
 
+**Razrješenje (2026-09-22):** Zvanična šema: `articleId`, `countryPriceListCode` (string, npr. `BIH`, `SLO`, `SRBCG`), `price` (decimal). Primjer odgovora dostavljen za sve tri navedene države. Neto/bruto priroda cijene nije eksplicitno navedena u dokumentu — nije established by this document.
+
 ---
 
-### 4. partnerBrandDiscountList Payload (dio AP-01) — P0 KRITIČNO
+### 4. partnerBrandDiscountList Payload (dio AP-01) — P0 KRITIČNO — ✅ RESOLVED (2026-09-22, zvanična ZGData API dokumentacija)
 
 **Svrha:** Implementacija Rabat 1 mehanizma za domaće kupce  
 **Traženi primjer:** Realni ugovorni uvjeti / `partnerBrandDiscountList` response — `sif_kup`, `brandId`, postotak, je li obavezan za sve domaće partnere.
 
+**Razrješenje (2026-09-22):** Zvanična šema: `partnerCode`, `name`, `vatId`, `email`, `brandId`, `brandName`, `discountPercent`; opcioni query parametar `partnerCode` za filtriranje. Primjer odgovora dostavljen za partnera 2870 (dva brenda). Da li je rabat obavezan za SVE domaće partnere i dalje nije eksplicitno potvrđeno ovim dokumentom.
+
 ---
 
-### 5. Delivery Locations Payload Examples (AP-07) — P1
+### 5. Delivery Locations Payload Examples (AP-07) — P1 — ⚠️ DJELOMIČNO RESOLVED (2026-09-22, zvanična ZGData API dokumentacija)
 
 **Svrha:** Određivanje finalne storage strukture i checkout UI za odabir dostavne adrese — model poznat (više lokacija, nema defaulta), payload nedostaje  
 **Traženi primjer:**
@@ -218,6 +226,8 @@ partnerDeliveryLocationList response za jednog partnera:
 - adresna polja (naziv, ulica, grad, poštanski broj, zemlja)
 - potvrda: nema default oznake (već potvrđeno verbalno)
 ```
+
+**Razrješenje (2026-09-22):** Adresna polja sada zvanično dostavljena: `partnerCode`, `recipientCode`, `name`, `adress`, `city`, `postalCode`, `recipientEmail`. Primjer odgovora za partnera 2870 (Kaptol, Split) odgovara postojećim staging podacima. **Napomena:** "zemlja"/country polje NIJE prisutno u zvaničnoj šemi (konzistentno sa ranijim ADR-010 nalazom da ERP tabela nema country kolonu). **I dalje nedostaje:** eksplicitna potvrda stabilnosti `recipientCode`-a između sync ciklusa — dokument to ne adresira.
 
 ---
 

@@ -536,6 +536,22 @@ Prijava kao `vis_none` (nulta catalog vidljivost) na trenutnu homepage stranicu,
 
 **Napomena o testiranju:** Projekat trenutno **nema PHPUnit/WP_UnitTestCase infrastrukturu** (nema `phpunit.xml`, `tests/` foldera, niti composer PHPUnit zavisnosti — provjereno u `composer.json`). Uvođenje PHPUnit-a bi bila NOVA zavisnost koja zahtijeva eksplicitno odobrenje. Za Fazu A, preporučena verifikacija bez novih alata: privremena, jednokratna `wp eval` provjera (read-only, deterministička, u skladu sa postojećom `wp eval` konvencijom projekta) koja konstruiše `WP_Query`/`get_terms()` sa i bez `dp_visibility_context` argumenta i potvrđuje očekivano ponašanje — ne ostavlja trag u kodu.
 
+### Update (2026-09-23) — Faza A deterministički POTVRĐENA
+
+Preporučena verifikacija iznad je izvršena: privremeni, read-only `wp eval-file` skript (nije ostavljen u repo-u), lokalno, za svih pet postojećih test korisnika. Ground truth (ukupan broj `product` postova i `product_brand` termina) dobijen direktnim `$wpdb` upitom, van vidljivost hook-ova: **427** proizvoda, **51** brand termina.
+
+| Korisnik (access type) | default upit | `shared_surface` upit | isolation (default #2) | nepoznat kontekst (`bogus_value`) | brand termini default | brand termini `shared_surface` |
+|---|---|---|---|---|---|---|
+| vis_none (no_access) | 0 | 427 | 0 | 0 | 0 | 51 |
+| vis_rule_brand (rule_based) | 2 | 427 | 2 | 2 | 1 | 51 |
+| vis_rule_cat (rule_based) | 2 | 427 | 2 | 2 | 51† | 51 |
+| vis_full (full_access) | 427 | 427 | 427 | 427 | 51 | 51 |
+| vis_offer (custom_offer) | 4 | 427 | 4 | 4 | 3 | 51 |
+
+† `vis_rule_cat` nema brand pravila → `filter_brand_terms()` namjerno ne filtrira brand listu kad je `allowed_brand_ids` prazan (postojeće, dokumentovano ponašanje u kodu — vidi komentar u `filter_brand_terms()` — nije regresija ni dataset anomalija).
+
+Potvrđeno za sve access tipove: (1) default upit i dalje primjenjuje customer/bucket vidljivost; (2) eksplicitan `dp_visibility_context = 'shared_surface'` bypass-uje i vraća pun katalog; (3) nakon shared upita, sljedeći default upit se vraća na restriktovano stanje — nema perzistentnog/globalnog leakage-a; (4) nepoznata vrijednost konteksta NE bypass-uje — fail-closed potvrđen; (5) `get_terms('product_brand')` integration point ponaša se identično WP_Query putanji. `inc/visibility/class-query-filter.php` nije mijenjan ovom verifikacijom — Faza A ostaje dormant do prvog stvarnog pozivaoca (Faza B).
+
 ### Consequences
 
 - Segment Landing (i bilo koja buduća shared površina) NE MOGU sigurno ponovno koristiti trenutne homepage blokove doslovno bez Faze B rada — ali sama Faza A ne blokira ništa niti zahtijeva da to bude riješeno sada.

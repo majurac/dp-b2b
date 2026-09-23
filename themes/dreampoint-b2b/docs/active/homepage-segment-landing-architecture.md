@@ -1,6 +1,10 @@
 # Homepage & Segment Landing — Final Structure (Design Record)
 
-**Status:** FINAL sadržajna specifikacija potvrđena od klijenta (2026-09-21, `B2B odgovori na pitanja.docx`, §5.1 EDIT). **Implementacija NIJE započeta.** Arhitekturalni gap u vidljivost engine-u je dokumentovan u `docs/decisions.md` ADR-009 i mora biti riješen prije bilo kakvog koda koji dira frozen vidljivost sistem.
+**Status (2026-09-23):** IMPLEMENTIRANO (lokalno, verifikovano) — Homepage rebuild + 3 Segment Landing stranice (Lifestyle/Toys/Outdoor) + ADR-009 Faza B vidljivost wiring. Vidi `docs/decisions.md` ADR-009 §Update 2026-09-23 za punu implementacionu evidenciju i deterministic/browser verifikaciju.
+
+**Otvoreno:** realne `brand_segment` vrijednosti (koji Apros-sinhronizovani brendovi pripadaju kojem segmentu, posebno Outdoor) su content-population zadatak, ne kod — Segment Landing product sekcije će ostati prazne dok se ne popune preko wp-admin. "Badge" hero polje i Figma-specifične hero slike nisu implementirane (field group gap / MCP screenshot rate limit tokom sesije).
+
+~~**Status:** FINAL sadržajna specifikacija potvrđena od klijenta (2026-09-21, `B2B odgovori na pitanja.docx`, §5.1 EDIT). **Implementacija NIJE započeta.** Arhitekturalni gap u vidljivost engine-u je dokumentovan u `docs/decisions.md` ADR-009 i mora biti riješen prije bilo kakvog koda koji dira frozen vidljivost sistem.~~ (superseded — gap riješen, implementacija završena, vidi gore)
 
 Ne miješati sa trenutnim, danas živim homepage sadržajem — ovaj dokument opisuje BUDUĆU strukturu. Trenutni homepage layout se koristi kao konceptualna/layout osnova za Segment Landing stranice (vidi §2), ne kao konačan cilj sam po sebi.
 

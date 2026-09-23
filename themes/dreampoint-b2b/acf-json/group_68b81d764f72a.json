@@ -99,7 +99,15 @@
                     "type": "taxonomy",
                     "instructions": "",
                     "required": 0,
-                    "conditional_logic": 0,
+                    "conditional_logic": [
+                        [
+                            {
+                                "field": "field_dp_show_custom_link",
+                                "operator": "!=",
+                                "value": "1"
+                            }
+                        ]
+                    ],
                     "wrapper": {
                         "width": "",
                         "class": "",
@@ -116,6 +124,54 @@
                     "bidirectional": 0,
                     "multiple": 0,
                     "bidirectional_target": [],
+                    "parent_repeater": "field_68b81d7658eeb"
+                },
+                {
+                    "key": "field_dp_show_custom_link",
+                    "label": "Use custom link instead of category",
+                    "name": "show_custom_link",
+                    "aria-label": "",
+                    "type": "true_false",
+                    "instructions": "Aktiviraj da tile linkuje na proizvoljan URL (npr. Segment Landing stranicu) umjesto na product_cat arhivu.",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "message": "",
+                    "default_value": 0,
+                    "ui": 1,
+                    "ui_on_text": "",
+                    "ui_off_text": "",
+                    "allow_in_bindings": 0,
+                    "parent_repeater": "field_68b81d7658eeb"
+                },
+                {
+                    "key": "field_dp_custom_url",
+                    "label": "Custom Url",
+                    "name": "custom_url",
+                    "aria-label": "",
+                    "type": "link",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": [
+                        [
+                            {
+                                "field": "field_dp_show_custom_link",
+                                "operator": "==",
+                                "value": "1"
+                            }
+                        ]
+                    ],
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "return_format": "array",
+                    "allow_in_bindings": 0,
                     "parent_repeater": "field_68b81d7658eeb"
                 }
             ]
@@ -142,5 +198,5 @@
     "display_title": "",
     "allow_ai_access": false,
     "ai_description": "",
-    "modified": 1785407621
+    "modified": 1790153355
 }

@@ -552,18 +552,50 @@ Preporučena verifikacija iznad je izvršena: privremeni, read-only `wp eval-fil
 
 Potvrđeno za sve access tipove: (1) default upit i dalje primjenjuje customer/bucket vidljivost; (2) eksplicitan `dp_visibility_context = 'shared_surface'` bypass-uje i vraća pun katalog; (3) nakon shared upita, sljedeći default upit se vraća na restriktovano stanje — nema perzistentnog/globalnog leakage-a; (4) nepoznata vrijednost konteksta NE bypass-uje — fail-closed potvrđen; (5) `get_terms('product_brand')` integration point ponaša se identično WP_Query putanji. `inc/visibility/class-query-filter.php` nije mijenjan ovom verifikacijom — Faza A ostaje dormant do prvog stvarnog pozivaoca (Faza B).
 
+### Update (2026-09-23) — Segment membership model istraga: `brand_segment` odobren, `product_cat` odbačen
+
+Prije Faze B implementacije, sproveden je poseban, isključivo read-only knowledge-first + staging-investigation krug da se utvrdi KOJI postojeći podatak treba biti izvor istine za "kom segmentu (Lifestyle/Toys/Outdoor) pripada proizvod" na Segment Landingu. Dva kandidata su postojala u projektu; oba investigirana do korena.
+
+**`product_cat` termini "Lifestyle"/"Toys"/"Outdoor" — ODBAČENI kao source of truth.**
+Ovi termini postoje i lokalno i na stagingu, ali su **van ERP mapiranja**: `Importer::get_categories()` (uncle-dev-importer, `src/Importer.php`) gradi mapu Apros `classification` → lokalni `product_cat` term ISKLJUČIVO preko ACF `remote_category_id` polja na terminu. Direktna staging provera (read-only, `wp eval` preko SSH): sva tri termina (staging term_id 254/255/256) imaju `remote_category_id = null` i `count = 0` — importer ih nikad ne dotiče, ne populiše, ne održava. Nisu ni traceable do lokalnog dev-catalog-generatora (nema literalnog kreiranja ovih naziva u `inc/dev/class-dev-catalog-generator.php`). Poreklo ostaje neutvrđeno, ali potvrđeno van ERP dosega — ne smiju postati Segment Landing izvor istine.
+
+**`brand_segment` (ACF select na `product_brand`, `acf-json/group_675053191eac4.json`) — ODOBREN kao B2B-owned/manual segment membership layer.**
+Direktno pročitan izvorni kod potvrđuje: `brand_segment` string se **ne pojavljuje nigdje** u `uncle-dev-importer` ni `apros-pricing` (SSH grep, staging, protected plugins, read-only). Polje je 100% lokalna WordPress/ACF ekstenzija — ERP ga ne poznaje, ne piše, ne briše. Vrijednosti na `product_brand` (ERP-sync taksonomija, 61/62 termina na stagingu ima `remote_category_id`) su nezavisan, ručno održavan sloj preko ERP-sinkronizovanih brendova — potpuno konzistentno sa poznatim workshop nalazom (`docs/erp-discovery-findings.md`, `docs/stakeholder-question-matrix.md`): legacy B2B sistem radi **brand→matično-skladište** automatsko mapiranje (Igračke=3, Lifestyle=5), a taj mehanizam TAKOĐE ne postoji tehnički implementiran nigdje u trenutnoj Apros integraciji (potvrđeno: nula pogodaka za `warehouse`/`skladi`/`lokacij`/`mjesto` u cijelom importer i pricing kodu) — samo kao institucionalno znanje. `brand_segment` je stoga ispravan nosilac tog znanja u trenutnoj arhitekturi, ne duplikacija niti izmišljena taksonomija.
+
+**Arhitekturalna odluka (closed):** `product → product_brand → brand_segment`. Ne uvoditi novu taksonomiju, mapping tabelu, ni sync mehanizam.
+
+**Poznat, namjerno neriješen content gap:** `Outdoor` nema NIGDJE dokumentovanu vezu ni sa jednim od 4 legacy skladišta (Glavno/Igračke/Naočale/Lifestyle) — ni u dokumentaciji, ni u kodu, ni na stagingu. Ovo je content/business pitanje (koji brendovi pripadaju Outdoor segmentu), NE arhitekturalni bloker — ne rešava se pogađanjem, čeka validno poslovno znanje (Josip/klijent). DP-02/BL-06 ostaje formalno otvoren kao P1 blocker (order-routing kontekst), nezavisno od ove Segment Landing odluke.
+
+### Update (2026-09-23) — Faza B implementirana
+
+Faza B (ADR-009 §Decision, "kad Homepage/Segment-Landing rendering arhitektura stvarno postoji, njen pozivalac eksplicitno prosljeđuje `shared_surface` semantiku") implementirana je isključivo na pozivaocima — **`inc/visibility/class-query-filter.php` nije mijenjan**.
+
+**Novi generički primitiv:** `inc/homepage-segments.php` — čita `dp_page_segment_context` ACF polje (novo, `acf-json/group_dp_shared_surface.json`, location: `post_type == page`, default prazno = bez promjene ponašanja) sa vrijednostima `''|homepage|lifestyle|toys|outdoor`. Izlaže: `dreampoint_b2b_shared_surface_query_args()` (dodaje `dp_visibility_context=shared_surface` na `WP_Query`/`get_terms` args), `dreampoint_b2b_apply_segment_tax_query()` (dodaje `product_brand` tax_query po segmentu, koristi `dreampoint_b2b_get_brand_ids_for_segment()` — `brand_segment` meta_query preko `get_terms`, sama sa `shared_surface`).
+
+**Pozivaoci ožičeni:** `blocks/templates/latest-products.php`, `discounted-products.php` (shared_surface + segment tax_query), `featured-products.php` (Faza B raw-ID konverzija `get_field('selected_products', false, false)` + shared_surface, BEZ segment tax_query — ručno kurirano po stranici), `blocks/templates/brands.php` (carousel: shared_surface uvijek; na segment stranicama dinamički `brand_segment`-based `include` umjesto `selected_brands`).
+
+**Deterministička verifikacija (lokalno, `wp eval-file`, read-only + privremena reverzibilna mutacija):** korišten je **[DEV] fixture brend** (term 214, sintetički test entitet, NE realan/ERP brend), privremeno markiran `brand_segment=lifestyle`, testiran preko stvarnih helper funkcija kao `vis_none` (no_access test korisnik), pa **odmah vraćen na prazno**. Rezultati: default upit (bez konteksta) = 0; `lifestyle` segment kontekst = 13 (= ground-truth broj proizvoda tog brenda); `toys` kontekst (isti brend, pogrešan segment) = 0 (nema cross-segment curenja); `homepage` kontekst = 427 (pun katalog, bez segment filtera); naredni default upit poslije = 0 (nema perzistentnog leakage-a). Sve u skladu sa Faza A garantovanim fail-closed ponašanjem.
+
+**Browser verifikacija (lokalno, Playwright, stvarni HTTP):** Homepage kao `vis_none` prikazuje pun "Naša zastupništva" carousel (identično adminu) — shared_surface bypass potvrđen u realnom rendering kontekstu. `/shop/` kao isti korisnik i dalje vraća "No products were found" — dublji katalog ostaje ograničen. Lifestyle Segment Landing (`/lifestyle/`) renderuje bez PHP grešaka za oba korisnička konteksta; "Novo u ponudi"/"Akcija" sekcije ispravno prazne (segment filter aktivan, ali nijedan REALAN brend još nema `lifestyle` vrijednost — očekivano, content gap, ne bug).
+
+**Implementacija:** Homepage (post ID 17) rebuild — Segmenti tile-ovi (`featured-categories-section`, prošireno sa `show_custom_link`/`custom_url` poljima koja je PHP kod već očekivao ali ACF field group nikad nije definisao) sada linkuju na nove stranice umjesto na prazne `product_cat` arhive; legacy Homepage sekcije koje Figma više ne sadrži (hero slider, Latest/Discounted/Featured Products, Featured Brand) uklonjene. Tri nove Segment Landing stranice (`lifestyle`/`toys`/`outdoor`, template `page-segment-landing.php`, `dp_page_segment_context` postavljen po stranici) kreirane sa istim reusable block kompozicijom.
+
+**Poznat, dokumentovan gap:** "Badge" tekst iznad hero naslova (Figma, Segment Landing) nije implementiran — polje ne postoji u `featured-section`/`featured-brand` field grupi, koja je DB-only (nije u `acf-json/`, pre-postojeći governance gap, van scope-a ove faze). Hero slika je generička (reused, ne Figma-specifična — `get_screenshot` MCP alat je bio rate-limited tokom ove sesije).
+
 ### Consequences
 
 - Segment Landing (i bilo koja buduća shared površina) NE MOGU sigurno ponovno koristiti trenutne homepage blokove doslovno bez Faze B rada — ali sama Faza A ne blokira ništa niti zahtijeva da to bude riješeno sada.
-- Bilo kakva izmena `inc/visibility/class-query-filter.php` (uključujući Fazu A) zahtijeva eksplicitno odobren implementacioni plan prije koda (frozen sistem pravilo, `docs/active/current-phase.md`) — Faza A je OVIM ADR-om odobrena za implementaciju; Faza B zahtijeva NOVU odluku kad Homepage/Segment-Landing arhitektura bude definisana.
+- Bilo kakva izmena `inc/visibility/class-query-filter.php` (uključujući Fazu A) zahtijeva eksplicitno odobren implementacioni plan prije koda (frozen sistem pravilo, `docs/active/current-phase.md`) — Faza A je OVIM ADR-om odobrena za implementaciju; Faza B je implementirana isključivo na pozivaocima, bez izmjene ovog fajla (vidi Update iznad).
 - FINALNA homepage/segment-landing struktura i sadržajna specifikacija dokumentovane su zasebno: `docs/active/homepage-segment-landing-architecture.md` (ta specifikacija i dalje važi za SADRŽAJ; ovaj ADR pokriva samo vidljivost-primitivu).
-- Nijedan trenutni blok se ne mijenja kao dio ovog ADR-a.
+- Realne `brand_segment` vrijednosti (posebno Outdoor) ostaju otvoren content-population zadatak — ne smiju biti izmišljene u kodu ni u ovoj dokumentaciji.
 
 ### Related
 
-- `inc/visibility/class-query-filter.php`
+- `inc/visibility/class-query-filter.php` (nepromijenjen)
+- `inc/homepage-segments.php` (novo, Faza B primitiv)
 - `docs/frozen/*` (Frozen Systems tabela, `docs/active/current-phase.md`)
-- `docs/active/homepage-segment-landing-architecture.md` (nova, FINAL struktura)
+- `docs/active/homepage-segment-landing-architecture.md` (FINAL struktura, status ažuriran)
+- `uncle-dev-importer/src/Importer.php` (`get_categories()`, `assign_taxonomy_term_to_product()` — ERP category/brand mapping evidencija)
 - ADR-008 (ERP boundary, ista sesija)
 
 ---

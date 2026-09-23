@@ -13,6 +13,11 @@ $args = array(
     'orderby'        => 'date',
     'order'          => 'DESC',
 );
+// ADR-009 Phase B: on Homepage/Segment Landing (dp_page_segment_context set
+// on the containing page), bypass customer-bucket visibility and, on a
+// segment page, restrict to that segment's brands ($post_id from ACF block render).
+$args = dreampoint_b2b_shared_surface_query_args( $args, $post_id ?? null );
+$args = dreampoint_b2b_apply_segment_tax_query( $args, $post_id ?? null );
 $latest_products = new WP_Query($args);
 ?>
 

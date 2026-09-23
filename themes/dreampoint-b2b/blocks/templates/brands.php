@@ -3,8 +3,19 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-$title        = get_field('title');
-$selected_ids = get_field('selected_brands');
+$title = get_field('title');
+
+// ADR-009 Phase B: on a Segment Landing page, the carousel is driven
+// dynamically by brand_segment (product → product_brand → brand_segment),
+// same semantics as the product sections — not by editorial curation.
+// On Homepage/other pages it stays editor-curated via selected_brands.
+$segment = dreampoint_b2b_get_page_segment( $post_id ?? null );
+
+if ( '' !== $segment ) {
+    $selected_ids = dreampoint_b2b_get_brand_ids_for_segment( $segment );
+} else {
+    $selected_ids = get_field('selected_brands');
+}
 
 if (empty($selected_ids)) {
     return;
@@ -13,12 +24,16 @@ if (empty($selected_ids)) {
 // Jedan get_terms poziv za sve odabrane brendove — 'orderby' => 'include' čuva
 // redoslijed odabira urednika. term meta (thumbnail_id) se cache-uje nativno
 // od strane get_terms (update_term_meta_cache), pa nema N+1 upita.
-$brands = get_terms([
+// ADR-009 Phase B: on Homepage/Segment Landing, bypass customer-bucket
+// visibility for this carousel too ($post_id from ACF block render).
+$term_args = dreampoint_b2b_shared_surface_query_args( [
     'taxonomy'   => 'product_brand',
     'include'    => $selected_ids,
     'orderby'    => 'include',
     'hide_empty' => false,
-]);
+], $post_id ?? null );
+
+$brands = get_terms( $term_args );
 
 if (empty($brands) || is_wp_error($brands)) {
     return;

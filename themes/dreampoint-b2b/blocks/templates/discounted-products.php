@@ -15,6 +15,9 @@ $args = array(
     'post__in'       => ! empty( $sale_ids ) ? $sale_ids : array( 0 ),
     'orderby'        => 'post__in',
 );
+// ADR-009 Phase B — see latest-products.php for rationale.
+$args = dreampoint_b2b_shared_surface_query_args( $args, $post_id ?? null );
+$args = dreampoint_b2b_apply_segment_tax_query( $args, $post_id ?? null );
 $discounted_products = new WP_Query($args);
 ?>
 

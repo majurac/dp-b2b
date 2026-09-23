@@ -44,7 +44,7 @@ Active engineering guidance lives in:
 | `docs/active/current-phase.md` | Current phase status (Quick Order: COMPLETE, maintenance mode as of 2026-07-21), frozen system boundaries, current philosophy |
 | `docs/active/status.md` | Implementation status matrix per system — Quick Order milestone marked COMPLETE 2026-07-21 |
 | `docs/active/quick-order-catalog-filters-spec.md` | Catalog Filters (New/Best Seller/Already Ordered) design rationale — **implementation COMPLETE**, retained as historical design record; current behavior documented in the plugin's `readme.md` |
-| `docs/active/homepage-segment-landing-architecture.md` | FINAL Homepage + Segment Landing (Lifestyle/Toys/Outdoor) structure and shared-visibility rule — **design record, NOT implemented**. Requires ADR-009's visibility-exemption plan before implementation. |
+| `docs/active/homepage-segment-landing-architecture.md` | Homepage + Segment Landing (Lifestyle/Toys/Outdoor) structure and shared-visibility rule — **IMPLEMENTED 2026-09-23** (local, verified). ADR-009 Phase B wiring complete; real `brand_segment` content population remains open. |
 
 ---
 

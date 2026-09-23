@@ -1,0 +1,60 @@
+{
+    "key": "group_dp_shared_surface",
+    "title": "Shared Surface Context (ADR-009)",
+    "fields": [
+        {
+            "key": "field_dp_page_segment_context",
+            "label": "Shared Surface Context",
+            "name": "dp_page_segment_context",
+            "aria-label": "",
+            "type": "select",
+            "instructions": "Postavi SAMO na Homepage i Segment Landing stranicama. Aktivira dp_visibility_context='shared_surface' (ADR-009 Faza B) — customer-bucket vidljivost se ne primenjuje na proizvode\/brendove ove stranice. Ostavi prazno na svim ostalim stranicama (default, bez promene ponasanja).",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "choices": {
+                "": "— Ne (default, normalna vidljivost)",
+                "homepage": "Homepage (dijeljeno, bez segment filtera)",
+                "lifestyle": "Segment Landing — Lifestyle",
+                "toys": "Segment Landing — Toys",
+                "outdoor": "Segment Landing — Outdoor"
+            },
+            "default_value": false,
+            "return_format": "value",
+            "multiple": 0,
+            "allow_null": 0,
+            "allow_in_bindings": 0,
+            "ui": 0,
+            "ajax": 0,
+            "placeholder": "",
+            "create_options": 0,
+            "save_options": 0
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "page"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "side",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "",
+    "show_in_rest": 0,
+    "display_title": "",
+    "allow_ai_access": false,
+    "ai_description": "",
+    "modified": 1790151556
+}

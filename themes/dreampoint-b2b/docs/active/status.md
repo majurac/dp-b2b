@@ -165,12 +165,16 @@ This is unfinished architecture work — not a locked system and not abandoned. 
 
 ## Staging TODOs (Open / Blocked)
 
-Last updated: 2026-06-02
+Last updated: 2026-09-23 (Homepage/Segment Landing follow-ups added — see `docs/decisions.md` ADR-009)
 
 These items remain open due to external dependencies. Do NOT mark as resolved unless the blocking dependency is confirmed resolved.
 
 | # | Item | Priority | Status | Blocked by |
 |---|------|----------|--------|------------|
+| 12 | Populate real `brand_segment` values on ERP-sync `product_brand` terms (Homepage/Segment Landing) | REQUIRED | Open | Valid business/content input per brand — must not be guessed. Outdoor membership specifically has no institutional-knowledge source identified yet. |
+| 13 | Segment Landing "Istaknuti proizvodi" manual product curation (Lifestyle/Toys/Outdoor) | MEDIUM | Open | Content/editorial task, not code |
+| 14 | Company Features `features_items` ACF Options content on staging (currently `NULL`) | MEDIUM | Open | Content population — block renders nothing until filled |
+| 15 | Segment Landing hero — Figma-specific images + "badge" field | LOW | Open | Badge blocked by DB-only `featured-section`/`featured-brand` ACF field group (no `acf-json/` entry); images pending pixel-level Figma visual pass (`get_screenshot` MCP was rate-limited throughout implementation) |
 | 1 | CorvusPay + jquery-migrate testing | BLOCKER | Open | CorvusPay test environment access not yet available |
 | 2 | LSCache JS Defer config in WP admin | HIGH | Open | Requires staging deploy |
 | 3 | `fetchpriority` count validation | MEDIUM | Open | Requires staging deploy (above-fold grid layout) |

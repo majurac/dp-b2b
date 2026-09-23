@@ -492,11 +492,11 @@ Detaljna rekonsilijacija po AP-ID stavci: `docs/project-status-matrix.md` (AP-01
 
 ---
 
-## ADR-009 — Homepage vs. Segment Landing vidljivost: identifikovan arhitekturalni gap (NIJE implementirano)
+## ADR-009 — Homepage vs. Segment Landing vidljivost: identifikovan arhitekturalni gap → implementirano i deployovano
 
-**Datum:** 2026-09-21
-**Status:** Accepted (dokumentovan gap i preporučen pravac) — **implementacija NIJE odobrena niti izvršena**
-**Vlasnik:** Vidljivost engine (frozen) / Homepage-Segment Landing arhitektura
+**Datum:** 2026-09-21 (odluka) / 2026-09-23 (implementacija, deploy, closure)
+**Status:** Accepted → **IMPLEMENTIRANO I DEPLOYOVANO** (staging, `dreampoint.b2b.uncledev.cloud`, commit `c4dc61d4f5674a3eb6da59490210f243019fee1e`)
+**Vlasnik:** Vidljivost engine (frozen, nepromijenjen) / Homepage-Segment Landing arhitektura
 
 ### Context
 
@@ -582,6 +582,33 @@ Faza B (ADR-009 §Decision, "kad Homepage/Segment-Landing rendering arhitektura 
 
 **Poznat, dokumentovan gap:** "Badge" tekst iznad hero naslova (Figma, Segment Landing) nije implementiran — polje ne postoji u `featured-section`/`featured-brand` field grupi, koja je DB-only (nije u `acf-json/`, pre-postojeći governance gap, van scope-a ove faze). Hero slika je generička (reused, ne Figma-specifična — `get_screenshot` MCP alat je bio rate-limited tokom ove sesije).
 
+### Update (2026-09-23) — Deploy + focused frontend fix pass (closure)
+
+**Finalni deployovan commit:** `c4dc61d4f5674a3eb6da59490210f243019fee1e` (staging `dreampoint.b2b.uncledev.cloud`, hash-potvrđen preko `git rev-parse HEAD`), gradi se na `feef07b61b59bbaec50a39b6ec306126bad51457` (originalni Homepage/Segment Landing/Faza B commit). Oba pushovana na `origin/master`.
+
+**Focused frontend fix (`c4dc61d`), otkriveno tokom staging acceptance-a:**
+
+1. **Brands slider JS nedostajao na Segment Landing stranicama.** Root cause: `dreampoint_b2b_needs_slick()` (gate za `slick.min.js`/`slick-init.js` enqueue) je bio hardkodovan na `is_front_page() || is_singular('post') || is_home() || is_product()` — obične `page` stranice (Lifestyle/Toys/Outdoor) nikad nisu prolazile uslov, pa se Slick nikad nije učitavao iako je Brands carousel markup postojao. Fix: funkcija sada, za svaku `is_singular()` stranicu koja ne prolazi postojeće uslove, parsira `post_content` (isti `parse_blocks()`/`dreampoint_b2b_collect_block_names()` mehanizam koji već koristi CSS enqueue, `inc/enqueue-block-styles.php`) i traži bilo koji ACF blok koji renderuje Slick-slider markup. Block-driven, ne page-ID/template provera — bez dupliranja slider JS-a.
+2. **Company Features se ponašao kao slider svuda gdje se pojavljuje (uključujući Homepage).** Root cause: shortcode je renderovao `class="features-content company-features-slider"` — druga klasa nije imala nijedan drugi legitiman kontekst u projektu (grep potvrdio). Fix: klasa i odgovarajući Slick init blok uklonjeni generički (ne per-page hack); dodat static `display:flex;flex-wrap:wrap;justify-content:center` u `sass/blocks/company-features.scss` (rebuild preko `npm run build:blocks`), pošto je horizontalni raspored ranije u potpunosti zavisio od Slick-ovog runtime flex-a.
+
+**Verifikacija — eksplicitna distinkcija lokalno/staging:**
+- **Lokalno (Playwright, browser):** potpuno verifikovano — Brands slider inicijalizovan (`slick-initialized` klasa) na sve 4 stranice, Company Features NEMA `slick-initialized` nigde, 4 stavke poravnate u jednom redu na desktop širini, responsive wrap radi, 0 console grešaka/upozorenja.
+- **Staging:** HEAD potvrđen (`c4dc61d...`), server-side/statička provera potvrđena (`dreampoint_b2b_needs_slick()` vraća `YES` za sve tri Segment Landing stranice, `brands-slider` markup prisutan, deployovan `slick-init.js` više ne inicijalizuje Company Features, deployovan CSS sadrži static flex layout) — **ali stvarna browser/JS inicijalizacija (`slick-initialized`, console stanje) NIJE direktno posmatrana na stagingu**, jer sajt globalno redirektuje neautentifikovane posetioce na `/my-account`, a staging test-korisnički kredencijali nisu bili dostupni u ovoj sesiji. Deployovan kod je hash-identičan lokalno-verifikovanom kodu, ali ova distinkcija se ne sme brisati.
+
+**Hero badge — klasifikacija (istorijsko usklađivanje, ne nova odluka):** Namjerno odloženo (nije slučajno izostavljeno) — eksplicitno identifikovano u Phase 1 Figma mappingu i eksplicitno zabilježeno u prethodnom Update-u iznad u trenutku implementacije. Uzrok odlaganja: blokirano postojećom ACF arhitekturom — `featured-section`/`featured-brand` field grupa je DB-only (nije u `acf-json/`), i dodavanje polja usred ove faze bi zahtijevalo DB-autoritativnu izmjenu van projektnog ACF Field Group Creation Doctrine-a bez sigurnog JSON mirror-a. Ostaje otvoren follow-up, ne redefinisan kao van scope-a.
+
+**Figma vernost — konačan, precizan status:** Strukturni/sadržajni Figma metadata za Homepage i Segment Landing su uspješno pročitani i sekcijska arhitektura/redoslijed implementirani iz tog izvora. Direktno pixel poređenje sa Figma screenshot-om je bilo blokirano `get_screenshot` MCP rate limit-om (Figma "View seat") tokom cijele sesije i nikad nije izvršeno — **rezultat se ne smije opisivati kao pixel-perfect Figma-complete**. Trenutne Segment Landing hero slike su reused/generičke, ne potvrđeni finalni Figma asset-i. Pixel-level vizuelno poređenje ostaje vizuelni acceptance/polish follow-up.
+
+**Cache-busting nalaz (zabilježeno, NIJE riješeno u ovom pass-u):** Pojedinačni block CSS fajlovi (`css/blocks/*.css`) dijele globalni `_S_VERSION` cache-bust query string sa `style.css`/`theme.min.js` (`_S_VERSION = max(filemtime(style.css), filemtime(theme.min.js))`) — promjena SAMO u block CSS-u ne mijenja `?ver=` vrijednost, pa postojeći posjetioci mogu zadržati stale keširanu verziju do prirodnog isteka keša. Otkriveno tokom lokalne verifikacije ovog fix-a (zaobiđeno samo za potrebe testiranja, cache-bypass fetch). Pun zapis: `docs/active/block-css-cache-busting-followup.md`.
+
+**Content-population follow-up (NIJE implementacioni defekt, konsolidovano sa prethodnim update-om):**
+- Realni ERP-sync brendovi na stagingu i dalje trebaju ručnu `brand_segment` populaciju (61/62 brand termina na stagingu je ERP-mapirano preko `product_brand`, ali segment vrijednost mora ostati ručni content unos — ne smije se izmišljati).
+- Outdoor membership posebno ostaje business/content knowledge gap — čeka validno institucionalno znanje (Josip/klijent), ne smije se pogađati.
+- "Istaknuti proizvodi" (Featured Products) na sve tri Segment Landing stranice čeka finalnu ručnu kuraciju gdje je primjenjivo.
+- **Novi nalaz iz finalnog staging acceptance-a:** `features_items` ACF Options polje (Company Features sadržaj) je `NULL`/nekonfigurisano na stagingu — blok trenutno ne renderuje nijednu stavku tamo. Pre-postojeći staging content/configuration gap, potpuno nezavisan od static-layout fix-a (potvrđeno da je kod ispravan preko istog, već popunjenog polja lokalno). Nije popunjavano u ovom pass-u.
+
+**Protected boundaries (potvrđeno tokom cijele implementacije/deploya/fix pass-a):** nijedan ERP sync/import nije pokrenut; nijedan protected Apros plugin (`uncle-dev-importer`, `apros-pricing`) nije mijenjan; nijedna realna `brand_segment` vrijednost nije izmišljena; sintetička katalog generacija nije pokretana na stagingu.
+
 ### Consequences
 
 - Segment Landing (i bilo koja buduća shared površina) NE MOGU sigurno ponovno koristiti trenutne homepage blokove doslovno bez Faze B rada — ali sama Faza A ne blokira ništa niti zahtijeva da to bude riješeno sada.
@@ -595,6 +622,7 @@ Faza B (ADR-009 §Decision, "kad Homepage/Segment-Landing rendering arhitektura 
 - `inc/homepage-segments.php` (novo, Faza B primitiv)
 - `docs/frozen/*` (Frozen Systems tabela, `docs/active/current-phase.md`)
 - `docs/active/homepage-segment-landing-architecture.md` (FINAL struktura, status ažuriran)
+- `docs/active/block-css-cache-busting-followup.md` (novo — cache-busting nalaz)
 - `uncle-dev-importer/src/Importer.php` (`get_categories()`, `assign_taxonomy_term_to_product()` — ERP category/brand mapping evidencija)
 - ADR-008 (ERP boundary, ista sesija)
 

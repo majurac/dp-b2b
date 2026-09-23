@@ -44,7 +44,8 @@ Active engineering guidance lives in:
 | `docs/active/current-phase.md` | Current phase status (Quick Order: COMPLETE, maintenance mode as of 2026-07-21), frozen system boundaries, current philosophy |
 | `docs/active/status.md` | Implementation status matrix per system — Quick Order milestone marked COMPLETE 2026-07-21 |
 | `docs/active/quick-order-catalog-filters-spec.md` | Catalog Filters (New/Best Seller/Already Ordered) design rationale — **implementation COMPLETE**, retained as historical design record; current behavior documented in the plugin's `readme.md` |
-| `docs/active/homepage-segment-landing-architecture.md` | Homepage + Segment Landing (Lifestyle/Toys/Outdoor) structure and shared-visibility rule — **IMPLEMENTED 2026-09-23** (local, verified). ADR-009 Phase B wiring complete; real `brand_segment` content population remains open. |
+| `docs/active/homepage-segment-landing-architecture.md` | Homepage + Segment Landing (Lifestyle/Toys/Outdoor) structure and shared-visibility rule — **IMPLEMENTED & DEPLOYED 2026-09-23** (staging, commit `c4dc61d`). ADR-009 Phase B wiring complete; real `brand_segment` content population and pixel-level Figma visual polish remain open. |
+| `docs/active/block-css-cache-busting-followup.md` | Accepted low-severity technical debt — per-block CSS shares the theme's global `_S_VERSION` cache-bust string, so a block-CSS-only change may not get an independently changed `?ver=`. Not fixed, documented only. |
 
 ---
 

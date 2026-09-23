@@ -1,8 +1,19 @@
 # Homepage & Segment Landing — Final Structure (Design Record)
 
-**Status (2026-09-23):** IMPLEMENTIRANO (lokalno, verifikovano) — Homepage rebuild + 3 Segment Landing stranice (Lifestyle/Toys/Outdoor) + ADR-009 Faza B vidljivost wiring. Vidi `docs/decisions.md` ADR-009 §Update 2026-09-23 za punu implementacionu evidenciju i deterministic/browser verifikaciju.
+**Status (2026-09-23):** IMPLEMENTIRANO I DEPLOYOVANO — Homepage rebuild + 3 Segment Landing stranice (Lifestyle/Toys/Outdoor) + ADR-009 Faza B vidljivost wiring, plus focused frontend fix (Brands slider enqueue, Company Features de-slider). Deployovan na staging (`dreampoint.b2b.uncledev.cloud`), commit `c4dc61d4f5674a3eb6da59490210f243019fee1e` (gradi na `feef07b61b59bbaec50a39b6ec306126bad51457`). Puna evidencija: `docs/decisions.md` ADR-009 (svi §Update unosi, 2026-09-23).
 
-**Otvoreno:** realne `brand_segment` vrijednosti (koji Apros-sinhronizovani brendovi pripadaju kojem segmentu, posebno Outdoor) su content-population zadatak, ne kod — Segment Landing product sekcije će ostati prazne dok se ne popune preko wp-admin. "Badge" hero polje i Figma-specifične hero slike nisu implementirane (field group gap / MCP screenshot rate limit tokom sesije).
+**Verifikacija:** potpuno lokalno (Playwright, browser, real HTTP). Na stagingu: hash potvrđen + server-side/statička provera; stvarna browser/JS inicijalizacija NIJE direktno posmatrana tamo (nema staging test-korisničkih kredencijala u ovoj sesiji, sajt globalno redirektuje neautentifikovane posjetioce).
+
+**Figma vernost:** strukturna/sadržajna, iz Figma metadata (ne pixel-perfect — `get_screenshot` je bio rate-limited cijelu sesiju, nikad izvršen).
+
+**Otvoreno (content-population, NE implementacioni defekt):**
+- Realne `brand_segment` vrijednosti na ERP-sync brendovima (posebno Outdoor) — Segment Landing product sekcije ostaju prazne dok se ne popune preko wp-admin.
+- "Istaknuti proizvodi" ručna kuracija po Segment Landing stranici.
+- `features_items` ACF Options (Company Features sadržaj) je `NULL` na stagingu — pre-postojeći, nezavisan gap.
+
+**Otvoreno (vizuelni polish follow-up):** "Badge" hero polje namjerno odloženo (blokirano DB-only ACF field grupom, ne slučajno izostavljeno — vidi ADR-009). Hero slike generičke/reused, ne potvrđeni Figma asset-i. Pixel-level Figma poređenje.
+
+**Otvoreno (tehnički follow-up, van scope-a implementacije):** `docs/active/block-css-cache-busting-followup.md` — block-level CSS dijeli globalni `_S_VERSION` cache-bust sa `style.css`/`theme.min.js`.
 
 ~~**Status:** FINAL sadržajna specifikacija potvrđena od klijenta (2026-09-21, `B2B odgovori na pitanja.docx`, §5.1 EDIT). **Implementacija NIJE započeta.** Arhitekturalni gap u vidljivost engine-u je dokumentovan u `docs/decisions.md` ADR-009 i mora biti riješen prije bilo kakvog koda koji dira frozen vidljivost sistem.~~ (superseded — gap riješen, implementacija završena, vidi gore)
 

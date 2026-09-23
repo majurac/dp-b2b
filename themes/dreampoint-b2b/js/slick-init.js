@@ -232,31 +232,6 @@ jQuery( function ( $ ) {
             );
         }
 
-        // --- Company Features Slider ---
-        initSlider( $( '.company-features-slider' ), {
-            dots:           false,
-            arrows:         false,
-            infinite:       false,
-            speed:          300,
-            slidesToShow:   6,
-            slidesToScroll: 1,
-            lazyLoad:       'ondemand',
-            responsive: [
-                {
-                    breakpoint: 1199,
-                    settings: { slidesToShow: 5, slidesToScroll: 1, dots: true },
-                },
-                {
-                    breakpoint: 991,
-                    settings: { slidesToShow: 4, slidesToScroll: 1, dots: true },
-                },
-                {
-                    breakpoint: 767,
-                    settings: { slidesToShow: 2, slidesToScroll: 1, dots: true },
-                },
-            ],
-        } );
-
         // --- Brands Slider — beskonačna animacija ---
         initSlider( $( '.brands-slider' ), {
             infinite:       true,

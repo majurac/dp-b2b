@@ -226,10 +226,42 @@ function dreampoint_b2b_needs_toastify(): bool {
 
 /**
  * Da li trenutna stranica zahteva Slick Slider?
- * Naslovna, blog arhiva, blog post, stranica proizvoda.
+ * Naslovna, blog arhiva, blog post, stranica proizvoda — ili bilo koja
+ * singular stranica čiji post_content sadrži ACF blok koji renderuje
+ * Slick-slider markup (npr. Segment Landing stranice sa Brands blokom).
+ * Block-driven provera koristi isti parse_blocks() mehanizam kao CSS
+ * enqueue (inc/enqueue-block-styles.php), umjesto page-ID/template provjere,
+ * pa važi za svaku trenutnu i buduću stranicu koja te blokove koristi.
  */
 function dreampoint_b2b_needs_slick(): bool {
-    return is_front_page() || is_singular( 'post' ) || is_home() || is_product();
+    if ( is_front_page() || is_singular( 'post' ) || is_home() || is_product() ) {
+        return true;
+    }
+
+    if ( ! is_singular() ) {
+        return false;
+    }
+
+    $post = get_queried_object();
+    if ( ! $post instanceof WP_Post || empty( $post->post_content ) ) {
+        return false;
+    }
+
+    // Samo ACF blokovi čiji template renderuje .{slug}-slider markup (js/slick-init.js).
+    static $slider_blocks = [
+        'acf/hero-section',
+        'acf/featured-categories-section',
+        'acf/latest-products-section',
+        'acf/discounted-products-section',
+        'acf/featured-products-section',
+        'acf/brands-section',
+        'acf/testimonials-section',
+        'acf/gallery-section',
+    ];
+
+    $block_names = dreampoint_b2b_collect_block_names( parse_blocks( $post->post_content ) );
+
+    return (bool) array_intersect( $slider_blocks, $block_names );
 }
 
 /**
@@ -875,7 +907,7 @@ function dreampoint_b2b_company_features_shortcode(): string {
     ?>
     <div class="features block">
         <div class="container">
-            <div class="features-content company-features-slider">
+            <div class="features-content">
                 <?php foreach ( $features_items as $item ) :
                     $item_title       = $item['title'] ?? '';
                     $item_description = $item['text']  ?? '';

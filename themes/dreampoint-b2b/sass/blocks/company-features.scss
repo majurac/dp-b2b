@@ -3,6 +3,9 @@
 .features {
     padding: 0;
     &-content {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
         padding-top: 64px;
         padding-bottom: 64px;
         @include bp(sm-down) {

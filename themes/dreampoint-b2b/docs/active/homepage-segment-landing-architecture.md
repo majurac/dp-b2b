@@ -6,6 +6,9 @@
 
 **Figma vernost:** strukturna/sadržajna, iz Figma metadata (ne pixel-perfect — `get_screenshot` je bio rate-limited cijelu sesiju, nikad izvršen).
 
+**Dodano (2026-09-29) — per-page kontrole za Akciju i Istaknute proizvode (ZATVORENO na stagingu):** Lifestyle, Toys i Outdoor imaju po dvije ACF True/False kontrole, `dp_show_discounted_products` ("Prikaži proizvode na akciji") i `dp_show_featured_products` ("Prikaži istaknute proizvode"), u grupi `group_dp_shared_surface`; polja su vidljiva samo za kontekste lifestyle/toys/outdoor. Obje su po defaultu ON. Guard je na vrhu block templatea (`dreampoint_b2b_segment_section_enabled()` u `inc/homepage-segments.php`): eksplicitno OFF izostavlja sekciju iz renderinga, a nespremljena/nedostajuća vrijednost ostavlja sekciju vidljivom (backward compatibility, bez migracije). Ne mijenja upite, segment filter ni visibility.
+Deploy: staging commit `0ad862488dce2cb33294f8ee413ab3783118ea0f`; ACF grupa je uspješno sinhronizovana. Staging acceptance je prošao za dostupna stanja (admin UI na sve tri stranice, toggle test na Toys). Featured Products sa stvarnim kuriranim karticama nije mogao biti ponovo testiran na stagingu jer stvarne Segment Landing stranice nemaju kuriran `selected_products`; to je content/configuration gap (vidi "Otvoreno" ispod), ne nedovršena implementacija.
+
 **Otvoreno (content-population, NE implementacioni defekt):**
 - Realne `brand_segment` vrijednosti na ERP-sync brendovima (posebno Outdoor) — Segment Landing product sekcije ostaju prazne dok se ne popune preko wp-admin.
 - "Istaknuti proizvodi" ručna kuracija po Segment Landing stranici.

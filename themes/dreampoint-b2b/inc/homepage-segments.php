@@ -116,3 +116,32 @@ function dreampoint_b2b_apply_segment_tax_query( array $args, ?int $post_id = nu
 
     return $args;
 }
+
+/**
+ * Whether an optional Segment Landing section is enabled for the current page.
+ *
+ * $field is a per-page ACF true/false name (e.g. 'dp_show_discounted_products').
+ * Backward compatible by design: only an EXPLICITLY stored falsy value hides
+ * the section. No stored meta row (page never saved with the toggle) → shown.
+ * Applies on frontend Segment Landing pages only — never in the block editor,
+ * never on the Homepage or any page without a segment context.
+ */
+function dreampoint_b2b_segment_section_enabled( string $field, ?int $post_id = null ): bool {
+    if ( is_admin() ) {
+        return true;
+    }
+
+    $post_id = $post_id ?? get_the_ID();
+
+    if ( ! $post_id || '' === dreampoint_b2b_get_page_segment( $post_id ) ) {
+        return true;
+    }
+
+    // metadata_exists() distinguishes "never saved" from "explicitly OFF" —
+    // ACF's default_value would otherwise mask that difference.
+    if ( ! metadata_exists( 'post', $post_id, $field ) ) {
+        return true;
+    }
+
+    return (bool) get_post_meta( $post_id, $field, true );
+}

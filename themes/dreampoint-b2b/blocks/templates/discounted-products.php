@@ -3,6 +3,11 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// Segment Landing per-page toggle (unset = shown; see dreampoint_b2b_segment_section_enabled()).
+if ( ! dreampoint_b2b_segment_section_enabled( 'dp_show_discounted_products', $post_id ?? null ) ) {
+    return;
+}
+
 $title = get_field('title');
 
 // Query products currently on sale (native WooCommerce API — covers simple + variable products)

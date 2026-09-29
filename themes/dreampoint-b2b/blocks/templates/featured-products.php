@@ -3,6 +3,11 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// Segment Landing per-page toggle (unset = shown; see dreampoint_b2b_segment_section_enabled()).
+if ( ! dreampoint_b2b_segment_section_enabled( 'dp_show_featured_products', $post_id ?? null ) ) {
+    return;
+}
+
 // ADR-009 Phase B: raw ID array (not the formatted relationship value) so
 // resolving these products runs through our own WP_Query below instead of
 // ACF's acf_get_posts() → filtered WP_Query (confirmed in ADR-009

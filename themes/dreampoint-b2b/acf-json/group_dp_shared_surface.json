@@ -33,6 +33,90 @@
             "placeholder": "",
             "create_options": 0,
             "save_options": 0
+        },
+        {
+            "key": "field_dp_show_discounted_products",
+            "label": "Prikaži proizvode na akciji",
+            "name": "dp_show_discounted_products",
+            "aria-label": "",
+            "type": "true_false",
+            "instructions": "Segment Landing: isključivanje samo skriva sekciju na ovoj stranici, ne briše njene postavke.",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_dp_page_segment_context",
+                        "operator": "==",
+                        "value": "lifestyle"
+                    }
+                ],
+                [
+                    {
+                        "field": "field_dp_page_segment_context",
+                        "operator": "==",
+                        "value": "toys"
+                    }
+                ],
+                [
+                    {
+                        "field": "field_dp_page_segment_context",
+                        "operator": "==",
+                        "value": "outdoor"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "message": "",
+            "default_value": 1,
+            "ui": 1,
+            "ui_on_text": "",
+            "ui_off_text": ""
+        },
+        {
+            "key": "field_dp_show_featured_products",
+            "label": "Prikaži istaknute proizvode",
+            "name": "dp_show_featured_products",
+            "aria-label": "",
+            "type": "true_false",
+            "instructions": "Segment Landing: isključivanje samo skriva sekciju na ovoj stranici, ne briše njene postavke.",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_dp_page_segment_context",
+                        "operator": "==",
+                        "value": "lifestyle"
+                    }
+                ],
+                [
+                    {
+                        "field": "field_dp_page_segment_context",
+                        "operator": "==",
+                        "value": "toys"
+                    }
+                ],
+                [
+                    {
+                        "field": "field_dp_page_segment_context",
+                        "operator": "==",
+                        "value": "outdoor"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "message": "",
+            "default_value": 1,
+            "ui": 1,
+            "ui_on_text": "",
+            "ui_off_text": ""
         }
     ],
     "location": [
@@ -56,5 +140,5 @@
     "display_title": "",
     "allow_ai_access": false,
     "ai_description": "",
-    "modified": 1790151556
+    "modified": 1790679421
 }

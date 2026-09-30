@@ -754,3 +754,26 @@ WooCommerce Blocks-ov vlastiti `localStorage` cart cache (`storeApiCartData`/`st
 - `docs/project-status-matrix.md` AP-07 (ažuriran ovom sesijom)
 - `inc/checkout-logic.php` / `docs/frozen/checkout-logic.md` (referentni primjer classic+Blocks razlike u hook ponašanju — razlog zašto TA specifična dual-hook potreba ovdje NE postoji, vidi Decision iznad)
 - Woo-native delivery mapping istraga (ista sesija) — poređenje `apros_get_partner_delivery_locations()` šeme, Woo adresnih polja i `uncle-dev-importer/order.php` payload-a; osnova za odbacivanje adresa→recipient_code mapiranja i za hibridnu 0/1/2+ granu
+
+---
+
+## ADR-011 — PDP "Neobvezujuća MPC": manually maintained product-level ACF field
+
+**Date:** 2026-09-30
+**Status:** Implemented locally (not committed, not deployed to staging)
+
+### Context
+
+The business wants a non-binding recommended retail price (MPC) shown above the B2B price on the Product Single Page only. A read-only request against the Apros sandbox `articleList/get` (10,186 articles, 2026-09-30) showed the payload contains exactly: `articleId, code, title, barcode, wholesalePrice, vatRate, stock, classification, virtualArticle, visible, brandId, isNew, isSpecialOffer, description` — no MPC-like field. This finding is scoped to the current B2B `articleList/get` payload only; it does not claim Apros has no MPC anywhere.
+
+### Decision
+
+- MPC is a theme-owned, manually maintained ACF `number` field `dp_non_binding_mpc` (min 0, step 0.01, optional) in a small dedicated group `group_dp_product_reference_price` (`acf-json/group_dp_product_reference_price.json`, location `post_type == product`). No existing theme field group targets products, so an existing group could not be extended.
+- The stored value is the final display amount entered by the client. It is never derived from `wholesalePrice`, VAT, brand discounts or country prices, and never participates in any price calculation.
+- Rendering: `dreampoint_b2b_get_non_binding_mpc()` (`inc/woocommerce.php`) + a conditional block in `woocommerce/content-single-product.php`, placed immediately above the existing price block but with its own independent condition (valid positive MPC only). The existing price guard (`get_price() && in stock`) is unchanged, so MPC still renders when the Woo price block is hidden (e.g. out of stock). Formatted with `wc_price()`. Empty, non-numeric or `<= 0` values render nothing. Variable products use the parent's single value. No JS.
+- The existing Woo price output (`get_price_html()`, regular/sale filters, `apros-pricing` resolver) is untouched. No other surface (archive, Quick Order, cart, checkout, emails) renders MPC.
+
+### Consequences
+
+- The importer (`uncle-dev-importer`) does not write `dp_non_binding_mpc`, so imports cannot overwrite it.
+- If MPC must later come from Apros, that is a separate investigation.

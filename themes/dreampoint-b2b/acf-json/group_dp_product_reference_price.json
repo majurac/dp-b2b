@@ -1,0 +1,51 @@
+{
+    "key": "group_dp_product_reference_price",
+    "title": "Product \/ Reference Price (MPC)",
+    "fields": [
+        {
+            "key": "field_dp_non_binding_mpc",
+            "label": "Neobvezujuća MPC",
+            "name": "dp_non_binding_mpc",
+            "aria-label": "",
+            "type": "number",
+            "instructions": "Unesite iznos koji treba biti prikazan kupcu kao neobvezujuća MPC. Vrijednost se prikazuje samo na stranici proizvoda i ne utječe na B2B cijenu, rabate ni obračun.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "min": 0,
+            "max": "",
+            "allow_in_bindings": 0,
+            "placeholder": "",
+            "step": "0.01",
+            "prepend": "",
+            "append": ""
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "product"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "side",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Theme-owned, manually maintained display value. Not ERP-owned; never used in pricing.",
+    "show_in_rest": 0,
+    "display_title": "",
+    "allow_ai_access": false,
+    "ai_description": "",
+    "modified": 1790764414
+}

@@ -294,6 +294,14 @@
                 }
             }
         }
+        .product-mpc {
+            @include caption-m;
+            color: $text-primary;
+            margin-bottom: 4px;
+            &__value {
+                font-weight: 500;
+            }
+        }
         .price-container {
             @include heading-4;
             font-family: 'Montserrat';

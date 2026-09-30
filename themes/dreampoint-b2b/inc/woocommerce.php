@@ -334,3 +334,20 @@ if ( ! function_exists( 'dreampoint_b2b_woocommerce_header_cart' ) ) {
 		<?php
 	}
 }
+
+/**
+ * Neobvezujuća MPC — ručno održavana informativna vrijednost (ACF `dp_non_binding_mpc`).
+ * Samo za prikaz na PDP-u; ne učestvuje ni u kakvom obračunu cijene.
+ *
+ * @param WC_Product $product Proizvod (kod varijabilnih: roditelj).
+ * @return float Pozitivan iznos, ili 0.0 ako vrijednost nije postavljena / nije valjana.
+ */
+function dreampoint_b2b_get_non_binding_mpc( WC_Product $product ): float {
+	if ( ! function_exists( 'get_field' ) ) {
+		return 0.0;
+	}
+
+	$value = get_field( 'dp_non_binding_mpc', $product->get_id() );
+
+	return is_numeric( $value ) && (float) $value > 0 ? (float) $value : 0.0;
+}

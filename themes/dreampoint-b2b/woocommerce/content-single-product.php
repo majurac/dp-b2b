@@ -190,6 +190,14 @@ $permalink = get_permalink($product_id);
                             
                             <h1 itemprop="name"><?php echo esc_html($product_name); ?></h1>
                             
+                            <?php $non_binding_mpc = dreampoint_b2b_get_non_binding_mpc($product); ?>
+                            <?php if ($non_binding_mpc > 0) : ?>
+                                <div class="product-mpc">
+                                    <span class="product-mpc__label"><?php esc_html_e('Neobvezujuća MPC', 'dreampoint-b2b'); ?>:</span>
+                                    <span class="product-mpc__value"><?php echo wp_kses_post(wc_price($non_binding_mpc)); ?></span>
+                                </div>
+                            <?php endif; ?>
+
                             <?php if ($product->get_price() && $is_in_stock) : ?>
                                 <span class="price price-container <?php echo $product->is_on_sale() ? 'onsale' : ''; ?>" itemprop="offers" itemscope itemtype="http://schema.org/Offer">
                                     <?php echo wp_kses_post($product->get_price_html()); ?>

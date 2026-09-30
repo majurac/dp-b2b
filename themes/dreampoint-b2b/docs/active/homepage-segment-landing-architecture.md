@@ -80,6 +80,7 @@ Ukratko: `inc/visibility/class-query-filter.php` danas bezuslovno filtrira SVAKI
 ## 4. Povezano
 
 - `docs/decisions.md` ADR-009 — puna investigacija, preporučena arhitektura, blast-radius analiza
+- `docs/decisions.md` ADR-009, Update 2026-09-30 (Brand data ownership) — `brand_segment`, `brand_image` i `thumbnail_id` su DreamPoint-owned; ERP ih ne posjeduje i ne smije se koristiti za njihovo brisanje/normalizaciju
 - `inc/visibility/class-query-filter.php` — frozen implementacija koja zahtijeva izmjenu
 - `docs/active/current-phase.md` — Frozen Systems tabela
 - `brands.php`, `blocks/templates/brands.php` — postojeći `brand_segment`/segment-navigation koncept koji se može ponovo iskoristiti za segment filtering

@@ -609,6 +609,40 @@ Faza B (ADR-009 §Decision, "kad Homepage/Segment-Landing rendering arhitektura 
 
 **Protected boundaries (potvrđeno tokom cijele implementacije/deploya/fix pass-a):** nijedan ERP sync/import nije pokrenut; nijedan protected Apros plugin (`uncle-dev-importer`, `apros-pricing`) nije mijenjan; nijedna realna `brand_segment` vrijednost nije izmišljena; sintetička katalog generacija nije pokretana na stagingu.
 
+### Update (2026-09-30) — Brand data ownership model (staging brand audit)
+
+Izvor: read-only staging audit `product_brand` termova (62 terma, 10 192 proizvoda) + read-only čitanje protected `uncle-dev-importer` koda + jedan read-only GET `brandList/get` prema verifikovanom Apros sandboxu (66 ERP brendova). Nijedna mutacija, import ni sync nisu izvršeni.
+
+**ERP/Apros posjeduje:** kanonski identitet branda — `GET /brandList/get` (`brandId`, `title`) — i vezu proizvod → brand kroz `articleList.brandId`.
+
+**Ponašanje importera (CONFIRMED BY CODE, `AprosProvider.php` + `Importer::assign_taxonomy_term_to_product()`):**
+- gradi mapu `brandId → title`; `product_brand` term nastaje SAMO ako je brend referenciran uvezenim artiklom (ERP brend bez artikala nema WP term);
+- postojeći term traži po IMENU (`get_term_by('name', ...)`), a kreira ga ako imena nema;
+- brand proizvoda dodjeljuje sa `wp_set_object_terms` (zamjena prethodne relacije, ne dodavanje);
+- ERP `brandId` upisuje na term kroz ACF `remote_category_id` (repeater, `value` = brandId kao string);
+- na proizvodu upisuje `_BRAND_ID` (int) za Apros pricing / rabat lookup; varijacije `_BRAND_ID` nemaju;
+- NIKAD ne briše zastarjele `product_brand` termove.
+
+**Arhitekturalna posljedica (rizik, NE observirani produkcijski kvar):** pošto identitet term-a počinje od IMENA, a ne od sačuvanog ERP `brandId`, preimenovanje brenda u ERP-u može stvoriti duplikat WordPress terma umjesto ažuriranja postojećeg kanonskog.
+
+**Fixture marker:** `_dp_brand_fixture` NE znači da je brend disposable test podatak. Devet trenutno označenih termova (24Bottles, A Fan Of, Design Letters ApS, Fresk, Leatherman, Ledlenser, Leuchtturm1917, NUUNA, Printworks) su validni ERP-backed brendovi čiji `remote_category_id` odgovara trenutnom sandbox inventaru. Fixture status se nikad ne smije koristiti kao kriterij brisanja.
+
+**DreamPoint (lokalni WordPress) posjeduje prezentacijske/enrichment podatke koje ERP ne isporučuje:**
+1. `brand_segment` (ACF select, `acf-json/group_675053191eac4.json`);
+2. Featured Image — ACF polje `brand_image`, field key `field_68302324d99a1`, pohranjeno kao attachment ID u term meta;
+3. Brand logo — nativni WooCommerce term meta `thumbnail_id`, attachment ID.
+
+**HARD invarijanta:** odsustvo segment/slika/logo informacije u ERP-u NIJE dokaz da su odgovarajući lokalni podaci zastarjeli. ERP reconciliation, brand cleanup, rukovanje preimenovanjem i konsolidacija duplikata NE smiju automatski: brisati ili mijenjati `brand_segment`; brisati `brand_image` ili `thumbnail_id`; brisati Media Library attachmente; mijenjati attachment metapodatke. Za svaki zadržani brend ova lokalna polja ostaju netaknuta osim ako eksplicitan zadatak namjerno kaže drugačije.
+
+**Pravilo sigurne konsolidacije:** prije brisanja ili spajanja bilo kojeg `product_brand` terma obavezno uporediti ERP identitet, legitimne relacije proizvoda, `brand_segment`, `brand_image`, `thumbnail_id` i ostale ne-ERP term meta. Ako duplikat/ručni term nosi lokalno kurirane podatke koji trebaju preživjeti, oni se PRIJE brisanja namjerno migriraju na zadržani kanonski term. Lokalno kurirani brand podaci se nikad ne odbacuju tiho tokom ERP normalizacije.
+
+**OTVOREN slučaj (nije riješen, nije odluka o brisanju) — Chilly's:**
+- term 16 `Chilly's` (slug `chillys`): ručni/ne-ERP term, bez ERP brand ID-a, objavljeni proizvodi #23 i #113 (bez `_erp_id`/`_BRAND_ID`), `thumbnail_id = 108`, bez `brand_image`;
+- term 283 `CHILLYS` (slug `chillys-2`): ERP-backed, `brandId = 28`, trenutno odvojen od terma 16, bez `thumbnail_id` i bez `brand_image`.
+Konsolidacija zahtijeva zasebnu istragu: proizvodi #23/#113, mogući ERP ekvivalenti, lokalna term meta, segment, logo 108 i svi drugi lokalni podaci koji moraju preživjeti.
+
+**Ostalo (strukturni nalazi, ne popravljano):** 5 ERP brendova nema WP term (11, 29, 30, 69, 76 — najvjerovatnije bez artikala); jedan draft proizvod (#23350) ima `_BRAND_ID` bez `product_brand` relacije.
+
 ### Consequences
 
 - Segment Landing (i bilo koja buduća shared površina) NE MOGU sigurno ponovno koristiti trenutne homepage blokove doslovno bez Faze B rada — ali sama Faza A ne blokira ništa niti zahtijeva da to bude riješeno sada.

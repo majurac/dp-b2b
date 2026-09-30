@@ -643,6 +643,8 @@ Konsolidacija zahtijeva zasebnu istragu: proizvodi #23/#113, mogući ERP ekvival
 
 **Ostalo (strukturni nalazi, ne popravljano):** 5 ERP brendova nema WP term (11, 29, 30, 69, 76 — najvjerovatnije bez artikala); jedan draft proizvod (#23350) ima `_BRAND_ID` bez `product_brand` relacije.
 
+**Životni ciklus importera (referenca):** normalni puni import zadržava lokalna brand polja (`brand_segment`, `brand_image`, `thumbnail_id`) i attachmente na zadržanim termovima — verifikovano stvarnim punim importom na stagingu. Detalji importer životnog ciklusa i destruktivnih putanja su u ADR-012. Identitet branda (preimenovanje, duplikati, brisanje/rekreiranje terma) i dalje podliježe pravilima očuvanja iz ovog ADR-a.
+
 ### Consequences
 
 - Segment Landing (i bilo koja buduća shared površina) NE MOGU sigurno ponovno koristiti trenutne homepage blokove doslovno bez Faze B rada — ali sama Faza A ne blokira ništa niti zahtijeva da to bude riješeno sada.
@@ -659,6 +661,7 @@ Konsolidacija zahtijeva zasebnu istragu: proizvodi #23/#113, mogući ERP ekvival
 - `docs/active/block-css-cache-busting-followup.md` (novo — cache-busting nalaz)
 - `uncle-dev-importer/src/Importer.php` (`get_categories()`, `assign_taxonomy_term_to_product()` — ERP category/brand mapping evidencija)
 - ADR-008 (ERP boundary, ista sesija)
+- ADR-012 (ERP importer lifecycle safety — životni ciklus importera i očuvanje lokalnih brand polja pri punom importu)
 
 ---
 
@@ -811,3 +814,45 @@ The business wants a non-binding recommended retail price (MPC) shown above the 
 
 - The importer (`uncle-dev-importer`) does not write `dp_non_binding_mpc`, so imports cannot overwrite it.
 - If MPC must later come from Apros, that is a separate investigation.
+
+---
+
+## ADR-012 — ERP importer lifecycle safety
+
+**Date:** 2026-09-30
+**Status:** Documented (behavior of the protected `uncle-dev-importer` plugin as inspected and exercised on staging; no code change)
+
+### Context
+
+Catalog cleanup work (manual legacy products, duplicate brand terms) depends on what a normal ERP refresh will and will not touch. The importer is a protected plugin (`uncle-dev-importer`, provider `AprosProvider`); its lifecycle was read from source and then confirmed by one real full import on staging. This ADR records the durable behavior, not the audit that found it. Statements about exact line-level behavior are implementation details of the current importer version and must be re-verified if the plugin changes.
+
+### Decision — recorded invariants
+
+**1. Execution path.** The canonical refresh is `wp importer import` (`ImporterWPClient::import` → `Importer::import`). It is a full import: all Apros GET endpoints are read every run and there is no separate incremental mode. A per-product response hash that includes the business date skips unchanged products only within the same business day.
+
+**2. Product identity and SKU namespace.** For an ERP parent product `_erp_id` is the ERP `articleId`, and the generated SKU is `'P-' + articleId`, so a normal ERP-managed parent satisfies `SKU == 'P-' + _erp_id`. Lookup is by `_erp_id` through a direct SQL query (post types/statuses publish, draft, pending, private, future), deliberately independent of storefront visibility hooks. Lookup happens before SKU assignment.
+
+**3. SKU collision is destructive.** If `set_sku()` fails because another product owns the target SKU, the importer resolves the holder and calls `wp_delete_post( $holder, true )`. The holder is **not required to be ERP-managed**: a manual WooCommerce product that owns an incoming `P-<articleId>` SKU would be permanently deleted. Consequence: before any import that follows manual catalog work, migrations, or bulk SKU edits, the `P-<articleId>` namespace must be checked against non-ERP products. A collision-free result is an observed state at the time of the check, not an architectural guarantee.
+
+**4. Variation lifecycle.** Stale ERP variations (existing under an ERP parent but absent from the incoming variation state) are hard-deleted (`wp_delete_post( ..., true )`) before new ones are created. Variation SKU collisions are scoped: a holder is deleted only if it is a variation of the same parent; other holders are left alone and the SKU assignment is logged as a duplicate. This lifecycle is not a general cleanup of unrelated products or Media Library attachments.
+
+**5. Missing-product lifecycle.** `trash_missing_products` selects only products carrying the ERP provider marker (`_erp_provider` = provider name, plus `_erp_id` present) and moves those absent from the incoming article list to trash with `wp_trash_post` (recoverable, not permanent deletion). Manual/non-ERP products have no provider marker and are outside this lifecycle, so they survive ERP refreshes indefinitely. Defensive guard: if the incoming list contains fewer than 20 article IDs (current implementation value) trash is skipped, protecting against a failed or truncated ERP response; a partial response above the threshold is not detected.
+
+**6. Visibility and status.** ERP `visible` drives publish/draft for ERP-managed products. It is not a one-to-one mapping: the provider forces `visible = false` for a virtual (variation-driven) article that has no usable variations, so `ERP visible = true` does not universally mean WordPress `publish`. Product images are imported only for visible products; draft products keep no imported images. This proves ERP-driven image handling only; it does not make manually uploaded product images protected enrichment and does not imply they must be migrated to ERP products.
+
+**7. Categories are not a working ERP channel.** `AprosProvider::categories()` returns an empty collection, so the provider creates no categories. The importer can map an article `classification` to a `product_cat` term only through a term-level `remote_category_id` mapping, and no such mapping is currently established. A full ERP refresh therefore does not reconstruct WordPress product categories. If category integration is implemented later, this ADR must be revised.
+
+**8. Brand enrichment boundary (extends ADR-009).** For `product_brand`, the importer resolves terms by NAME (`get_term_by('name', ...)`), creates a term when no name matches, assigns the product brand with `wp_set_object_terms` (replacing the previous relation), and writes only the ERP mapping field `remote_category_id` on the term. It does not write `brand_segment`, `brand_image` or `thumbnail_id`, and it never deletes terms or Media Library attachments. A real full import preserved these fields unchanged on retained terms. This holds for the normal full-import lifecycle of retained terms only. Because identity resolution starts from the brand name, an ERP rename, capitalization/name mismatch, duplicate term, term deletion/recreation or importer change is a reconciliation case that must explicitly preserve DreamPoint-owned enrichment per ADR-009.
+
+### Consequences
+
+- Manual/non-ERP products are not cleaned up by the ERP lifecycle; retiring them is an explicit, separately approved catalog operation.
+- Any operation that could give a non-ERP product a `P-<articleId>` SKU, or that recreates ERP parents with new IDs, requires a SKU-namespace pre-flight before the next full import.
+- A full import is safe for retained brand terms' presentation fields under current behavior, but is not a substitute for brand identity reconciliation.
+- Category structure must be maintained outside the importer until a category mapping is deliberately introduced.
+
+### Related
+
+- ADR-009 (Update 2026-09-30, Brand data ownership model)
+- ADR-008 (ERP boundary, protected Apros plugins)
+- `uncle-dev-importer/src/Importer.php` (`import()`, `get_product_id_by_erp_id()`, `trash_missing_products()`, `assign_taxonomy_term_to_product()`), `Providers/AprosProvider.php` (`fetch()`, `categories()`)

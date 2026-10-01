@@ -108,7 +108,11 @@ class DP_Quick_Order_Rest_Api {
 		$product_id = absint( $request->get_param( 'id' ) );
 		$product    = wc_get_product( $product_id );
 
-		if ( ! $product instanceof WC_Product_Variable ) {
+		// Parent must be accessible to the current B2B user (canonical visibility contract).
+		// Inaccessible parents get the same 404 as a non-variable product — no existence/type disclosure.
+		$accessible = (bool) apply_filters( 'dp_b2b_product_accessible', true, $product_id, get_current_user_id() );
+
+		if ( ! $accessible || ! $product instanceof WC_Product_Variable ) {
 			return new WP_Error(
 				'not_variable',
 				__( 'Product is not a variable product.', 'dp-b2b-quick-order' ),

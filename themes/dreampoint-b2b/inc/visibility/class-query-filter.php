@@ -199,8 +199,13 @@ class Dreampoint_B2B_Query_Filter {
 			return $terms;
 		}
 
+		// Terms of other taxonomies (product_type, product_cat, …) can be primed in the same
+		// get_terms() call and must never be touched. Scalar results (IDs/names) carry no
+		// taxonomy identity, so they are filtered only when the query is scoped to product_brand alone.
+		$solely_brand = 1 === count( $taxonomies );
+
 		if ( $context->is_no_access() ) {
-			return [];
+			return $this->restrict_brand_terms( $terms, [], $solely_brand );
 		}
 
 		if ( $context->is_rule_based() ) {
@@ -208,23 +213,35 @@ class Dreampoint_B2B_Query_Filter {
 			if ( empty( $context->allowed_brand_ids ) ) {
 				return $terms;
 			}
-			$allowed = $context->allowed_brand_ids;
-			return array_values( array_filter( $terms, static function ( $term ) use ( $allowed ): bool {
-				return in_array( self::term_id_from( $term ), $allowed, true );
-			} ) );
+			return $this->restrict_brand_terms( $terms, $context->allowed_brand_ids, $solely_brand );
 		}
 
 		if ( $context->is_custom_offer() ) {
-			$allowed = $this->get_brand_ids_for_custom_offer( $user_id );
-			if ( empty( $allowed ) ) {
-				return [];
-			}
-			return array_values( array_filter( $terms, static function ( $term ) use ( $allowed ): bool {
-				return in_array( self::term_id_from( $term ), $allowed, true );
-			} ) );
+			return $this->restrict_brand_terms( $terms, $this->get_brand_ids_for_custom_offer( $user_id ), $solely_brand );
 		}
 
 		return $terms;
+	}
+
+	/**
+	 * Keeps only allowed product_brand terms; terms of any other taxonomy pass through unchanged.
+	 *
+	 * @param WP_Term[]|int[]|string[] $terms
+	 * @param int[]                    $allowed      Allowed product_brand term IDs.
+	 * @param bool                     $solely_brand True when the query requested product_brand only.
+	 * @return WP_Term[]|int[]|string[]
+	 */
+	private function restrict_brand_terms( array $terms, array $allowed, bool $solely_brand ): array {
+		return array_values( array_filter( $terms, static function ( $term ) use ( $allowed, $solely_brand ): bool {
+			if ( $term instanceof WP_Term ) {
+				if ( 'product_brand' !== $term->taxonomy ) {
+					return true;
+				}
+			} elseif ( ! $solely_brand ) {
+				return true;
+			}
+			return in_array( self::term_id_from( $term ), $allowed, true );
+		} ) );
 	}
 
 	// -------------------------------------------------------------------------

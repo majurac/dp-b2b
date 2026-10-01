@@ -4,7 +4,7 @@
 
 Development-only stress-test data generator. Exercises visibility engine, Quick Order, filtering, variation sync, and pagination with realistic fake catalog data.
 
-**Never run in production.** Hard-fails if `WP_ENVIRONMENT_TYPE === 'production'`.
+**Never run in production.** Environment guard (fixed 2026-10-01): `guard_production()` uses `wp_get_environment_type()` with a fail-closed allow-list — only `local`, `development` and `staging` are allowed; `production`, unset and invalid values (which WordPress normalizes to `production`) are blocked, with no bypass flag. *Historical behavior:* before 2026-10-01 the guard checked `defined('WP_ENVIRONMENT_TYPE') && WP_ENVIRONMENT_TYPE === 'production'`, which did not enforce the effective-environment rule while the constant was undefined (see `docs/decisions.md` ADR-006 / ADR-012). Both the local installation and staging currently resolve `wp_get_environment_type() === 'production'` unless an environment is explicitly configured, so the generator is intentionally blocked there by default. Intentional fixture work must explicitly configure an allowed WordPress environment (`local`, `development` or `staging`) through the canonical WordPress mechanism (`WP_ENVIRONMENT_TYPE` constant or environment variable).
 
 ---
 
@@ -97,14 +97,14 @@ All variations have individual SKUs (`DEV-VAR-001-01` etc.), deterministic price
 
 ### Phase 4 — Brand Fixtures (implemented)
 
-Recreates the canonical 21-brand real (non-`[DEV]`) `product_brand` development
+Recreates the canonical 18-brand real (non-`[DEV]`) `product_brand` development
 dataset used to test the Brands page (segment navigation, brand hero image/logo).
 Unlike Phases 1–3, this is a **fixed, hardcoded list** — not randomly generated,
 not derived from live DB state at run time. See
 `docs/superpowers/specs/2026-08-04-brand-fixtures-design.md` for the full design
 rationale.
 
-**21 brands**, each with `name`, `description`, optional `brand_segment` (ACF),
+**18 brands** (current inventory; originally 21 — `chillys`, `flow-amsterdam` and `go-baby-go` were removed as fixture definitions on 2026-10-01, see ADR-012), each with `name`, `description`, optional `brand_segment` (ACF),
 optional logo (`thumbnail_id` term meta), optional `brand_image` (ACF). Some brands
 intentionally lack one or more of these fields — this is the real, current state of
 the dataset and is reproduced faithfully, not "completed":
@@ -113,15 +113,12 @@ the dataset and is reproduced faithfully, not "completed":
 |---|---|---|---|
 | `24bottles` | lifestyle | yes | yes |
 | `a-fan-of` | lifestyle | yes | yes |
-| `chillys` | — | yes | no |
 | `design-letters-aps` | lifestyle | yes | yes |
 | `djeco` | — | yes | no |
 | `dock-bay` | lifestyle | yes | yes |
 | `eat-my-socks` | — | yes | yes |
-| `flow-amsterdam` | toys | yes | yes |
 | `fresk` | toys | yes | yes |
 | `gaston-luga` | lifestyle | no | yes |
-| `go-baby-go` | toys | yes | yes |
 | `izipizi` | lifestyle | yes | yes |
 | `janod` | — | yes | no |
 | `la-coque-francaise` | lifestyle | yes | yes |
@@ -160,7 +157,7 @@ asset's path relative to `dev-fixtures/`, so re-running the phase never creates
 duplicate Media Library attachments.
 
 **Deliberately outside the `_dp_generated`/`reset-catalog` lifecycle:** Brand
-Fixtures terms are real brand data — three of them (`chillys`, `djeco`, `janod`)
+Fixtures terms are real brand data — at the time of the original design three of them (`chillys`, `djeco`, `janod`)
 have real, non-`[DEV]` products currently assigned. They are **not** tagged with
 `_dp_generated`/`_dp_generation_batch` and `reset-catalog` never touches them.
 
@@ -296,7 +293,7 @@ is needed.
 | Optimistic rollback on out-of-stock | Phase 3 — variation-level stock mix |
 | Variation add_to_cart validation | Phase 3 — all stock states per product |
 | Quick Order New/Best Seller filters | Backdated post_date + total_sales tiers (Phase 2), thresholds sourced live from DP_Quick_Order_Config |
-| Brands page segment navigation / hero image / logo | Phase 4 — 21-brand canonical fixture dataset |
+| Brands page segment navigation / hero image / logo | Phase 4 — 18-brand canonical fixture dataset |
 
 ---
 

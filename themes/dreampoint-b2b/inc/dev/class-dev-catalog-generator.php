@@ -135,12 +135,26 @@ class Dreampoint_B2B_Dev_Catalog_Generator extends WP_CLI_Command {
 	}
 
 	// -------------------------------------------------------------------------
-	// Production guard
+	// Environment guard
 	// -------------------------------------------------------------------------
 
+	/**
+	 * Fail-closed allow-list on WordPress's effective environment type.
+	 *
+	 * wp_get_environment_type() resolves the WP_ENVIRONMENT_TYPE constant, then
+	 * the env var, and normalizes unset/invalid values to 'production' — so an
+	 * unconfigured environment is blocked until it is explicitly opted in.
+	 */
 	private function guard_production(): void {
-		if ( defined( 'WP_ENVIRONMENT_TYPE' ) && WP_ENVIRONMENT_TYPE === 'production' ) {
-			WP_CLI::error( 'Catalog generator is disabled in production.' );
+		$environment          = wp_get_environment_type();
+		$allowed_environments = [ 'local', 'development', 'staging' ];
+
+		if ( ! in_array( $environment, $allowed_environments, true ) ) {
+			WP_CLI::error( sprintf(
+				'Catalog generator is blocked: effective environment is "%s" (allowed: %s). Explicitly configure an allowed WP_ENVIRONMENT_TYPE to use it.',
+				$environment,
+				implode( ', ', $allowed_environments )
+			) );
 		}
 	}
 
@@ -1433,7 +1447,7 @@ class Dreampoint_B2B_Dev_Catalog_Generator extends WP_CLI_Command {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * Canonical Brand Fixtures dataset — 21 real (non-[DEV]) product_brand
+	 * Canonical Brand Fixtures dataset — 18 real (non-[DEV]) product_brand
 	 * records reproducing the current Brands-page development dataset,
 	 * including its intentionally incomplete state (missing logo/brand_image
 	 * on some brands, missing brand_segment on others — see the approved
@@ -1460,14 +1474,6 @@ class Dreampoint_B2B_Dev_Catalog_Generator extends WP_CLI_Command {
 				'segment'     => 'lifestyle',
 				'logo'        => 'brands/a-fan-of/logo.webp',
 				'image'       => 'brands/a-fan-of/brand-image.webp',
-			],
-			[
-				'slug'        => 'chillys',
-				'name'        => 'Chilly\'s',
-				'description' => '',
-				'segment'     => null,
-				'logo'        => 'brands/chillys/logo.jpg',
-				'image'       => null,
 			],
 			[
 				'slug'        => 'design-letters-aps',
@@ -1502,14 +1508,6 @@ class Dreampoint_B2B_Dev_Catalog_Generator extends WP_CLI_Command {
 				'image'       => 'brands/eat-my-socks/brand-image.webp',
 			],
 			[
-				'slug'        => 'flow-amsterdam',
-				'name'        => 'Flow Amsterdam',
-				'description' => '',
-				'segment'     => 'toys',
-				'logo'        => 'brands/flow-amsterdam/logo.png',
-				'image'       => 'brands/flow-amsterdam/brand-image.png',
-			],
-			[
 				'slug'        => 'fresk',
 				'name'        => 'Fresk',
 				'description' => '',
@@ -1524,14 +1522,6 @@ class Dreampoint_B2B_Dev_Catalog_Generator extends WP_CLI_Command {
 				'segment'     => 'lifestyle',
 				'logo'        => null,
 				'image'       => 'brands/gaston-luga/brand-image.webp',
-			],
-			[
-				'slug'        => 'go-baby-go',
-				'name'        => 'Go baby go',
-				'description' => '',
-				'segment'     => 'toys',
-				'logo'        => 'brands/go-baby-go/logo.png',
-				'image'       => 'brands/go-baby-go/brand-image.png',
 			],
 			[
 				'slug'        => 'izipizi',

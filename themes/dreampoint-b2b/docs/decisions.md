@@ -239,7 +239,7 @@ Two staging-only problems needed resolving:
 ### Actions taken (2026-09-02, staging only; read-only except the two authorized operations below)
 
 **1. Synthetic catalog cleanup** — via the generator's own canonical batch-scoped path:
-`wp dp-b2b reset-catalog --batch=20260713_1138` (run as site user `dream9399`). The generator's `guard_production()` aborts when `wp_get_environment_type() === 'production'`; on staging that function returns `production` only because the `WP_ENVIRONMENT_TYPE` constant/env var is unset (WordPress default), so the guard was satisfied for the single invocation with a transient `WP_ENVIRONMENT_TYPE=staging` env var — **no `wp-config.php` change, no source change**.
+`wp dp-b2b reset-catalog --batch=20260713_1138` (run as site user `dream9399`). The generator's `guard_production()` was *intended* to abort in a production environment; on staging `wp_get_environment_type()` returns `production` only because the `WP_ENVIRONMENT_TYPE` constant/env var is unset (WordPress default). A transient `WP_ENVIRONMENT_TYPE=staging` env var was supplied for the single invocation — **no `wp-config.php` change, no source change**. *Correction (2026-10-01):* the guard of that time did NOT use `wp_get_environment_type()`; it checked `defined('WP_ENVIRONMENT_TYPE') && WP_ENVIRONMENT_TYPE === 'production'` on the raw constant, so it did not actually enforce the effective-environment rule, and the transient env var was not what satisfied it. The guard was replaced with a `wp_get_environment_type()` allow-list (`local`/`development`/`staging`) — see ADR-012 Update 2026-10-01 (fixture generator hardening). With the new guard, a transient env var is exactly the supported opt-in.
 - Deleted: **210 parent products + 183 variations = 393 objects** (`wp_delete_post($id, true)`).
 - **Preserved** (batch mode never deletes terms): 24 `_dp_generated` `[DEV]` product categories, 30 `_dp_generated` `[DEV]` brands, all 11 `_dp_brand_fixture` Brand Fixture terms, 3 `faq-category` terms + 9 `faq` posts, 16 pages, 6 nav menu items, 6061 attachments.
 - **Zero Apros products affected.** `SYNTHETIC DELETE SET ∩ PROTECTED ERP SET = ∅` proven: no post carries both `_dp_generated` and `_erp_*`; the 16 flagged products all have `_dp_generated IS NULL` + `_erp_provider = AprosProvider`.
@@ -913,7 +913,7 @@ Catalog cleanup work (manual legacy products, duplicate brand terms) depends on 
 - Buckets 135 and 136: empty development/test remnants, no users, no legacy-product rules.
 - Term 283 slug stays `chillys-2` (not renamed to `chillys`; changing the ERP brand archive URL is a URL/SEO decision, not a requirement).
 
-**Fixture-generator residual (not fixed).** `inc/dev/class-dev-catalog-generator.php` still defines a `chillys` brand fixture. The generator is WP-CLI-only, manual and was not run; it is not part of normal runtime. Because term 16 is gone and term 283 is `chillys-2`, slug `chillys` is free, so manually running the `brand-fixtures` phase could recreate a Chilly's term. Its `guard_production()` checks `defined('WP_ENVIRONMENT_TYPE')`, which does not protect staging while the constant is undefined, although `wp_get_environment_type()` reports `production`.
+**Fixture-generator residual — RESOLVED 2026-10-01 (see 'Fixture generator hardening' below).** Originally recorded: `inc/dev/class-dev-catalog-generator.php` still defined a `chillys` brand fixture and `guard_production()` checked only the raw `WP_ENVIRONMENT_TYPE` constant, so it did not protect staging while the constant was undefined although `wp_get_environment_type()` reports `production`.
 
 **Follow-up register (none is a blocker for the closed core cleanup):**
 1. Legacy/manual product categories — separate decision; currently KEEP.
@@ -921,9 +921,19 @@ Catalog cleanup work (manual legacy products, duplicate brand terms) depends on 
 3. Buckets 135/136 — separate decision.
 4. Orphan attachments of the six products — separate decision.
 5. Persistent cart — `vis_full` already emptied naturally; no cleanup required unless broader stale carts are later investigated.
-6. Fixture generator — stale `chillys` fixture + environment-guard hardening; separate code task.
+6. Fixture generator — stale `chillys` fixture + environment-guard hardening — **DONE 2026-10-01** (see below).
 7. CHILLYS slug `chillys-2` → `chillys` — separate URL/SEO decision.
 8. Six trashed products — eventual permanent deletion/empty-trash; separate explicit decision, not to be bundled into another cleanup.
+
+### Update (2026-10-01) — Fixture generator hardening (follow-up register item 6: CLOSED)
+
+Code/repository-only fix to `inc/dev/class-dev-catalog-generator.php` and `dev-fixtures/`; no staging data was touched, the generator was not run, and no configuration was changed (no `WP_ENVIRONMENT_TYPE` definition, no `wp-config.php` change).
+
+- **Environment guard.** `guard_production()` now uses `wp_get_environment_type()` with an explicit fail-closed allow-list: only `local`, `development` and `staging` are allowed. `production`, unset and invalid values (WordPress normalizes them to `production`) are blocked with an error naming the effective environment and the allowed values. No bypass flag, no hostname exceptions, no automatic override. The guard covers both `generate-catalog` (all phases and `--refresh-metadata`) and `reset-catalog`. Historical truth: the previous guard checked only the raw constant and never enforced this rule (see ADR-006 correction).
+- **Stale fixtures removed.** The `chillys` (canonical ERP-backed term is 283 `CHILLYS` / `chillys-2`), `flow-amsterdam` and `go-baby-go` (terms 267/269 were deliberately deleted from staging earlier) fixture definitions were removed, along with `dev-fixtures/brands/{chillys,flow-amsterdam,go-baby-go}/`. The canonical fixture inventory is now 18. `djeco` and `janod` are retained (their slug-matching ERP-backed terms 17/18 exist, so they skip). Fixture identity (slug matching) and `_dp_brand_fixture` semantics (provenance only, no runtime meaning) are unchanged; existing markers were not touched.
+- **No data migration.** Term 283, attachment 108 and all Media Library data are untouched.
+- **Operational consequence.** Both the local installation and staging currently resolve `wp_get_environment_type() === 'production'` unless an environment is explicitly configured, so the generator is intentionally blocked there by default. Future intentional fixture work must explicitly configure an allowed environment (`local`, `development` or `staging`) through the canonical WordPress mechanism (constant or environment variable, e.g. a transient `WP_ENVIRONMENT_TYPE=staging` for a single invocation).
+- **Validation.** `php -l`; static assertion of 18 unique fixture slugs (no `chillys`/`flow-amsterdam`/`go-baby-go`, `djeco`/`janod` present); isolated harness using the real `wp_get_environment_type()` and the real guard method confirming `local`/`development`/`staging` allowed and `production`/unset/invalid blocked — no WordPress bootstrap, no DB.
 
 ### Related
 

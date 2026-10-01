@@ -645,6 +645,30 @@ Konsolidacija zahtijeva zasebnu istragu: proizvodi #23/#113, mogući ERP ekvival
 
 **Životni ciklus importera (referenca):** normalni puni import zadržava lokalna brand polja (`brand_segment`, `brand_image`, `thumbnail_id`) i attachmente na zadržanim termovima — verifikovano stvarnim punim importom na stagingu. Detalji importer životnog ciklusa i destruktivnih putanja su u ADR-012. Identitet branda (preimenovanje, duplikati, brisanje/rekreiranje terma) i dalje podliježe pravilima očuvanja iz ovog ADR-a.
 
+### Update (2026-10-01) — Visibility/Quick Order correctness invariants (commit `648b3c9`)
+
+Two defects found during staging acceptance of the real-ERP demo configuration were fixed and verified with real authenticated HTTP on staging (via User Switching).
+
+**Invariant 1 — brand-term filtering touches `product_brand` only.** `Dreampoint_B2B_Query_Filter::filter_brand_terms()` (`get_terms` hook) previously filtered the ENTIRE returned collection whenever `product_brand` was among the requested taxonomies. WordPress/WooCommerce prime several product taxonomies in one `get_terms()` call, so `product_type` was dropped and a variable product was reported as `simple` for restricted users (confirmed: product 13206, `vis_offer`). Now `restrict_brand_terms()` filters only `WP_Term` objects whose `taxonomy === 'product_brand'`; terms of any other taxonomy pass through unchanged. Scalar results (IDs/names) carry no taxonomy identity and are filtered only when the query is scoped to `product_brand` alone. Semantics for genuine brand-only queries, the `shared_surface` bypass and admin bypass are unchanged. Note: callers that use `WP_Term_Query` directly (e.g. WooCommerce Store API `/products/brands`) never reach the `get_terms` filter — this is existing behavior, not part of this invariant.
+
+**Invariant 2 — variation data requires parent access.** `DP_Quick_Order_Rest_Api::get_variations()` (`/quick-order/products/{id}/variations`) now calls the canonical `dp_b2b_product_accessible` filter for the parent before returning anything. An inaccessible parent returns the same 404 `not_variable` as a non-variable product (no existence/type disclosure). Previously any B2B-eligible user could read price, stock and attributes of all variations of a parent they could not otherwise see. Sibling routes were checked: product list uses the visibility engine, `cart/sync` already used `dp_b2b_product_accessible`.
+
+**Staging acceptance (2026-10-01, product 13206 / ERP 55639, 24 variations):**
+
+| User | list | search | variations | PDP |
+|---|---|---|---|---|
+| vis_full | variable | variable | 200 × 24 | 200 |
+| vis_offer | variable | variable | 200 × 24 | — |
+| vis_rule_brand | no | no | 404 | 404 |
+| vis_rule_cat | no | no | 404 | 404 |
+| vis_none | 403 | 403 | 403 | 404 |
+
+List totals confirmed per rule: full 457, NUUNA-only 68, category-800 3, custom offer 5. For `vis_offer` the Store API product data (type, brands, attribute terms 1/12/2, 24 variations) matched the admin baseline.
+
+**Staging-only fixture:** product category 800 `Demo — Category Access` (bucket 131, products 9339/18893/6180) exists only on staging as a demo fixture for rule-based category access. It is not ERP-owned and not part of any production data model; it must not be treated as a canonical category or migrated.
+
+**Open finding (not fixed, outside this change):** WooCommerce Store API `GET /wc/store/v1/products/{id}` returns parent data (name, price, type, variation IDs) to a logged-in restricted user whose list/search/PDP access is denied (observed: `vis_rule_brand` → 13206, HTTP 200). The Store API list route and PDP are filtered; the single-product route is not. Needs a separate decision.
+
 ### Consequences
 
 - Segment Landing (i bilo koja buduća shared površina) NE MOGU sigurno ponovno koristiti trenutne homepage blokove doslovno bez Faze B rada — ali sama Faza A ne blokira ništa niti zahtijeva da to bude riješeno sada.

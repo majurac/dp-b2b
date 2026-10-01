@@ -145,6 +145,15 @@ If database access is truly needed:
 - ask for confirmation first
 - explain why browser/WP admin/WP-CLI is not enough
 
+## Staging — Testing As Another User (User Switching)
+
+The standard `User Switching` plugin is installed and active on staging. It is the DEFAULT mechanism whenever testing, debugging or acceptance needs the perspective of an existing WordPress user.
+
+- Not having a user's password is NOT a blocker. Never request, reset or change passwords/capabilities merely for testing.
+- Flow: administrator → native "Switch To" → real authenticated browser/HTTP test → native "Switch Back" → administrator.
+- Prefer real authenticated browser/HTTP over CLI emulation whenever behavior depends on user, cookies, WooCommerce session, B2B visibility or REST auth.
+- Always restore and verify administrator identity at the end.
+
 ## Playwright Login Reliability
 
 Browser autofill can interfere with automated login flows during Playwright testing.

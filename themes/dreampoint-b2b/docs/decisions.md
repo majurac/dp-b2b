@@ -667,7 +667,22 @@ List totals confirmed per rule: full 457, NUUNA-only 68, category-800 3, custom 
 
 **Staging-only fixture:** product category 800 `Demo — Category Access` (bucket 131, products 9339/18893/6180) exists only on staging as a demo fixture for rule-based category access. It is not ERP-owned and not part of any production data model; it must not be treated as a canonical category or migrated.
 
-**Open finding (not fixed, outside this change):** WooCommerce Store API `GET /wc/store/v1/products/{id}` returns parent data (name, price, type, variation IDs) to a logged-in restricted user whose list/search/PDP access is denied (observed: `vis_rule_brand` → 13206, HTTP 200). The Store API list route and PDP are filtered; the single-product route is not. Needs a separate decision.
+### Update (2026-10-01) — Store API / REST product visibility finding: CLOSED (commit `5891b7e`)
+
+`STORE API VISIBILITY FIX VERIFIED — DEFECT CLOSED` — the Store API gate no longer blocks Phase 2 cleanup.
+
+**Finding (previously recorded here as OPEN).** WooCommerce Store API `GET /wc/store/v1/products/{id}` returned parent data (identity, public price, type, variation IDs) to restricted and anonymous users whose list/search/PDP access was denied (observed: `vis_rule_brand` → #13206, HTTP 200). Classified as a DreamPoint B2B integration/access-control defect, not an upstream WooCommerce vulnerability: upstream normally exposes published products; DreamPoint did not apply its per-user boundary to these paths. No customer data and no partner-specific prices were exposed (generic catalog price only).
+
+**Root cause.** Direct Store API product reads (`ProductsById`, `ProductsBySlug`) use `wc_get_product()` and direct WP REST reads (`wp/v2/product/{id}`) use `get_post()`, so they never pass through the `WP_Query` filters (`pre_get_posts` / `posts_clauses`) that protect catalog collections. Variations had the same gap: direct variation retrieval, and Store API `type=variation` collections (`post_type=product_variation`, outside `should_filter()`), bypassed parent-product visibility.
+
+**Fix.**
+- `Dreampoint_B2B_Access_Guard::guard_rest_product_item()` on `rest_request_after_callbacks`: for Store API by-ID / by-slug and wp/v2 product single reads it calls the canonical `dp_b2b_product_accessible` and replaces an inaccessible result with the route's own 404 error (no existence disclosure). Routes are recognized by controller instance, not URL parsing. A variation is authorized by its PARENT. The client-supplied `dp_skip_visibility` param is deliberately not honoured on these public routes.
+- `Dreampoint_B2B_Query_Filter`: REST queries for `product_variation` only are restricted to variations of parents visible to the current user (visible parents come from the regular product query; full access is not restricted).
+- Normal Store API product collections (list/search/include/sku/slug/`collection-data`) are unchanged — still protected by the existing `WP_Query` filtering. Authorization logic is not duplicated.
+
+**Verified acceptance (staging, real HTTP via User Switching, 2026-10-01).** #13206: `vis_full` and `vis_offer` 200 (by ID, slug, variation, wp/v2; `type=variation&parent` = 24); `vis_rule_brand`, `vis_rule_cat`, `vis_none` and anonymous 404 / 0 results with no product data in the error body. Allowed controls still 200 (NUUNA #7613, category-800 #9339, offer #5874). `type=variation` without parent returns only variations of accessible parents (vis_offer 24 from #13206; vis_full 1284 = admin; others 0). Collection counts unchanged: 457 / 68 / 5 / 3 / 0. Quick Order (list, search, variations) and PDP unchanged; admin retains access; unrelated wp/v2 objects unaffected.
+
+**Testing caveat (not a confirmed defect).** During acceptance, browser HTTP caching reused an earlier anonymous Store API collection response for requests such as `/products?per_page=5` and `search=Urban`. Repeating them with cache disabled (`no-store`) returned the correct per-user results. Those collection responses carried `Last-Modified` but no explicit `Cache-Control` preventing browser reuse. This is recorded only as a testing note: acceptance of user-specific REST responses must disable the browser cache. No cross-user server/CDN cache leakage was observed or claimed, and no cache change was made.
 
 ### Consequences
 

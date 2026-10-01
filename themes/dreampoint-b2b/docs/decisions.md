@@ -636,10 +636,10 @@ Izvor: read-only staging audit `product_brand` termova (62 terma, 10 192 proizvo
 
 **Pravilo sigurne konsolidacije:** prije brisanja ili spajanja bilo kojeg `product_brand` terma obavezno uporediti ERP identitet, legitimne relacije proizvoda, `brand_segment`, `brand_image`, `thumbnail_id` i ostale ne-ERP term meta. Ako duplikat/ručni term nosi lokalno kurirane podatke koji trebaju preživjeti, oni se PRIJE brisanja namjerno migriraju na zadržani kanonski term. Lokalno kurirani brand podaci se nikad ne odbacuju tiho tokom ERP normalizacije.
 
-**OTVOREN slučaj (nije riješen, nije odluka o brisanju) — Chilly's:**
+**Slučaj Chilly's — RIJEŠEN 2026-10-01 (Phase 2B; zapis u ADR-012, Update 2026-10-01).** Izvorno stanje (zadržano kao evidencija):
 - term 16 `Chilly's` (slug `chillys`): ručni/ne-ERP term, bez ERP brand ID-a, objavljeni proizvodi #23 i #113 (bez `_erp_id`/`_BRAND_ID`), `thumbnail_id = 108`, bez `brand_image`;
-- term 283 `CHILLYS` (slug `chillys-2`): ERP-backed, `brandId = 28`, trenutno odvojen od terma 16, bez `thumbnail_id` i bez `brand_image`.
-Konsolidacija zahtijeva zasebnu istragu: proizvodi #23/#113, mogući ERP ekvivalenti, lokalna term meta, segment, logo 108 i svi drugi lokalni podaci koji moraju preživjeti.
+- term 283 `CHILLYS` (slug `chillys-2`): ERP-backed, `brandId = 28`, bio odvojen od terma 16, bez `thumbnail_id` i bez `brand_image`.
+Ishod: logo 108 je prije brisanja sačuvan kao `thumbnail_id` terma 283, a term 16 je obrisan. Slug `chillys-2` je namjerno nepromijenjen (zasebna URL/SEO odluka).
 
 **Ostalo (strukturni nalazi, ne popravljano):** 5 ERP brendova nema WP term (11, 29, 30, 69, 76 — najvjerovatnije bez artikala); jedan draft proizvod (#23350) ima `_BRAND_ID` bez `product_brand` relacije.
 
@@ -890,8 +890,43 @@ Catalog cleanup work (manual legacy products, duplicate brand terms) depends on 
 - A full import is safe for retained brand terms' presentation fields under current behavior, but is not a substitute for brand identity reconciliation.
 - Category structure must be maintained outside the importer until a category mapping is deliberately introduced.
 
+### Update (2026-10-01) — Phase 2: core legacy catalog cleanup CLOSED (staging)
+
+`PHASE 2 CORE LEGACY CATALOG CLEANUP DOCUMENTED AND CLOSED`. Staging only; runtime code was not changed (HEAD `587a5bf` before and after). This is the explicit, separately approved retirement operation that the Consequences above require.
+
+**Six legacy products.** Manual staging development/test fixtures #23, #113, #114, #119, #124, #127 were independently verified before cleanup: `publish`, `simple`, no `_erp_id` / `_erp_provider` / `_BRAND_ID` / ERP GTIN / lock metadata, outside `dp_product_access` and every demo bucket. Only #114 had a local SKU (`F300BLPNK`); no ERP-style `P-*` SKU collision existed. Action: all six moved `publish → trash` with `wp_trash_post()` (reversible). They were **not** permanently deleted and remain in Trash (`EMPTY_TRASH_DAYS = 30`). Their probable ERP counterparts #9416, #6150, #19836, #15602, #21142, #9470 were untouched; those mappings are PROBABLE, not hard-identity duplicates, and the decision did not depend on them.
+
+**Chilly's.** Manual term 16 `Chilly's` (slug `chillys`) was non-ERP legacy/test brand data; ERP-backed term 283 `CHILLYS` (slug `chillys-2`, `remote_category_id` 28) is the canonical brand. Before deleting term 16, attachment 108 (`chillys.jpg`, md5 `fa413177f5095a5945c747d787c0c344`) was assigned as term 283 `thumbnail_id = 108`; the attachment and file were unchanged. After the six products were trashed, term 16 was deleted. Term 283 remained present, ERP-backed (28), slug `chillys-2`, `thumbnail_id` 108, and `/brand/chillys-2/` kept rendering the logo. No product-level data from #23/#113 was migrated. Legacy #23 had been assigned to manual term 16, but its probable ERP counterpart (#9416) belongs to 24Bottles — it was NOT mapped to CHILLYS. Attachment 108 is not orphaned: it is now term 283's WooCommerce brand logo.
+
+**Recovery artifacts** (`/home/dreampoint.b2b/backups/`, do not move or modify): `pre-phase2b-20261001-113307.sql.gz` (5,709,264 B, `dream9399:dream9399`, `gzip -t` PASS); `pre-phase2b-chillys-logo-20261001-113307.tgz` (384,429 B, 10 files, `gzip -t` PASS); `pre-phase2b-manifest-20261001-113307.txt`.
+
+**Real ERP demo intact.** Demo products #5874, #7613, #7505, #9339, #18893, #6180, #13206, #15287, #14250 stayed `publish` / ERP-owned. Buckets unchanged: 130 → `vis_full`; 131 → category 800 → `vis_rule_cat`; 134 → NUUNA (273) → `vis_rule_brand`; 137 custom offer → `vis_offer` (exactly 5874, 6180, 9339, 13206, 18893); `vis_none` no access. Category 800 stayed assigned exactly to 6180, 9339, 18893.
+
+**Acceptance (real HTTP, User Switching, cache disabled).** Catalog counts `vis_full` / `vis_rule_brand` / `vis_offer` / `vis_rule_cat` / `vis_none` = 451 / 68 / 5 / 3 / 0. The six trashed products are absent from catalog, search, Quick Order and Store API collections, and direct access no longer exposes them as catalog products. Quick Order for #13206 unchanged (`vis_full`/`vis_offer`: visible, variable, 24 variations; `vis_rule_brand`/`vis_rule_cat`: not visible, variations protected; `vis_none`: no-access behavior). Store API fix remains closed (#13206 authorized 200, unauthorized 404). Navigation and shop render.
+
+**Persistent-cart observation (side effect, not a failure).** Before Phase 2B the persistent cart of `vis_full` (user 3) contained legacy #113, #119, #127. During post-cleanup acceptance WooCommerce loaded that user's context after those products had become unavailable and the persistent cart became empty (`[]`). It was not cleared manually and no cart cleanup command was run; no rollback is needed because the entries were test products intentionally removed from the active catalog.
+
+**Intentionally retained (separate decisions).**
+- Legacy/manual `product_cat` terms (20, 23, 25, 27, 30, 31, 32, 34 and their trees): `inc/nav-categories.php` builds the desktop/mobile navigation from `product_cat` with `hide_empty => false` and ERP does not supply categories, so they are part of current navigation. Category 800 is protected demo infrastructure.
+- Checkout-draft orders 31, 142, 146: reference some legacy products but keep their historical item names.
+- The 13 product attachments of the six products: may now be orphaned.
+- Buckets 135 and 136: empty development/test remnants, no users, no legacy-product rules.
+- Term 283 slug stays `chillys-2` (not renamed to `chillys`; changing the ERP brand archive URL is a URL/SEO decision, not a requirement).
+
+**Fixture-generator residual (not fixed).** `inc/dev/class-dev-catalog-generator.php` still defines a `chillys` brand fixture. The generator is WP-CLI-only, manual and was not run; it is not part of normal runtime. Because term 16 is gone and term 283 is `chillys-2`, slug `chillys` is free, so manually running the `brand-fixtures` phase could recreate a Chilly's term. Its `guard_production()` checks `defined('WP_ENVIRONMENT_TYPE')`, which does not protect staging while the constant is undefined, although `wp_get_environment_type()` reports `production`.
+
+**Follow-up register (none is a blocker for the closed core cleanup):**
+1. Legacy/manual product categories — separate decision; currently KEEP.
+2. Checkout-draft orders 31/142/146 — separate decision; currently KEEP.
+3. Buckets 135/136 — separate decision.
+4. Orphan attachments of the six products — separate decision.
+5. Persistent cart — `vis_full` already emptied naturally; no cleanup required unless broader stale carts are later investigated.
+6. Fixture generator — stale `chillys` fixture + environment-guard hardening; separate code task.
+7. CHILLYS slug `chillys-2` → `chillys` — separate URL/SEO decision.
+8. Six trashed products — eventual permanent deletion/empty-trash; separate explicit decision, not to be bundled into another cleanup.
+
 ### Related
 
-- ADR-009 (Update 2026-09-30, Brand data ownership model)
+- ADR-009 (Update 2026-09-30, Brand data ownership model; Chilly's case resolved by the 2026-10-01 update above)
 - ADR-008 (ERP boundary, protected Apros plugins)
 - `uncle-dev-importer/src/Importer.php` (`import()`, `get_product_id_by_erp_id()`, `trash_missing_products()`, `assign_taxonomy_term_to_product()`), `Providers/AprosProvider.php` (`fetch()`, `categories()`)

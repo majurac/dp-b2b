@@ -917,7 +917,7 @@ Catalog cleanup work (manual legacy products, duplicate brand terms) depends on 
 
 **Follow-up register (none is a blocker for the closed core cleanup):**
 1. Legacy/manual product categories — separate decision; currently KEEP.
-2. Checkout-draft orders 31/142/146 — separate decision; currently KEEP.
+2. Checkout-draft orders 31/142/146 — **DONE 2026-10-01** (permanently deleted on explicit user decision; see 'Legacy test order cleanup' below).
 3. Buckets 135/136 — separate decision.
 4. Orphan attachments of the six products — separate decision.
 5. Persistent cart — `vis_full` already emptied naturally; no cleanup required unless broader stale carts are later investigated.
@@ -934,6 +934,17 @@ Code/repository-only fix to `inc/dev/class-dev-catalog-generator.php` and `dev-f
 - **No data migration.** Term 283, attachment 108 and all Media Library data are untouched.
 - **Operational consequence.** Both the local installation and staging currently resolve `wp_get_environment_type() === 'production'` unless an environment is explicitly configured, so the generator is intentionally blocked there by default. Future intentional fixture work must explicitly configure an allowed environment (`local`, `development` or `staging`) through the canonical WordPress mechanism (constant or environment variable, e.g. a transient `WP_ENVIRONMENT_TYPE=staging` for a single invocation).
 - **Validation.** `php -l`; static assertion of 18 unique fixture slugs (no `chillys`/`flow-amsterdam`/`go-baby-go`, `djeco`/`janod` present); isolated harness using the real `wp_get_environment_type()` and the real guard method confirming `local`/`development`/`staging` allowed and `production`/unset/invalid blocked — no WordPress bootstrap, no DB.
+
+### Update (2026-10-01) — Legacy test order cleanup (follow-up register item 2: CLOSED)
+
+Staging data operation only; no repository/runtime code or configuration changed (staging HEAD `9f882ba` before and after, `git status` clean).
+
+- **Decision.** The user explicitly decided that orders #31, #142 and #146 are not needed for business, historical, development, debugging or audit purposes and may be permanently removed.
+- **Pre-delete classification (re-verified).** All three were HPOS `shop_order` records in status `checkout-draft`, `created_via = store-api`, payment method `bacs`, customer user 1, dated 2026-04-23 / 2026-04-29 / 2026-06-18. No transaction ID, no refunds, no order notes, no ERP/integration meta (only WooCommerce internal hash/index keys and `is_vat_exempt`). Items referenced only legacy test products (#23, #114, #119, #127 — the trashed fixtures). Evidence supported: legacy development/test order.
+- **Backup.** `/home/dreampoint.b2b/backups/pre-delete-test-orders-31-142-146-20261001-143320.sql.gz` (5,710,742 B, `dream9399:dream9399`, `gzip -t` PASS, full dump). Do not move or modify.
+- **Mechanism.** WooCommerce API `WC_Order::delete( true )` per ID from a hard allow-list (31, 142, 146), with a precondition (status `checkout-draft`, `created_via = store-api`). No manual SQL deletes, no bulk/status/date-based cleanup.
+- **Verification.** Order set before = {31, 142, 146, 147, 23358}; after = {147, 23358}; exactly the three allow-listed IDs were removed. `wc_get_order()` returns nothing for each. No residual rows for those IDs in HPOS tables, `posts`/`postmeta`, order items or `wc_order_stats`; no global orphan order items. Unrelated orders #147 and #23358 remain readable; WooCommerce 11.1.2 queries normally; no `debug.log`.
+- **Scope.** No other order, product, attachment, user, category, brand or cart was touched.
 
 ### Related
 

@@ -42,6 +42,11 @@ class Dreampoint_B2B_Query_Filter {
 	// -------------------------------------------------------------------------
 
 	public function filter_product_query( WP_Query $query ): void {
+		if ( $this->is_rest_variation_query( $query ) ) {
+			$this->restrict_variation_parents( $query );
+			return;
+		}
+
 		if ( ! $this->should_filter( $query ) ) {
 			if ( defined( 'DP_VISIBILITY_DEBUG' ) && DP_VISIBILITY_DEBUG ) {
 				error_log( '[dp_visibility] filter_product_query | should_filter=false | query skipped' );
@@ -353,27 +358,74 @@ class Dreampoint_B2B_Query_Filter {
 		return 0; // slug/name queries — cannot match by ID, let them pass
 	}
 
-	private function should_filter( WP_Query $query ): bool {
+	/**
+	 * True when this query must see the unfiltered catalog (admin pages, admins,
+	 * ERP flag, explicit shared-surface opt-in).
+	 */
+	private function is_visibility_bypassed( WP_Query $query ): bool {
 		// Skip regular admin pages; allow AJAX (WooFilter Pro AJAX goes through admin-ajax.php).
 		if ( is_admin() && ! ( defined( 'DOING_AJAX' ) && DOING_AJAX ) ) {
-			return false;
+			return true;
 		}
 
 		// Admins and shop managers bypass visibility.
 		if ( current_user_can( 'manage_options' ) ) {
-			return false;
+			return true;
 		}
 
 		// ERP integration sets this flag to see the full catalog.
 		if ( ! empty( $query->get( 'dp_skip_visibility' ) ) ) {
-			return false;
+			return true;
 		}
 
 		// Explicit shared-surface opt-in (ADR-009, Phase A). Only this exact
 		// value bypasses customer-specific visibility — an unknown/invalid
 		// value fails closed and normal filtering continues. No current
 		// caller sets this; the primitive is dormant until Phase B.
-		if ( 'shared_surface' === $query->get( 'dp_visibility_context' ) ) {
+		return 'shared_surface' === $query->get( 'dp_visibility_context' );
+	}
+
+	/**
+	 * REST queries for product_variation posts only (Store API `type=variation`,
+	 * wp/v2 product_variation). Mixed product+variation queries already take the
+	 * product path in should_filter().
+	 */
+	private function is_rest_variation_query( WP_Query $query ): bool {
+		return defined( 'REST_REQUEST' ) && REST_REQUEST
+			&& [ 'product_variation' ] === (array) $query->get( 'post_type' )
+			&& ! $this->is_visibility_bypassed( $query );
+	}
+
+	/**
+	 * A variation inherits its parent's visibility: restrict the query to variations of
+	 * parents the current user can see. The visible-parent set is computed by the regular
+	 * product query, so the canonical filters above remain the single source of truth.
+	 */
+	private function restrict_variation_parents( WP_Query $query ): void {
+		if ( $this->engine->get_context( get_current_user_id() )->is_full_access() ) {
+			return;
+		}
+
+		$visible_parents = ( new WP_Query( [
+			'post_type'              => 'product',
+			'post_status'            => 'publish',
+			'fields'                 => 'ids',
+			'posts_per_page'         => -1,
+			'no_found_rows'          => true,
+			'ignore_sticky_posts'    => true,
+			'update_post_meta_cache' => false,
+			'update_post_term_cache' => false,
+		] ) )->posts;
+
+		$requested = array_filter( array_map( 'intval', (array) $query->get( 'post_parent__in' ) ) );
+		$allowed   = $requested ? array_values( array_intersect( $requested, $visible_parents ) ) : $visible_parents;
+
+		// post_parent 0 never matches a variation → empty result when no parent is visible.
+		$query->set( 'post_parent__in', $allowed ?: [ 0 ] );
+	}
+
+	private function should_filter( WP_Query $query ): bool {
+		if ( $this->is_visibility_bypassed( $query ) ) {
 			return false;
 		}
 

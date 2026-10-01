@@ -19,6 +19,7 @@ class Dreampoint_B2B_Access_Guard {
 	public function register_hooks(): void {
 		add_action( 'template_redirect', [ $this, 'guard_single_product' ] );
 		add_filter( 'woocommerce_rest_prepare_product_object', [ $this, 'scrub_rest_response' ], 10, 3 );
+		add_filter( 'rest_request_after_callbacks',           [ $this, 'guard_rest_product_item' ], 10, 3 );
 
 		// Quick Order integration contracts — loosely coupled via WP filters.
 		add_filter( 'dp_b2b_product_accessible',          [ $this, 'handle_product_accessible' ], 10, 3 );
@@ -61,6 +62,91 @@ class Dreampoint_B2B_Access_Guard {
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Enforces the canonical product visibility decision on single-item REST reads that
+	 * load a product directly (wc_get_product() / get_post()) and therefore never pass
+	 * through the WP_Query filters:
+	 *  - Store API   GET /wc/store/v1/products/{id}   (ProductsById)
+	 *  - Store API   GET /wc/store/v1/products/{slug} (ProductsBySlug, incl. variation slugs)
+	 *  - WP REST     GET /wp/v2/product/{id}          (WP_REST_Posts_Controller::get_item)
+	 *
+	 * Runs after the route has resolved the item (so the ID/slug semantics are WooCommerce's
+	 * own) but before the response is serialized. A variation inherits its parent's decision.
+	 * Inaccessible items become a 404 with the route's own "invalid id/slug" error code.
+	 *
+	 * Deliberately does NOT honour the `dp_skip_visibility` request param: these routes are
+	 * public, so a client-supplied param must never act as a bypass.
+	 *
+	 * @param WP_REST_Response|WP_HTTP_Response|WP_Error|mixed $response
+	 * @param array<string, mixed>                              $handler
+	 * @return WP_REST_Response|WP_HTTP_Response|WP_Error|mixed
+	 */
+	public function guard_rest_product_item( mixed $response, array $handler, WP_REST_Request $request ): mixed {
+		if ( ! $response instanceof WP_REST_Response || $response->is_error() ) {
+			return $response;
+		}
+		if ( ! in_array( $request->get_method(), [ 'GET', 'HEAD' ], true ) ) {
+			return $response;
+		}
+
+		$error_code = $this->get_guarded_rest_error_code( $handler );
+		if ( null === $error_code ) {
+			return $response;
+		}
+
+		$data = $response->get_data();
+		if ( ! is_array( $data ) || empty( $data['id'] ) ) {
+			return $response;
+		}
+
+		// wp/v2 controllers serve every post type — only product posts are in scope here.
+		if ( 'rest_post_invalid_id' === $error_code && ! in_array( $data['type'] ?? '', [ 'product', 'product_variation' ], true ) ) {
+			return $response;
+		}
+
+		$item_id   = (int) $data['id'];
+		$parent_id = (int) wp_get_post_parent_id( $item_id ); // 0 for a parent product, parent ID for a variation.
+
+		if ( (bool) apply_filters( 'dp_b2b_product_accessible', true, $parent_id ?: $item_id, get_current_user_id() ) ) {
+			return $response;
+		}
+
+		return new WP_Error(
+			$error_code,
+			'rest_post_invalid_id' === $error_code
+				? __( 'Invalid post ID.', 'dreampoint-b2b' )
+				: __( 'Invalid product.', 'dreampoint-b2b' ),
+			[ 'status' => 404 ]
+		);
+	}
+
+	/**
+	 * Maps a matched REST handler to the "not found" error code of the route families
+	 * guarded by guard_rest_product_item(), or null when the route is not guarded.
+	 *
+	 * @param array<string, mixed> $handler
+	 */
+	private function get_guarded_rest_error_code( array $handler ): ?string {
+		$callback = $handler['callback'] ?? null;
+		if ( ! is_array( $callback ) || ! is_object( $callback[0] ?? null ) ) {
+			return null;
+		}
+
+		$controller = $callback[0];
+
+		if ( $controller instanceof \Automattic\WooCommerce\StoreApi\Routes\V1\ProductsById ) {
+			return 'woocommerce_rest_product_invalid_id';
+		}
+		if ( $controller instanceof \Automattic\WooCommerce\StoreApi\Routes\V1\ProductsBySlug ) {
+			return 'woocommerce_rest_product_invalid_slug';
+		}
+		if ( $controller instanceof WP_REST_Posts_Controller && 'get_item' === ( $callback[1] ?? '' ) ) {
+			return 'rest_post_invalid_id';
+		}
+
+		return null;
 	}
 
 	// -------------------------------------------------------------------------

@@ -162,6 +162,17 @@ Prefer explicit Playwright focus/type/click interactions over JS form submission
 
 ---
 
+## Catalog Navigation — UI Source of Truth
+
+The DreamPoint B2B navigation UX is defined ONLY by the Figma design, node "Katalog proizvoda menu":
+https://www.figma.com/design/lZvGxdZfmaLJgAMo4NBgpp/DreamPoint-B2B?node-id=11022-51566
+
+`inc/nav-categories.php` and its markup/CSS (category grid with subcategory thumbnails, 6h shared transient) were copied from the JekaaStore B2C theme as a temporary development placeholder. They are NOT a specification: never infer menu depth, thumbnails, behavior or data needs from them.
+
+Design facts (Figma, 2026-10-02): "Katalog proizvoda" opens a panel with a left list of category rows (each with a chevron, i.e. expandable), a "Prikaži sve kategorije" link, and a right column "Popularni proizvodi" (4 compact cards: image, name, price). "Popularni proizvodi" is independent of the selected/active category. Category rows show no thumbnails. The row labels and the row count in Figma are placeholders: Figma defines the UI pattern only, never the taxonomy or the number of categories. Lifestyle/Toys/Outdoor are separate homepage segment blocks, not menu items. See `docs/decisions.md` ADR-013 (update 2026-10-02).
+
+---
+
 ## Coding Rules
 
 PHP:

@@ -988,3 +988,37 @@ Keep the existing importer unchanged and use the existing manual mapping model.
 - They stay temporarily because the developer needs populated navigation while designing the dropdown; removal needs explicit approval.
 - Term 800 `Demo — Category Access` is a separate staging access-control fixture. Term 15 `Uncategorized` is WooCommerce default-category infrastructure.
 - Currently no B2B `product_cat` term has a `remote_category_id`, so ERP products remain in Uncategorized until a curated mapping is entered.
+
+### Update (2026-10-02) — Navigation UX source of truth is the Figma design, not the copied Jekaa code
+
+The current `inc/nav-categories.php` (top-level groups with a subcategory grid and 200×200 thumbnails, one shared 6-hour transient) was copied from JekaaStore as a temporary placeholder and must not be treated as the DreamPoint UX specification. Statements earlier in this ADR's discussion that the menu "has two levels with thumbnails" described that placeholder only.
+
+Source of truth: Figma file `lZvGxdZfmaLJgAMo4NBgpp`, node `11022:51566` "Katalog proizvoda menu" (https://www.figma.com/design/lZvGxdZfmaLJgAMo4NBgpp/DreamPoint-B2B?node-id=11022-51566). What it shows:
+
+- "Katalog proizvoda" (header item with chevron) opens a panel: left column of category rows, each with a chevron-down (children revealed on expand; the expanded/hover state is not drawn), and a "Prikaži sve kategorije" link under the list; right column "Popularni proizvodi" with 4 compact product cards (image, name, price). The 9 row labels ("Kategorija 1…5") are arbitrary placeholders: Figma defines the UI pattern only, not the taxonomy or the number of categories (7, 8, 9 … are equally acceptable).
+- "Popularni proizvodi" is independent of the selected/active category. It must not be modelled as category-dependent content.
+- Category rows carry no thumbnails; category thumbnails are not a menu requirement.
+- Lifestyle / Toys / Outdoor are separate homepage segment blocks (ADR-009), not menu entries.
+- "Brandovi" and "Akcija" are separate header items.
+
+Implications for later work (not implemented): the menu needs a curated, ordered selection of categories (with a link to all categories), a target for "Prikaži sve kategorije", a separately curated "Popularni proizvodi" list, and that list must respect per-customer B2B visibility and prices, so it cannot live in the shared global menu transient. Interaction details (expand vs flyout, hover vs click, depth beyond one expand level, mobile) are not defined by this node and need the designer.
+
+### Proposed B2B storefront taxonomy (2026-10-02, NOT implemented, awaiting client confirmation of names)
+
+Derived from Apros `classificationList` + `articleList` (snapshot 2026-10-02: 210 classifications, 10,186 articles, 471 ERP-visible) and the JekaaStore manual `remote_category_id` precedent; the Figma pattern fits it (category rows with expandable children). Compact, 2 levels, 5 groups / 26 children, covering all 471 visible products. ERP model-line nodes (12-digit) are folded into their parent child-term (N:1); every used ERP node needs its own `remote_category_id` row (58 rows) because the importer matches the exact classification only (no parent propagation).
+
+| Group (ERP code) | Child ← ERP subtree (nodes; articles / visible) |
+|---|---|
+| Boce i posude za hranu (002001; 1 direct article) | Termo boce ← 002001005 (6; 290/19) · Termo šalice ← 002001004 (4; 66/4) · Posude za hranu ← 002001002 (4; 17/2) · Dodaci za boce ← 002001001 (3; 48/1) |
+| Naočale (002002) | Za čitanje ← 002002001 (1; 990/7) · Zaštita od ekrana ← 002002002 (2; 182/9) · Sportske ← 002002003 (8; 129/11) · Sunčane ← 002002004 (3; 183/22) · Sleeping ← 002002005 (1; 2/2) · Dodaci za naočale ← 002007 (1; 19/12) |
+| Djeca (002003) | Dječje sunčane naočale ← 002003003 (8; 162/20) · Dječje naočale za zaštitu od ekrana ← 002003001 (1; 17/1) · Dječje sportske naočale ← 002003002 (1; 1/1) · Dječje boce i posude za užinu ← 002003004 (1; 8/3) · Dječji ručnici ← 002003005 (1; 2/2) |
+| Lifestyle (002005; 5 direct articles) | Bilježnice i planeri ← 002005009 (1; 414/84) · Šalice ← 002005010 (1; 31/11) · Ručnici ← 002005003 (1; 36/7) · Dodaci ← 002005006 (1; 34/7) · Poklon setovi ← 002005011 (1; 7/7) · Foto albumi ← 002005012 (1; 3/3) |
+| Modni dodaci (002006) | Dodaci za mobitele ← 002006005 (1; 293/103) · Novčanici ← 002006003 (1; 106/48) · Ruksaci i torbe ← 002006004 (1; 145/42) · Lepeze ← 002006002 (1; 35/26) · Čarape ← 002006006 (1; 18/17) |
+
+Visible totals: Boce 26, Naočale 63, Djeca 27, Lifestyle 119, Modni dodaci 236 = 471.
+
+Decisions taken (low risk, name/data-only, reversible): groups map to ERP level-2 codes, also mapped at group level; kids' eyewear appears only under Djeca (mirrors ERP 002003; no 1:N); duplicate names across groups are disambiguated by name only ("Termo šalice" vs Lifestyle "Šalice", "Dodaci za boce" vs Lifestyle "Dodaci"); Croatian names follow the JekaaStore precedent; "Lifestyle" group name coincides with the Lifestyle segment (`brand_segment`) and may be renamed without any mapping change; WooCommerce default term 15 is to be mapped to a dummy remote value (`UNCATEGORIZED`) as on JekaaStore so it is dropped from mapped products; developer fixtures 20–36, 254–256 and term 800 are not part of it.
+
+Intentionally unmapped for now (8 used ERP nodes, 270 articles, 0 visible): 002 root direct (17), promo nodes 002001003 / 002004 / 002005004, 002001006001, Svijeće 002005005, Kućni ljubimci 002005008, Nakit 002006001. Also unmapped: 001 HARDWARE (775 articles) and 003 DJEČJE IGRAČKE I OPREMA (5,897), all currently not visible. Mapping them is additive data work once they become visible.
+
+Genuine client decisions remaining: (1) confirmation of the group/child names and the kids' eyewear placement; (2) storefront categories for HARDWARE and toys (and Nakit / Svijeće / Kućni ljubimci / promo) when they become visible; (3) who curates "Popularni proizvodi" (not a taxonomy item).

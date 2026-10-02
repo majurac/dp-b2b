@@ -951,3 +951,40 @@ Staging data operation only; no repository/runtime code or configuration changed
 - ADR-009 (Update 2026-09-30, Brand data ownership model; Chilly's case resolved by the 2026-10-01 update above)
 - ADR-008 (ERP boundary, protected Apros plugins)
 - `uncle-dev-importer/src/Importer.php` (`import()`, `get_product_id_by_erp_id()`, `trash_missing_products()`, `assign_taxonomy_term_to_product()`), `Providers/AprosProvider.php` (`fetch()`, `categories()`)
+
+---
+
+## ADR-013 — Product categories: manual `remote_category_id` mapping model (inherited from JekaaStore) and fixture provenance
+
+**Date:** 2026-10-02
+**Status:** Accepted. No importer change is required or made; this record documents facts and the decision to keep the existing model.
+
+### Context
+
+The question was whether DreamPoint B2B should import Apros `classificationList` into `product_cat` automatically. A Phase A importer proposal (`AprosProvider::categories()`, hardened `import_remote_categories()`, `sync_categories`/`reconcile_categories`, Uncategorized change, navigation exclusion) was prepared as a local diff and then **rejected and removed**; it was never installed, committed or deployed.
+
+### Decision
+
+Keep the existing importer unchanged and use the existing manual mapping model.
+
+- `uncle-dev-importer` on B2B was forked from the JekaaStore (Apros B2C) importer. Category code is byte-identical to JekaaStore (`get_categories()`, `import_remote_categories()`, `assign_taxonomy_term_to_product()`, the `product_cat` assignment block, the `fetch_categories` gate and the `AprosProvider::categories()` stub). The same code is present in older Jekaa snapshots (2026-03), so it was not introduced by B2B work. B2B-specific importer changes exist elsewhere (pricing/partners, etc.).
+- WordPress/storefront categories are locally curated. Apros classifications are associated through the ACF repeater `remote_category_id` on the term.
+- **Meaning of `remote_category_id`:** "this local category is mapped to one or more ERP classifications". It does **not** mean the category was created or is owned by the ERP. Real storefront categories are expected to carry it.
+- `AprosProvider::categories()` stays an unchanged stub; automatic `classificationList` → `product_cat` creation is not introduced; `fetch_categories` stays absent/NULL for Apros. No importer category-code change is needed for the current B2B requirement.
+- Future production storefront taxonomy and the exact ERP mappings are a separate content/business decision (client input).
+
+### Reference evidence (JekaaStore, read-only, 2026-10-02)
+
+- JekaaStore is the reference Apros B2C implementation: 80 `product_cat` terms, 75 with `remote_category_id`, no automatic import of `classificationList`.
+- Names and hierarchy are curated and often differ from the ERP taxonomy.
+- One ERP classification can map to several WP terms (11 ERP ids do). The repeater also allows several ERP ids on one term; that direction is supported by code but was not observed in the reference data.
+- Manual terms without a remote id (e.g. "Noviteti") are preserved by the importer; the default term 15 carries a dummy remote value so it is dropped from mapped products.
+- Classifications without a mapping leave products in Uncategorized.
+- Note: other importer instances (Cotra, TASK ERP) do implement `categories()` and enable `fetch_categories`; that is a different provider and was not adopted for Apros.
+
+### DreamPoint B2B category terms (provenance, established by the project owner)
+
+- `product_cat` terms 20–36 and 254–256 were created manually by the developer for development/testing and for designing the navigation dropdown. They are not client business taxonomy and not ERP-generated taxonomy, and must not be mapped to ERP classifications merely because names match. This supersedes the "origin undetermined" statement in the ADR-009 update of 2026-09-23.
+- They stay temporarily because the developer needs populated navigation while designing the dropdown; removal needs explicit approval.
+- Term 800 `Demo — Category Access` is a separate staging access-control fixture. Term 15 `Uncategorized` is WooCommerce default-category infrastructure.
+- Currently no B2B `product_cat` term has a `remote_category_id`, so ERP products remain in Uncategorized until a curated mapping is entered.

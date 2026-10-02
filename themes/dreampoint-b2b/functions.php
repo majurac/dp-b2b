@@ -381,7 +381,10 @@ function dreampoint_b2b_scripts(): void {
         wp_enqueue_style( 'dp-page-shop-single', get_template_directory_uri() . '/css/pages/shop-single.css', [ 'dp-style' ], _S_VERSION );
     }
     if ( is_page_template( 'brands.php' ) || is_tax( 'product_brand' ) ) {
-        wp_enqueue_style( 'dp-page-brands', get_template_directory_uri() . '/css/pages/brands.css', [ 'dp-style' ], _S_VERSION );
+        // Versioned by its own mtime: _S_VERSION only tracks style.css / theme.min.js, so a
+        // brands.css rebuild alone would keep the old ?ver= and stay cached (max-age 7 days).
+        $brands_css_mtime = @filemtime( get_template_directory() . '/css/pages/brands.css' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- falls back to _S_VERSION if missing
+        wp_enqueue_style( 'dp-page-brands', get_template_directory_uri() . '/css/pages/brands.css', [ 'dp-style' ], $brands_css_mtime ? (string) $brands_css_mtime : _S_VERSION );
     }
     if ( is_page_template( 'faq.php' ) ) {
         wp_enqueue_style( 'dp-page-faq', get_template_directory_uri() . '/css/pages/faq.css', [ 'dp-style' ], _S_VERSION );

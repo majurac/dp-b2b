@@ -300,3 +300,38 @@ add_action( 'acf/save_post', function ( $post_id ): void {
         dreampoint_b2b_flush_catalog_menu_cache();
     }
 }, 20 );
+
+/**
+ * Marks the "Katalog proizvoda" item of the primary menu (theme location menu-1) so the
+ * catalog panel can attach to it without a manually entered CSS class.
+ *
+ * Deterministic rule: the first top-level custom-link item whose URL is "#" (a menu item
+ * that only opens the panel). Applies to every render of menu-1 (desktop and mobile).
+ * A manually added "cat-toggler" class is still honoured and never duplicated.
+ *
+ * @param WP_Post[] $items Sorted menu items.
+ * @param stdClass  $args  wp_nav_menu() arguments.
+ * @return WP_Post[]
+ */
+function dreampoint_b2b_mark_catalog_menu_item( $items, $args ) {
+    if ( ( $args->theme_location ?? '' ) !== 'menu-1' ) {
+        return $items;
+    }
+
+    foreach ( $items as $item ) {
+        if ( in_array( 'cat-toggler', (array) $item->classes, true ) ) {
+            return $items;
+        }
+    }
+
+    foreach ( $items as $item ) {
+        if ( 0 === (int) $item->menu_item_parent && 'custom' === $item->type && '#' === $item->url ) {
+            $item->classes[] = 'cat-toggler';
+            $item->classes[] = 'menu-item-parent-proizvodi';
+            break;
+        }
+    }
+
+    return $items;
+}
+add_filter( 'wp_nav_menu_objects', 'dreampoint_b2b_mark_catalog_menu_item', 10, 2 );

@@ -243,3 +243,17 @@
         letter-spacing: normal;
     }
 }
+
+// Chevron on the "Katalog proizvoda" item (Figma); rotates while the panel is open.
+#header #main-header ul.links li.cat-toggler > a::after {
+    content: "\e91a"; // icon-chevron-down (icomoon)
+    font-family: 'icomoon';
+    margin-left: 8px;
+    font-size: 10px;
+    transition: transform 0.15s ease;
+}
+
+#header #main-header ul.links li.cat-toggler:hover > a::after,
+#header #main-header ul.links li.cat-toggler:focus-within > a::after {
+    transform: rotate(180deg);
+}

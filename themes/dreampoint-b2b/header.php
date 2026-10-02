@@ -163,12 +163,11 @@ $company_phone = get_field('company_phone', 'option') ?: '';
                         <?php endif; ?>
 
                         <div class="col-md-4 products-menu">
-                            <nav role="navigation" aria-label="<?php esc_attr_e('Glavni meni', 'dreampoint-b2b'); ?>" style="display:none;">
+                            <nav role="navigation" aria-label="<?php esc_attr_e('Glavni meni', 'dreampoint-b2b'); ?>">
                                 <?php echo dreampoint_b2b_catalog_menu_desktop(); ?>
                                 <?php 
                                 wp_nav_menu([
                                     'theme_location' => 'menu-1',
-                                    'menu'           => 'Main Menu',
                                     'container'      => false,
                                     'menu_class'     => 'links',
                                     'items_wrap'     => '<ul class="%2$s">%3$s</ul>',
@@ -292,7 +291,6 @@ $company_phone = get_field('company_phone', 'option') ?: '';
                     <?php 
                     wp_nav_menu([
                         'theme_location' => 'menu-1',
-                        'menu'           => 'Main Menu',
                         'container'      => false,
                         'menu_class'     => 'first-menu',
                         'items_wrap'     => '<ul class="%2$s">%3$s</ul>',

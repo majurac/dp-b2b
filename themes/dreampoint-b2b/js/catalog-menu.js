@@ -35,6 +35,13 @@
     }
 
     document.addEventListener( 'click', function ( event ) {
+        // The "Katalog proizvoda" item is a "#" link that only opens the panel: do not jump to the top.
+        const topLink = event.target.closest( '.cat-toggler > a' );
+        if ( topLink && topLink.getAttribute( 'href' ) === '#' ) {
+            event.preventDefault();
+            return;
+        }
+
         const button = event.target.closest( '.catalog-menu__toggle' );
         if ( ! button ) {
             return;

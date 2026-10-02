@@ -1003,7 +1003,7 @@ Source of truth: Figma file `lZvGxdZfmaLJgAMo4NBgpp`, node `11022:51566` "Katalo
 
 Implications for later work (not implemented): the menu needs a curated, ordered selection of categories (with a link to all categories), a target for "Prikaži sve kategorije", a separately curated "Popularni proizvodi" list, and that list must respect per-customer B2B visibility and prices, so it cannot live in the shared global menu transient. Interaction details (expand vs flyout, hover vs click, depth beyond one expand level, mobile) are not defined by this node and need the designer.
 
-### Proposed B2B storefront taxonomy (2026-10-02, NOT implemented, awaiting client confirmation of names)
+### B2B storefront taxonomy — INITIAL STAGING taxonomy (2026-10-02; created on staging, editable after client feedback)
 
 Derived from Apros `classificationList` + `articleList` (snapshot 2026-10-02: 210 classifications, 10,186 articles, 471 ERP-visible) and the JekaaStore manual `remote_category_id` precedent; the Figma pattern fits it (category rows with expandable children). Compact, 2 levels, 5 groups / 26 children, covering all 471 visible products. ERP model-line nodes (12-digit) are folded into their parent child-term (N:1); every used ERP node needs its own `remote_category_id` row (58 rows) because the importer matches the exact classification only (no parent propagation).
 
@@ -1022,3 +1022,25 @@ Decisions taken (low risk, name/data-only, reversible): groups map to ERP level-
 Intentionally unmapped for now (8 used ERP nodes, 270 articles, 0 visible): 002 root direct (17), promo nodes 002001003 / 002004 / 002005004, 002001006001, Svijeće 002005005, Kućni ljubimci 002005008, Nakit 002006001. Also unmapped: 001 HARDWARE (775 articles) and 003 DJEČJE IGRAČKE I OPREMA (5,897), all currently not visible. Mapping them is additive data work once they become visible.
 
 Genuine client decisions remaining: (1) confirmation of the group/child names and the kids' eyewear placement; (2) storefront categories for HARDWARE and toys (and Nakit / Svijeće / Kućni ljubimci / promo) when they become visible; (3) who curates "Popularni proizvodi" (not a taxonomy item).
+
+### Initial staging taxonomy — created 2026-10-02 (staging data only)
+
+This is an INITIAL STAGING taxonomy. It was created without prior client approval because it is reversible data: names, slugs, hierarchy, order and `remote_category_id` rows stay editable in WP admin and are expected to change after client feedback. It is not a final production taxonomy.
+
+- Created via WP-CLI (WP/ACF APIs, no importer code, no SQL) on DreamPoint B2B staging: 5 groups + 26 children = 31 `product_cat` terms, IDs 801–831 (801 Boce i posude za hranu, 806 Naočale, 813 Djeca, 819 Lifestyle, 826 Modni dodaci; children in between, in the order of the table above). `order` term meta set per sibling group.
+- `remote_category_id` rows: 61 (58 used ERP nodes + group-level codes 002001, 002002, 002003, 002005, 002006 — three of the group codes have no direct articles today) and term 15 `Uncategorized` carries the dummy value `UNCATEGORIZED` (JekaaStore convention: it makes the importer drop the default category from mapped products).
+- Slug collisions with the developer fixtures were resolved deterministically by suffixing, e.g. group Lifestyle → `lifestyle-kategorija` (the fixture 254 "Lifestyle" keeps `lifestyle`; two top-level "Lifestyle" entries coexist until the fixtures are removed), Termo boce → `termo-boce-boce-i-posude-za-hranu`, Posude za hranu → `posude-za-hranu-boce-i-posude-za-hranu`, Dodaci (Lifestyle) → `dodaci-lifestyle-kategorija`.
+- Developer fixtures 20–36 and 254–256 and staging fixture 800 were left untouched (verified unchanged); they stay for navigation design and are not part of this taxonomy. The copied placeholder navigation lists all top-level terms, so the new groups appear next to the fixtures on staging.
+- Product assignment: done afterwards by a one-off, category-only WP-CLI migration (see below), not by the importer.
+- DB checkpoint before the change: `/home/dreampoint.b2b/backups/pre-b2b-taxonomy-20261002-124022.sql.gz` (site-user owned, `gzip -t` OK). Do not move or modify.
+- Read-only simulation of the unchanged importer's assignment: all 451 published ERP products have a mapped classification; 6,942 (hidden hardware/toys etc.) have none.
+
+### Category-only migration of existing ERP products — executed 2026-10-02 (staging)
+
+A one-off WP-CLI script (not part of the repo, not importer code) assigned the new terms to the existing ERP products, applying the importer's own rule (current terms minus ERP-owned terms, plus mapped terms), with one deliberate difference: products whose classification has NO mapping keep Uncategorized as a safe fallback. Manual terms (e.g. fixture 800) are preserved. Variations received their parent's `product_cat` set, as the importer does. The full importer was not run.
+
+- Dry-run first, then a fresh checkpoint `/home/dreampoint.b2b/backups/pre-cat-migration-20261002-124523.sql.gz` (`gzip -t` OK), then apply guarded by the dry-run plan key (apply aborts if the plan differs). Run log: `/home/dreampoint.b2b/backups/cat-migration-apply-20261002-124523.log`.
+- Before → after (ERP parent products 10,186): 3,244 matched products moved from Uncategorized to their mapped child term (1,291 variations updated); 6,942 products with no mapped classification (hidden hardware/toys/promo etc.) keep Uncategorized; Uncategorized published count 451 → 0 (all 451 published products are mapped); products in no `product_cat`: 0; fixture 800 keeps its 3 products. Published (cumulative) counts: Boce i posude za hranu 25, Naočale 53, Djeca 24, Lifestyle 119, Modni dodaci 230 = 451.
+- Verified: all 28 child terms hold exactly the expected number of products; posts, postmeta of products/variations and all non-`product_cat` term relationships are byte-for-byte unchanged by checksum; fixtures 20–36, 254–256, 800 unchanged.
+- User Switching acceptance (real HTTP): shop catalog `vis_full` 451, `vis_rule_brand` 68, `vis_offer` 5, `vis_rule_cat` 3, `vis_none` 0 (identical to ADR-012); category 800 shows 3 for `vis_full`/`vis_offer`/`vis_rule_cat` and none for `vis_rule_brand`/`vis_none`; admin identity restored. Category archives render (Naočale 53, Boce 25, Lifestyle 119, Modni dodaci 230) without errors.
+- Still true: this is an INITIAL STAGING taxonomy, editable after client feedback. A later full importer run will converge to the same assignment (term 15 is mapped to the dummy value), except that on the importer's own rule unmapped products lose Uncategorized unless WooCommerce re-applies the default (as observed on JekaaStore); they are hidden, so this has no visible effect.

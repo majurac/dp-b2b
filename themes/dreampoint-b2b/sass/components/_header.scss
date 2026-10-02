@@ -294,14 +294,6 @@
         left: 0;
         width: 100%;
         z-index: 9998;
-        .container {
-            @media(min-width: 1580px) {
-                min-width: 1500px;
-            }
-            @media(min-width: 1900px) {
-                min-width: 1800px;
-            }
-        }
         .row {
             align-items: stretch;
             height: 72px;   

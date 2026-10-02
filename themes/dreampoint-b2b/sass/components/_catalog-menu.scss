@@ -1,0 +1,245 @@
+// Catalog menu ("Katalog proizvoda") — DreamPoint Figma node 11022:51566.
+// Desktop: panel 531px = 24px padding + 175px category column + 36px gap + 272px "Popularni proizvodi".
+// The panel lives inside the header nav (ul.links li.cat-toggler), so rules are nested under
+// the same ID chain to win over the generic header link styles.
+
+#header #main-header ul.links li.cat-toggler {
+    position: relative;
+}
+
+#header #main-header ul.links li .catalog-menu {
+    position: absolute;
+    top: 100%;
+    left: -29px;
+    z-index: 9999;
+    display: grid;
+    grid-template-columns: 175px 272px;
+    column-gap: 36px;
+    box-sizing: border-box;
+    width: 531px;
+    max-height: calc(100vh - 170px);
+    overflow-y: auto;
+    padding: 24px;
+    background-color: #fcfcfc;
+    box-shadow: 0px 10px 16px rgba(10, 14, 21, 0.12), 0px 2px 5px rgba(10, 14, 21, 0.16);
+    text-align: left;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.15s ease, visibility 0.15s ease;
+
+    @include bp(md-down) {
+        display: none;
+    }
+
+    ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    li {
+        height: auto;
+    }
+
+    a {
+        height: auto;
+        display: block;
+        padding: 0;
+        text-align: left;
+        text-transform: none;
+        letter-spacing: normal;
+        font-family: inherit;
+        color: $black;
+        &:hover {
+            color: $brand;
+        }
+    }
+
+    .catalog-menu__list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .catalog-menu__row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 25px;
+    }
+
+    a.catalog-menu__link {
+        flex: 1;
+        font-size: 16px;
+        line-height: 25px;
+        font-weight: 400;
+    }
+
+    .catalog-menu__toggle {
+        flex: none;
+        width: 24px;
+        height: 24px;
+        padding: 0;
+        border: 0;
+        background: none;
+        color: $black;
+        cursor: pointer;
+        line-height: 1;
+        i {
+            display: inline-block;
+            font-size: 14px;
+            transition: transform 0.15s ease;
+        }
+        &:hover,
+        &:focus-visible {
+            color: $brand;
+        }
+        &[aria-expanded="true"] i {
+            transform: rotate(180deg);
+        }
+    }
+
+    .catalog-menu__sub {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 8px 0 4px 12px;
+        &[hidden] {
+            display: none;
+        }
+    }
+
+    a.catalog-menu__sublink {
+        font-size: 14px;
+        line-height: 20px;
+        font-weight: 400;
+    }
+
+    a.catalog-menu__all {
+        margin-top: 12px;
+        padding: 4px 0;
+        font-size: 12px;
+        line-height: 18px;
+        font-weight: 500;
+    }
+
+    .catalog-menu__popular-title {
+        margin: 0 0 4px;
+        font-size: 14px;
+        line-height: 23px;
+        font-weight: 600;
+        color: $black;
+    }
+
+    .catalog-menu__products {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    a.catalog-menu__product {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        min-height: 80px;
+        box-sizing: border-box;
+        padding: 8px;
+        &:hover {
+            background-color: rgba($black, 0.04);
+            color: $black;
+        }
+    }
+}
+
+// Open: hover, keyboard focus inside, unless dismissed with Escape.
+#header #main-header ul.links li.cat-toggler:hover > .catalog-menu,
+#header #main-header ul.links li.cat-toggler:focus-within > .catalog-menu {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+#header #main-header ul.links li.cat-toggler[data-dismissed] > .catalog-menu {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+// Shared product card parts (desktop panel + mobile menu).
+.catalog-menu__product-image {
+    flex: none;
+    width: 64px;
+    height: 64px;
+    background-color: #f1f1f1;
+    img {
+        display: block;
+        width: 64px;
+        height: 64px;
+        object-fit: cover;
+    }
+}
+
+.catalog-menu__product-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.catalog-menu__product-name {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 14px;
+    line-height: 17px;
+    font-weight: 600;
+    color: $black;
+}
+
+.catalog-menu__product-price {
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 600;
+    color: $black;
+    del {
+        margin-right: 4px;
+        font-weight: 400;
+        opacity: 0.6;
+    }
+    ins {
+        text-decoration: none;
+    }
+}
+
+// Mobile: drill-down reuses the existing mobile menu; only the extra rows are styled here.
+.mobile-menu__menu .catalog-menu-mobile {
+    .catalog-menu-mobile__all a {
+        font-size: 14px;
+    }
+    .catalog-menu__popular {
+        padding: 16px 0;
+    }
+    .catalog-menu__popular-title {
+        margin: 0 0 8px;
+        font-size: 14px;
+        font-weight: 600;
+    }
+    .catalog-menu__products {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .catalog-menu__product {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 8px 0;
+        text-transform: none;
+        letter-spacing: normal;
+    }
+}

@@ -164,7 +164,7 @@ $company_phone = get_field('company_phone', 'option') ?: '';
 
                         <div class="col-md-4 products-menu">
                             <nav role="navigation" aria-label="<?php esc_attr_e('Glavni meni', 'dreampoint-b2b'); ?>" style="display:none;">
-                                <?php echo dreampoint_b2b_nav_categories_desktop(); ?>
+                                <?php echo dreampoint_b2b_catalog_menu_desktop(); ?>
                                 <?php 
                                 wp_nav_menu([
                                     'theme_location' => 'menu-1',
@@ -288,7 +288,7 @@ $company_phone = get_field('company_phone', 'option') ?: '';
                 <!-- /.mobile-menu__header -->
                 
                 <nav class="mobile-menu__menu" role="navigation" aria-label="<?php esc_attr_e('Mobilni meni', 'dreampoint-b2b'); ?>">
-                    <?php dreampoint_b2b_nav_categories_mobile(); ?>
+                    <?php dreampoint_b2b_catalog_menu_mobile(); ?>
                     <?php 
                     wp_nav_menu([
                         'theme_location' => 'menu-1',

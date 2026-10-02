@@ -1,0 +1,130 @@
+{
+    "key": "group_dp_catalog_menu",
+    "title": "Katalog meni (Katalog proizvoda)",
+    "fields": [
+        {
+            "key": "field_dp_cm_categories",
+            "label": "Kategorije u meniju",
+            "name": "catalog_menu_categories",
+            "aria-label": "",
+            "type": "repeater",
+            "instructions": "Glavne kategorije koje se prikazuju kao redovi u izborniku \"Katalog proizvoda\". Redoslijed redova = redoslijed u meniju. Podkategorije se prikazuju automatski (samo one koje imaju proizvode, po WooCommerce redoslijedu kategorija). Ostavite prazno da se prikažu sve glavne kategorije s proizvodima.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "table",
+            "pagination": 0,
+            "min": 0,
+            "max": 0,
+            "collapsed": "",
+            "button_label": "Dodaj kategoriju",
+            "rows_per_page": 20,
+            "sub_fields": [
+                {
+                    "key": "field_dp_cm_category",
+                    "label": "Kategorija",
+                    "name": "category",
+                    "aria-label": "",
+                    "type": "taxonomy",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "taxonomy": "product_cat",
+                    "add_term": 0,
+                    "save_terms": 0,
+                    "load_terms": 0,
+                    "return_format": "id",
+                    "field_type": "select",
+                    "allow_null": 0,
+                    "allow_in_bindings": 0,
+                    "bidirectional": 0,
+                    "multiple": 0,
+                    "bidirectional_target": [],
+                    "parent_repeater": "field_dp_cm_categories"
+                }
+            ]
+        },
+        {
+            "key": "field_dp_cm_all_link",
+            "label": "Poveznica \"Prikaži sve kategorije\"",
+            "name": "catalog_menu_all_link",
+            "aria-label": "",
+            "type": "link",
+            "instructions": "Ostavite prazno da vodi na stranicu Shop.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "return_format": "array",
+            "allow_in_bindings": 0
+        },
+        {
+            "key": "field_dp_cm_popular",
+            "label": "Popularni proizvodi",
+            "name": "catalog_menu_popular",
+            "aria-label": "",
+            "type": "relationship",
+            "instructions": "Do 4 proizvoda koji se prikazuju u desnoj koloni izbornika, neovisno o kategoriji. Redoslijed odabira = redoslijed prikaza. Kupcu se prikazuju samo proizvodi koje smije vidjeti (B2B vidljivost) i s njegovom cijenom.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "post_type": [
+                "product"
+            ],
+            "post_status": [
+                "publish"
+            ],
+            "taxonomy": "",
+            "filters": [
+                "search"
+            ],
+            "return_format": "id",
+            "min": 0,
+            "max": 4,
+            "allow_in_bindings": 0,
+            "elements": [
+                "featured_image"
+            ],
+            "bidirectional": 0,
+            "bidirectional_target": []
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "options_page",
+                "operator": "==",
+                "value": "theme-settings"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "",
+    "show_in_rest": 0,
+    "display_title": "",
+    "allow_ai_access": false,
+    "ai_description": "",
+    "modified": 1790946081
+}

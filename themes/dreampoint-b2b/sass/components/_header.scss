@@ -401,7 +401,7 @@
                         color: $brand;
                     }
                 }
-                .product-categories-list, .sub-menu {
+                .sub-menu {
                     border-top: 4px solid $brand;
                     position: absolute;
                     margin: 0;
@@ -423,45 +423,10 @@
                     
                     
                 }
-                .product-categories-list {
-                    @include centre(x);
-                    column-count: 6;
-                    -moz-column-count: 6;
-                    -webkit-column-count: 6;
-                    column-gap: 30px;
-                    width: 100%;
-                    .product-category-item {
-                        break-inside: avoid-column;
-                        display: table;
-                        margin-bottom: 25px;
-                        page-break-inside: avoid;
-                    }
-                }
                 &.cat-toggler {
                     >a {
                         position: relative;
                     }
-                    &:hover {
-                        .product-categories-list {
-                            pointer-events: auto;
-                            opacity: 1;
-                        }
-                    }
-                }
-                .category-title {
-                    a {
-                        color: $brand;
-                    }
-                }
-                .product-subcategories {
-                    li {
-                        a {
-                            font-size: 16px;
-                            text-transform: none;
-                            font-weight: 400;
-                            letter-spacing: 0.01em;
-                        }
-                    }   
                 }
                 &.menu-item {
                     &:hover {

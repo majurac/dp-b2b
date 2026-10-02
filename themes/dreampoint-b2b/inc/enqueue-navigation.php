@@ -26,6 +26,16 @@ add_action( 'wp_enqueue_scripts', function (): void {
             true
         );
         wp_script_add_data( 'dreampoint-b2b-mobile-menu', 'strategy', 'defer' );
+
+        // Katalog meni (Figma "Katalog proizvoda menu") — expand/collapse redova, Escape.
+        wp_enqueue_script(
+            'dreampoint-b2b-catalog-menu',
+            get_template_directory_uri() . '/js/catalog-menu.js',
+            [],
+            (string) ( @filemtime( get_template_directory() . '/js/catalog-menu.js' ) ?: _S_VERSION ), // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+            true
+        );
+        wp_script_add_data( 'dreampoint-b2b-catalog-menu', 'strategy', 'defer' );
     }
 
     // --- JS: Sticky header — vanilla JS, sve stranice osim account login stranice ---

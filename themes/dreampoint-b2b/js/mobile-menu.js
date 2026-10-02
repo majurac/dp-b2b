@@ -17,8 +17,8 @@
 
     document.addEventListener( 'DOMContentLoaded', function () {
 
-        // --- Desktop: inject product categories lista unutar .cat-toggler ---
-        const categoriesList = document.querySelector( '.product-categories-list' );
+        // --- Desktop: inject catalog menu panel unutar .cat-toggler ---
+        const categoriesList = document.querySelector( '.catalog-menu' );
         const catToggler     = document.querySelector( '.cat-toggler' );
 
         if ( categoriesList && catToggler ) {
@@ -28,8 +28,8 @@
             }
         }
 
-        // --- Mobile: inject product categories submenu unutar .cat-toggler (mobile menu) ---
-        const mobileSubmenu   = document.querySelector( '.sub-menu.product-categories-mobile' );
+        // --- Mobile: inject catalog menu submenu unutar .cat-toggler (mobile menu) ---
+        const mobileSubmenu   = document.querySelector( '.sub-menu.catalog-menu-mobile' );
         const catTogglerLink  = document.querySelector( '.mobile-menu__menu .cat-toggler a' );
 
         if ( mobileSubmenu && catTogglerLink ) {

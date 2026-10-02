@@ -242,6 +242,12 @@
         text-transform: none;
         letter-spacing: normal;
     }
+    // The generic mobile menu rule "a img { width: 24px }" would shrink the product thumbnail.
+    .catalog-menu__product-image img {
+        width: 64px;
+        height: 64px;
+        object-fit: cover;
+    }
 }
 
 // Chevron on the "Katalog proizvoda" item (Figma); rotates while the panel is open.

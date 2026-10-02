@@ -326,8 +326,11 @@ function dreampoint_b2b_mark_catalog_menu_item( $items, $args ) {
 
     foreach ( $items as $item ) {
         if ( 0 === (int) $item->menu_item_parent && 'custom' === $item->type && '#' === $item->url ) {
+            // menu-item-has-children: the panel/sub-menu is attached by JS, so WordPress does not know about it;
+            // the mobile menu styles and drill-down handler key off this class.
             $item->classes[] = 'cat-toggler';
             $item->classes[] = 'menu-item-parent-proizvodi';
+            $item->classes[] = 'menu-item-has-children';
             break;
         }
     }

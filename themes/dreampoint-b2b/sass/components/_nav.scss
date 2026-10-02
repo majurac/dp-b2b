@@ -87,11 +87,6 @@
                         }
                     }*/
                 }
-                &.cat-toggler {
-                    @include bp(md-down) {
-                        display: none;
-                    }
-                }
             }
         }
         .sub-menu {

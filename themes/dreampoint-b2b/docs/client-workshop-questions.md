@@ -180,7 +180,7 @@ Treba li sistem prikazivati related products, upsell ili cross-sell prijedloge?
 
 | ID | Odluka | Ko odlučuje | Napomena |
 |----|--------|-------------|----------|
-| INT-01 | Search prioritet: SKU-first vs. naziv-first? Autocomplete? Recent searches? | Dev + UX | Relevanssi je aktivan — konfiguracija je interna odluka |
+| INT-01 | Search prioritet: SKU-first vs. naziv-first? Autocomplete? Recent searches? | Dev + UX | Relevanssi je aktivan — konfiguracija je interna odluka. [SUPERSEDED 2026-10-05 (ADR-014): Relevanssi was never installed; current architecture = native search + identifier extension, no SKU-first ranking, no typo tolerance. The "Relevanssi je aktivan" claim was incorrect.] |
 | INT-02 | Filter layout: sidebar vs. header sticky? URL state ponašanje? Kombinovanje filtera? | UX | Naglašena kompleksnost zbog mix-a kategorija (igračke + naočale + lifestyle) |
 | INT-03 | Multi-warehouse korpa: može li jedna korpa imati artikle iz više skladišta? | Dev + Marko | Tehničke implikacije na Apros order endpoint — zavisi i od B-02 odgovora |
 | INT-04 | Basket price change handling: tiho update, warning ili blokada? | UX + Marko | Tek nakon klijentovog odgovora na B-06 |

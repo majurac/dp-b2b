@@ -1054,3 +1054,116 @@ Implemented from the Figma node (11022:51566) and accepted on staging. Final cod
 - **Behaviour (assumptions where Figma is silent):** desktop panel opens on hover/focus, rows expand inline (one at a time), Escape dismisses and returns focus, "#" link does not jump; "Prikaži sve kategorije" → Shop unless the admin sets a link; "Popularni proizvodi" are independent of categories, rendered per request (B2B visibility and prices apply) and hidden when the customer may see none; mobile reuses the existing drill-down with the popular cards at the end of the "Katalog proizvoda" level.
 - **Staging acceptance:** desktop 1440 and 1920 (panel 531×407, columns 175/36/272), accordion, Escape, 35 links all HTTP 200; User Switching — popular products vis_full 4, vis_offer 2, vis_rule_cat 1, vis_rule_brand 1, vis_none 0 (section hidden), admin 4; mobile 390px — no horizontal overflow, "Katalog proizvoda" first, 5 categories, "Prikaži sve kategorije", 4 popular products (64px thumbnails), category drill-down and back. Focused regression after the header CSS change: header layout, menu and mobile unchanged.
 - **Known notes:** long real labels wrap in the 175px column (e.g. "Boce i posude za hranu"); per-customer price differences were not demonstrable because the test customers share the same prices; "Brandovi" has no dropdown (Figma shows one, out of scope); the header logo is not shown on staging (pre-existing). The browser tab used for testing reported `visibilityState: hidden`, so CSS transitions were disabled in the test page only.
+
+---
+
+## ADR-014 — Product search: native WordPress/WooCommerce search + small identifier extension; header search UI; Select2 on variable PDPs
+
+**Date:** 2026-10-05
+**Status:** Accepted and CLOSED on staging. Code commit `b5ce399cd183c648dd273492709f4ceaa89c1f7e` (local = `origin/master` = DreamPoint staging, working tree clean). Production deployment is NOT APPLICABLE (no production environment is provisioned for this project). The final DreamPoint Figma design for search is still expected; the current presentation is an accepted staging implementation that may receive later visual (CSS) refinement.
+
+### Context
+
+Header search had to be brought in line with the intended UX (default/focus panel, compact live results) and with the product data model (ERP identifiers). A requirements audit of the canonical documentation and a read-only data-model inspection were done first.
+
+**Requirements audit** (what the project documentation actually requires):
+
+| Topic | Status | Source |
+|---|---|---|
+| Product name/title search | implied, implemented (native) | — |
+| SKU / catalog number ("SKU-first for B2B") | recommended direction of an INTERNAL decision (INT-01), not client-confirmed | `docs/project-status-matrix.md` INT-01, `docs/stakeholder-question-matrix.md` INT-01, `Dreampoint-B2B-Workshop-Pack.docx` |
+| Autocomplete shows SKU + name | same recommendation (INT-01) | same |
+| EAN / barcode | data confirmed (`barcode` → `global_unique_id`, AP-11); barcode search documented as a possibility, not a requirement | `docs/apros-question-resolution-matrix.md` AP-11, `docs/apros-session-final-pack.md` |
+| Typo tolerance / "did you mean" | only a question in INT-01; no decision, not confirmed | INT-01 |
+| Popular / recent searches | implied by the approved (temporary) default-state design; "Recent searches?" was also an INT-01 question | design + INT-01 |
+| B2B visibility / access | confirmed, mandatory | `inc/visibility/`, CLAUDE.md |
+| Client acceptance criteria for search | none exist | — |
+
+**Product data model** (verified read-only on staging: 10,192 products, 1,291 variations): parent `_sku` = `P-<articleId>` (internal form), `_ARTICLE_CODE` = ERP catalog number ("Kataloški broj"), `_global_unique_id` = EAN (on simple products; ERP variable parents carry none); variations carry their own `_sku` (= variationId), `_ARTICLE_CODE` and `_global_unique_id`.
+
+### Corrections to earlier documentation (Relevanssi)
+
+Several documents stated that Relevanssi is installed/active ("Relevanssi je aktivan", the CLAUDE.md stack list, the dev-context plugin map). **This was wrong.** Verified 2026-10-05: Relevanssi is NOT installed locally and NOT installed on DreamPoint staging (no plugin directory, no `relevanssi_*` options, no `relevanssi_*` functions). There is no executable Relevanssi dependency in the DreamPoint PHP/JS (the old `'relevanssi' => true` query argument and the `did_you_mean()` wrapper were dead code and were removed). The only remaining mentions are historical/workshop text and an inert `relevanssi_exclude` key in some `acf-json` field settings (written by ACF while the plugin existed on some dev machine; harmless without the plugin).
+
+Historical documents that propose Relevanssi (INT-01 rows, workshop `.docx` artifacts) are preserved as history. Their current-state conclusion is **superseded by this ADR**: Relevanssi is not part of the active stack, and the INT-01 recommendation "Relevanssi for name search" was not implemented. The `.docx` workshop files were intentionally not edited.
+
+### Decision
+
+Keep search on native WordPress/WooCommerce and add one small, opt-in extension. No dedicated search plugin, index, table or ranking layer is introduced. If typo tolerance or fuzzy matching ever becomes a confirmed requirement, evaluate an existing search plugin then; do not build a custom search engine.
+
+**Identifier search** (`inc/product-search.php`):
+- Opt-in through the query var `dp_search_extended` (set by the AJAX handler and, for the frontend main query, by `pre_get_posts` when `is_search()` and `post_type === 'product'`). Admin, REST/Store API and Quick Order queries are not affected.
+- A `posts_search` filter widens the native clause with `OR ID IN (matching ids)`; the WordPress `post_password` clause stays outside the `OR`.
+- Searchable values: native title/content (unchanged), `_sku`, `_ARTICLE_CODE` (catalog number), `_global_unique_id` (EAN). A match on a **published variation** returns the **parent** product. Owners of the matched meta must be published (`publish`); this is intended.
+- `MIN_CHARS = 2` (JS threshold, server threshold and extension threshold are identical).
+- The identifier lookup collects at most **200** matching ids; `ORDER BY pid ASC` makes that set deterministic (the lowest 200 ids). This is not relevance ranking. For unusually broad identifier terms (e.g. `P-`, which matches ~every parent SKU) the cap can omit matches. **Accepted limitation, not a blocker.**
+- The term used is the WordPress-parsed `s` (no extra `stripslashes`).
+- There is **no SKU-first ranking**. Final result ordering remains native WordPress/WooCommerce behavior. "SKU-first" remains an unconfirmed internal recommendation.
+- Typo tolerance, fuzzy matching and "did you mean" are **not implemented** and are not part of the architecture.
+
+**AJAX handler** (`inc/ajax-handlers.php`): nonce-protected `search_products`; 5 compact rows (image, title, catalog number, price/stock) + footer ("Odustani", "Vidi sve rezultate"); no-results block. See the security correction below.
+
+### UI sources of truth (split)
+
+- **Default / focus state before typing:** temporary DreamPoint screenshot/Figma-derived design: "Popularne pretrage" (configurable chips), "Nedavno pretraženo" (up to 4 client-side recent searches, history icon + individual ×), empty-state hint "Počnite kucati za prikaz rezultata".
+- **Live AJAX result state after typing:** the current DreamPoint Figma does not define it. **Cotra production search UI is the temporary presentation/interaction reference.** Cotra is UI/UX reference ONLY: no Cotra search, indexing, backend, ranking, normalization or SKU/EAN engine (`ud_ls_*`, `ud2_dym_suggest`, …) was ported. Cotra's own `ajax-search.js` contains the iOS DOM-removal bug and its behavior was deliberately not copied.
+- The final DreamPoint Figma design is expected later; visual changes should be primarily CSS (default panel markup is in `header.php` + a `<template>`; styles in `sass/components/_header.scss`).
+
+**Popular searches:** ACF group `group_dp_search_panel` (JSON in `acf-json/`, DB post created through ACF's native import), field `search_popular_terms` (repeater, sub-field `term`, max 6), stored on the existing `theme-settings` options page. No terms are hardcoded in PHP. Initial staging values: `IZIPIZI`, `Notabag`, `Termos boca`. Deployment: the group was synced **by key only** (`wp acf json sync --key=group_dp_search_panel`, after a dry-run for that exact key showed only this group); the **21 other pending ACF groups on staging were not touched** — never run an unscoped `wp acf json sync` there. Values were written with `update_field()` and read back exactly (3 rows). ACF data/options are DB content: any other environment needs the same group sync and values.
+
+**Recent searches:** `localStorage` key `dpRecentSearches`; max 4; newest first; case-insensitive de-duplication; individual removal (×, a separate `<button>`, never inside the link); all storage access is wrapped so unavailable/blocked storage degrades to "no history" without breaking search. No server-side or user-identifying storage is introduced.
+
+**iOS/WebKit-safe interaction rules** (keep when changing the UI): no click/tap handler may remove or empty result/default DOM that contains the link or form being activated; closing (Escape, outside tap) only sets `hidden`; panels are re-rendered only after the "×" `<button>` is activated; the document-level "outside click" handler ignores targets that were detached from the DOM.
+
+### Security / B2B visibility correction (important)
+
+`admin-ajax.php` runs `WP_Query` with `is_admin = true`, and without an explicit status WordPress then adds protected statuses (`draft`, `pending`, `future`) for every user. The legacy handler therefore could expose non-published products to ordinary B2B users. **The AJAX product search now explicitly sets `'post_status' => 'publish'`.** Keep it.
+
+- Reproduced locally before the fix (an ordinary B2B user saw draft/pending/future products and a draft variable parent through a published variation's SKU); fixed and re-verified.
+- Staging proof (staging has 9,735 draft products): known draft #23350 returned **0** by title, catalog number, SKU and EAN; published variations belonging to draft parents returned **0** (catalog number, EAN, SKU); published control products remained searchable. Tested as admin and `vis_full`.
+- Existing B2B visibility filtering (`pre_get_posts` + `posts_clauses`) is unchanged and remains applied to title search, SKU, catalog number, EAN, variation identifiers, AJAX results and the normal search-results page. Staging matrix: `vis_full` finds everything tested; `vis_rule_cat` finds only products of its category rule (positive control found, other product not); `vis_none` finds nothing. No visibility leakage in the tested access contexts.
+
+### Search result cache removed
+
+The old shared `dp_search_*` rendered-HTML transient cache (and its clearing hooks) was **removed**: search results depend on the user's B2B visibility/access context, and the old cache key was only the search term, so one user's HTML could be served to another. **Do not reintroduce a shared search-result HTML cache keyed only by the search term.** Staging check: 0 legacy `dp_search_*` transient rows; staging has no external object cache (no `object-cache.php`), so nothing needed cleanup and no cache was flushed.
+
+### Select2 on variable PDPs
+
+- Select2 now loads on single product pages (`dreampoint_b2b_needs_select2()` includes `is_product()`), so variable-product attribute selects and the mobile tabs dropdown are Select2-enhanced. Coverage was aligned with the relevant Suplementi (staging) behavior; features DreamPoint does not have (e.g. blog post sorting) were not copied.
+- On `woocommerce_update_variation_values` the variation selects are defensively re-synced (`destroy` + re-init), as in Suplementi.
+- **The original Suplementi stale-Select2 bug was NOT reproduced on DreamPoint** (the A→B→A scenario passed locally even with the handler removed). The resync is retained defensively and for parity with the proven Suplementi solution.
+- Directly enqueued JS (`ajax-search.js`, `select2-init.js`, `product-single.js`, `variation-stock.js`, `tabs-dropdown.js`) is versioned per file by mtime through `dreampoint_b2b_asset_ver()`; `_S_VERSION` still tracks `style.css` / `theme.min.js`. Staging `?ver=` values matched the server mtimes.
+
+### Acceptance (2026-10-05)
+
+- **Local:** focused backend suite (names, SKU, catalog number, EAN, partial identifiers, variations, `vis_full`/`vis_rule_cat`/`vis_none`, results page, nonce 403) and UI suite 196/196 across WebKit (iPhone 13, iPad landscape, desktop) and Chromium/Edge (mobile emulation, desktop, blocked localStorage).
+- **Staging, Chromium:** default panel, chips, recent searches, transitions, results, "Vidi sve rezultate", no-results, Escape/outside close, blocked storage, mobile overlay with admin bar, identifier searches, N1 proof, visibility matrix via User Switching, Select2 (three variable products, A→B→A, reset), shop sort and account selects. The controlled Chrome window was occluded (`visibilityState: hidden`), so interactions used dispatched DOM events and geometric hit-target checks instead of real pointer events.
+- **Staging, WebKit with real Playwright touchscreen taps** (temporary storage state, deleted afterwards): iPhone 13 **41/41** search + **6/6** PDP Select2; iPad Pro 11 portrait **46/46**; iPad Pro 11 landscape **40/40**. Popular chip, recent item, "×" (removes only that item, no navigation), product result and "Vidi sve rezultate" all navigate/submit correctly; a document-level probe confirmed that after every such tap the target was still connected and the default action was not prevented. **No equivalent of the known Suplementi iOS AJAX-search DOM-removal bug was found.**
+- **Physical iPhone/iPad hardware was NOT tested** — this was Playwright WebKit emulation.
+
+### Performance (staging measurements, not guarantees)
+
+- Server-side identifier metadata lookup: ~50–56 ms median (scans ~33k identifier meta rows).
+- Browser AJAX, representative queries: ~196–232 ms median (about 160 ms of that is the baseline PHP/network cost of a rejected admin-ajax request); p90 ≤ 245 ms in the measured run (12 samples per query, admin and `vis_full`). One isolated 486 ms outlier.
+- No need for Relevanssi, custom indexing, custom tables or additional search caching was demonstrated.
+
+### Known / out-of-scope items (not blockers)
+
+1. **Mobile tabs dropdown:** the Select2 wrapper exists, but the product tabs section is hidden by existing template behavior (`woocommerce/content-single-product.php`: `.wc-tabs-section` has `display: none`) on all 12 sampled staging PDPs, so it could not be interactively tested. Pre-existing, not a regression.
+2. **Variation image switching** was not meaningfully verified: the tested product variations share the same image.
+3. **A single typed backslash** is lost upstream (core/site layer) before the extension sees the term; not addressed.
+4. **Broad identifier searches:** the 200-id cap (above) is accepted.
+5. **Final DreamPoint Figma design** for search is pending; visual refinements may follow.
+6. Pre-existing and unrelated: a third-party TI Wishlist script throws when `localStorage` is blocked; staging has 21 unsynced ACF groups; the CLAUDE.md stack list names "Redis Object Cache" but staging has no external object cache (not changed here).
+
+### Consequences
+
+- Search stays small and dependency-free; any future typo tolerance or ranking needs a new, separate decision.
+- Any change to the AJAX handler must keep `post_status => publish`, keep the visibility filters on the query, and stay cache-free for result HTML.
+- Staging is the only deployment target; ACF group sync and options values are an environment step (git does not carry DB content).
+
+### Related
+
+- Code: commit `b5ce399` — `inc/product-search.php`, `inc/ajax-handlers.php`, `header.php`, `js/ajax-search.js`, `js/select2-init.js`, `functions.php`, `sass/components/_header.scss`, `sass/components/_content.scss`, `acf-json/group_dp_search_panel.json`.
+- Superseded statements (kept as history, annotated): INT-01 rows in `docs/project-status-matrix.md`, `docs/stakeholder-question-matrix.md`, `docs/client-workshop-questions.md`.
+- ADR-003 (WBW filter search compatibility — separate topic), ADR-012 (visibility/test users).

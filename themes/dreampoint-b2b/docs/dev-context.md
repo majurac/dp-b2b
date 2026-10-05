@@ -321,7 +321,7 @@ Do not implement anything from a future phase while current phase is not stable.
 |--------|---------|
 | `tinvwl` (TI WooCommerce Wishlist) | Wishlist / save products |
 | `cwginstock` (Back In Stock Notifier) | Product availability notifications |
-| Relevanssi | Fast search by name or SKU |
+| _(none — search is native)_ | Product search by name / `_sku` / catalog number / EAN: native WP search + `inc/product-search.php` (ADR-014). Relevanssi was proposed earlier but is NOT installed |
 | GLS plugin | Shipping + label print (Phase 7) |
 | CorvusPay | Card payment (Phase 7) |
 | WooCommerce Product Filter (WPF) | Faceted filtering |

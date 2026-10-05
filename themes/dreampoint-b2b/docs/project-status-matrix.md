@@ -577,7 +577,7 @@ Puna analiza (plugin research, Quick Order compatibility, preostali tehnički ot
 
 | ID | Odluka | Vlasnik | Preporučeni pravac | Rok |
 |----|--------|---------|-------------------|-----|
-| INT-01 | **Search strategija** — SKU-first ili naziv-first? Autocomplete? Recent searches? Typo tolerance? | Dev + UX | SKU-first za B2B kontekst; Relevanssi za naziv search. Autocomplete s prikazom SKU + naziva | Prije low-fi faze |
+| INT-01 | **Search strategija** — SKU-first ili naziv-first? Autocomplete? Recent searches? Typo tolerance? | Dev + UX | SKU-first za B2B kontekst; Relevanssi za naziv search. Autocomplete s prikazom SKU + naziva. [SUPERSEDED 2026-10-05 (ADR-014): Relevanssi was never installed; current architecture = native search + identifier extension, no SKU-first ranking, no typo tolerance.] | Prije low-fi faze |
 | INT-02 | **Filter layout i ponašanje** — sidebar vs. sticky header? URL state? Prioritet filtera za mix kategorija (igračke + naočale + lifestyle)? | UX | Sidebar s clear-all; filter po brandu, kategoriji, dostupnosti, skladištu; URL state za dijeljive pretrage | Prije low-fi faze |
 | INT-03 | **Multi-warehouse korpa** — može li jedna korpa sadržavati artikle iz više skladišta? | Dev + Marko | Da, ali uz jasnu UI indikaciju porijekla; split se dešava interno; ovisi o DP-B02 odgovoru | Nakon DP-B02 |
 | INT-04 | **Basket price change UX** — tiho update, warning ili blokada? | UX + Marko | Warning s confirm opcijom — balans između UX friction i business transparency | Nakon DP-B05 |

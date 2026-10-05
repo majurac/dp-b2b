@@ -38,7 +38,6 @@ Do not modify or re-analyze the visibility system unless explicitly requested.
 - LiteSpeed Cache
 - Cloudflare on staging/production
 - WooCommerce Product Filter
-- Relevanssi
 - TI WooCommerce Wishlist
 
 ---
@@ -170,6 +169,18 @@ https://www.figma.com/design/lZvGxdZfmaLJgAMo4NBgpp/DreamPoint-B2B?node-id=11022
 `inc/nav-categories.php` and its markup/CSS (category grid with subcategory thumbnails, 6h shared transient) were copied from the JekaaStore B2C theme as a temporary development placeholder. They are NOT a specification: never infer menu depth, thumbnails, behavior or data needs from them.
 
 Design facts (Figma, 2026-10-02): "Katalog proizvoda" opens a panel with a left list of category rows (each with a chevron, i.e. expandable), a "Prikaži sve kategorije" link, and a right column "Popularni proizvodi" (4 compact cards: image, name, price). "Popularni proizvodi" is independent of the selected/active category. Category rows show no thumbnails. The row labels and the row count in Figma are placeholders: Figma defines the UI pattern only, never the taxonomy or the number of categories. Lifestyle/Toys/Outdoor are separate homepage segment blocks, not menu items. See `docs/decisions.md` ADR-013 (update 2026-10-02).
+
+---
+
+## Product Search — Current State (ADR-014)
+
+Closed on staging 2026-10-05, commit `b5ce399`. Full record: `docs/decisions.md` ADR-014.
+
+- Search is native WordPress/WooCommerce plus a small DreamPoint identifier extension (`inc/product-search.php`). **Relevanssi is NOT installed** (neither locally nor on staging) and there is no Relevanssi dependency in PHP/JS — never describe it as part of the stack.
+- Matches product title/content (native) plus `_sku`, `_ARTICLE_CODE` (catalog number), `_global_unique_id` (EAN); a hit on a published variation returns the parent. `MIN_CHARS = 2`. Identifier lookup collects at most 200 deterministic ids (accepted limitation). No SKU-first ranking; no typo tolerance / "did you mean".
+- The AJAX handler must keep `'post_status' => 'publish'` (admin-ajax.php otherwise exposes draft/pending/future products) and B2B visibility filtering. Never reintroduce a shared search-result HTML cache keyed only by the search term (the old `dp_search_*` transient was visibility-unaware and was removed).
+- UI sources: default/focus state = temporary screenshot-derived design (popular chips from ACF field `search_popular_terms` in group `group_dp_search_panel`; recent searches in localStorage `dpRecentSearches`, max 4); live AJAX results = Cotra production UI as a temporary UI/UX reference ONLY (no Cotra search backend/indexing/ranking was ported). The final DreamPoint Figma search design is pending — expect CSS refinements.
+- No click/tap handler may remove or empty result/default DOM that contains the link or form being activated (iOS/WebKit cancels the navigation/submit).
 
 ---
 

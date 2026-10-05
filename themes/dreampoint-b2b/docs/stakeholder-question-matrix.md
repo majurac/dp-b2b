@@ -239,7 +239,7 @@ Ako da: ko ih definira?
 
 | # | Odluka | Preporučeni pravac | Vlasnik | Rok |
 |---|--------|-------------------|---------|-----|
-| INT-01 | **Search strategija** — SKU-first ili naziv-first? Autocomplete? Typo tolerance? | SKU-first za B2B; Relevanssi za naziv. Autocomplete: SKU + naziv u rezultatu. | Dev + UX | Prije IA faze |
+| INT-01 | **Search strategija** — SKU-first ili naziv-first? Autocomplete? Typo tolerance? | SKU-first za B2B; Relevanssi za naziv. Autocomplete: SKU + naziv u rezultatu. [SUPERSEDED 2026-10-05 (ADR-014): Relevanssi was never installed; current architecture = native search + identifier extension, no SKU-first ranking, no typo tolerance.] | Dev + UX | Prije IA faze |
 | INT-02 | **Filter layout** — sidebar vs. sticky header? URL state? Prioritet filtera za mix kategorija? | Sidebar s clear-all; brand + kategorija + dostupnost + skladište; URL state za dijeljive pretrage | UX | Prije low-fi faze |
 | INT-03 | **Multi-warehouse korpa** — može li jedna korpa imati artikle iz više skladišta? | Da, uz UI indikaciju porijekla; split interno; ovisi i o odgovoru na B-02 | Dev + Marko | Nakon B-02 odgovora |
 | INT-04 | **Basket price change** — tiho update, warning ili blokada? | Warning s confirm opcijom | UX + Marko | Nakon B-06 odgovora |

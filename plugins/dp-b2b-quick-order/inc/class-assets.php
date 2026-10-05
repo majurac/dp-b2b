@@ -44,11 +44,26 @@ class DP_Quick_Order_Assets {
 			'cartSyncMaxBatch' => DP_Quick_Order_Config::CART_SYNC_MAX_BATCH,
 			'searchMinChars'   => DP_Quick_Order_Config::SEARCH_MIN_CHARS,
 			'currency'         => get_woocommerce_currency(),
+			// BCP-47 form of the site locale (hr_HR -> hr-HR) so the footer subtotal is formatted like the prices.
+			'locale'           => str_replace( '_', '-', get_locale() ),
 			'placeholderImg'   => esc_url( wc_placeholder_img_src() ),
 			'i18n'             => [
 				'skuLabel'           => __( 'Kataloški broj:', 'dp-b2b-quick-order' ),
-				'itemsSuffix'        => __( 'artikala', 'dp-b2b-quick-order' ),
-				'rowsSuffix'         => __( 'varijacija', 'dp-b2b-quick-order' ),
+				// Croatian declension forms for the footer counts: [1, 2-4, 5+].
+				'itemForms'          => [
+					__( 'artikl', 'dp-b2b-quick-order' ),
+					__( 'artikla', 'dp-b2b-quick-order' ),
+					__( 'artikala', 'dp-b2b-quick-order' ),
+				],
+				'skuForms'           => [
+					__( 'različiti SKU', 'dp-b2b-quick-order' ),
+					__( 'različita SKU-a', 'dp-b2b-quick-order' ),
+					__( 'različitih SKU-a', 'dp-b2b-quick-order' ),
+				],
+				'priceLabel'         => __( 'Cijena:', 'dp-b2b-quick-order' ),
+				'qtyLabel'           => __( 'Količina', 'dp-b2b-quick-order' ),
+				'qtyDecrease'        => __( 'Smanji količinu', 'dp-b2b-quick-order' ),
+				'qtyIncrease'        => __( 'Povećaj količinu', 'dp-b2b-quick-order' ),
 				'loadingVariations'  => __( 'Učitavanje varijacija...', 'dp-b2b-quick-order' ),
 				'variationLoadError' => __( 'Greška pri učitavanju varijacija.', 'dp-b2b-quick-order' ),
 				'adding'             => __( 'Dodavanje...', 'dp-b2b-quick-order' ),

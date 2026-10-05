@@ -29,13 +29,16 @@ export class FooterController {
         const items  = this.#state.getItemCount();
         const rows   = this.#state.getRowCount();
 
-        if (this.#itemsEl) this.#itemsEl.textContent = `${items} ${config.i18n?.itemsSuffix ?? 'artikala'}`;
-        if (this.#rowsEl)  this.#rowsEl.textContent  = `${rows} ${config.i18n?.rowsSuffix ?? 'varijacija'}`;
+        // Counting is unchanged (state.getItemCount / getRowCount) — only the wording is
+        // declined for Croatian: 1 artikl / 2-4 artikla / 5+ artikala, and
+        // 1 različiti SKU / 2-4 različita SKU-a / 5+ različitih SKU-a.
+        if (this.#itemsEl) this.#itemsEl.textContent = `${items} ${pluralHr(items, config.i18n?.itemForms ?? ['artikl', 'artikla', 'artikala'])}`;
+        if (this.#rowsEl)  this.#rowsEl.textContent  = `${rows} ${pluralHr(rows, config.i18n?.skuForms ?? ['različiti SKU', 'različita SKU-a', 'različitih SKU-a'])}`;
 
         if (this.#subtotalEl) {
             const subtotal = this.#state.getSubtotal();
             try {
-                this.#subtotalEl.textContent = new Intl.NumberFormat(navigator.language, {
+                this.#subtotalEl.textContent = new Intl.NumberFormat(config.locale ?? navigator.language, {
                     style: 'currency', currency: config.currency ?? 'EUR',
                 }).format(subtotal);
             } catch {
@@ -50,4 +53,19 @@ export class FooterController {
     setSubmitEnabled(enabled) {
         if (this.#addBtn) this.#addBtn.disabled = !enabled;
     }
+}
+
+/**
+ * Croatian noun declension for a count: [one, few, many].
+ * 1, 21, 31… -> one (not 11); 2-4, 22-24… -> few (not 12-14); everything else (incl. 0) -> many.
+ * @param {number} n
+ * @param {[string,string,string]} forms
+ * @returns {string}
+ */
+function pluralHr(n, forms) {
+    const mod10  = n % 10;
+    const mod100 = n % 100;
+    if (mod10 === 1 && mod100 !== 11) return forms[0];
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return forms[1];
+    return forms[2];
 }

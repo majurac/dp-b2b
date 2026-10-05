@@ -212,25 +212,53 @@ $dp_qo_active_filters = [
 					</div>
 				</div><!-- /.dp-qo-toolbar -->
 
+				<?php
+				/*
+				 * Product list: one bordered card per parent product (identity on the left) holding
+				 * one or more purchasable lines (option / stock / price / quantity). Rendered by
+				 * ProductList. The column labels are a visual aid only — every field is
+				 * self-describing for assistive technology (aria-hidden header, labelled inputs).
+				 */
+				?>
 				<div class="dp-qo-table-wrap">
-					<table class="dp-qo-table">
-						<thead>
-							<tr>
-								<th class="dp-qo-col-thumb"></th>
-								<th><?php esc_html_e( 'Naziv', 'dp-b2b-quick-order' ); ?></th>
-								<th><?php esc_html_e( 'Stanje', 'dp-b2b-quick-order' ); ?></th>
-								<th><?php esc_html_e( 'Cijena', 'dp-b2b-quick-order' ); ?></th>
-								<th><?php esc_html_e( 'Kol.', 'dp-b2b-quick-order' ); ?></th>
-							</tr>
-						</thead>
-						<tbody class="dp-qo-tbody">
-							<tr>
-								<td colspan="5" class="dp-qo-loading">
-									<?php esc_html_e( 'Učitavanje...', 'dp-b2b-quick-order' ); ?>
-								</td>
-							</tr>
-						</tbody>
-					</table>
+					<div class="dp-qo-table">
+						<div class="dp-qo-thead" aria-hidden="true">
+							<div class="dp-qo-thead__product"><?php esc_html_e( 'Proizvod', 'dp-b2b-quick-order' ); ?></div>
+							<div class="dp-qo-thead__cols">
+								<span><?php esc_html_e( 'Opcija', 'dp-b2b-quick-order' ); ?></span>
+								<span><?php esc_html_e( 'Stanje', 'dp-b2b-quick-order' ); ?></span>
+								<span><?php esc_html_e( 'Cijena', 'dp-b2b-quick-order' ); ?></span>
+								<span></span>
+								<span></span>
+							</div>
+						</div>
+						<div class="dp-qo-tbody" aria-label="<?php esc_attr_e( 'Proizvodi', 'dp-b2b-quick-order' ); ?>">
+							<div class="dp-qo-loading"><?php esc_html_e( 'Učitavanje...', 'dp-b2b-quick-order' ); ?></div>
+						</div>
+					</div>
+				</div>
+
+				<?php /* Summary: sticky inside the product column (CSS), content driven by local state. */ ?>
+				<div class="dp-qo-footer" role="region" aria-label="<?php esc_attr_e( 'Sažetak narudžbe', 'dp-b2b-quick-order' ); ?>">
+					<div class="dp-qo-footer__summary">
+						<svg class="dp-qo-footer__icon" width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 3.5 28 9.7v12.6L16 28.5 4 22.3V9.7L16 3.5Z"/><path d="M4 9.7 16 16l12-6.3M16 16v12.5"/></svg>
+						<div class="dp-qo-footer__counts" aria-live="polite">
+							<strong class="dp-qo-footer__items">0 <?php esc_html_e( 'artikala', 'dp-b2b-quick-order' ); ?></strong>
+							<span class="dp-qo-footer__rows">0 <?php esc_html_e( 'različitih SKU-a', 'dp-b2b-quick-order' ); ?></span>
+						</div>
+					</div>
+					<div class="dp-qo-footer__total">
+						<span class="dp-qo-footer__total-label"><?php esc_html_e( 'Ukupno (bez PDV-a)', 'dp-b2b-quick-order' ); ?></span>
+						<strong class="dp-qo-footer__subtotal-amount"></strong>
+					</div>
+					<div class="dp-qo-footer__actions">
+						<a href="<?php echo esc_url( wc_get_cart_url() ); ?>" class="dp-qo-footer__cart-link">
+							<?php esc_html_e( 'Pregled košarice', 'dp-b2b-quick-order' ); ?>
+						</a>
+						<button type="button" class="dp-qo-footer__add-to-cart" disabled>
+							<?php esc_html_e( 'Dodaj u košaricu', 'dp-b2b-quick-order' ); ?>
+						</button>
+					</div>
 				</div>
 
 			</div><!-- .col-lg-9 -->
@@ -238,24 +266,4 @@ $dp_qo_active_filters = [
 		</div><!-- .row -->
 	</div><!-- .container -->
 
-	<div class="dp-qo-footer">
-		<div class="dp-qo-footer__summary">
-			<i class="icon-shopping-bag dp-qo-footer__icon" aria-hidden="true"></i>
-			<span class="dp-qo-footer__items">0 <?php esc_html_e( 'artikala', 'dp-b2b-quick-order' ); ?></span>
-			<span class="dp-qo-footer__rows">0 <?php esc_html_e( 'varijacija', 'dp-b2b-quick-order' ); ?></span>
-		</div>
-		<div class="dp-qo-footer__total">
-			<span class="dp-qo-footer__total-label"><?php esc_html_e( 'Ukupno (bez PDV-a)', 'dp-b2b-quick-order' ); ?></span>
-			<span class="dp-qo-footer__subtotal-amount"></span>
-		</div>
-		<div class="dp-qo-footer__actions">
-			<a href="<?php echo esc_url( wc_get_cart_url() ); ?>" class="dp-qo-footer__cart-link button button--outline">
-				<?php esc_html_e( 'Pregled košarice', 'dp-b2b-quick-order' ); ?>
-			</a>
-			<button type="button" class="dp-qo-footer__add-to-cart  button" disabled>
-				<?php esc_html_e( 'Dodaj u košaricu', 'dp-b2b-quick-order' ); ?>
-			</button>
-			
-		</div>
-	</div>
 </div><!-- #dp-quick-order -->

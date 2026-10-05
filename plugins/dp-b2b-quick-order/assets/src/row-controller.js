@@ -15,8 +15,6 @@ export class RowController {
     #chips;
     /** @type {HTMLElement|null} */
     #tbody;
-    /** @type {WeakMap<HTMLElement, number>} checkmark element -> active fade-out timeout id */
-    #checkTimers = new WeakMap();
 
     /**
      * @param {import('./quick-order-state.js').QuickOrderState} state
@@ -46,6 +44,7 @@ export class RowController {
             const qty = this.#state.getQuantity(row.dataset.rowKey);
             input.value = qty;
             this.#applyAddedState(row, qty);
+            this.#syncMinus(row, qty);
         });
     }
 
@@ -79,8 +78,8 @@ export class RowController {
         this.#state.setQuantity(rowKey, qty, { productId, variationId, unitPrice });
         this.#footer.render();
         this.#chips.render();
-        this.#flashCheck(row, qty);
         this.#applyAddedState(row, qty);
+        this.#syncMinus(row, qty);
     }
 
     /**
@@ -96,7 +95,9 @@ export class RowController {
      * state is re-applied to fresh DOM), so the two paths can never drift.
      * `row` is always the purchasable unit's own container — a simple
      * product's `.dp-qo-row` or a variable product's `.dp-qo-variation-row`
-     * — matching #flashCheck's row resolution above.
+     * — the same row resolution as #onQtyInput above. This class is also what
+     * the persistent selected-row check indicator (CSS) is driven by — there is
+     * no separate selection state.
      * @param {HTMLElement} row
      * @param {number} qty
      */
@@ -105,36 +106,16 @@ export class RowController {
     }
 
     /**
-     * Flash the row's checkmark on a successful quantity change. Restarts
-     * the fade-out timer on rapid repeated changes instead of stacking
-     * animations or timers — the WeakMap lookup always clears any existing
-     * timeout for this element before scheduling a new one, so at most one
-     * timeout is ever active per checkmark. Keying by element (not row key)
-     * also means the timer is released automatically once the element
-     * leaves the DOM (pagination/sort/re-render) — no manual cleanup needed.
-     * Hides immediately, no animation, if quantity returns to 0.
+     * The decrement control is inert at quantity 0 (visual affordance only — the
+     * quantity is already clamped at 0). Rows whose input is disabled (out of
+     * stock) keep both buttons disabled as rendered.
      * @param {HTMLElement} row
      * @param {number} qty
      */
-    #flashCheck(row, qty) {
-        const check = row.querySelector('.dp-qo-qty-check');
-        if (!check) return;
-
-        const existingTimer = this.#checkTimers.get(check);
-        if (existingTimer) clearTimeout(existingTimer);
-
-        if (qty <= 0) {
-            check.classList.remove('is-visible');
-            this.#checkTimers.delete(check);
-            return;
-        }
-
-        check.classList.add('is-visible');
-        const timer = setTimeout(() => {
-            check.classList.remove('is-visible');
-            this.#checkTimers.delete(check);
-        }, 1000);
-        this.#checkTimers.set(check, timer);
+    #syncMinus(row, qty) {
+        const input = row.querySelector('.dp-qo-qty');
+        const minus = row.querySelector('.dp-qo-qty-minus');
+        if (minus && input && !input.disabled) minus.disabled = qty <= 0;
     }
 
     #onQtyButton(btn, delta) {

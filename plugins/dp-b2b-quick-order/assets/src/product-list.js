@@ -26,6 +26,11 @@ const QO_FILTER_STATE = {
     qo_best_seller:     'qoBestSeller',
 };
 
+/** Decorative icons (aria-hidden): quantity stepper arrows and the selected-row check. */
+const ARROW_LEFT  = '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M13 8H3M7.5 3.5 3 8l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ARROW_RIGHT = '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path d="M3 8h10M8.5 3.5 13 8l-4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const CHECK_ICON  = '<svg class="dp-qo-selected-check" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m7.5 12.5 3 3 6-6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
 export class ProductList {
     /** @type {object} dpQuickOrder config */
     #config;
@@ -85,7 +90,8 @@ export class ProductList {
     async loadPage(page = 1) {
         if (!this.#tbody) return;
         this.#currentPage = page;
-        this.#tbody.innerHTML = `<tr><td colspan="5" class="dp-qo-loading">Učitavanje...</td></tr>`;
+        this.#tbody.removeAttribute('role');
+        this.#tbody.innerHTML = `<div class="dp-qo-loading">Učitavanje...</div>`;
 
         const reqId = ++this.#reqSeq;
         let data;
@@ -96,7 +102,7 @@ export class ProductList {
             data = await res.json();
         } catch (err) {
             if (reqId !== this.#reqSeq) return;
-            this.#tbody.innerHTML = `<tr><td colspan="5" class="dp-qo-error">Greška pri učitavanju proizvoda.</td></tr>`;
+            this.#tbody.innerHTML = `<div class="dp-qo-error">Greška pri učitavanju proizvoda.</div>`;
             return;
         }
 
@@ -142,140 +148,130 @@ export class ProductList {
 
     #renderRows(products) {
         if (!products.length) {
+            this.#tbody.removeAttribute('role');
             this.#tbody.innerHTML = this.#emptyStateHTML();
             return;
         }
+        this.#tbody.setAttribute('role', 'list');
         this.#tbody.innerHTML = products.map(p => this.#rowHTML(p)).join('');
     }
 
-    #rowHTML(product) {
-        const isVariable = product.type === 'variable';
-        const thumbSrc    = product.image || this.#config.placeholderImg || '';
+    /**
+     * Binary availability only — the client never receives (or shows) a stock quantity.
+     * The marker is a dot AND text, so state never depends on colour alone.
+     */
+    #stockHTML(status) {
+        const labels = { instock: 'Na stanju', outofstock: 'Nema na stanju', onbackorder: 'Po narudžbi' };
+        const s = status ?? 'outofstock';
+        return `<span class="dp-qo-stock dp-qo-stock--${escAttr(s)}">${escHtml(labels[s] ?? s)}</span>`;
+    }
 
-        if (isVariable) {
-            const skuLabel  = escHtml(this.#config.i18n?.skuLabel ?? 'Kataloški broj:');
-            const thumbCell = thumbSrc
-                ? `<img src="${escHtml(thumbSrc)}" alt="" class="dp-qo-thumb" width="40" height="40" loading="lazy">`
-                : '';
-            const loadingText = escHtml(this.#config.i18n?.loadingVariations ?? 'Učitavanje varijacija...');
-            return `
-<tr class="dp-qo-row dp-qo-row--variable" data-product-id="${product.id}" data-type="variable">
-  <td class="dp-qo-col-thumb">${thumbCell}</td>
-  <td class="dp-qo-col-name dp-qo-col-name--variable">
-    <div class="dp-qo-row__product-info">
+    /** Product identity (image + name + catalog number) — the PROIZVOD column of a card. */
+    #productCellHTML(product, extraHtml = '') {
+        const skuLabel = escHtml(this.#config.i18n?.skuLabel ?? 'Kataloški broj:');
+        // Real WooCommerce thumbnail; WooCommerce's own placeholder when the product has none.
+        const thumbSrc = product.image || this.#config.placeholderImg || '';
+        const img      = thumbSrc
+            ? `<img src="${escAttr(thumbSrc)}" alt="" class="dp-qo-thumb" width="110" height="110" loading="lazy">`
+            : '';
+        return `
+  <div class="dp-qo-card__product">
+    <div class="dp-qo-card__media">${img}</div>
+    <div class="dp-qo-card__info">
       <strong class="dp-qo-name">${escHtml(product.name)}</strong>
       <small class="dp-qo-sku">${skuLabel} ${escHtml(product.catalog_number)}</small>
+      ${extraHtml}
     </div>
-    <div class="dp-qo-variation-labels dp-qo-variation-list--loading">${loadingText}</div>
-  </td>
-  <td class="dp-qo-col-stock"><div class="dp-qo-variation-stocks"></div></td>
-  <td class="dp-qo-col-price"><div class="dp-qo-variation-prices"></div></td>
-  <td class="dp-qo-col-qty"><div class="dp-qo-variation-qtys"></div></td>
-</tr>`.trim();
+  </div>`;
+    }
+
+    /** OPCIJA..check cells of one purchasable line. Pure presentation of data the server already sent. */
+    #lineCellsHTML({ optionHtml, stockHtml, priceHtml, qtyHtml }) {
+        return `
+      <div class="dp-qo-cell dp-qo-cell--option">${optionHtml}</div>
+      <div class="dp-qo-cell dp-qo-cell--stock">${stockHtml}</div>
+      <div class="dp-qo-cell dp-qo-cell--price"><span class="dp-qo-sr">${escHtml(this.#t('priceLabel', 'Cijena:'))} </span>${priceHtml}</div>
+      <div class="dp-qo-cell dp-qo-cell--qty">${qtyHtml}</div>
+      <div class="dp-qo-cell dp-qo-cell--check">${CHECK_ICON}</div>`;
+    }
+
+    #rowHTML(product) {
+        if (product.type === 'variable') {
+            const loadingText = escHtml(this.#config.i18n?.loadingVariations ?? 'Učitavanje varijacija...');
+            return `
+<div class="dp-qo-row dp-qo-card dp-qo-card--variable" role="listitem" data-product-id="${escAttr(product.id)}" data-type="variable" data-product-name="${escAttr(product.name)}">${this.#productCellHTML(product, this.#stockHTML(product.stock?.status))}
+  <div class="dp-qo-card__lines">
+    <div class="dp-qo-variation-list--loading">${loadingText}</div>
+  </div>
+</div>`.trim();
         }
 
         const rowKey     = `${product.id}_0`;
         const disableQty = product.stock?.status === 'outofstock';
-        const stockLabel = { instock: 'Na stanju', outofstock: 'Nema na stanju', onbackorder: 'Po narudžbi' };
-        const stockClass = `dp-qo-stock--${escHtml(product.stock?.status ?? 'outofstock')}`;
-        const stockText  = stockLabel[product.stock?.status] ?? (product.stock?.status ?? '');
-        const thumbCell  = thumbSrc
-            ? `<img src="${escHtml(thumbSrc)}" alt="" class="dp-qo-thumb" width="40" height="40" loading="lazy">`
-            : '';
 
-        return this.#dataRowHTML({
-            rowKey, productId: product.id, variationId: 0,
-            name: escHtml(product.name), sku: escHtml(product.catalog_number),
-            stockClass, stockText, priceHtml: product.price_html ?? '', price: product.price ?? 0,
-            thumbCell, disableQty,
-        });
+        // Simple product: the card itself is the purchasable unit (carries the row dataset
+        // RowController resolves via `.closest('.dp-qo-row, .dp-qo-variation-row')`).
+        // No OPCIJA — there is no option to show, and none is invented.
+        return `
+<div class="dp-qo-row dp-qo-card dp-qo-card--simple" role="listitem"
+     data-product-id="${escAttr(product.id)}"
+     data-variation-id="0"
+     data-row-key="${rowKey}"
+     data-price="${escAttr(product.price ?? 0)}">${this.#productCellHTML(product)}
+  <div class="dp-qo-card__lines">
+    <div class="dp-qo-line">${this.#lineCellsHTML({
+        optionHtml: '',
+        stockHtml:  this.#stockHTML(product.stock?.status),
+        priceHtml:  product.price_html ?? '',
+        qtyHtml:    this.#qtyControlsHTML(rowKey, disableQty, product.name),
+    })}
+    </div>
+  </div>
+</div>`.trim();
     }
 
     /**
-     * Shared row template for both simple-product rows and expanded variation rows.
-     * Product links are intentionally omitted — Quick Order keeps the user on-page (brief §5).
+     * Shared qty stepper markup (simple-product card and variation lines).
+     * Behaviour is unchanged (RowController): integer >= 0, no client-side maximum —
+     * stock is enforced by the server at submit time. `name` gives the controls an
+     * accessible association with their product/option.
      */
-    #dataRowHTML({ rowKey, productId, variationId, name, sku, stockClass, stockText, priceHtml, price, thumbCell, disableQty }) {
-        const skuLabel = escHtml(this.#config.i18n?.skuLabel ?? 'Kataloški broj:');
-        return `
-<tr class="dp-qo-row"
-    data-product-id="${productId}"
-    data-variation-id="${variationId}"
-    data-row-key="${rowKey}"
-    data-price="${price}">
-  <td class="dp-qo-col-thumb">${thumbCell}</td>
-  <td class="dp-qo-col-name">
-    <strong class="dp-qo-name">${name}</strong>
-    <small class="dp-qo-sku">${skuLabel} ${sku}</small>
-  </td>
-  <td class="dp-qo-col-stock">
-    <span class="dp-qo-stock ${stockClass}">${stockText}</span>
-  </td>
-  <td class="dp-qo-col-price">${priceHtml}</td>
-  <td class="dp-qo-col-qty">${this.#qtyControlsHTML(rowKey, disableQty)}</td>
-</tr>`.trim();
-    }
-
-    /** Shared qty +/- controls markup, used by both simple-product/data rows and variation rows. */
-    #qtyControlsHTML(rowKey, disableQty) {
+    #qtyControlsHTML(rowKey, disableQty, name) {
+        const minusLabel = escAttr(`${this.#t('qtyDecrease', 'Smanji količinu')}: ${name}`);
+        const plusLabel  = escAttr(`${this.#t('qtyIncrease', 'Povećaj količinu')}: ${name}`);
+        const inputLabel = escAttr(`${this.#t('qtyLabel', 'Količina')}: ${name}`);
         return `
 <div class="dp-qo-qty-wrap">
-  <button class="dp-qo-qty-btn dp-qo-qty-minus" type="button" aria-label="Smanji količinu"${disableQty ? ' disabled' : ''}>−</button>
+  <button class="dp-qo-qty-btn dp-qo-qty-minus" type="button" aria-label="${minusLabel}" disabled>${ARROW_LEFT}</button>
   <input type="number"
          class="dp-qo-qty"
          data-row-key="${rowKey}"
-         value="0" min="0" step="1"
+         value="0" min="0" step="1" inputmode="numeric"
+         aria-label="${inputLabel}"
          ${disableQty ? 'disabled' : ''}>
-  <button class="dp-qo-qty-btn dp-qo-qty-plus" type="button" aria-label="Povećaj količinu"${disableQty ? ' disabled' : ''}>+</button>
-  <span class="dp-qo-qty-check" aria-hidden="true">✓</span>
+  <button class="dp-qo-qty-btn dp-qo-qty-plus" type="button" aria-label="${plusLabel}"${disableQty ? ' disabled' : ''}>${ARROW_RIGHT}</button>
 </div>`.trim();
     }
 
     /**
-     * One variation's line within the Naziv (attrs+SKU) column — no parent
-     * name repeated per variation.
+     * OPCIJA cell: every resolved attribute as "Label value" (labels/values come from the server —
+     * nothing is hard-coded), joined deterministically in the server's order, then the variation's
+     * own catalog number (muted). Falls back to the server label if no attribute pairs exist.
      */
-    #variationLabelLineHTML(label, sku) {
-        const skuLabel = escHtml(this.#config.i18n?.skuLabel ?? 'Kataloški broj:');
-        return `
-<div class="dp-qo-variation-line">
-  <span class="dp-qo-variation-line__attrs">${label}</span>
-  <small class="dp-qo-sku">${skuLabel} ${sku}</small>
-</div>`.trim();
+    #optionHTML(v) {
+        const attrs = (v.attributes ?? []).map(a =>
+            `<span class="dp-qo-option__attr"><span class="dp-qo-option__label">${escHtml(a.label)}</span> <strong class="dp-qo-option__value">${escHtml(a.value)}</strong></span>`
+        ).join(' <span class="dp-qo-option__sep" aria-hidden="true">·</span> ');
+        const skuLabel = this.#config.i18n?.skuLabel ?? 'Kataloški broj:';
+        // The variation's own catalog number stays visible (muted, compact); its "Kataloški broj"
+        // label is kept for tooltip and assistive technology so the narrow OPCIJA column stays tidy.
+        return `${attrs || `<span class="dp-qo-option__attr">${escHtml(v.label)}</span>`}<small class="dp-qo-sku dp-qo-option__code" title="${escAttr(`${skuLabel} ${v.catalog_number}`)}"><span class="dp-qo-sr">${escHtml(skuLabel)} </span>${escHtml(v.catalog_number)}</small>`;
     }
 
-    /** One variation's line within the Stanje (stock) column. */
-    #variationStockLineHTML(stockClass, stockText) {
-        return `
-<div class="dp-qo-variation-line">
-  <span class="dp-qo-stock ${stockClass}">${stockText}</span>
-</div>`.trim();
-    }
-
-    /** One variation's line within the Cijena (price) column. */
-    #variationPriceLineHTML(priceHtml) {
-        return `<div class="dp-qo-variation-line">${priceHtml}</div>`;
-    }
-
-    /**
-     * One variation's line within the Kol. (qty) column — carries the
-     * variation's full dataset (product/variation id, row key, price) on
-     * the same `.dp-qo-variation-row` class RowController already resolves
-     * via `.closest('.dp-qo-row, .dp-qo-variation-row')`. `data-variation-label`
-     * is a debugging byproduct only — VariationChipsController's canonical
-     * label source is the `dp:qo:rows-rendered` event payload, not this
-     * attribute (see #loadVariationOptions below).
-     */
-    #variationQtyLineHTML({ rowKey, productId, variationId, price, disableQty, label }) {
-        return `
-<div class="dp-qo-variation-row dp-qo-variation-line"
-     data-product-id="${productId}"
-     data-variation-id="${variationId}"
-     data-row-key="${rowKey}"
-     data-price="${price}"
-     data-variation-label="${label}">
-  ${this.#qtyControlsHTML(rowKey, disableQty)}
-</div>`.trim();
+    /** Accessible name of one variation line: parent name + its attribute pairs. */
+    #variationName(parentName, v) {
+        const opts = (v.attributes ?? []).map(a => `${a.label} ${a.value}`).join(', ');
+        return opts ? `${parentName}, ${opts}` : `${parentName}, ${v.label}`;
     }
 
     /** Kick off parallel variation fetches for all variable rows on current page. */
@@ -285,19 +281,16 @@ export class ProductList {
     }
 
     /**
-     * Fetch variation details and populate the parent row's four real
-     * columns (Naziv/Stanje/Cijena/Kol.) each with one stacked line per
-     * variation (no dropdown, no colspan). The parent `.dp-qo-row` and its
-     * real `<td>` columns are left in place — only each column's inner list
-     * content changes.
+     * Fetch variation details and fill the parent card's lines container with one purchasable
+     * line per variation (option / stock / price / quantity). The parent card and its product
+     * identity are left in place — only the lines container changes. Each line is the same
+     * standalone purchasable unit as before: it carries the row dataset RowController resolves.
      */
-    async #loadVariationOptions(row) {
-        const productId = row.dataset.productId;
-        const labelsEl   = row.querySelector('.dp-qo-variation-labels');
-        const stocksEl   = row.querySelector('.dp-qo-variation-stocks');
-        const pricesEl   = row.querySelector('.dp-qo-variation-prices');
-        const qtysEl     = row.querySelector('.dp-qo-variation-qtys');
-        if (!labelsEl || !stocksEl || !pricesEl || !qtysEl) return;
+    async #loadVariationOptions(card) {
+        const productId  = card.dataset.productId;
+        const parentName = card.dataset.productName ?? '';
+        const linesEl    = card.querySelector('.dp-qo-card__lines');
+        if (!linesEl) return;
 
         let variations;
         try {
@@ -306,48 +299,39 @@ export class ProductList {
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             variations = await res.json();
         } catch {
-            labelsEl.classList.remove('dp-qo-variation-list--loading');
-            labelsEl.innerHTML = `<div class="dp-qo-error">${escHtml(this.#config.i18n?.variationLoadError ?? 'Greška pri učitavanju varijacija.')}</div>`;
+            linesEl.innerHTML = `<div class="dp-qo-error">${escHtml(this.#config.i18n?.variationLoadError ?? 'Greška pri učitavanju varijacija.')}</div>`;
             return;
         }
 
         if (!variations.length) {
-            row.remove();
+            card.remove();
             return;
         }
 
-        const stockLabel          = { instock: 'Na stanju', outofstock: 'Nema na stanju', onbackorder: 'Po narudžbi' };
-        const labelLines          = [];
-        const stockLines          = [];
-        const priceLines          = [];
-        const qtyLines            = [];
         const variationAttributes = [];
-
-        variations.forEach(v => {
-            const rowKey       = `${productId}_${v.id}`;
-            const stockClass   = `dp-qo-stock--${escHtml(v.stock_status)}`;
-            const stockText    = stockLabel[v.stock_status] ?? v.stock_status;
-            const disableQty   = v.stock_status === 'outofstock';
-            const escapedLabel = escHtml(v.label);
-
-            labelLines.push(this.#variationLabelLineHTML(escapedLabel, escHtml(v.catalog_number)));
-            stockLines.push(this.#variationStockLineHTML(stockClass, stockText));
-            priceLines.push(this.#variationPriceLineHTML(v.price_html));
-            qtyLines.push(this.#variationQtyLineHTML({
-                rowKey, productId: Number(productId), variationId: v.id, price: v.price, disableQty,
-                label: escapedLabel,
-            }));
+        const lines = variations.map(v => {
+            const rowKey     = `${productId}_${v.id}`;
+            const disableQty = v.stock_status === 'outofstock';
             // v.attributes is already-resolved { label, value } pairs from
             // class-product-query.php::get_variation_details() — passed
             // through untouched, no re-parsing at this layer.
             variationAttributes.push({ rowKey, attributes: v.attributes ?? [] });
+            return `
+    <div class="dp-qo-line dp-qo-variation-row"
+         data-product-id="${escAttr(productId)}"
+         data-variation-id="${escAttr(v.id)}"
+         data-row-key="${rowKey}"
+         data-price="${escAttr(v.price)}"
+         data-variation-label="${escAttr(v.label)}">${this.#lineCellsHTML({
+        optionHtml: this.#optionHTML(v),
+        stockHtml:  this.#stockHTML(v.stock_status),
+        priceHtml:  v.price_html ?? '',
+        qtyHtml:    this.#qtyControlsHTML(rowKey, disableQty, this.#variationName(parentName, v)),
+    })}
+    </div>`;
         });
 
-        labelsEl.classList.remove('dp-qo-variation-list--loading');
-        labelsEl.innerHTML = labelLines.join('');
-        stocksEl.innerHTML = stockLines.join('');
-        pricesEl.innerHTML = priceLines.join('');
-        qtysEl.innerHTML   = qtyLines.join('');
+        linesEl.innerHTML = lines.join('');
         document.dispatchEvent(new CustomEvent('dp:qo:rows-rendered', { detail: { variationAttributes } }));
     }
 
@@ -716,7 +700,7 @@ export class ProductList {
         const hasFilters = this.#hasActiveFilters();
 
         if (!search && !hasFilters) {
-            return `<tr><td colspan="5" class="dp-qo-empty">${escHtml(this.#t('emptyCatalog', 'Nema dostupnih proizvoda.'))}</td></tr>`;
+            return `<div class="dp-qo-empty">${escHtml(this.#t('emptyCatalog', 'Nema dostupnih proizvoda.'))}</div>`;
         }
 
         const intro = search && hasFilters ? this.#t('noResultsSearchFilters', 'Za pojam “%s” i odabrane filtre nije pronađen nijedan proizvod. Pokušajte sljedeće:')
@@ -729,7 +713,7 @@ export class ProductList {
         ].filter(Boolean);
 
         return `
-<tr><td colspan="5" class="dp-qo-no-results">
+<div class="dp-qo-no-results">
   <div class="dp-qo-no-results__inner">
     <svg class="dp-qo-no-results__icon" width="96" height="96" viewBox="0 0 96 96" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" aria-hidden="true" focusable="false"><circle cx="42" cy="42" r="30"/><path d="M64 64l22 22"/></svg>
     <h2 class="dp-qo-no-results__title">${escHtml(this.#t('noResultsTitle', 'Nismo pronašli proizvode'))}</h2>
@@ -740,7 +724,7 @@ export class ProductList {
       <button type="button" class="button button--outline dp-qo-no-results__btn" data-qo-action="view-all">${escHtml(this.#t('viewAllProducts', 'Pogledaj sve proizvode'))}</button>
     </div>
   </div>
-</td></tr>`.trim();
+</div>`.trim();
     }
 
     /** Reflect current #woofFilters QO booleans onto the checkbox DOM elements. */
@@ -941,4 +925,9 @@ function escHtml(str) {
     const d = document.createElement('div');
     d.textContent = str ?? '';
     return d.innerHTML;
+}
+
+/** Escape for use inside a double-quoted HTML attribute. */
+function escAttr(str) {
+    return escHtml(str).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }

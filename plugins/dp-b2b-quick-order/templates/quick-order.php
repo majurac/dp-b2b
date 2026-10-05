@@ -9,6 +9,17 @@ defined( 'ABSPATH' ) || exit;
 // Initial search value mirrors the URL (authoritative state) for the first paint;
 // ProductList re-derives it from the URL on load/back/forward.
 $dp_qo_search_term = isset( $_GET['qo_search'] ) ? sanitize_text_field( wp_unslash( $_GET['qo_search'] ) ) : '';
+// Popular searches are optional presentation config supplied by the theme through a
+// WP filter (it reads the ACF option). No theme/ACF => empty list => the row is simply
+// not rendered; Quick Order never depends on it.
+$dp_qo_popular_terms = [];
+foreach ( (array) apply_filters( 'dp_qo_popular_searches', [] ) as $dp_qo_popular_term ) {
+	$dp_qo_popular_term = is_string( $dp_qo_popular_term ) ? trim( sanitize_text_field( $dp_qo_popular_term ) ) : '';
+	if ( '' !== $dp_qo_popular_term ) {
+		$dp_qo_popular_terms[] = $dp_qo_popular_term;
+	}
+}
+$dp_qo_popular_terms = array_slice( array_values( array_unique( $dp_qo_popular_terms ) ), 0, 6 );
 $dp_qo_active_filters = [
 	'qo_already_ordered' => isset( $_GET['qo_already_ordered'] ) && rest_sanitize_boolean( wp_unslash( $_GET['qo_already_ordered'] ) ),
 	'qo_new'             => isset( $_GET['qo_new'] ) && rest_sanitize_boolean( wp_unslash( $_GET['qo_new'] ) ),
@@ -124,12 +135,33 @@ $dp_qo_active_filters = [
 					<button type="button" class="dp-qo-search__clear" aria-label="<?php esc_attr_e( 'Očisti pretragu', 'dp-b2b-quick-order' ); ?>" hidden>&times;</button>
 				</form>
 
+				<?php
+				/*
+				 * Search/filter state row — exactly one of the two groups is visible at a time
+				 * (toggled by ProductList from the URL/WBW state, never from its own state):
+				 *   popular → no active FILTER (a search term alone does not count);
+				 *   active  → at least one QO-owned or WBW filter is active; chips are rendered
+				 *             by ProductList (QO chips from qo_* URL state, WBW chips derived from
+				 *             WBW's own checked inputs — the remove control delegates to WBW).
+				 */
+				?>
+				<div class="dp-qo-state-row" data-qo-state="popular"<?php echo $dp_qo_popular_terms ? '' : ' hidden'; ?>>
+					<span class="dp-qo-state-row__label"><?php esc_html_e( 'Popularne pretrage', 'dp-b2b-quick-order' ); ?></span>
+					<ul class="dp-qo-chip-list dp-qo-chip-list--popular">
+						<?php foreach ( $dp_qo_popular_terms as $dp_qo_popular_term ) : ?>
+							<li><button type="button" class="dp-qo-filter-chip dp-qo-filter-chip--term" data-qo-popular="<?php echo esc_attr( $dp_qo_popular_term ); ?>"><?php echo esc_html( $dp_qo_popular_term ); ?></button></li>
+						<?php endforeach; ?>
+					</ul>
+				</div>
+				<div class="dp-qo-state-row" data-qo-state="active" hidden>
+					<span class="dp-qo-state-row__label"><?php esc_html_e( 'Aktivni filteri', 'dp-b2b-quick-order' ); ?></span>
+					<ul class="dp-qo-chip-list dp-qo-chip-list--active"></ul>
+				</div>
+
 				<div class="dp-qo-pagination"></div>
 
 				<div class="dp-qo-toolbar">
 					<div class="dp-qo-toolbar__filters">
-						<span class="dp-qo-toolbar__label"><?php esc_html_e( 'Aktivni filteri', 'dp-b2b-quick-order' ); ?></span>
-
 						<div class="selected-prod_atributes">
 							<?php echo do_shortcode('[wpf-selected-filters id=3]'); ?>
 							    <?php

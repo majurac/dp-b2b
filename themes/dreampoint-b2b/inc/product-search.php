@@ -120,3 +120,36 @@ function dreampoint_b2b_search_identifier_matches( string $term ): array {
 
 	return array_filter( array_map( 'absint', $wpdb->get_col( $sql ) ) );
 }
+
+/**
+ * Popular searches — the configured search terms shown as chips in the header search panel and in
+ * Quick Order. Single source: ACF option repeater `search_popular_terms` (sub-field `term`) on the
+ * `theme-settings` options page. No hard-coded terms; returns [] when ACF or the option is unavailable.
+ *
+ * Quick Order (plugin) consumes this through the `dp_qo_popular_searches` filter so it never needs to
+ * know about ACF or the option name.
+ *
+ * @return string[]
+ */
+function dreampoint_b2b_get_popular_searches(): array {
+	if ( ! function_exists( 'get_field' ) ) {
+		return array();
+	}
+
+	$rows = get_field( 'search_popular_terms', 'option' );
+	if ( ! is_array( $rows ) ) {
+		return array();
+	}
+
+	$terms = array();
+	foreach ( $rows as $row ) {
+		$term = trim( (string) ( is_array( $row ) ? ( $row['term'] ?? '' ) : '' ) );
+		if ( '' !== $term ) {
+			$terms[] = $term;
+		}
+	}
+
+	return $terms;
+}
+
+add_filter( 'dp_qo_popular_searches', 'dreampoint_b2b_get_popular_searches' );

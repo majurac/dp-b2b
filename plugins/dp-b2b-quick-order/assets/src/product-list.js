@@ -19,6 +19,13 @@
 /** Search debounce — matches the project's 300 ms debounce convention (DP_Quick_Order_Config::CART_SYNC_DEBOUNCE_MS). */
 const SEARCH_DEBOUNCE_MS = 300;
 
+/** Quick Order-owned filter URL param -> #woofFilters state key. */
+const QO_FILTER_STATE = {
+    qo_already_ordered: 'qoAlreadyOrdered',
+    qo_new:             'qoNew',
+    qo_best_seller:     'qoBestSeller',
+};
+
 export class ProductList {
     /** @type {object} dpQuickOrder config */
     #config;
@@ -40,6 +47,16 @@ export class ProductList {
     #searchTimer  = null;
     /** Monotonic request counter — an older, slower response never overwrites a newer one. */
     #reqSeq       = 0;
+    /** @type {HTMLElement|null} "Popularne pretrage" row (shown while no FILTER is active). */
+    #popularRow;
+    /** @type {HTMLElement|null} "Aktivni filteri" row (shown while at least one FILTER is active). */
+    #activeRow;
+    /** @type {HTMLElement|null} */
+    #activeList;
+    /** @type {HTMLElement|null} WBW's own selected-filters node, once adopted into #activeRow. */
+    #wbwSelected = null;
+    /** @type {MutationObserver|null} */
+    #wbwObserver = null;
 
     /**
      * @param {object} config  window.dpQuickOrder
@@ -50,9 +67,14 @@ export class ProductList {
         this.#paginationEl = document.querySelector('.dp-qo-pagination');
         this.#searchInput  = document.querySelector('.dp-qo-search__input');
         this.#searchClear  = document.querySelector('.dp-qo-search__clear');
+        this.#popularRow   = document.querySelector('.dp-qo-state-row[data-qo-state="popular"]');
+        this.#activeRow    = document.querySelector('.dp-qo-state-row[data-qo-state="active"]');
+        this.#activeList   = this.#activeRow?.querySelector('.dp-qo-chip-list--active') ?? null;
         this.#bindWoofIntegration();
         this.#bindQoOwnedFilters();
         this.#bindSearch();
+        this.#bindStateRow();
+        this.#renderStateRow();
         this.#bindFilterToggle();
     }
 
@@ -120,7 +142,7 @@ export class ProductList {
 
     #renderRows(products) {
         if (!products.length) {
-            this.#tbody.innerHTML = `<tr><td colspan="5" class="dp-qo-empty">Nema dostupnih proizvoda.</td></tr>`;
+            this.#tbody.innerHTML = this.#emptyStateHTML();
             return;
         }
         this.#tbody.innerHTML = products.map(p => this.#rowHTML(p)).join('');
@@ -331,6 +353,10 @@ export class ProductList {
 
     #renderPagination() {
         if (!this.#paginationEl) return;
+        if (this.#totalPages < 1) { // empty result set — no "Strana 1 / 0"
+            this.#paginationEl.innerHTML = '';
+            return;
+        }
 
         const hasPrev = this.#currentPage > 1;
         const hasNext = this.#currentPage < this.#totalPages;
@@ -396,6 +422,10 @@ export class ProductList {
             this.#reflectSearchInput();
             this.loadPage(1);
         }
+
+        // After the state update above. Always runs: WBW's DOM (the source of WBW chips) can change
+        // without any REST-relevant diff in #woofFilters.
+        this.#renderStateRow();
     }
 
     /**
@@ -461,6 +491,256 @@ export class ProductList {
 
     #syncSearchClear() {
         if (this.#searchClear && this.#searchInput) this.#searchClear.hidden = this.#searchInput.value === '';
+    }
+
+    /** @param {string} key  @param {string} fallback */
+    #t(key, fallback) {
+        return this.#config.i18n?.[key] ?? fallback;
+    }
+
+    /**
+     * Search/filter state row + no-results actions. Everything here is a VIEW of
+     * state owned elsewhere (qo_* URL params, WBW's own inputs) — it keeps no state
+     * of its own that could disagree with the URL:
+     *   - popular chip      -> same search path as typing (#commitSearch -> qo_search);
+     *   - QO filter chip ×  -> same URL write + #onWoofUrlChange() as unchecking its checkbox;
+     *   - WBW filter chips  -> WBW's own native selected-filters node, relocated into the row (WBW
+     *                          renders and removes them); fallback chips click WBW's own checkbox;
+     *   - clear-all / view-all (no-results) -> #clearAll().
+     */
+    #bindStateRow() {
+        this.#popularRow?.addEventListener('click', e => {
+            const chip = e.target.closest?.('[data-qo-popular]');
+            if (!chip || !this.#searchInput) return;
+            this.#searchInput.value = chip.dataset.qoPopular;
+            this.#commitSearch();
+        });
+
+        this.#activeRow?.addEventListener('click', e => {
+            const btn = e.target.closest?.('[data-qo-remove]');
+            if (!btn) return;
+            if (btn.dataset.qoRemove === 'qo') {
+                this.#removeQoFilter(btn.dataset.qoParam);
+            } else {
+                const wrapper = [...document.querySelectorAll('.wpfFilterWrapper')]
+                    .find(w => w.getAttribute('data-get-attribute') === btn.dataset.wbwAttr);
+                const input = [...(wrapper?.querySelectorAll('li[data-term-slug]') ?? [])]
+                    .find(li => li.dataset.termSlug === btn.dataset.wbwSlug)?.querySelector('input');
+                input?.click();
+            }
+        });
+
+        this.#tbody?.addEventListener('click', e => {
+            if (e.target.closest?.('[data-qo-action]')) this.#clearAll();
+        });
+
+        // WBW changes its checkboxes before its AJAX completes — reflect that right away;
+        // wpfAjaxSuccess / popstate (-> #onWoofUrlChange) re-render again afterwards.
+        document.addEventListener('change', e => {
+            if (e.target.matches?.('.wpfFilterWrapper input')) this.#renderStateRow();
+        });
+
+        // Keyboard activation of WBW's native chip × (WBW itself only listens for click).
+        this.#activeRow?.addEventListener('keydown', e => {
+            const del = e.target.closest?.('.wpfSelectedDelete');
+            if (del && (e.key === 'Enter' || e.key === ' ')) {
+                e.preventDefault();
+                del.click();
+            }
+        });
+
+        // WBW builds its selected-filters node after our script runs and mutates it on every
+        // filter change: follow it (adopt once, re-render on any change) instead of polling.
+        const filterArea = document.querySelector('.dp-qo-filter-area');
+        this.#wbwObserver = new MutationObserver(() => this.#renderStateRow());
+        if (filterArea) this.#wbwObserver.observe(filterArea, { childList: true, subtree: true });
+    }
+
+    /** Actual FILTERS (not the search term) currently active: QO-owned from state, WBW from its checked inputs. */
+    #collectActiveFilters() {
+        const chips = [];
+
+        for (const [param, key] of Object.entries(QO_FILTER_STATE)) {
+            if (!this.#woofFilters[key]) continue;
+            const label = document.querySelector(`.dp-qo-catalog-filter__input[data-qo-filter="${param}"]`)
+                ?.closest('label')?.querySelector('.dp-qo-catalog-filter__label')?.textContent.trim() ?? param;
+            chips.push({ kind: 'qo', param, label });
+        }
+
+        // WBW filters: while WBW's own selected-filters node is adopted into our row, WBW renders
+        // (and removes) those chips itself. Only when that node is unavailable do we fall back to
+        // deriving chips from WBW's checked inputs — the × then clicks WBW's own checkbox.
+        if (!this.#adoptWbwSelected()) {
+            const seen = new Set();
+            const wbwInputs = document.querySelectorAll('.wpfFilterWrapper:not([data-filter-type="wpfSortBy"]) input:checked');
+            for (const input of wbwInputs) {
+                const li      = input.closest('li');
+                const wrapper = input.closest('.wpfFilterWrapper');
+                const label   = (input.closest('.wpfLiLabel')?.querySelector('.wpfFilterTaxNameWrapper')?.textContent ?? li?.textContent ?? '')
+                    .replace(/\s+/g, ' ').trim();
+                const attr = wrapper?.getAttribute('data-get-attribute') ?? '';
+                const slug = li?.dataset.termSlug ?? '';
+                if (!label || !slug || seen.has(`${attr}|${slug}`)) continue; // no stable handle => cannot be removed safely
+                seen.add(`${attr}|${slug}`);
+                chips.push({ kind: 'wbw', attr, slug, label });
+            }
+        }
+
+        return chips;
+    }
+
+    /**
+     * WBW's NATIVE selected-filters node (`.wpfSelectedParameters`, created by WBW JS inside its
+     * view-3 wrapper — it already carries WBW's own × handlers, delegated on <body>). Adopting it =
+     * relocating that node into our "Aktivni filteri" row and tagging it with its view id, which is
+     * WBW's documented "external selected filters" placement (data-filter), so WBW keeps updating
+     * the very same node. WBW stays authoritative; we only decide where it is shown.
+     * @returns {boolean} true while the native node is adopted
+     */
+    #adoptWbwSelected() {
+        if (this.#wbwSelected?.isConnected) return true;
+        if (!this.#activeRow) return false;
+
+        const node = document.querySelector('.dp-qo-filter-area .wpfSelectedParameters');
+        const view = document.querySelector('.dp-qo-filter-area .wpfMainWrapper')?.dataset.filter;
+        if (!node || !view) return false;
+
+        node.dataset.filter = view;
+        this.#activeRow.append(node);
+        this.#wbwSelected = node;
+        this.#wbwObserver?.observe(node, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+        return true;
+    }
+
+    #hasWbwNativeActive() {
+        return !!this.#wbwSelected?.isConnected && this.#wbwSelected.querySelectorAll('.wpfSelectedParameter').length > 0;
+    }
+
+    /** Any actual FILTER (QO-owned, WBW native/derived) — the search term alone never counts. */
+    #hasActiveFilters() {
+        return this.#collectActiveFilters().length > 0 || this.#hasWbwNativeActive();
+    }
+
+    /** Toggle popular-vs-active row and (re)build the active chips. A search term alone never counts as a filter. */
+    #renderStateRow() {
+        if (!this.#popularRow && !this.#activeRow) return;
+
+        const chips     = this.#collectActiveFilters();
+        const hasActive = chips.length > 0 || this.#hasWbwNativeActive();
+
+        // Keyboard/AT access for WBW's native × (a plain div upstream): expose it as a button.
+        const removeText = this.#t('removeFilter', 'Ukloni filter: %s');
+        this.#wbwSelected?.querySelectorAll('.wpfSelectedParameter').forEach(p => {
+            const del = p.querySelector('.wpfSelectedDelete');
+            if (!del || del.hasAttribute('role')) return;
+            del.setAttribute('role', 'button');
+            del.setAttribute('tabindex', '0');
+            del.setAttribute('aria-label', removeText.replace('%s', p.querySelector('.wpfSelectedTitle')?.textContent.trim() ?? ''));
+        });
+
+        if (this.#popularRow) this.#popularRow.hidden = hasActive || !this.#popularRow.querySelector('[data-qo-popular]');
+        if (this.#activeRow)  this.#activeRow.hidden  = !hasActive;
+        if (!this.#activeList) return;
+
+        const removeLabel = this.#t('removeFilter', 'Ukloni filter: %s');
+        this.#activeList.replaceChildren(...chips.map(chip => {
+            const li  = document.createElement('li');
+            const el  = document.createElement('span');
+            const txt = document.createElement('span');
+            const btn = document.createElement('button');
+            el.className  = 'dp-qo-filter-chip dp-qo-filter-chip--active';
+            txt.textContent = chip.label;
+            btn.type      = 'button';
+            btn.className = 'dp-qo-filter-chip__remove';
+            btn.textContent = '×';
+            btn.setAttribute('aria-label', removeLabel.replace('%s', chip.label));
+            btn.dataset.qoRemove = chip.kind;
+            if (chip.kind === 'qo') {
+                btn.dataset.qoParam = chip.param;
+            } else {
+                btn.dataset.wbwAttr = chip.attr;
+                btn.dataset.wbwSlug = chip.slug;
+            }
+            el.append(txt, btn);
+            li.append(el);
+            return li;
+        }));
+    }
+
+    /** Same write-URL-then-resync path as unchecking the filter's checkbox. */
+    #removeQoFilter(param) {
+        if (!(param in QO_FILTER_STATE)) return;
+        const params = new URLSearchParams(window.location.search);
+        params.delete(param);
+        const query = params.toString();
+        history.pushState(null, '', window.location.pathname + (query ? `?${query}` : ''));
+        this.#onWoofUrlChange();
+    }
+
+    /**
+     * Reset search + every QO-owned filter + every WBW filter, in place (never
+     * navigates — leaving the page would discard the local quantity state).
+     * Sort and local quantities are not touched: the quantity Map lives in
+     * QuickOrderState and re-hydrates onto re-rendered rows.
+     */
+    #clearAll() {
+        clearTimeout(this.#searchTimer);
+        this.#searchTimer = null;
+        if (this.#searchInput) this.#searchInput.value = '';
+
+        const params = new URLSearchParams(window.location.search);
+        ['qo_search', ...Object.keys(QO_FILTER_STATE)].forEach(k => params.delete(k));
+        const query = params.toString();
+        history.pushState(null, '', window.location.pathname + (query ? `?${query}` : ''));
+        this.#onWoofUrlChange();
+
+        // WBW's own native Clear (its real AJAX / wpfAjaxSuccess pipeline). Only when a WBW filter is active.
+        if (document.querySelector('.wpfFilterWrapper:not([data-filter-type="wpfSortBy"]) input:checked')) {
+            const clearBtn = document.querySelector('.wpfClearButton');
+            if (clearBtn) {
+                clearBtn.click();
+            } else {
+                document.querySelectorAll('.wpfFilterWrapper:not([data-filter-type="wpfSortBy"]) input:checked')
+                    .forEach(input => input.click());
+            }
+        }
+    }
+
+    /**
+     * Zero-result markup. Case A (search and/or a filter is active): structured no-results
+     * state with reset actions. Case B (nothing active): a neutral message with no filter
+     * advice — the user simply has no accessible products (and we never say why).
+     */
+    #emptyStateHTML() {
+        const search     = this.#woofFilters.qoSearch ?? '';
+        const hasFilters = this.#hasActiveFilters();
+
+        if (!search && !hasFilters) {
+            return `<tr><td colspan="5" class="dp-qo-empty">${escHtml(this.#t('emptyCatalog', 'Nema dostupnih proizvoda.'))}</td></tr>`;
+        }
+
+        const intro = search && hasFilters ? this.#t('noResultsSearchFilters', 'Za pojam “%s” i odabrane filtre nije pronađen nijedan proizvod. Pokušajte sljedeće:')
+                    : search               ? this.#t('noResultsSearch', 'Za pojam “%s” nije pronađen nijedan proizvod. Pokušajte sljedeće:')
+                    :                        this.#t('noResultsFilters', 'Za odabrane filtre nije pronađen nijedan proizvod. Pokušajte sljedeće:');
+        const tips = [
+            search     ? this.#t('noResultsTipSearch', 'Provjeriti pravopis ili koristiti drugi pojam za pretragu') : null,
+            hasFilters ? this.#t('noResultsTipFilters', 'Ukloniti neke filtre kako biste vidjeli više rezultata') : null,
+            this.#t('noResultsTipBrowse', 'Pregledati ostale kategorije ili brendove'),
+        ].filter(Boolean);
+
+        return `
+<tr><td colspan="5" class="dp-qo-no-results">
+  <div class="dp-qo-no-results__inner">
+    <svg class="dp-qo-no-results__icon" width="96" height="96" viewBox="0 0 96 96" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" aria-hidden="true" focusable="false"><circle cx="42" cy="42" r="30"/><path d="M64 64l22 22"/></svg>
+    <h2 class="dp-qo-no-results__title">${escHtml(this.#t('noResultsTitle', 'Nismo pronašli proizvode'))}</h2>
+    <p class="dp-qo-no-results__text">${escHtml(intro).replace('%s', () => escHtml(search))}</p>
+    <ul class="dp-qo-no-results__tips">${tips.map(t => `<li>${escHtml(t)}</li>`).join('')}</ul>
+    <div class="dp-qo-no-results__actions">
+      <button type="button" class="button dp-qo-no-results__btn" data-qo-action="clear-all">${escHtml(this.#t('clearAllFilters', 'Očisti sve filtre'))}</button>
+      <button type="button" class="button button--outline dp-qo-no-results__btn" data-qo-action="view-all">${escHtml(this.#t('viewAllProducts', 'Pogledaj sve proizvode'))}</button>
+    </div>
+  </div>
+</td></tr>`.trim();
     }
 
     /** Reflect current #woofFilters QO booleans onto the checkbox DOM elements. */

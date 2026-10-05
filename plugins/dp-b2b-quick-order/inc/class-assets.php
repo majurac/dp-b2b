@@ -52,7 +52,21 @@ class DP_Quick_Order_Assets {
 				'loadingVariations'  => __( 'Učitavanje varijacija...', 'dp-b2b-quick-order' ),
 				'variationLoadError' => __( 'Greška pri učitavanju varijacija.', 'dp-b2b-quick-order' ),
 				'adding'             => __( 'Dodavanje...', 'dp-b2b-quick-order' ),
-				'partialFailure'     => __( 'Neki artikli nisu dodani u košaricu — provjerite stanje na skladištu.', 'dp-b2b-quick-order' ),
+				'noResultsTitle'     => __( 'Nismo pronašli proizvode', 'dp-b2b-quick-order' ),
+				/* translators: %s: current search term */
+				'noResultsSearchFilters' => __( 'Za pojam “%s” i odabrane filtre nije pronađen nijedan proizvod. Pokušajte sljedeće:', 'dp-b2b-quick-order' ),
+				/* translators: %s: current search term */
+				'noResultsSearch'    => __( 'Za pojam “%s” nije pronađen nijedan proizvod. Pokušajte sljedeće:', 'dp-b2b-quick-order' ),
+				'noResultsFilters'   => __( 'Za odabrane filtre nije pronađen nijedan proizvod. Pokušajte sljedeće:', 'dp-b2b-quick-order' ),
+				'noResultsTipSearch' => __( 'Provjeriti pravopis ili koristiti drugi pojam za pretragu', 'dp-b2b-quick-order' ),
+				'noResultsTipFilters' => __( 'Ukloniti neke filtre kako biste vidjeli više rezultata', 'dp-b2b-quick-order' ),
+				'noResultsTipBrowse' => __( 'Pregledati ostale kategorije ili brendove', 'dp-b2b-quick-order' ),
+				'clearAllFilters'    => __( 'Očisti sve filtre', 'dp-b2b-quick-order' ),
+				'viewAllProducts'    => __( 'Pogledaj sve proizvode', 'dp-b2b-quick-order' ),
+				'emptyCatalog'       => __( 'Nema dostupnih proizvoda.', 'dp-b2b-quick-order' ),
+				/* translators: %s: filter name */
+				'removeFilter'       => __( 'Ukloni filter: %s', 'dp-b2b-quick-order' ),
+				'partialFailure'     =>__( 'Neki artikli nisu dodani u košaricu — provjerite stanje na skladištu.', 'dp-b2b-quick-order' ),
 			],
 		] );
 	}

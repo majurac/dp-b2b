@@ -206,13 +206,7 @@ $company_phone = get_field('company_phone', 'option') ?: '';
                                     </form>
                                     <?php
                                     // Popularne pretrage: ACF opcija (Theme Settings → Pretraga). Nema hardkodiranih termina.
-                                    $popular_searches = [];
-                                    foreach ( (array) get_field( 'search_popular_terms', 'option' ) as $popular_row ) {
-                                        $popular_term = trim( (string) ( $popular_row['term'] ?? '' ) );
-                                        if ( '' !== $popular_term ) {
-                                            $popular_searches[] = $popular_term;
-                                        }
-                                    }
+                                    $popular_searches = function_exists( 'dreampoint_b2b_get_popular_searches' ) ? dreampoint_b2b_get_popular_searches() : [];
                                     ?>
                                     <!-- Default / fokus stanje pre kucanja -->
                                     <div class="search-default" id="search-default" hidden>

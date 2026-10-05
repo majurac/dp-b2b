@@ -510,3 +510,144 @@
     outline: 2px solid #303030;
     outline-offset: 1px;
 }
+
+/* ── Search/filter state row (Slice 2): "Popularne pretrage" OR "Aktivni filteri" ──
+   One row visible at a time, toggled via [hidden] by ProductList from URL/WBW state. ── */
+.dp-qo-state-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    margin: 0 0 14px;
+}
+.dp-qo-state-row[hidden] { display: none; }
+
+.dp-qo-state-row__label {
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b6b6b;
+}
+
+.dp-qo-chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    min-width: 0;
+}
+.dp-qo-chip-list > li { margin: 0; padding: 0; min-width: 0; }
+
+.dp-qo-filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
+    padding: 6px 12px;
+    border: 0;
+    border-radius: 2px;
+    background: #f1f1f1;
+    color: #1a1a1a;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+button.dp-qo-filter-chip { cursor: pointer; }
+button.dp-qo-filter-chip:hover { background: #e6e6e6; }
+.dp-qo-filter-chip:focus-visible,
+.dp-qo-filter-chip__remove:focus-visible {
+    outline: 2px solid #303030;
+    outline-offset: 2px;
+}
+
+/* × is a real button; padded to a comfortable touch target without growing the chip visually. */
+.dp-qo-filter-chip__remove {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #333;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+}
+.dp-qo-filter-chip__remove::after {
+    content: '';
+    position: absolute;
+    inset: -10px;
+}
+.dp-qo-filter-chip__remove:hover { background: #d6d6d6; }
+
+/* ── No-results state ────────────────────────────────────────── */
+.dp-qo-table td.dp-qo-no-results {
+    padding: 48px 16px;
+    border-bottom: 0;
+    text-align: center;
+    font-style: normal;
+}
+.dp-qo-no-results__inner { max-width: 640px; margin: 0 auto; }
+.dp-qo-no-results__icon { display: block; margin: 0 auto 20px; color: #6b7280; }
+.dp-qo-no-results__title { margin: 0 0 12px; font-size: 32px; line-height: 1.2; font-weight: 600; }
+.dp-qo-no-results__text { margin: 0 0 16px; font-size: 16px; color: #1a1a1a; }
+.dp-qo-no-results__tips {
+    margin: 0 0 28px;
+    padding: 0;
+    list-style: none;
+    font-size: 14px;
+    color: #1a1a1a;
+}
+.dp-qo-no-results__tips > li { margin: 0 0 8px; }
+.dp-qo-no-results__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+.dp-qo-no-results__btn { cursor: pointer; }
+
+/* ── WBW's own selected-filters node, relocated into the "Aktivni filteri" row ──
+   WBW keeps rendering/removing these chips (and its delegated × handler still applies);
+   only their presentation is aligned with .dp-qo-filter-chip here. WBW's own "Clear All"
+   link is hidden in this row — Quick Order's reset lives in the no-results actions. ── */
+.dp-qo-state-row .wpfSelectedParameters { display: contents; }
+.dp-qo-state-row .wpfSelectedParameters.wpfHidden { display: none !important; }
+.dp-qo-state-row .wpfSelectedParametersClear { display: none; }
+.dp-qo-state-row .wpfSelectedParameter {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
+    margin: 0;
+    padding: 6px 12px;
+    border: 0;
+    border-radius: 2px;
+    background: #f1f1f1 !important;
+    color: #1a1a1a;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+.dp-qo-state-row .wpfSelectedTitle { order: 1; margin: 0; padding: 0; font-size: inherit; font-weight: inherit; line-height: inherit; overflow-wrap: anywhere; }
+.dp-qo-state-row .wpfSelectedDelete {
+    position: relative;
+    order: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 0;
+    cursor: pointer;
+}
+.dp-qo-state-row .wpfSelectedDelete::before { content: '\00d7'; font-size: 16px; line-height: 1; color: #333; }
+.dp-qo-state-row .wpfSelectedDelete::after { content: ''; position: absolute; inset: -10px; }
+.dp-qo-state-row .wpfSelectedDelete:hover { background: #d6d6d6; }
+.dp-qo-state-row .wpfSelectedDelete:focus-visible { outline: 2px solid #303030; outline-offset: 2px; }

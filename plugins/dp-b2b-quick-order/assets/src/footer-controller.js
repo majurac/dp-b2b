@@ -38,9 +38,9 @@ export class FooterController {
         if (this.#subtotalEl) {
             const subtotal = this.#state.getSubtotal();
             try {
-                this.#subtotalEl.textContent = new Intl.NumberFormat(config.locale ?? navigator.language, {
-                    style: 'currency', currency: config.currency ?? 'EUR',
-                }).format(subtotal);
+                this.#subtotalEl.textContent = config.money
+                    ? formatMoney(subtotal, config.money)
+                    : new Intl.NumberFormat(navigator.language, { style: 'currency', currency: config.currency ?? 'EUR' }).format(subtotal);
             } catch {
                 this.#subtotalEl.textContent = subtotal.toFixed(2);
             }
@@ -68,4 +68,22 @@ function pluralHr(n, forms) {
     if (mod10 === 1 && mod100 !== 11) return forms[0];
     if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return forms[1];
     return forms[2];
+}
+
+/**
+ * Format an amount with WooCommerce's own money settings (same separators / symbol
+ * position as the server-rendered prices). Presentation only.
+ * @param {number} amount
+ * @param {{decimals:number, decimalSep:string, thousandSep:string, symbol:string, format:string}} m
+ * @returns {string}
+ */
+function formatMoney(amount, m) {
+    const [int, dec = ''] = Math.abs(amount).toFixed(Number(m.decimals) || 0).split('.');
+    const grouped = int.replace(/\B(?=(\d{3})+(?!\d))/g, m.thousandSep ?? '');
+    const number  = dec ? `${grouped}${m.decimalSep ?? '.'}${dec}` : grouped;
+    const text    = String(m.format ?? '%1$s%2$s')
+        .replace('%1$s', () => m.symbol)
+        .replace('%2$s', () => number)
+        .replace(/&nbsp;/g, ' ');
+    return amount < 0 ? `-${text}` : text;
 }

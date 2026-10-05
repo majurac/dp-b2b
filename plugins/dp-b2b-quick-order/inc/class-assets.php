@@ -44,8 +44,16 @@ class DP_Quick_Order_Assets {
 			'cartSyncMaxBatch' => DP_Quick_Order_Config::CART_SYNC_MAX_BATCH,
 			'searchMinChars'   => DP_Quick_Order_Config::SEARCH_MIN_CHARS,
 			'currency'         => get_woocommerce_currency(),
-			// BCP-47 form of the site locale (hr_HR -> hr-HR) so the footer subtotal is formatted like the prices.
-			'locale'           => str_replace( '_', '-', get_locale() ),
+			// WooCommerce's own money settings, so the footer subtotal is formatted exactly like the
+			// server-rendered prices (separators, symbol position) regardless of the site locale.
+			// Presentation only — no amount is computed from these.
+			'money'            => [
+				'decimals'     => wc_get_price_decimals(),
+				'decimalSep'   => wc_get_price_decimal_separator(),
+				'thousandSep'  => wc_get_price_thousand_separator(),
+				'symbol'       => html_entity_decode( get_woocommerce_currency_symbol(), ENT_QUOTES, 'UTF-8' ),
+				'format'       => get_woocommerce_price_format(), // e.g. '%2$s&nbsp;%1$s' (1 = symbol, 2 = amount)
+			],
 			'placeholderImg'   => esc_url( wc_placeholder_img_src() ),
 			'i18n'             => [
 				'skuLabel'           => __( 'Kataloški broj:', 'dp-b2b-quick-order' ),

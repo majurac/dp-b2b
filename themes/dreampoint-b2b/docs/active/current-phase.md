@@ -22,6 +22,8 @@ baseline (e.g. items already listed under "Future Phases" in
 Quick Order future-scope notes), not completion of pending work — none is
 scheduled or implied by this close-out.
 
+**Update 2026-10-05:** redesign slices 1–3 (search, state row/chips, product list and footer visuals) were accepted on staging at plugin v1.0.22 as a new-scope enhancement; maintenance mode otherwise unchanged. See `docs/active/status.md` (2026-10-05 update) for the remaining, unscheduled scope. No Slice 4 is scheduled.
+
 ## Historical record — local-state transformation phase (2026-07-10)
 
 Quick Order V1.1 (usability/completeness pass) was complete — its plan

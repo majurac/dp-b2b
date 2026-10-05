@@ -1162,6 +1162,16 @@ The old shared `dp_search_*` rendered-HTML transient cache (and its clearing hoo
 - Any change to the AJAX handler must keep `post_status => publish`, keep the visibility filters on the query, and stay cache-free for result HTML.
 - Staging is the only deployment target; ACF group sync and options values are an environment step (git does not carry DB content).
 
+### Addendum 2026-10-05 — Quick Order reuses the ADR-014 identifier semantics (narrow opt-in)
+
+Quick Order (plugin `dp-b2b-quick-order`) search opts into the same extension; the ADR-014 decision itself is unchanged.
+
+- QO sets the `dp_search_extended` query var on its own WP_Query, so `posts_search` matches title/content + `_sku` + `_ARTICLE_CODE` + `_global_unique_id`, variation hit returns the parent, `MIN_CHARS` 2 (QO mirrors it as `searchMinChars`), 200-ID cap. No QO-specific search backend, index, ranking or typo tolerance. URL param: `qo_search`.
+- Catalog number (`_ARTICLE_CODE`) is exposed in the QO REST contract as `catalog_number` (parent, and per variation — future ERP per-variation catalog-number model; keep it visible below the variation option).
+- Stock is binary only (in stock / out of stock) in the QO REST contract and UI — numeric stock quantities are never sent to the client.
+- "Popularne pretrage" reuse `search_popular_terms` through the `dp_qo_popular_searches` filter (helper in `inc/product-search.php`); QO is visibility-filtered like every other query (`pre_get_posts` + `posts_clauses`).
+- Search results are never cached by term (consistent with "Search result cache removed").
+
 ### Related
 
 - Code: commit `b5ce399` — `inc/product-search.php`, `inc/ajax-handlers.php`, `header.php`, `js/ajax-search.js`, `js/select2-init.js`, `functions.php`, `sass/components/_header.scss`, `sass/components/_content.scss`, `acf-json/group_dp_search_panel.json`.

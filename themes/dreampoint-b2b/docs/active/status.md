@@ -5,6 +5,12 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-05 — Quick Order redesign slices 1–3 (staging-accepted)
+
+Search (ADR-014 reuse, `qo_search`, `catalog_number`, binary stock), state row (popular searches, active chips, no-results, reset) and the new product list/footer visuals are implemented and accepted on staging at plugin v1.0.22 (commits `06d1ac7`, `516d44d`, `ab8a0c3`, `80aa419`, `e827fc9`; docs commit follows). Local-state/cart-sync architecture unchanged. Details: `docs/frozen/quick-order-local-state-architecture.md` Addendum 2026-10-05; plugin `readme.md`.
+
+Remaining QO scope (not scheduled): Excel Import; Model/Boja/Dob WBW blocks (Boja/Pakovanje blocks do not render on staging view 3); brand visibility-safe list/show-more; row-level cart error UX (incl. `quantity_allowed` semantics); mobile QO design; broader filter slice; WBW drops `orderby` when a filter is applied (pre-existing); search placement under the sidebar on mobile.
+
 ## Milestone: COMPLETE (2026-07-21)
 
 Quick Order has completed its planned development cycle and has entered

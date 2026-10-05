@@ -408,3 +408,16 @@ proof no fixed naming convention can be assumed.
 - This section describes the current implementation, not an aspiration —
   check any future WBW-facing Quick Order change against it before adding a
   new hardcoded assumption about WBW's naming, delimiters, or state.
+
+---
+
+## Addendum 2026-10-05 — Quick Order redesign slices 1–3 (supersedes parts of §3 and §6 wording)
+
+Additive note; the local-state model (§2, §4, §5), additive chunked cart sync, and WBW doctrine (§11) are UNCHANGED. Staging-accepted at plugin v1.0.22 (commits `06d1ac7`, `516d44d`, `ab8a0c3`, `80aa419`, `e827fc9`).
+
+- **§3 Footer wording.** Labels are now "N artikl/artikla/artikala" and "N različiti SKU / različita SKU-a / različitih SKU-a" (Croatian declension, `pluralHr` in `footer-controller.js`; forms localized in `class-assets.php`). Counting semantics are unchanged (`getItemCount` / `getRowCount`). Subtotal is formatted with WooCommerce's own money settings (`dpQuickOrder.money`) — presentation only, the amount is still computed from local state. The footer is a sticky region inside the content column (not a viewport-fixed bar); "Pregled košarice" is a link to the native cart, "Dodaj u košaricu" is the unchanged submit.
+- **§6 Variation rendering.** The `<table>` markup is replaced by a div-based list (`.dp-qo-thead` PROIZVOD / OPCIJA / STANJE / CIJENA + `.dp-qo-tbody`). A product is one parent card (`.dp-qo-card--simple` / `--variable`); a variable card holds its variations as `.dp-qo-line.dp-qo-variation-row` lines showing the attribute option(s) (server order, `label · label`) and the variation catalog number beneath (kept deliberately — future ERP per-variation catalog numbers). Row resolution stays `.closest('.dp-qo-row, .dp-qo-variation-row')`; state key stays `"${productId}_${variationId}"`.
+- **Selected check / stepper.** `.is-added` (local qty > 0) drives a persistent selected check; the flash-check timers were removed. Stepper is a joined arrow control; minus is disabled at qty 0.
+- **Stock.** Binary only (dot + text). Numeric stock is never part of the client contract.
+- **Search / chips (Slices 1–2).** `qo_search` URL param with ADR-014 identifier semantics (see `docs/decisions.md` ADR-014 addendum), popular-search chips, active-filter chips (native WBW `.wpfSelectedParameters` adopted into the QO state row) and a structured no-results state with reset. This supersedes the earlier "no QO-owned chip row" recommendation in `docs/active/quick-order-catalog-filters-spec.md`.
+- **Still out of scope / open:** Excel Import, mobile-specific QO design, Model/Boja/Dob WBW blocks, brand show-more list, row-level cart error UX.

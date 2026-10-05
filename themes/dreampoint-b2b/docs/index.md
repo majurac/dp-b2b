@@ -41,7 +41,7 @@ Active engineering guidance lives in:
 
 | Doc | Covers |
 |-----|--------|
-| `docs/active/current-phase.md` | Current phase status (Quick Order: COMPLETE, maintenance mode as of 2026-07-21), frozen system boundaries, current philosophy |
+| `docs/active/current-phase.md` | Current phase status (Quick Order: COMPLETE, maintenance mode as of 2026-07-21; redesign slices 1–3 accepted 2026-10-05), frozen system boundaries, current philosophy |
 | `docs/active/status.md` | Implementation status matrix per system — Quick Order milestone marked COMPLETE 2026-07-21 |
 | `docs/active/quick-order-catalog-filters-spec.md` | Catalog Filters (New/Best Seller/Already Ordered) design rationale — **implementation COMPLETE**, retained as historical design record; current behavior documented in the plugin's `readme.md` |
 | `docs/active/homepage-segment-landing-architecture.md` | Homepage + Segment Landing (Lifestyle/Toys/Outdoor) structure and shared-visibility rule — **IMPLEMENTED & DEPLOYED 2026-09-23** (staging, commit `c4dc61d`). ADR-009 Phase B wiring complete; real `brand_segment` content population and pixel-level Figma visual polish remain open. |
@@ -57,7 +57,7 @@ Active engineering guidance lives in:
 | Doc | System |
 |-----|--------|
 | `docs/frozen/checkout-logic.md` | Checkout — payment rules, billing prefill, WooCommerce Blocks billing data protection |
-| `docs/frozen/quick-order-local-state-architecture.md` | Quick Order — local state workspace model (canonical, current). Milestone COMPLETE 2026-07-21 — see `docs/active/status.md`. |
+| `docs/frozen/quick-order-local-state-architecture.md` | Quick Order — local state workspace model (canonical, current). Milestone COMPLETE 2026-07-21; Addendum 2026-10-05 covers redesign slices 1–3 (footer wording, card/OPCIJA rendering, search/chips). |
 | `docs/frozen/quick-order-sync-architecture.md` | CartSync — real-time debounce engine (SUPERSEDED 2026-07-10 — see local-state doc) |
 
 ---

@@ -465,3 +465,7 @@ every subsequent page fetch and every sort change with no additional code.
 | Clear All clears both WBW and QO filters in one click | Playwright: set a WBW filter + a QO checkbox, click combined Clear All, assert both URL and result set reset |
 | Browser back restores previous combined filter state | Playwright: toggle QO checkbox, navigate back, assert checkbox unchecked and result set matches |
 | Pagination/Sort preserve QO filters | Playwright: check a QO filter, go to page 2, change sort, assert filter still active in URL and result set |
+
+---
+
+**Note 2026-10-05:** the "Selected-filter chips → no separate QO-owned chip row" recommendation above is superseded. Quick Order now shows an active-filter chip state row (native WBW selected parameters adopted into the QO state row, plus the `qo_search` term) with a clear-all/reset action. See `docs/frozen/quick-order-local-state-architecture.md` Addendum 2026-10-05. The three QO-owned boolean filters themselves are unchanged.

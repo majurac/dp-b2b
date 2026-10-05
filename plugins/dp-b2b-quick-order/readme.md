@@ -97,6 +97,13 @@ constant rather than producing a broken comparison). Already Ordered's
 qualifying statuses are overridable via `dp_qo_already_ordered_statuses`
 (default `['processing', 'completed']`).
 
+## Search, State Row and Product List (2026-10-05, v1.0.22)
+
+- **Search:** `qo_search` URL param. Reuses the theme's ADR-014 extension (`dp_search_extended` query var: title/content, `_sku`, `_ARTICLE_CODE`, `_global_unique_id`; variation hit returns parent; min 2 chars; 200-ID cap). No QO-specific index/ranking. REST exposes `catalog_number` (parent and per variation); stock is binary only — no numeric stock reaches the client.
+- **State row:** shows "Popularne pretrage" (theme filter `dp_qo_popular_searches`, ACF `search_popular_terms`) when nothing is active, otherwise removable active-filter chips (native WBW `.wpfSelectedParameters` adopted into the row, plus the search term) and a clear-all action; structured no-results state when the query is empty.
+- **Product list:** div-based list (PROIZVOD / OPCIJA / STANJE / CIJENA), parent cards with the variations as lines inside variable cards (attribute options + catalog number beneath), joined arrow stepper, persistent selected check (`.is-added`), sticky footer with Croatian-declined counts ("N artikala", "N različitih SKU-a"), WooCommerce-formatted subtotal, "Pregled košarice" link and "Dodaj u košaricu" submit.
+- Out of scope / not built: Excel Import, mobile QO design, Model/Boja/Dob filter blocks, brand show-more.
+
 ## HPOS Compatibility
 
 Declares compatibility with `custom_order_tables` (High-Performance Order

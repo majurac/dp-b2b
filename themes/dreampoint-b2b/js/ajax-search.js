@@ -1,222 +1,334 @@
 /**
- * AJAX Search with Debouncing and iOS Support
- * Optimized version with loading states and error handling
- * 
+ * Header search — default panel, live AJAX results, recent searches.
+ *
+ * States (only one of the two panels is shown at a time):
+ *   - input shorter than 2 chars  → .search-default ("Popularne pretrage", "Nedavno pretraženo", hint)
+ *   - input of 2+ chars           → #ajax-search-result (Cotra-style compact AJAX rows)
+ *
+ * Desktop: panels open under the input in the header.
+ * Mobile (md-down): .search-area is a fullscreen overlay opened by .mobile-search-toggle.
+ *
+ * VAŽNO (iOS/WebKit): niti jedan klik/tap handler ne uklanja i ne prazni DOM koji sadrži link
+ * ili formu na koju je korisnik upravo tapnuo (to otkazuje navigaciju/submit na iOS Safari-ju).
+ *   - Linkovi (čipovi, nedavne pretrage, rezultati) se samo prate; handleri samo upisuju u storage.
+ *   - "×" je zasebno <button> pored linka; lista se ponovo iscrtava tek nakon njegovog klika.
+ *   - Zatvaranje (Escape / klik van) samo postavlja `hidden`, ne briše sadržaj.
+ *   - Rezultati se prazne samo eksplicitno ("Odustani", zatvaranje overlaya, prazan upit).
+ *
+ * Nedavne pretrage: isključivo localStorage (po uređaju), max 4, najnovija prva,
+ * bez ikakvog slanja na server.
+ *
  * @package Dreampoint_B2B
- * @version 1.1.0
+ * @version 3.0.0
  */
 
-jQuery(document).ready(function ($) {
+jQuery( function ( $ ) {
     'use strict';
-    
-    // ========================================================================
-    // UTILITY FUNCTIONS
-    // ========================================================================
-    
-    function isIOS() {
-        return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+    const MIN_CHARS    = 2;
+    const MAX_RECENT   = 4;
+    const MAX_TERM_LEN = 80;
+    const STORAGE_KEY  = 'dpRecentSearches';
+
+    const $area     = $( '.search-area' );
+    const $input    = $area.find( '#s' );
+    const $form     = $area.find( 'form.custom-form' );
+    const $results  = $area.find( '#ajax-search-result' );
+    const $default  = $area.find( '.search-default' );
+    const $recent   = $default.find( '.search-default__recent' );
+    const $recentUl = $recent.find( '.search-recent' );
+    const $toggle   = $( '.mobile-search-toggle' );
+    const $closeBtn = $area.find( '.close-mobile-search' );
+    const template  = document.getElementById( 'search-recent-template' );
+
+    if ( ! $area.length || ! $input.length || ! $results.length ) {
+        return;
     }
-    
-    function debounce(func, wait) {
-        let timeout;
-        return function () {
-            const context = this;
-            const args = arguments;
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(context, args), wait);
-        };
-    }
-    
-    function toggleOverlay(state) {
-        $('.menu-overlay').toggleClass('active', state);
-        $('html').toggleClass('fixed', state);
-        $('body').toggleClass('fixed', state);
-    }
-    
-    function showLoading() {
-        const loadingHTML = '<div class="ajax-search-loading"><span class="spinner"></span> ' + ( typeof dpAjax !== 'undefined' ? dpAjax.loading : 'Pretraga...' ) + '</div>';
-        $('#ajax-search-result').html(loadingHTML);
-    }
-    
-    function showError(message) {
-        const errorHTML = `<div class="ajax-search-error"><p>${message}</p></div>`;
-        $('#ajax-search-result').html(errorHTML);
-    }
-    
-    // ========================================================================
-    // CACHE & STATE MANAGEMENT
-    // ========================================================================
-    
+
     let currentRequest = null;
-    const searchCache = {};
-    
-    // ========================================================================
-    // MAIN SEARCH HANDLER
-    // ========================================================================
-    
-    function handleSearchInput() {
-        const searchTerm = $(this).val().trim();
-        
-        if (searchTerm === '') {
-            $('#ajax-search-result').empty();
+
+    // ------------------------------------------------------------------------
+    // Recent searches (localStorage, sve u try/catch — storage može biti nedostupan)
+    // ------------------------------------------------------------------------
+
+    function normalizeTerm( value ) {
+        return String( value || '' ).replace( /\s+/g, ' ' ).trim().slice( 0, MAX_TERM_LEN );
+    }
+
+    function readRecent() {
+        try {
+            const parsed = JSON.parse( window.localStorage.getItem( STORAGE_KEY ) || '[]' );
+            if ( ! Array.isArray( parsed ) ) {
+                return [];
+            }
+            return parsed.map( normalizeTerm ).filter( ( t ) => t.length >= MIN_CHARS ).slice( 0, MAX_RECENT );
+        } catch ( e ) {
+            return [];
+        }
+    }
+
+    function writeRecent( list ) {
+        try {
+            window.localStorage.setItem( STORAGE_KEY, JSON.stringify( list.slice( 0, MAX_RECENT ) ) );
+        } catch ( e ) {
+            // Storage nedostupan (privatni mod, blokiran, kvota) — pretraga radi bez istorije.
+        }
+    }
+
+    // Upis termina: najnoviji prvi, bez duplikata (case-insensitive), max 4.
+    function rememberTerm( value ) {
+        const term = normalizeTerm( value );
+        if ( term.length < MIN_CHARS ) {
             return;
         }
-        
-        if (searchTerm.length < 2) {
-            $('#ajax-search-result').html(
-                '<div class="ajax-search-hint"><p>' + ( typeof dpAjax !== 'undefined' ? dpAjax.minChars : 'Unesite najmanje 2 znaka...' ) + '</p></div>'
-            );
+        const key  = term.toLocaleLowerCase();
+        const list = readRecent().filter( ( t ) => t.toLocaleLowerCase() !== key );
+        list.unshift( term );
+        writeRecent( list );
+    }
+
+    function forgetTerm( value ) {
+        const key = normalizeTerm( value ).toLocaleLowerCase();
+        writeRecent( readRecent().filter( ( t ) => t.toLocaleLowerCase() !== key ) );
+    }
+
+    function searchUrl( term ) {
+        const action = $form.attr( 'action' ) || '/';
+        const url    = new URL( action, window.location.href );
+        url.searchParams.set( 's', term );
+        url.searchParams.set( 'post_type', 'product' );
+        return url.toString();
+    }
+
+    function renderRecent() {
+        const list = readRecent();
+
+        $recentUl.empty();
+
+        if ( ! list.length || ! template ) {
+            $recent.prop( 'hidden', true );
             return;
         }
-        
-        if (searchCache[searchTerm]) {
-            $('#ajax-search-result').html(searchCache[searchTerm]);
-            return;
+
+        list.forEach( ( term ) => {
+            const item = template.content.firstElementChild.cloneNode( true );
+            const link = item.querySelector( '.search-recent__link' );
+            const btn  = item.querySelector( '.search-recent__remove' );
+
+            link.setAttribute( 'href', searchUrl( term ) );
+            link.setAttribute( 'data-search-term', term );
+            item.querySelector( '.search-recent__term' ).textContent = term;
+            btn.setAttribute( 'data-search-term', term );
+            btn.setAttribute( 'aria-label', ( typeof dpAjax !== 'undefined' ? dpAjax.removeRecent : 'Ukloni „%s“' ).replace( '%s', term ) );
+
+            $recentUl[ 0 ].appendChild( item );
+        } );
+
+        $recent.prop( 'hidden', false );
+    }
+
+    // ------------------------------------------------------------------------
+    // Panels
+    // ------------------------------------------------------------------------
+
+    function termLength() {
+        return $input.val().trim().length;
+    }
+
+    // Pokazuje tačno jedan panel prema dužini upita.
+    function syncPanels() {
+        if ( termLength() < MIN_CHARS ) {
+            renderRecent();
+            $results.prop( 'hidden', true );
+            $default.prop( 'hidden', false );
+        } else {
+            $default.prop( 'hidden', true );
+            $results.prop( 'hidden', false );
         }
-        
-        if (currentRequest && currentRequest.readyState !== 4) {
+    }
+
+    // Zatvaranje samo sakriva — sadržaj (linkovi/forme) ostaje u DOM-u.
+    function hidePanels() {
+        $default.prop( 'hidden', true );
+        $results.prop( 'hidden', true );
+    }
+
+    function abortRequest() {
+        if ( currentRequest && currentRequest.readyState !== 4 ) {
             currentRequest.abort();
         }
-        
-        showLoading();
-        
-        currentRequest = $.ajax({
-            url: dpAjax.url,
-            type: 'GET',
-            data: {
-                action: 'search_products',
+        currentRequest = null;
+    }
+
+    function clearResults() {
+        abortRequest();
+        $results.empty();
+    }
+
+    function debounce( func, wait ) {
+        let timeout;
+        const debounced = function () {
+            const context = this;
+            const args    = arguments;
+            clearTimeout( timeout );
+            timeout = setTimeout( () => func.apply( context, args ), wait );
+        };
+        debounced.cancel = function () {
+            clearTimeout( timeout );
+        };
+        return debounced;
+    }
+
+    // ------------------------------------------------------------------------
+    // Live search
+    // ------------------------------------------------------------------------
+
+    function fetchResults() {
+        const searchTerm = $input.val().trim();
+
+        if ( searchTerm.length < MIN_CHARS ) {
+            clearResults();
+            syncPanels();
+            return;
+        }
+
+        abortRequest();
+
+        currentRequest = $.ajax( {
+            url:     dpAjax.url,
+            type:    'GET',
+            data:    {
+                action:     'search_products',
                 searchTerm: searchTerm,
-                nonce: dpAjax.nonce
+                nonce:      dpAjax.nonce,
             },
             timeout: 10000,
-            success: function (response) {
-                if (response && response.trim() !== '') {
-                    searchCache[searchTerm] = response;
-                    $('#ajax-search-result').html(response);
-                } else {
-                    showError( typeof dpAjax !== 'undefined' ? dpAjax.noResults : 'Nema rezultata pretrage.' );
-                }
+            success: function ( response ) {
+                $results.html( response );
             },
-            error: function (xhr, status, error) {
-                if (status === 'abort') return;
-                if (status === 'timeout') {
-                    showError( typeof dpAjax !== 'undefined' ? dpAjax.timeout : 'Pretraga traje predugo. Pokušajte ponovo.' );
-                } else {
-                    showError( typeof dpAjax !== 'undefined' ? dpAjax.error : 'Greška pri pretrazi. Pokušajte ponovo.' );
+            error:   function ( xhr, status ) {
+                if ( status === 'abort' ) {
+                    return;
                 }
-                if (window.console && window.console.error) {
-                    console.error('AJAX Search Error:', status, error);
-                }
+                $results.empty().append(
+                    $( '<div class="sajx-nofund-prod"></div>' ).append( $( '<p></p>' ).text( dpAjax.error ) )
+                );
             },
             complete: function () {
                 currentRequest = null;
-            }
-        });
+            },
+        } );
     }
-    
-    // ========================================================================
-    // SEARCH POPUP MANAGEMENT
-    // ========================================================================
-    
-    const $searchBtn = $('.search-area .toggle-search');
-    const $searchPopup = $('.search-popup');
-    const $searchClose = $('.search-popup .search-close');
-    const $searchInput = $('#s');
-    const $searchModalContent = $('.search-popup .modal-content');
-    
-    /**
-     * Close search popup and reset state
-     *
-     * ORDER MATTERS:
-     * Focus must be moved OUT of the modal BEFORE aria-hidden="true" is set.
-     * If any element inside the modal has focus when aria-hidden is applied,
-     * the browser throws: "Blocked aria-hidden on a focused element".
-     */
-    function closeSearchPopup() {
-        // 1. Return focus to trigger button BEFORE touching aria-hidden
-        $searchBtn.trigger('focus');
-        // 2. Now safe to hide from assistive technology
-        $searchPopup.attr('aria-hidden', 'true');
-        // 3. Hide visually
-        $searchPopup.removeClass('active');
-        // 4. Remove input from tab order while modal is closed
-        $searchInput.attr('tabindex', '-1');
-        // 5. Reset content and overlay
-        $('#ajax-search-result').empty();
-        $searchInput.val('');
-        toggleOverlay(false);
-    }
-    
-    /**
-     * Open search popup with proper focus
-     *
-     * ORDER MATTERS:
-     * aria-hidden must be removed BEFORE focus is set on the input,
-     * otherwise the browser blocks the focus attempt.
-     */
-    function openSearchPopup() {
-        // 1. Remove aria-hidden FIRST — browser now allows focus inside modal
-        $searchPopup.attr('aria-hidden', 'false');
-        // 2. Restore input to tab order
-        $searchInput.attr('tabindex', '0');
-        // 3. Show modal
-        $searchPopup.addClass('active');
-        toggleOverlay(true);
-        // 4. Focus input — short delay ensures CSS transition has started
-        setTimeout(function () {
-            $searchInput.trigger('focus');
-        }, 50);
-    }
-    
-    // ========================================================================
-    // EVENT HANDLERS
-    // ========================================================================
-    
-    $searchInput.on('input', debounce(handleSearchInput, 500));
-    
-    $searchBtn.on('click', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        openSearchPopup();
-    });
-    
-    $searchClose.on('click', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        closeSearchPopup();
-    });
-    
-    $searchPopup.on('click', function (e) {
-        if (e.target === this) {
-            closeSearchPopup();
+
+    const debouncedFetch = debounce( fetchResults, 500 );
+
+    $input.on( 'input', function () {
+        // Prelaz default ↔ rezultati je trenutan; samo dohvat je debounce-ovan.
+        if ( termLength() < MIN_CHARS ) {
+            clearResults();
         }
-    });
-    
-    $searchModalContent.on('click', function(e) {
-        e.stopPropagation();
-    });
-    
-    $(document).on('keyup', function(e) {
-        if (e.key === 'Escape' && $searchPopup.hasClass('active')) {
-            closeSearchPopup();
-        }
-    });
-    
-    if (isIOS()) {
-        $('#ajax-search-result').on('click', '.sajx-nofund-prod, .ajax-search-hint', function () {
-            $(this).remove();
-        });
+        syncPanels();
+        debouncedFetch();
+    } );
+
+    $input.on( 'focus click', function () {
+        syncPanels();
+    } );
+
+    // ------------------------------------------------------------------------
+    // Upis nedavnih pretraga (samo upis — nikakvo uklanjanje DOM-a pre navigacije)
+    // ------------------------------------------------------------------------
+
+    $form.on( 'submit', function () {
+        rememberTerm( $input.val() );
+        // ne pokreći/ne ostavljaj XHR u letu dok pregledač napušta stranicu
+        debouncedFetch.cancel();
+        abortRequest();
+    } );
+
+    // "Vidi sve rezultate" forma iz AJAX rezultata.
+    $results.on( 'submit', 'form', function () {
+        rememberTerm( $( this ).find( 'input[name="s"]' ).val() );
+        debouncedFetch.cancel();
+        abortRequest();
+    } );
+
+    // Čip / nedavna pretraga: link ide normalno na stranicu rezultata; ovde se samo upisuje.
+    $default.on( 'click', '.search-chip, .search-recent__link', function () {
+        rememberTerm( $( this ).attr( 'data-search-term' ) );
+    } );
+
+    // "×" — briše samo tu stavku i ponovo iscrtava listu (dugme nije link, nema navigacije).
+    $default.on( 'click', '.search-recent__remove', function ( e ) {
+        e.preventDefault();
+        forgetTerm( $( this ).attr( 'data-search-term' ) );
+        renderRecent();
+    } );
+
+    // "Odustani" u footeru rezultata.
+    $results.on( 'click', '.live-search-footer .cancel', function () {
+        clearResults();
+        syncPanels();
+    } );
+
+    // ------------------------------------------------------------------------
+    // Mobilni overlay + zatvaranje
+    // ------------------------------------------------------------------------
+
+    function openMobileSearch() {
+        $area.addClass( 'active' );
+        $toggle.attr( 'aria-expanded', 'true' );
+        syncPanels();
+        // Fokus u istom user-gesture-u (iOS dozvoljava fokus samo iz tap handlera).
+        $input.trigger( 'focus' );
     }
-    
-    // ========================================================================
-    // PERFORMANCE OPTIMIZATION
-    // ========================================================================
-    
-    setInterval(function() {
-        Object.keys(searchCache).forEach(key => delete searchCache[key]);
-    }, 5 * 60 * 1000);
-    
-    $searchInput.on('focus', function() {
-        // Analytics / prefetch hook
-    });
-});
+
+    function closeMobileSearch() {
+        $area.removeClass( 'active' );
+        $toggle.attr( 'aria-expanded', 'false' );
+        clearResults();
+        hidePanels();
+    }
+
+    $toggle.on( 'click', function ( e ) {
+        e.preventDefault();
+        openMobileSearch();
+    } );
+
+    $closeBtn.on( 'click', function ( e ) {
+        e.preventDefault();
+        closeMobileSearch();
+        $toggle.trigger( 'focus' );
+    } );
+
+    $( document ).on( 'keyup', function ( e ) {
+        if ( e.key !== 'Escape' ) {
+            return;
+        }
+        if ( $area.hasClass( 'active' ) ) {
+            closeMobileSearch();
+            $toggle.trigger( 'focus' );
+        } else if ( ! $default.prop( 'hidden' ) || ! $results.prop( 'hidden' ) ) {
+            hidePanels();
+        }
+    } );
+
+    // Klik/tap van pretrage zatvara desktop panele (samo `hidden`, sadržaj ostaje).
+    $( document ).on( 'click', function ( e ) {
+        if ( $area.hasClass( 'active' ) ) {
+            return; // mobilni overlay se zatvara samo svojim dugmetom / Escape-om
+        }
+        // Meta koja je u međuvremenu uklonjena iz DOM-a (npr. "×" nakon ponovnog iscrtavanja liste)
+        // nema roditelja pa bi izgledala kao "klik van pretrage".
+        if ( ! document.documentElement.contains( e.target ) ) {
+            return;
+        }
+        if ( $( e.target ).closest( $area ).length || $( e.target ).closest( $toggle ).length ) {
+            return;
+        }
+        hidePanels();
+    } );
+
+    // Početno stanje: oba panela skrivena dok korisnik ne fokusira input.
+    $results.prop( 'hidden', true );
+} );

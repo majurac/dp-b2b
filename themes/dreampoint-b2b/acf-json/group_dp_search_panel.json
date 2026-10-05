@@ -1,0 +1,74 @@
+{
+    "key": "group_dp_search_panel",
+    "title": "Pretraga (Popularne pretrage)",
+    "fields": [
+        {
+            "key": "field_dp_sp_popular",
+            "label": "Popularne pretrage",
+            "name": "search_popular_terms",
+            "aria-label": "",
+            "type": "repeater",
+            "instructions": "Termini koji se prikazuju kao čipovi u polju za pretragu prije kucanja (preporuka: do 3–6). Klik na čip pokreće pretragu tog termina.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "table",
+            "pagination": 0,
+            "min": 0,
+            "max": 6,
+            "collapsed": "",
+            "button_label": "Dodaj pretragu",
+            "rows_per_page": 20,
+            "sub_fields": [
+                {
+                    "key": "field_dp_sp_term",
+                    "label": "Termin",
+                    "name": "term",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": 80,
+                    "allow_in_bindings": 0,
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": "",
+                    "parent_repeater": "field_dp_sp_popular"
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "options_page",
+                "operator": "==",
+                "value": "theme-settings"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "",
+    "show_in_rest": 0,
+    "display_title": "",
+    "allow_ai_access": false,
+    "ai_description": "",
+    "modified": 1791189370
+}

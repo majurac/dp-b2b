@@ -197,17 +197,64 @@ $company_phone = get_field('company_phone', 'option') ?: '';
                                     </button>
                                     <form role="search" method="get" action="<?php echo esc_url(home_url('/')); ?>" autocomplete="off" class="custom-form">
                                         <label class="screen-reader-text" for="s"><?php esc_html_e( 'Pretraži', 'dreampoint-b2b' ); ?>:</label>
-                                        <input type="text" value="<?php the_search_query(); ?>" name="s" id="s" placeholder="<?php _e('Pretražite naziv, SKU ili EAN', 'dreampoint-b2b') ?>" class="search-input" autocomplete="off" />
+                                        <input type="text" value="<?php the_search_query(); ?>" name="s" id="s" placeholder="<?php esc_attr_e( 'Naziv, kataloški broj ili EAN', 'dreampoint-b2b' ); ?>" class="search-input" autocomplete="off" />
                                         <button class="search-btn" type="submit" aria-label="<?php esc_attr_e( 'Gumb za pretragu', 'dreampoint-b2b' ); ?>">
-                                            <i class="icon-magnifing-glass"></i>
+                                            <i class="icon-search"></i>
                                         </button>
                                         <!-- /.search-btn -->
                                         <input type="hidden" name="post_type" value="product">
                                     </form>
-                                    <div id="ajax-search-result">
+                                    <?php
+                                    // Popularne pretrage: ACF opcija (Theme Settings → Pretraga). Nema hardkodiranih termina.
+                                    $popular_searches = [];
+                                    foreach ( (array) get_field( 'search_popular_terms', 'option' ) as $popular_row ) {
+                                        $popular_term = trim( (string) ( $popular_row['term'] ?? '' ) );
+                                        if ( '' !== $popular_term ) {
+                                            $popular_searches[] = $popular_term;
+                                        }
+                                    }
+                                    ?>
+                                    <!-- Default / fokus stanje pre kucanja -->
+                                    <div class="search-default" id="search-default" hidden>
+                                        <?php if ( $popular_searches ) : ?>
+                                            <div class="search-default__section search-default__popular">
+                                                <p class="search-default__title"><?php esc_html_e( 'Popularne pretrage', 'dreampoint-b2b' ); ?></p>
+                                                <ul class="search-chips">
+                                                    <?php foreach ( $popular_searches as $popular_term ) : ?>
+                                                        <li>
+                                                            <a class="search-chip" data-search-term="<?php echo esc_attr( $popular_term ); ?>" href="<?php echo esc_url( add_query_arg( [ 's' => $popular_term, 'post_type' => 'product' ], home_url( '/' ) ) ); ?>"><?php echo esc_html( $popular_term ); ?></a>
+                                                        </li>
+                                                    <?php endforeach; ?>
+                                                </ul>
+                                            </div>
+                                        <?php endif; ?>
+                                        <div class="search-default__section search-default__recent" hidden>
+                                            <p class="search-default__title"><?php esc_html_e( 'Nedavno pretraženo', 'dreampoint-b2b' ); ?></p>
+                                            <ul class="search-recent"></ul>
+                                        </div>
+                                        <p class="search-default__hint">
+                                            <i class="icon-search" aria-hidden="true"></i>
+                                            <em><?php esc_html_e( 'Počnite kucati za prikaz rezultata', 'dreampoint-b2b' ); ?></em>
+                                        </p>
+                                    </div>
+                                    <!-- Predložak stavke "Nedavno pretraženo" (JS ga klonira; ikonu/izgled menja samo ovaj blok + CSS) -->
+                                    <template id="search-recent-template">
+                                        <li class="search-recent__item">
+                                            <a class="search-recent__link" href="">
+                                                <svg class="search-recent__icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6.25" stroke="currentColor" stroke-width="1.5"/><path d="M8 4.5V8l2.25 1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                                <span class="search-recent__term"></span>
+                                            </a>
+                                            <button type="button" class="search-recent__remove"><i class="icon-xmark" aria-hidden="true"></i></button>
+                                        </li>
+                                    </template>
+                                    <div id="ajax-search-result" role="region" aria-live="polite" aria-atomic="true">
                                     </div>
                                 </div>
                                 <!-- /.search-area -->
+                                <div class="mobile-search-button action-btn">
+                                    <button type="button" class="mobile-search-toggle" aria-label="<?php esc_attr_e( 'Otvori mobilnu pretragu', 'dreampoint-b2b' ); ?>" aria-expanded="false"><i class="icon-search" aria-hidden="true"></i></button>
+                                </div>
+                                <!-- /.mobile-search-button -->
                                 <?php $quick_order_url = dreampoint_b2b_get_quick_order_url(); ?>
                                 <?php if ( $quick_order_url ) : ?>
                                 <div class="quick-order-btn">
@@ -312,45 +359,6 @@ $company_phone = get_field('company_phone', 'option') ?: '';
         </header>
         <!-- /#header -->
         
-        <!-- Search Popup -->
-        <div class="search-popup modal" id="search-popup" role="dialog" aria-modal="true" aria-labelledby="search-title" aria-hidden="true">
-            <div class="modal-content">
-                <h2 id="search-title" class="screen-reader-text"><?php esc_html_e('Pretraga proizvoda', 'dreampoint-b2b'); ?></h2>
-                
-                <button 
-                    class="sliding-content-close search-close close-modal" 
-                    aria-label="<?php esc_attr_e('Zatvori pretragu', 'dreampoint-b2b'); ?>"
-                >
-                    <i class="icon-xmark" aria-hidden="true"></i>
-                </button>
-                
-                <form role="search" method="get" action="<?php echo esc_url(home_url('/')); ?>" autocomplete="off">
-                    <label class="screen-reader-text" for="s"><?php esc_html_e('Traži proizvode:', 'dreampoint-b2b'); ?></label>
-                    <div class="input-wrapper">
-                        <input 
-                            type="search" 
-                            value="<?php echo esc_attr(get_search_query()); ?>" 
-                            name="s" 
-                            id="s" 
-                            placeholder="<?php esc_attr_e('Traži proizvode...', 'dreampoint-b2b'); ?>" 
-                            class="search-input" 
-                            autocomplete="off"
-                            aria-label="<?php esc_attr_e('Pretraži proizvode', 'dreampoint-b2b'); ?>"
-                            tabindex="-1"
-                        />
-                        <input type="hidden" name="post_type" value="product">
-                        <button class="submit-search" type="submit" aria-label="<?php esc_attr_e('Pretraži', 'dreampoint-b2b'); ?>">
-                            <i class="icon-search" aria-hidden="true"></i>
-                        </button>
-                    </div>
-                    <!-- /.input-wrapper -->
-                </form>
-                
-                <div id="ajax-search-result" role="region" aria-live="polite" aria-atomic="true"></div>
-            </div>
-            <!-- /.modal-content -->
-        </div>
-        <!-- /.search-popup -->
         
         <!-- Mini Cart -->
         <div class="my-custom-mini-cart-container widget_shopping_cart_content" role="complementary" aria-label="<?php esc_attr_e('košarica', 'dreampoint-b2b'); ?>">

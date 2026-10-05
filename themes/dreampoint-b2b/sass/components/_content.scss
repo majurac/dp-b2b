@@ -58,14 +58,26 @@ body.admin-bar {
             }
         }
     }
-    #header .bottom-nav .search-area form.custom-form {
+    #header .search-area form.custom-form {
         @include bp(md-down) {
             margin-top: 96px;
         }
     }
-    #header .bottom-nav .search-area.active .close-mobile-search {
+    #header .search-area.active .close-mobile-search {
         @include bp(md-down) {
             top: 62px;
+        }
+    }
+    #header .search-area #ajax-search-result,
+    #header .search-area .search-default {
+        @include bp(md-down) {
+            top: 161px;
+        }
+    }
+    #header .search-area #ajax-search-result .product-rows {
+        @include bp(md-down) {
+            max-height: calc(100vh - 177px);
+            max-height: calc(100dvh - 177px);
         }
     }
     .mobile-menu__menu .sub-menu {

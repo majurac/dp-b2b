@@ -530,14 +530,16 @@
             margin-top: 50px;
         }
     }
-    input[type="text"] {
+    form.custom-form input[type="text"] {
         padding-left: 44px;
         margin-top: 0;
     }
-    .search-btn {
+    // form.custom-form prefix: must outrank the generic `.custom-form button[type="submit"]` pink button rule
+    form.custom-form .search-btn {
         @include btn-reset;
         @include centre(y);
         left: 16px;
+        height: auto;
         padding: 0;
         background: none;
         border: 0;
@@ -606,11 +608,129 @@
 }
 
 
+// Default / fokus stanje pretrage (pre kucanja) — struktura iz privremenog screenshota; vizuelni detalji dolaze iz finalnog Figma dizajna.
+.search-default,
+#ajax-search-result {
+    &[hidden] {
+        display: none;
+    }
+}
+.search-default {
+    position: absolute;
+    z-index: 3;
+    width: 100%;
+    top: 100%;
+    text-align: left; // header .action-btns is text-align:right on sm-up
+    padding: 16px;
+    background: #FFFFFF;
+    box-shadow: 0px 10px 16px rgba(10, 14, 21, 0.12), 0px 2px 5px rgba(10, 14, 21, 0.16);
+    border-radius: 8px;
+    @include bp(md-down) {
+        top: 115px;
+        width: calc(100% - 32px);
+        @include centre(x);
+        box-shadow: none;
+        border: 1px solid $border-primary;
+    }
+    .search-default__section + .search-default__section {
+        margin-top: 16px;
+    }
+    .search-default__title {
+        margin: 0 0 8px;
+        font-size: 12px;
+        font-weight: 600;
+        color: $text-secondary;
+    }
+    .search-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    .search-chip {
+        display: inline-flex;
+        align-items: center;
+        min-height: 32px;
+        padding: 4px 12px;
+        border: 1px solid $border-primary;
+        border-radius: 16px;
+        font-size: 14px;
+        color: $text-primary;
+        text-decoration: none;
+        &:hover,
+        &:focus-visible {
+            border-color: $brand;
+            color: $brand;
+        }
+    }
+    .search-recent {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    .search-recent__item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
+    .search-recent__link {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-grow: 1;
+        min-height: 36px;
+        font-size: 14px;
+        color: $text-primary;
+        text-decoration: none;
+        &:hover,
+        &:focus-visible {
+            color: $brand;
+        }
+    }
+    .search-recent__icon {
+        flex-shrink: 0;
+        color: $text-secondary;
+    }
+    .search-recent__remove {
+        @include btn-reset;
+        flex-shrink: 0;
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        background: none;
+        border: 0;
+        color: $text-secondary;
+        font-size: 16px;
+        &:hover,
+        &:focus-visible {
+            color: $text-primary;
+        }
+    }
+    .search-default__hint {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin: 16px 0 0;
+        padding-top: 16px;
+        border-top: 1px solid $border-primary;
+        font-size: 14px;
+        color: $text-secondary;
+        em {
+            font-style: italic;
+        }
+    }
+}
+
 #ajax-search-result {
     position: absolute;
     z-index: 3;
     width: 100%;
     top: 100%;
+    text-align: left; // header .action-btns is text-align:right on sm-up — don't inherit it into results
     @include bp(md-down) {
         top: 115px;
         width: calc(100% - 32px);
@@ -665,6 +785,9 @@
         @include bp(md-down) {
             box-shadow: none;
             border: 1px solid $border-primary;
+            // overlay je fixed: lista (sa footerom) mora stati u visinu ekrana ispod inputa (top: 115px + 16px razmak)
+            max-height: calc(100vh - 131px);
+            max-height: calc(100dvh - 131px);
         }
         .product-row {
             background-color: #fff;
@@ -683,6 +806,11 @@
                 display: flex;
                 flex-direction: column;
                 gap: 16px;
+                .product-sku {
+                    margin-top: -8px;
+                    font-size: 12px;
+                    color: $text-secondary;
+                }
                 .product-title {
                     color: $text-primary;
                     a {

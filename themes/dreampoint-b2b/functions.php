@@ -28,6 +28,17 @@ if ( ! defined( '_S_VERSION' ) ) {
     ) );
 }
 
+/**
+ * Cache-bust verzija po fajlu (mtime). _S_VERSION prati samo style.css / theme.min.js,
+ * pa direktno enqueue-ovani JS fajlovi koriste ovo da bi izmena odmah dobila novi ?ver=.
+ *
+ * @param string $relative_path Putanja relativna na temu, npr. 'js/ajax-search.js'.
+ */
+function dreampoint_b2b_asset_ver( string $relative_path ): string {
+    $mtime = @filemtime( get_template_directory() . '/' . ltrim( $relative_path, '/' ) ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- fallback na _S_VERSION ako fajl ne postoji
+    return $mtime ? (string) $mtime : _S_VERSION;
+}
+
 // ============================================================================
 // DEVICE DETECTION
 // ============================================================================
@@ -148,6 +159,7 @@ if ( class_exists( 'WooCommerce' ) ) {
     require get_template_directory() . '/inc/checkout-logic.php';
     require get_template_directory() . '/inc/checkout-delivery-location.php';
     require get_template_directory() . '/inc/ajax-handlers.php';
+    require get_template_directory() . '/inc/product-search.php';
     require get_template_directory() . '/inc/brand-hero.php';
     require get_template_directory() . '/inc/homepage-segments.php';
     require get_template_directory() . '/inc/wbw-multi-search-compat.php';
@@ -186,12 +198,14 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
  *
  * Shop/archive stranice su uključene jer header-shop-archive.php renderuje
  * .sort-area select (woocommerce_catalog_ordering) koji se inicijalizuje
- * u select2-init.js. is_woocommerce() nije korišten jer uključuje i
- * is_product() — single product stranice imaju zasebnu potrebu za Select2
- * (.variations select) i mogu se dodati odvojeno po potrebi.
+ * u select2-init.js. is_woocommerce() nije korišten jer bi uključio i
+ * ostale WC kontekste bez select elemenata; is_product() je dodat zasebno
+ * jer single product stranica ima .variations select (varijabilni proizvodi)
+ * i mobilni tabs dropdown (tabs-dropdown.js).
  */
 function dreampoint_b2b_needs_select2(): bool {
-    return is_cart()                         ||
+    return is_product()                      ||
+           is_cart()                         ||
            is_checkout()                     ||
            is_account_page()                 ||
            is_wc_endpoint_url()              ||
@@ -295,26 +309,6 @@ function empty_block( array $block = [] ): void {
     printf(
         '<p class="empty-block">Block "%s" is empty <small>(only editors see this)</small></p>',
         esc_html( $block['title'] ?? 'unknown' )
-    );
-}
-
-/**
- * Omotač za Relevanssi "Did you mean?" sugestiju.
- *
- * @param string|null $search_string Pojam za pretragu
- * @return string HTML sugestija ili prazan string
- */
-function did_you_mean( ?string $search_string = null ): string {
-    if ( ! function_exists( 'relevanssi_didyoumean' ) ) return '';
-
-    $search_string = $search_string ?: get_search_query( false );
-
-    return relevanssi_didyoumean(
-        $search_string,
-        '<p>' . esc_html__( 'Da li ste mislili:', 'dreampoint-b2b' ) . ' ',
-        '</p>',
-        5,
-        false
     );
 }
 
@@ -470,7 +464,7 @@ function dreampoint_b2b_scripts(): void {
             'dreampoint-b2b-select2-init',
             get_template_directory_uri() . '/js/select2-init.js',
             [ 'dreampoint-b2b-select2' ],
-            _S_VERSION,
+            dreampoint_b2b_asset_ver( 'js/select2-init.js' ),
             true
         );
         wp_script_add_data( 'dreampoint-b2b-select2-init', 'strategy', 'defer' );
@@ -482,18 +476,16 @@ function dreampoint_b2b_scripts(): void {
         'dreampoint-b2b-ajax-search',
         get_template_directory_uri() . '/js/ajax-search.js',
         [ 'jquery' ],
-        _S_VERSION,
+        dreampoint_b2b_asset_ver( 'js/ajax-search.js' ),
         true
     );
     wp_script_add_data( 'dreampoint-b2b-ajax-search', 'strategy', 'defer' );
     wp_localize_script( 'dreampoint-b2b-ajax-search', 'dpAjax', [
-        'url'      => admin_url( 'admin-ajax.php' ),
-        'nonce'    => wp_create_nonce( 'dp_search_nonce' ),
-        'loading'  => esc_html__( 'Pretraga...', 'dreampoint-b2b' ),
-        'minChars' => esc_html__( 'Unesite najmanje 2 znaka...', 'dreampoint-b2b' ),
-        'noResults'=> esc_html__( 'Nema rezultata pretrage.', 'dreampoint-b2b' ),
-        'timeout'  => esc_html__( 'Pretraga traje predugo. Pokušajte ponovo.', 'dreampoint-b2b' ),
-        'error'    => esc_html__( 'Greška pri pretrazi. Pokušajte ponovo.', 'dreampoint-b2b' ),
+        'url'   => admin_url( 'admin-ajax.php' ),
+        'nonce' => wp_create_nonce( 'dp_search_nonce' ),
+        'error' => esc_html__( 'Greška pri pretrazi. Pokušajte ponovo.', 'dreampoint-b2b' ),
+        /* translators: %s: recent search term */
+        'removeRecent' => esc_html__( 'Ukloni „%s“ iz nedavnih pretraga', 'dreampoint-b2b' ),
     ] );
 
     // --- CSS/JS: Toastify — obaveštenja za dodavanje u korpu ---
@@ -654,7 +646,7 @@ function dreampoint_b2b_scripts(): void {
             'dreampoint-b2b-product-single',
             get_template_directory_uri() . '/js/product-single.js',
             [ 'jquery' ],
-            _S_VERSION,
+            dreampoint_b2b_asset_ver( 'js/product-single.js' ),
             true
         );
         wp_script_add_data( 'dreampoint-b2b-product-single', 'strategy', 'defer' );
@@ -667,7 +659,7 @@ function dreampoint_b2b_scripts(): void {
             'dreampoint-b2b-variation-stock',
             get_template_directory_uri() . '/js/variation-stock.js',
             [ 'jquery' ],
-            _S_VERSION,
+            dreampoint_b2b_asset_ver( 'js/variation-stock.js' ),
             true
         );
         wp_script_add_data( 'dreampoint-b2b-variation-stock', 'strategy', 'defer' );
@@ -680,8 +672,8 @@ function dreampoint_b2b_scripts(): void {
         wp_enqueue_script(
             'dreampoint-b2b-tabs-dropdown',
             get_template_directory_uri() . '/js/tabs-dropdown.js',
-            [ 'jquery' ],
-            _S_VERSION,
+            [ 'jquery', 'dreampoint-b2b-select2' ],
+            dreampoint_b2b_asset_ver( 'js/tabs-dropdown.js' ),
             true
         );
         wp_script_add_data( 'dreampoint-b2b-tabs-dropdown', 'strategy', 'defer' );

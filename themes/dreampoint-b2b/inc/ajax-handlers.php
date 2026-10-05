@@ -8,20 +8,23 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 // ============================================================================
-// AJAX — PRETRAGA PROIZVODA SA TRANSIENT CACHE
+// AJAX — PRETRAGA PROIZVODA
 // ============================================================================
 
 add_action( 'wp_ajax_search_products',        'dreampoint_b2b_ajax_search_products' );
 add_action( 'wp_ajax_nopriv_search_products', 'dreampoint_b2b_ajax_search_products' );
 
 /**
- * AJAX pretraga proizvoda sa keširanjem u tranzijentu.
- * Redis Object Cache automatski preuzima wp_transients — nema promene u kodu.
+ * AJAX pretraga proizvoda — kompaktna lista (slika, naziv, cena) + footer sa
+ * "Odustani" i "Vidi sve rezultate" (UI preuzet iz Cotra B2B).
+ *
+ * Namerno BEZ transient keša: rezultati zavise od B2B vidljivosti trenutnog
+ * korisnika (SQL-level filteri), pa deljeni keš između korisnika ne sme postojati.
  *
  * Sigurnost:
  *   - Nonce verifikacija (dp_search_nonce) sprečava CSRF i bot flood
  *   - sanitize_text_field + wp_unslash za ulazne podatke
- *   - Keširani HTML je pouzdan — generisan i escapovan u ovoj funkciji
+ *   - Sav izlaz je escapovan u ovoj funkciji
  *
  * JS strana treba da šalje: { searchTerm: '...', nonce: dpAjax.nonce }
  * dpAjax se registruje u dreampoint_b2b_scripts() putem wp_localize_script.
@@ -33,86 +36,78 @@ function dreampoint_b2b_ajax_search_products(): void {
 
     $search_term = sanitize_text_field( wp_unslash( $_GET['searchTerm'] ?? '' ) );
 
-    if ( empty( $search_term ) ) {
-        echo '<p>' . esc_html__( 'Unesite pojam za pretragu', 'dreampoint-b2b' ) . '</p>';
+    // Kratki upiti ne prave upit — JS prazni kontejner kad stigne prazan odgovor.
+    if ( mb_strlen( $search_term, 'UTF-8' ) < 2 ) {
         wp_die();
     }
 
-    $cache_key   = 'dp_search_' . md5( $search_term );
-    $cached_html = get_transient( $cache_key );
-
-    if ( false !== $cached_html ) {
-        echo $cached_html;
-        wp_die();
-    }
-
+    // Nativni upit (+ kataloški broj / SKU / EAN preko dp_search_extended, vidi inc/product-search.php).
+    // Broj redova 3 → 5 (kompaktna lista umesto kartica). B2B vidljivost se primenjuje preko pre_get_posts.
+    // post_status je obavezan: u admin-ajax.php WP_Query ima is_admin = true i bez eksplicitnog statusa
+    // dodaje draft/pending/future za SVAKOG korisnika — živa B2B pretraga sme da vrati samo objavljene proizvode.
     $query = new WP_Query( [
-        'post_type'      => 'product',
-        'posts_per_page' => 3,
-        's'              => $search_term,
-        'relevanssi'     => true,
+        'post_type'          => 'product',
+        'post_status'        => 'publish',
+        'posts_per_page'     => 5,
+        's'                  => $search_term,
+        'dp_search_extended' => true,
     ] );
 
-    ob_start();
-
     if ( $query->have_posts() ) {
-        echo '<div class="row">';
+        echo '<div class="product-rows">';
+
         while ( $query->have_posts() ) {
             $query->the_post();
             $product = wc_get_product( get_the_ID() );
-            if ( ! $product ) continue;
+            if ( ! $product ) {
+                continue;
+            }
 
-            echo '<div class="col-md-4">';
-            wc_get_template_part( 'content', 'product' );
+            $permalink = get_permalink( $product->get_id() );
+            $title     = get_the_title( $product->get_id() );
+
+            echo '<div class="product-row">';
+            echo '<div class="product-photo">';
+            // Slika je dekorativna — naziv u product-title linku je jedini fokusabilni link reda.
+            echo '<a href="' . esc_url( $permalink ) . '" tabindex="-1" aria-hidden="true">';
+            echo $product->get_image( 'woocommerce_thumbnail', [ 'alt' => '' ] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- WC image markup
+            echo '</a>';
+            echo '</div>';
+            echo '<div class="product-content">';
+            echo '<span class="product-title"><a href="' . esc_url( $permalink ) . '">' . esc_html( $title ) . '</a></span>';
+            // Kataloški broj (ERP _ARTICLE_CODE) ima prioritet nad SKU-om u prikazu (docs/erp-discovery-findings.md).
+            $catalog_no = (string) get_post_meta( $product->get_id(), '_ARTICLE_CODE', true );
+            if ( '' === $catalog_no ) {
+                $catalog_no = $product->get_sku();
+            }
+            if ( '' !== $catalog_no ) {
+                echo '<span class="product-sku">' . esc_html__( 'Kataloški broj:', 'dreampoint-b2b' ) . ' ' . esc_html( $catalog_no ) . '</span>';
+            }
+            if ( ! $product->is_in_stock() ) {
+                echo '<span class="price out-of-stock-price">' . esc_html__( 'Nema na stanju', 'dreampoint-b2b' ) . '</span>';
+            } elseif ( $product->get_price() ) {
+                echo '<span class="price' . ( $product->is_on_sale() ? ' onsale' : '' ) . '">' . wp_kses_post( $product->get_price_html() ) . '</span>';
+            }
+            echo '</div>';
             echo '</div>';
         }
-        echo '</div>';
 
         echo '<div class="live-search-footer">';
-        printf(
-            '<form method="get" action="%s">
-                <input type="hidden" name="s" value="%s">
-                <input type="hidden" name="post_type" value="product">
-                <button type="submit" class="button see-all">%s</button>
-            </form>',
-            esc_url( home_url( '/' ) ),
-            esc_attr( $search_term ),
-            esc_html__( 'Vidi sve rezultate', 'dreampoint-b2b' )
-        );
+        echo '<button type="button" class="button button--sm button--outline cancel">' . esc_html__( 'Odustani', 'dreampoint-b2b' ) . '</button>';
+        echo '<form method="get" action="' . esc_url( home_url( '/' ) ) . '">';
+        echo '<input type="hidden" name="s" value="' . esc_attr( $search_term ) . '">';
+        echo '<input type="hidden" name="post_type" value="product">';
+        echo '<button type="submit" class="button button--sm see-all">' . esc_html__( 'Vidi sve rezultate', 'dreampoint-b2b' ) . '</button>';
+        echo '</form>';
         echo '</div>';
 
+        echo '</div>'; // .product-rows
     } else {
         echo '<div class="sajx-nofund-prod">';
         echo '<p>' . esc_html__( 'Nismo pronašli nijedan rezultat', 'dreampoint-b2b' ) . '</p>';
-        $suggestion = did_you_mean( $search_term );
-        if ( $suggestion ) {
-            echo wp_kses_post( $suggestion );
-        }
         echo '</div>';
     }
 
     wp_reset_postdata();
-
-    $html = ob_get_clean();
-    set_transient( $cache_key, $html, HOUR_IN_SECONDS );
-    echo $html;
     wp_die();
-}
-
-/**
- * Briše keširan transijent pretrage kada se proizvod promeni ili kreira.
- * Redis automatski sinhronizuje brisanje bez dodatne konfiguracije.
- */
-add_action( 'save_post_product',          'dreampoint_b2b_clear_search_cache' );
-add_action( 'woocommerce_update_product', 'dreampoint_b2b_clear_search_cache' );
-add_action( 'woocommerce_new_product',    'dreampoint_b2b_clear_search_cache' );
-
-function dreampoint_b2b_clear_search_cache(): void {
-    global $wpdb;
-
-    $wpdb->query(
-        "DELETE FROM {$wpdb->options}
-         WHERE option_name LIKE '_transient_dp_search_%'
-            OR option_name LIKE '_transient_timeout_dp_search_%'"
-    );
 }

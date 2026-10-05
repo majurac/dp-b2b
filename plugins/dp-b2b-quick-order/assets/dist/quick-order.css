@@ -451,9 +451,9 @@ button.dp-qo-filter-chip:hover { background: #e6e6e6; }
 .dp-qo-table-wrap { overflow-x: auto; margin: 12px 0 0; }
 
 .dp-qo-table {
-    --qo-product-w: 32%;
-    --qo-line-cols: minmax(110px, 1.5fr) minmax(98px, 0.9fr) minmax(56px, 0.7fr) 124px 24px;
-    min-width: 720px;
+    --qo-product-w: 28%;
+    --qo-line-cols: minmax(200px, 3fr) minmax(96px, 0.8fr) minmax(56px, 0.6fr) 120px 22px;
+    min-width: 800px;
 }
 
 .dp-qo-thead,
@@ -511,6 +511,7 @@ button.dp-qo-filter-chip:hover { background: #e6e6e6; }
 .dp-qo-card__lines { display: flex; flex-direction: column; min-width: 0; }
 .dp-qo-line { min-height: 30px; padding: 3px 0; }
 .dp-qo-cell { min-width: 0; font-size: 13px; }
+.dp-qo-cell--option { font-size: 12px; line-height: 1.35; }
 
 .dp-qo-option__attr { white-space: nowrap; }
 .dp-qo-option__label { color: #333; }

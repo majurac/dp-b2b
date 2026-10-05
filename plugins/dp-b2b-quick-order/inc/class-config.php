@@ -27,6 +27,11 @@ class DP_Quick_Order_Config {
 	const PRODUCTS_PER_PAGE_DEFAULT = 50;
 	const PRODUCTS_PER_PAGE_MAX     = 200;
 
+	// Shortest search term that is executed (same threshold as the ADR-014 header
+	// search and the dp_search_extended identifier lookup). Shorter terms are
+	// ignored by the query and never sent by the frontend.
+	const SEARCH_MIN_CHARS = 2;
+
 	// ── Variation Architecture ────────────────────────────────────────────────
 
 	// Max variation IDs returned per product in lightweight summary payloads.

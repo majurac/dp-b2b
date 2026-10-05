@@ -6,6 +6,9 @@ defined( 'ABSPATH' ) || exit;
 // for a 'type' => 'boolean' arg) so the server-rendered first paint can
 // never disagree with what the REST endpoint would actually interpret.
 // Absent, '0', 'false', '', etc. are all correctly falsy — never checked.
+// Initial search value mirrors the URL (authoritative state) for the first paint;
+// ProductList re-derives it from the URL on load/back/forward.
+$dp_qo_search_term = isset( $_GET['qo_search'] ) ? sanitize_text_field( wp_unslash( $_GET['qo_search'] ) ) : '';
 $dp_qo_active_filters = [
 	'qo_already_ordered' => isset( $_GET['qo_already_ordered'] ) && rest_sanitize_boolean( wp_unslash( $_GET['qo_already_ordered'] ) ),
 	'qo_new'             => isset( $_GET['qo_new'] ) && rest_sanitize_boolean( wp_unslash( $_GET['qo_new'] ) ),
@@ -104,6 +107,22 @@ $dp_qo_active_filters = [
 			</div>
 
 			<div class="col-lg-9">
+
+				<form class="dp-qo-search" role="search" novalidate>
+					<label class="dp-qo-search__label" for="dp-qo-search-input">
+						<?php esc_html_e( 'Pretraga proizvoda', 'dp-b2b-quick-order' ); ?>
+					</label>
+					<input
+						type="text"
+						id="dp-qo-search-input"
+						class="dp-qo-search__input"
+						value="<?php echo esc_attr( $dp_qo_search_term ); ?>"
+						placeholder="<?php esc_attr_e( 'Pretražite naziv, kataloški broj, SKU ili EAN', 'dp-b2b-quick-order' ); ?>"
+						autocomplete="off"
+						enterkeyhint="search"
+					>
+					<button type="button" class="dp-qo-search__clear" aria-label="<?php esc_attr_e( 'Očisti pretragu', 'dp-b2b-quick-order' ); ?>" hidden>&times;</button>
+				</form>
 
 				<div class="dp-qo-pagination"></div>
 

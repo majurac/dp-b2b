@@ -18,7 +18,7 @@ class DP_Quick_Order_Rest_Api {
 			'args'                => [
 				'page'     => [ 'type' => 'integer', 'default' => 1, 'minimum' => 1 ],
 				'per_page' => [ 'type' => 'integer', 'default' => DP_Quick_Order_Config::PRODUCTS_PER_PAGE_DEFAULT, 'minimum' => 1, 'maximum' => DP_Quick_Order_Config::PRODUCTS_PER_PAGE_MAX ],
-				'search'   => [ 'type' => 'string', 'default' => '' ],
+				'search'   => [ 'type' => 'string', 'default' => '', 'sanitize_callback' => 'sanitize_text_field' ],
 				'category' => [ 'type' => 'string', 'default' => '' ],
 				'brand'    => [ 'type' => 'string', 'default' => '' ],
 				'qo_orderby' => [ 'type' => 'string', 'enum' => [ 'title', 'price' ], 'default' => 'title' ],

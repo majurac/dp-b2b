@@ -455,3 +455,58 @@
     outline: 2px solid #025788 !important;
     outline-offset: 2px;
 }
+
+/* ── Search (Slice 1: functional baseline — full visual alignment follows later) ── */
+.dp-qo-search {
+    position: relative;
+    margin: 0 0 12px;
+}
+.dp-qo-search__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+.dp-qo-search__input {
+    display: block;
+    width: 100%;
+    height: 44px;
+    padding: 0 44px 0 14px;
+    border: 1px solid #d0d0d0;
+    border-radius: 4px;
+    background: #fff;
+    font-size: 14px;
+    line-height: 1.2;
+    box-sizing: border-box;
+}
+.dp-qo-search__input:focus-visible {
+    outline: 2px solid #303030;
+    outline-offset: 1px;
+}
+.dp-qo-search__clear {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #555;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+}
+.dp-qo-search__clear[hidden] { display: none; }
+.dp-qo-search__clear:hover { color: #000; }
+.dp-qo-search__clear:focus-visible {
+    outline: 2px solid #303030;
+    outline-offset: 1px;
+}

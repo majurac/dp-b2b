@@ -40,8 +40,16 @@ class DP_Quick_Order_Product_Query {
 		}
 		$query_args['order'] = $order;
 
-		if ( ! empty( $args['search'] ) ) {
-			$query_args['s'] = sanitize_text_field( $args['search'] );
+		// Search: native WP `s` plus the ADR-014 identifier extension (SKU,
+		// catalog number, EAN; a variation match resolves to its parent), which
+		// lives in the theme (inc/product-search.php) and is opt-in through the
+		// `dp_search_extended` query var. No SQL here: if the theme extension is
+		// absent the query degrades to the native title/content search. B2B
+		// visibility is applied to the same query below, unchanged.
+		$search = trim( sanitize_text_field( (string) ( $args['search'] ?? '' ) ) );
+		if ( mb_strlen( $search, 'UTF-8' ) >= DP_Quick_Order_Config::SEARCH_MIN_CHARS ) {
+			$query_args['s']                  = $search;
+			$query_args['dp_search_extended'] = true;
 		}
 
 		if ( ! empty( $args['category'] ) ) {
@@ -254,19 +262,19 @@ class DP_Quick_Order_Product_Query {
 		}
 
 		$data = [
-			'id'         => $id,
-			'name'       => $product->get_name(),
-			'sku'        => $product->get_sku(),
-			'type'       => $product->get_type(),
-			'price'      => $product->get_price(),
-			'price_html' => $product->get_price_html(),
-			'stock'      => [
-				'status'   => $product->get_stock_status(),
-				'quantity' => $product->get_stock_quantity(),
-				'managed'  => $product->get_manage_stock(),
+			'id'             => $id,
+			'name'           => $product->get_name(),
+			'sku'            => $product->get_sku(),
+			'catalog_number' => $this->get_catalog_number( $product ),
+			'type'           => $product->get_type(),
+			'price'          => $product->get_price(),
+			'price_html'     => $product->get_price_html(),
+			// Binary availability only — exact stock quantities are never exposed to the client.
+			'stock'          => [
+				'status'         => $product->get_stock_status(),
 			],
-			'image'      => $this->get_thumbnail_url( $id ),
-			'permalink'  => get_permalink( $id ),
+			'image'          => $this->get_thumbnail_url( $id ),
+			'permalink'      => get_permalink( $id ),
 		];
 
 		if ( $product instanceof WC_Product_Variable ) {
@@ -274,6 +282,17 @@ class DP_Quick_Order_Product_Query {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * "Kataloški broj" is the ERP article code (_ARTICLE_CODE), not the internal
+	 * WC SKU (parent `P-<articleId>`, variation = variation ID). Falls back to the
+	 * SKU only when the article code is unexpectedly empty — same convention as the
+	 * ADR-014 header live search (inc/ajax-handlers.php).
+	 */
+	private function get_catalog_number( WC_Product $product ): string {
+		$code = (string) get_post_meta( $product->get_id(), '_ARTICLE_CODE', true );
+		return '' !== $code ? $code : (string) $product->get_sku();
 	}
 
 	private function get_thumbnail_url( int $id ): string {
@@ -307,7 +326,7 @@ class DP_Quick_Order_Product_Query {
 	 * Never calls get_available_variations() — avoids full variation tree hydration.
 	 *
 	 * @param int $product_id Parent variable product ID.
-	 * @return list<array{id:int,sku:string,label:string,attributes:list<array{label:string,value:string}>,price:string,price_html:string,stock_status:string,stock_qty:int|null}>
+	 * @return list<array{id:int,sku:string,catalog_number:string,label:string,attributes:list<array{label:string,value:string}>,price:string,price_html:string,stock_status:string}>
 	 */
 	public function get_variation_details( int $product_id ): array {
 		$product = wc_get_product( $product_id );
@@ -349,14 +368,15 @@ class DP_Quick_Order_Product_Query {
 				: sprintf( __( 'Variation #%d', 'dp-b2b-quick-order' ), $variation_id );
 
 			$result[] = [
-				'id'           => $variation_id,
-				'sku'          => $variation->get_sku(),
-				'label'        => $label,
-				'attributes'   => $attributes,
-				'price'        => (string) $variation->get_price(),
-				'price_html'   => $variation->get_price_html(),
-				'stock_status' => $variation->get_stock_status(),
-				'stock_qty'    => $variation->get_manage_stock() ? (int) $variation->get_stock_quantity() : null,
+				'id'             => $variation_id,
+				'sku'            => $variation->get_sku(),
+				'catalog_number' => $this->get_catalog_number( $variation ),
+				'label'          => $label,
+				'attributes'     => $attributes,
+				'price'          => (string) $variation->get_price(),
+				'price_html'     => $variation->get_price_html(),
+				// Binary availability only — no exact stock quantity in the client contract.
+				'stock_status'   => $variation->get_stock_status(),
 			];
 		}
 

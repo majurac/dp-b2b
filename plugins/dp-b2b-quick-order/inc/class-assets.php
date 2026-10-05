@@ -42,6 +42,7 @@ class DP_Quick_Order_Assets {
 			'wpNonce'          => wp_create_nonce( 'wp_rest' ),
 			'timeoutMs'        => DP_Quick_Order_Config::CART_SYNC_TIMEOUT_MS,
 			'cartSyncMaxBatch' => DP_Quick_Order_Config::CART_SYNC_MAX_BATCH,
+			'searchMinChars'   => DP_Quick_Order_Config::SEARCH_MIN_CHARS,
 			'currency'         => get_woocommerce_currency(),
 			'placeholderImg'   => esc_url( wc_placeholder_img_src() ),
 			'i18n'             => [

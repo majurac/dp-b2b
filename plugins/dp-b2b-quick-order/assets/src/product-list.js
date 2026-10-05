@@ -16,6 +16,9 @@
  * with wpf_filter_pa_* or pr_min/pr_max params, re-fetches with those filters mapped
  * to Quick Order's server-side REST params.
  */
+/** Search debounce — matches the project's 300 ms debounce convention (DP_Quick_Order_Config::CART_SYNC_DEBOUNCE_MS). */
+const SEARCH_DEBOUNCE_MS = 300;
+
 export class ProductList {
     /** @type {object} dpQuickOrder config */
     #config;
@@ -29,6 +32,14 @@ export class ProductList {
     #orderDir     = 'asc';
     /** WOOF-sourced filter state. Reset to {} on each URL change parse. */
     #woofFilters  = {};
+    /** @type {HTMLInputElement|null} */
+    #searchInput;
+    /** @type {HTMLElement|null} */
+    #searchClear;
+    /** Pending search debounce timer id, or null when nothing is pending. */
+    #searchTimer  = null;
+    /** Monotonic request counter — an older, slower response never overwrites a newer one. */
+    #reqSeq       = 0;
 
     /**
      * @param {object} config  window.dpQuickOrder
@@ -37,8 +48,11 @@ export class ProductList {
         this.#config       = config;
         this.#tbody        = document.querySelector('.dp-qo-tbody');
         this.#paginationEl = document.querySelector('.dp-qo-pagination');
+        this.#searchInput  = document.querySelector('.dp-qo-search__input');
+        this.#searchClear  = document.querySelector('.dp-qo-search__clear');
         this.#bindWoofIntegration();
         this.#bindQoOwnedFilters();
+        this.#bindSearch();
         this.#bindFilterToggle();
     }
 
@@ -51,6 +65,7 @@ export class ProductList {
         this.#currentPage = page;
         this.#tbody.innerHTML = `<tr><td colspan="5" class="dp-qo-loading">Učitavanje...</td></tr>`;
 
+        const reqId = ++this.#reqSeq;
         let data;
         try {
             const url = this.#buildProductsUrl(page);
@@ -58,10 +73,12 @@ export class ProductList {
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             data = await res.json();
         } catch (err) {
+            if (reqId !== this.#reqSeq) return;
             this.#tbody.innerHTML = `<tr><td colspan="5" class="dp-qo-error">Greška pri učitavanju proizvoda.</td></tr>`;
             return;
         }
 
+        if (reqId !== this.#reqSeq) return; // superseded by a newer search/filter request
         this.#totalPages = data.total_pages ?? 1;
         this.#renderRows(data.products ?? []);
         this.#renderPagination();
@@ -93,6 +110,7 @@ export class ProductList {
         if (f.attributes && Object.keys(f.attributes).length) {
             params.set('attributes', JSON.stringify(f.attributes));
         }
+        if (f.qoSearch)         params.set('search', f.qoSearch);
         if (f.qoNew)            params.set('qo_new', '1');
         if (f.qoBestSeller)     params.set('qo_best_seller', '1');
         if (f.qoAlreadyOrdered) params.set('qo_already_ordered', '1');
@@ -124,7 +142,7 @@ export class ProductList {
   <td class="dp-qo-col-name dp-qo-col-name--variable">
     <div class="dp-qo-row__product-info">
       <strong class="dp-qo-name">${escHtml(product.name)}</strong>
-      <small class="dp-qo-sku">${skuLabel} ${escHtml(product.sku)}</small>
+      <small class="dp-qo-sku">${skuLabel} ${escHtml(product.catalog_number)}</small>
     </div>
     <div class="dp-qo-variation-labels dp-qo-variation-list--loading">${loadingText}</div>
   </td>
@@ -145,7 +163,7 @@ export class ProductList {
 
         return this.#dataRowHTML({
             rowKey, productId: product.id, variationId: 0,
-            name: escHtml(product.name), sku: escHtml(product.sku),
+            name: escHtml(product.name), sku: escHtml(product.catalog_number),
             stockClass, stockText, priceHtml: product.price_html ?? '', price: product.price ?? 0,
             thumbCell, disableQty,
         });
@@ -290,7 +308,7 @@ export class ProductList {
             const disableQty   = v.stock_status === 'outofstock';
             const escapedLabel = escHtml(v.label);
 
-            labelLines.push(this.#variationLabelLineHTML(escapedLabel, escHtml(v.sku)));
+            labelLines.push(this.#variationLabelLineHTML(escapedLabel, escHtml(v.catalog_number)));
             stockLines.push(this.#variationStockLineHTML(stockClass, stockText));
             priceLines.push(this.#variationPriceLineHTML(v.price_html));
             qtyLines.push(this.#variationQtyLineHTML({
@@ -356,6 +374,7 @@ export class ProductList {
         this.#woofFilters = this.#extractWoofFilters(params);
         Object.assign(this.#woofFilters, this.#extractQoOwnedFilters(params));
         this.#reflectQoCheckboxes();
+        this.#reflectSearchInput();
         this.#applyOrderbyParam(params);
 
         const onUrlChange = () => this.#onWoofUrlChange();
@@ -374,8 +393,74 @@ export class ProductList {
         if (JSON.stringify(next) !== current || orderbyChanged) {
             this.#woofFilters = next;
             this.#reflectQoCheckboxes();
+            this.#reflectSearchInput();
             this.loadPage(1);
         }
+    }
+
+    /**
+     * Quick Order search box. The URL's `qo_search` param is the single source
+     * of truth (same doctrine as the QO filter checkboxes): this control only
+     * ever WRITES the URL, then calls the one URL-to-state resync path
+     * (#onWoofUrlChange), which reads it back, resets to page 1 and refetches.
+     * Terms shorter than `searchMinChars` stay in the URL/input but are never
+     * executed as a search (see #extractQoOwnedFilters).
+     */
+    #bindSearch() {
+        const input = this.#searchInput;
+        if (!input) return;
+
+        input.closest('form')?.addEventListener('submit', e => {
+            e.preventDefault();
+            this.#commitSearch();
+        });
+        input.addEventListener('input', () => {
+            this.#syncSearchClear();
+            clearTimeout(this.#searchTimer);
+            this.#searchTimer = setTimeout(() => this.#commitSearch(), SEARCH_DEBOUNCE_MS);
+        });
+        input.addEventListener('keydown', e => {
+            if (e.key === 'Escape' && input.value) {
+                e.preventDefault();
+                input.value = '';
+                this.#commitSearch();
+            }
+        });
+        this.#searchClear?.addEventListener('click', () => {
+            input.value = '';
+            this.#commitSearch();
+            input.focus();
+        });
+        this.#syncSearchClear();
+    }
+
+    /** Write the input's trimmed value to `qo_search` (removing it when empty), then resync from the URL. */
+    #commitSearch() {
+        clearTimeout(this.#searchTimer);
+        this.#searchTimer = null;
+
+        const term   = this.#searchInput.value.trim();
+        const params = new URLSearchParams(window.location.search);
+        this.#syncSearchClear();
+        if ((params.get('qo_search') ?? '').trim() === term) return;
+
+        if (term) params.set('qo_search', term);
+        else params.delete('qo_search');
+        const query = params.toString();
+        history.pushState(null, '', window.location.pathname + (query ? `?${query}` : ''));
+        this.#onWoofUrlChange();
+    }
+
+    /** Show the URL's term in the input (initial load, back/forward) — never while a typed value is still pending. */
+    #reflectSearchInput() {
+        if (!this.#searchInput || this.#searchTimer !== null) return;
+        const fromUrl = new URLSearchParams(window.location.search).get('qo_search') ?? '';
+        if (this.#searchInput.value.trim() !== fromUrl.trim()) this.#searchInput.value = fromUrl;
+        this.#syncSearchClear();
+    }
+
+    #syncSearchClear() {
+        if (this.#searchClear && this.#searchInput) this.#searchClear.hidden = this.#searchInput.value === '';
     }
 
     /** Reflect current #woofFilters QO booleans onto the checkbox DOM elements. */
@@ -556,10 +641,14 @@ export class ProductList {
      * DOM-metadata lookup needed (Quick Order owns both the param name and
      * the control that writes it, unlike the WBW-driven extraction above).
      * @param {URLSearchParams} params
-     * @returns {{ qoNew?: boolean, qoBestSeller?: boolean, qoAlreadyOrdered?: boolean }}
+     * @returns {{ qoSearch?: string, qoNew?: boolean, qoBestSeller?: boolean, qoAlreadyOrdered?: boolean }}
      */
     #extractQoOwnedFilters(params) {
         const result = {};
+        // Only an EXECUTABLE term (>= min chars) enters state, so typing a single
+        // character neither triggers a refetch nor changes the result set.
+        const search = (params.get('qo_search') ?? '').trim();
+        if (search.length >= (this.#config.searchMinChars ?? 2)) result.qoSearch = search;
         if (params.has('qo_new'))            result.qoNew = true;
         if (params.has('qo_best_seller'))     result.qoBestSeller = true;
         if (params.has('qo_already_ordered')) result.qoAlreadyOrdered = true;

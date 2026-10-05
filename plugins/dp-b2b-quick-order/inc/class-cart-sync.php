@@ -110,10 +110,8 @@ class DP_Quick_Order_Cart_Sync {
 			if ( $product->get_manage_stock() ) {
 				$stock_qty = (int) $product->get_stock_quantity();
 				if ( $stock_qty < $new_quantity ) {
-					return array_merge( $base, [
-						'action'           => 'out_of_stock',
-						'quantity_allowed' => max( 0, $stock_qty - $current_quantity ),
-					] );
+					// Typed result only — the remaining stock amount is never returned to the client.
+					return array_merge( $base, [ 'action' => 'out_of_stock' ] );
 				}
 			}
 
@@ -138,15 +136,12 @@ class DP_Quick_Order_Cart_Sync {
 
 			// Managed-stock quantity check for new adds — mirrors the existing check for
 			// updates. WC's add_to_cart() silently returns false when qty > stock, which
-			// would produce action:failed with no quantity_allowed hint. This pre-check
-			// returns a typed out_of_stock response so the frontend can correct the input.
+			// would produce a generic action:failed. This pre-check returns a typed
+			// out_of_stock response (no stock amount) so the frontend can flag the row.
 			if ( $product->get_manage_stock() ) {
 				$stock_qty = (int) $product->get_stock_quantity();
 				if ( $stock_qty < $quantity ) {
-					return array_merge( $base, [
-						'action'           => 'out_of_stock',
-						'quantity_allowed' => max( 0, $stock_qty ),
-					] );
+					return array_merge( $base, [ 'action' => 'out_of_stock' ] );
 				}
 			}
 

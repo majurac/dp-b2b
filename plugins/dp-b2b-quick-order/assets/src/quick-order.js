@@ -63,6 +63,13 @@ function submitStatusText(i18n, added, failed, ambiguous) {
 
     const addBtn = document.querySelector('.dp-qo-footer__add-to-cart');
 
+    // The last submit's summary goes stale as soon as the user edits a quantity — except the
+    // "outcome unknown, check the cart" warning, which must stay until the next submit.
+    let statusSticky = false;
+    document.addEventListener('input', e => {
+        if (!statusSticky && e.target.matches?.('.dp-qo-qty')) footer.setStatus('');
+    });
+
     addBtn?.addEventListener('click', async () => {
         if (state.isEmpty()) return;
 
@@ -70,6 +77,7 @@ function submitStatusText(i18n, added, failed, ambiguous) {
         const originalLabel = addBtn.textContent;
         addBtn.textContent = config.i18n?.adding ?? '...';
         footer.setStatus('');
+        statusSticky = false;
 
         const { addedKeys, failed, ambiguousKeys } = await submit.submit();
 
@@ -87,6 +95,7 @@ function submitStatusText(i18n, added, failed, ambiguous) {
         addBtn.textContent = originalLabel;
         addBtn.disabled = state.isEmpty();
 
+        statusSticky = ambiguousKeys.length > 0;
         footer.setStatus(submitStatusText(config.i18n ?? {}, addedKeys.length, failed.length, ambiguousKeys.length));
     });
 

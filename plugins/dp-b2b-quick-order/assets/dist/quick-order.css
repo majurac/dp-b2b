@@ -3,6 +3,15 @@
 /* ── WPF filter area ─────────────────────────────────────────── */
 .dp-qo-filter-area { margin-bottom: 16px; }
 
+/* Native WBW filter blocks (Brand / Model / Boja / Dob / Dostupnost): typography and spacing
+   aligned with the Quick Order "Popularno" group above them. Presentation only — WBW markup,
+   behavior and its own scrolling/search/collapse are used as shipped. */
+.dp-qo-filter-area .wpfFilterWrapper { margin: 0 0 16px; }
+.dp-qo-filter-area .wpfFilterTitle { display: flex; align-items: center; justify-content: space-between; margin: 0 0 6px; padding: 0; }
+.dp-qo-filter-area .wpfFilterTitle .wfpTitle { font-size: 13px; font-weight: 600; line-height: 1.3; color: #444; }
+.dp-qo-filter-area .wpfFilterContent .wpfFilterTaxNameWrapper { font-size: 13px; }
+.dp-qo-filter-area .wpfSearchWrapper input { box-sizing: border-box; width: 100%; font-size: 13px; }
+
 /* ── Quick Order-owned catalog filters (Already Ordered/New/Best Seller) —
    own block, always rendered above WBW's filter widgets; never styles or
    touches WBW markup/classes. Checkbox appearance below is an independent

@@ -23,6 +23,14 @@ Remaining QO scope (not scheduled): Excel Import; row-level cart error UX (incl.
 
 Remaining QO scope (not scheduled): Excel Import; mobile QO design; WBW drops `orderby` when a filter is applied (pre-existing); theme brand `get_terms` leak outside Quick Order.
 
+## Update 2026-10-06 — Excel/CSV import (Gate 1 + Gate 2 staging PASS, plugin v1.0.33)
+
+Excel Import (upload → validation → result → add-to-cart → completion) is implemented and accepted on staging; decisions and acceptance: `docs/decisions.md` ADR-017, plugin `readme.md`. A shared `CartSubmit` chunking bug (`cartSyncMaxBatch` arriving as the string `"50"`) was fixed for both Excel Import and the normal QO submit (staging-proven up to 500 items). Checkpoint: local/origin/staging runtime HEAD `729d059`; production NOT deployed.
+
+**Safe continuation point: "Gate 2 staging PASS / pre-production manual acceptance."** Do not restart Gate 1/2 discovery. Outstanding before production: (1) Microsoft Excel smoke of the XLSX template — NOT TESTED; (2) manual focused desktop keyboard pass; (3) real mobile-device smoke; (4) explicit production decision. Final closure documentation only after production acceptance.
+
+Remaining QO scope (not scheduled): mobile QO design; WBW drops `orderby` when a filter is applied (pre-existing); theme brand `get_terms` leak outside Quick Order.
+
 ## Milestone: COMPLETE (2026-07-21)
 
 Quick Order has completed its planned development cycle and has entered

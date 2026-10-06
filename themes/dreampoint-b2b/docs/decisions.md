@@ -1309,3 +1309,47 @@ No idempotency token, no preflight or per-row requests, no polling, no stock res
 ### Acceptance (staging, `dreampoint.b2b.uncledev.cloud`, 2026-10-06)
 
 Backend contract exercised through `/cart/sync` as admin and as `vis_rule_cat`: valid simple/variation, simple and variation OOS, excessive quantity (fresh line and existing line), existing line whose product became OOS (product 18896 stock temporarily set to 0, restored to 18), nonexistent, draft, hidden, variation of another parent, invalid variation, variable parent without variation (`not_addable`), `product_id=0`/malformed items, mixed batch, 51 rows (chunks 50 + 1, a failure in each chunk). Hidden-existing, nonexistent, hidden+OOS, hidden variation, invalid variation, unpublished draft, "visible parent + hidden product's variation" and "visible parent + hidden OOS variation" all returned the identical `failed/product_unavailable`. Browser (real UI, User Switching `vis_full` / `vis_rule_cat`): all-success, partial, row error + status region + ARIA wiring, retry (successful rows are not re-sent, cart unchanged), search hide/return keeps the error, variation-row error, ambiguous scenarios (route abort, HTTP 500, 403, malformed 200, a 13 s hold → client abort at 10 s) with no automatic retry, 390 px smoke, Slice 1–4 smoke. Commits: `5c07c53` (contract + UX, v1.0.28), `0aee6f1` (stale-summary clearing, v1.0.29).
+
+
+---
+
+## ADR-017 — Quick Order Excel/CSV import: browser parsing, authoritative read-only validation, auto-clamp, direct cart add
+
+**Status:** Gate 1 (foundation) and Gate 2 (modal) PASSED on staging 2026-10-06 (plugin v1.0.33). **NOT deployed to production; NOT production-closed** — see "Pre-production blockers". Detail: plugin `readme.md` (Excel/CSV import sections).
+
+### Context
+
+Client-approved designs QO-05/06/07: a modal "File upload → Validacija → Rezultat → Dodavanje u košaricu" opened by an "Excel Import" button next to the Quick Order search. Explicit client rule: a requested quantity above the additional orderable quantity is automatically reduced when the reduced quantity is > 0. Discovery, a real-staging identifier/stock audit (1,535 orderable units: every unit has a unique `_sku` and `_ARTICLE_CODE`, no cross-namespace collisions, all managed stock, no backorders/sold-individually/parent-managed pools) and two staging acceptance passes preceded this record.
+
+### Decision (final — do not reopen)
+
+- **Formats / parsing:** `.xlsx` and `.csv` only, parsed LOCALLY in the browser (`fflate` 0.8.3 + DOMParser for xlsx; dependency-free quote-aware CSV). Static committed templates (`assets/templates/`, identifier column formatted as Text). Limits: 2 MB, 500 rows, ZIP central directory checked before any inflate, no formulas executed, no macros, DOCTYPE/entities rejected. The server never receives the file; only `{row, identifier, quantity}`.
+- **Validation:** one READ-ONLY endpoint `POST /dreampoint-b2b/v1/quick-order/import/validate` (`no-store`). Order is security-critical: syntax → ONE batch lookup of `_ARTICLE_CODE` AND `_sku` (published unit + published parent) → B2B authorization via `dp_b2b_product_accessible` on the parent → ONLY then ambiguity / variable parent / purchasability → duplicate merge → stock clamp → name. Hidden, nonexistent, unpublished and orphan identifiers are byte-identical (`identifier_not_found`). Ambiguity fails closed; no namespace precedence. EAN is not an identifier.
+- **Identifier normalization (one contract, input AND stored value):** strip leading/trailing TAB, LF, VT, FF, CR, space, NBSP, BOM only (SQL `REGEXP_REPLACE` on the stored side; PHP/JS use the same class). No fuzzy matching, no zero-padding, no numeric coercion, internal whitespace untouched.
+- **Duplicates:** merged per RESOLVED unit (first-occurrence order, also across `_sku`/`_ARTICLE_CODE` aliases); summed quantity is capped at 99,999.
+- **Clamp:** `final = min(requested, additional orderable)` using WooCommerce semantics: managed stock − quantity already in the current cart − quantity granted to earlier import rows, keyed by `get_stock_managed_by_id()`; unmanaged / backorders / sold-individually follow WooCommerce. `0 < final < requested` → `adjusted` (still eligible); `final = 0` → `unavailable`. The final quantity is the only stock-derived number that reaches the client (intentional, inherent in the client rule); no raw stock, managed flag, pool id, price or brand.
+- **Validation is NOT a reservation** (no hold, lock or timer). Final `/cart/sync` stays authoritative and validates again; the normalized quantity is attempted exactly once; no hidden second clamp.
+- **Modal (Gate 2):** private transient state only (nothing in the visible `QuickOrderState`, storage or DB; reopening = fresh session). Result statuses Spremno / Prilagođeno / Greška; partial import supported; summary counts resulting units and states the spreadsheet row count. Cart step reuses `CartSubmit` (additive, **max 50 per chunk**) with real chunk progress; an ambiguous chunk stops the import at that boundary (no retry, later chunks not sent, counts added / unknown / not sent, only "Pregled košarice"). Existing unsent QO selections are preserved; an overlapping imported unit yields an informational notice, never silent clearing. No close/Escape while the cart request is in flight. Croatian copy is centralized in PHP (`import_copy()`).
+- **Shared `CartSubmit` fix:** `wp_localize_script()` delivers top-level scalars as strings, so `cartSyncMaxBatch` was `"50"` and `i += "50"` concatenated, producing oversized chunks (e.g. 120 → 50 + 70; the server rejects > 50) for any submit above 100 items — in Excel Import AND the normal Quick Order submit. Fixed with `Number()`. Staging proof (served code, network layer): 49→49, 50→50, 51→50+1, 100→50+50, 101→50+50+1, 120→50+50+20, 500→10×50; real >100 cart submissions passed for both paths (118 units via Excel Import, 101 via main QO), carts restored.
+- **Modal keyboard fix (9282361):** key handling lives on `document` (capture) while the modal is open; focus on `<body>` after a click on non-focusable modal text/backdrop previously broke Escape and the focus trap.
+
+### Data-quality compatibility (not a data fix)
+
+8 published variation `_ARTICLE_CODE` values in the ERP-derived staging data end with a trailing LF. Import defensively applies the symmetric boundary normalization above; a normalized collision audit (duplicates, `_sku`↔`_ARTICLE_CODE`, parent vs unit) was clean. The stored data was NOT mutated and no ERP/importer cleanup task was opened.
+
+### Acceptance (staging `dreampoint.b2b.uncledev.cloud`, 2026-10-06)
+
+Real theme/modal integration; XLSX and CSV through the real validation REST; User Switching `vis_full` / `vis_rule_cat` / `vis_rule_brand` / `vis_offer` / `vis_none` (hidden, unpublished, orphan, hidden variable parent and whitespace-normalized identifiers indistinguishable from nonexistent; `vis_none` = no access); privacy/oracle boundary; adjusted quantities; cart-aware validation (stock 5, cart 2, request 12 → 3); real direct `/cart/sync`; partial and ambiguous final results; shared chunking; manual QO selection preserved + overlap notice; close/cancel semantics; structural accessibility; 390px browser viewport; 500-row validation/render (≈1.1 s, 4.5k DOM nodes); focused Gate 1 and main-QO regression; staging fingerprint unchanged (product meta, orders, carts, options except cron). Verdict: **Gate 1 PASS, Gate 2 staging PASS.**
+
+### Pre-production blockers (NOT done — do not call the feature production-complete)
+
+1. **Microsoft Excel smoke — NOT TESTED:** open the XLSX template in real Excel without a repair warning; column A is Text; `000046` survives entry, save, close, reopen; no macro/formula/external-link warning.
+2. **Manual focused desktop-browser keyboard pass** (staging automation had no genuinely focused browser; local Chromium covers keyboard behaviour).
+3. **Real mobile-device smoke** (390px was a browser viewport only).
+4. **Explicit production approval/deployment decision.** Production has not been touched.
+
+Residual observations (not tasks unless decided): download-to-disk event not captured (serving, hashes and `download` attributes verified); Safari/WebKit untested; no screen-reader certification; existing cart-bridge Toastify messages can appear beside modal outcomes; hidden XLSX rows are imported with a warning (Gate 1 decision).
+
+### Commits
+
+`213d035` Gate 1 foundation · `ef08233` stored-identifier boundary normalization · `635a230` Gate 2 modal + `CartSubmit` chunking fix · `9282361` modal keyboard/focus fix (v1.0.33) · `729d059` removal of accidentally committed test screenshots (no code impact).

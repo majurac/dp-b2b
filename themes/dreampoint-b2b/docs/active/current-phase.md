@@ -24,6 +24,8 @@ scheduled or implied by this close-out.
 
 **Update 2026-10-05:** redesign slices 1–3 (search, state row/chips, product list and footer visuals) were accepted on staging at plugin v1.0.22 as a new-scope enhancement; maintenance mode otherwise unchanged. See `docs/active/status.md` (2026-10-05 update) for the remaining, unscheduled scope. No Slice 4 is scheduled.
 
+**Update 2026-10-06 (evening):** Excel/CSV import Gate 1 + Gate 2 passed on staging (plugin v1.0.33, ADR-017). Safe continuation point: "Gate 2 staging PASS / pre-production manual acceptance" — next steps: Microsoft Excel smoke (NOT TESTED), manual focused desktop keyboard smoke, real mobile-device smoke, evaluate findings, then an explicit production decision. Production untouched; do not mark the feature production-closed.
+
 ## Historical record — local-state transformation phase (2026-07-10)
 
 Quick Order V1.1 (usability/completeness pass) was complete — its plan

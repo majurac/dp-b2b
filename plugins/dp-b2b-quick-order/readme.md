@@ -115,7 +115,7 @@ Quick Order filtering is native-first. WooCommerce global attributes remain nati
 
 ## Excel / CSV import — Gate 1 foundation (v1.0.30, no UI yet)
 
-Foundation only: local parsers, static templates and a read-only server validation endpoint. There is no import modal, no cart submission from an import and no change to `/cart/sync` or to the visible `QuickOrderState` yet (Gate 2).
+Foundation only: local parsers, static templates and a read-only server validation endpoint. The modal that builds on it is described in the Gate 2 section below. Decisions and acceptance: theme `docs/decisions.md` ADR-017.
 
 - **Browser parsing** (`assets/src/import/`, bundle `assets/dist/quick-order-import.js`, global `window.dpQuickOrderImport`; build: `npm run build:import`). `.xlsx` via `fflate` 0.8.3 (`unzipSync` + `DOMParser`, pinned exact; ≥ 0.8.3 fixes GHSA-px8p-9vwx-vf98) and `.csv` via a dependency-free, quote-aware tokenizer. Output is only untrusted `{row, identifier, quantity}` text — never product IDs. The file is never uploaded or stored.
 - **XLSX safety:** ≤ 2 MB; ZIP central directory is read first (entry count ≤ 100, total declared uncompressed ≤ 30 MB, sheet/shared-strings XML ≤ 8 MB, small parts ≤ 1 MB) before anything is inflated; VBA/macro/embedded parts rejected; DOCTYPE/ENTITY rejected; external links ignored; formulas are never evaluated (cached scalar used as inert text, no cached value → empty cell + warning); first visible worksheet only; columns A/B only; ≤ 500 data rows. Leading zeros survive only when the cell is text — a number already coerced by Excel (`46` for `000046`) is not repaired.
@@ -133,7 +133,7 @@ Foundation only: local parsers, static templates and a read-only server validati
 - Validation is advisory, not a reservation: the final cart write still goes through `/cart/sync`.
 - Tests (local only): `tests/import/` — `gen-fixtures.py` + `run-parser-tests.mjs` (Chromium via the local Playwright install) and `validator-test.php` (`wp eval-file`, synthetic fixtures, refuses to run off localhost).
 
-## Excel / CSV import — Gate 2 modal (v1.0.32, pending staging acceptance)
+## Excel / CSV import — Gate 2 modal (v1.0.33, staging PASS 2026-10-06; NOT production-closed)
 
 User-facing workflow on top of the Gate 1 foundation: **File upload → Validacija → Rezultat → Dodavanje u košaricu** (`assets/src/import/modal.js`, `session.js`; CSS appended to `assets/dist/quick-order.css`; entry point = the "Excel Import" button next to the search field, revealed by the import bundle once it is alive). Design references: QO-01 / QO-05 / QO-06 / QO-07.
 
@@ -144,7 +144,8 @@ User-facing workflow on top of the Gate 1 foundation: **File upload → Validaci
 - **Bug fixed on the way:** `wp_localize_script()` delivers top-level scalars as strings, so `cartSyncMaxBatch` was `"50"` and `i += "50"` produced oversized chunks for > 100 items (the server rejects chunks above its maximum). `CartSubmit` now coerces the value to a number.
 - **Accessibility.** `role="dialog"` + `aria-modal` + labelled title, focus moved into the modal and to the new view's heading on every step, manual focus trap, background `inert`, Escape closes only in safe states (never during the in-flight cart request, where the close control is also removed), focus restored to the trigger, labelled file input with a keyboard alternative to drag & drop, one polite live region, result table with captions/`scope`, status never by colour alone, `prefers-reduced-motion` respected.
 - **Tests** (local): `tests/import/run-modal-tests.mjs` (real Chromium, REAL template markup + localized copy via `render-harness.php`, mocked REST; also asserts the unchanged visible-QO submit) in addition to the Gate 1 parser/validator suites.
-- **Still required before any production release:** a manual smoke of the XLSX template in real Microsoft Excel (opens without repair, column A is Text, `000046` survives save/reopen, no macro/formula/external-link warning) — NOT yet done.
+- **Staging acceptance (2026-10-06): PASS.** Plugin v1.0.33 also contains the modal keyboard/focus fix (document-level key handling when focus is on `<body>`). Production has NOT been deployed.
+- **Still required before any production release (outstanding, in this order):** manual focused desktop keyboard pass; real mobile-device smoke; explicit production decision; and a manual smoke of the XLSX template in real Microsoft Excel (opens without repair, column A is Text, `000046` survives save/reopen, no macro/formula/external-link warning) — NOT yet done.
 
 ## HPOS Compatibility
 

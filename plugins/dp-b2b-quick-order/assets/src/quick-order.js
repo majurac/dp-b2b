@@ -6,10 +6,13 @@ import { RowController }            from './row-controller.js';
 import { ProductList }              from './product-list.js';
 import { CartSubmit }               from './cart-submit.js';
 import { VariationChipsController } from './variation-chips.js';
+import { patchWbwFilterParam }        from './wbw-compat.js';
 
 (function () {
     const config = window.dpQuickOrder;
     if (!config || !config.cartSyncUrl || !config.wpNonce || !config.productsUrl) return;
+
+    patchWbwFilterParam();
 
     const state  = new QuickOrderState();
     const footer = new FooterController(state);

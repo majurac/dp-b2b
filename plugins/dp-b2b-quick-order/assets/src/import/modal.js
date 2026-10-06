@@ -166,7 +166,13 @@ export class ImportModal {
             this.#stepsHost, this.#bodyHost, this.#footHost, this.#live);
         this.#root = h('div', { class: 'dp-qo-import', 'data-dp-qo-import-root': '' }, this.#dialog);
         // Clicking the dim backdrop is deliberately NOT a close action: a stray click must never cancel an import.
-        this.#root.addEventListener('keydown', this.#onKeydown);
+        // Keyboard handling lives on the document (capture) while the modal is open: when focus sits on <body>
+        // (a click on non-focusable modal text or on the dim backdrop) key events would otherwise never reach the
+        // modal, so Escape would stop working and Tab could leave the trap.
+        document.addEventListener('keydown', this.#onKeydown, true);
+        // A click anywhere inside the modal keeps focus inside it (dialog + backdrop are focusable containers).
+        this.#dialog.setAttribute('tabindex', '-1');
+        this.#root.setAttribute('tabindex', '-1');
         // A file dropped outside the drop zone must not make the browser navigate away from Quick Order.
         this.#root.addEventListener('dragover', this.#swallowDrop);
         this.#root.addEventListener('drop', this.#swallowDrop);
@@ -183,6 +189,7 @@ export class ImportModal {
     }
 
     #teardown() {
+        document.removeEventListener('keydown', this.#onKeydown, true);
         this.#abort?.abort();
         this.#abort = null;
         for (const [el, was] of this.#inerted) if (!was) el.removeAttribute('inert');
@@ -206,6 +213,7 @@ export class ImportModal {
     }
 
     #keydown(e) {
+        if (!this.#root || e.defaultPrevented) return;
         if (e.key === 'Escape') {
             e.preventDefault();
             e.stopPropagation();

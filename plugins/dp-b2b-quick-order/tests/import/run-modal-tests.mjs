@@ -438,6 +438,28 @@ currentGroup = 'E a11y';
   await ctx.close();
 }
 
+{
+  // focus on <body> (click on non-focusable modal text / backdrop) must not break Escape or the focus trap
+  const { ctx, page } = await newPage({ mock: { validate: () => ok(DESIGN_ROWS) } });
+  await openModal(page);
+  await page.evaluate(() => document.activeElement.blur());
+  const active0 = await page.evaluate(() => document.activeElement.tagName);
+  await page.keyboard.press('Tab');
+  check('focus on <body>: Tab pulls focus back INTO the dialog (trap holds)', active0 === 'BODY' && (await page.evaluate(() => !!document.activeElement.closest('.dp-qo-import__dialog'))), active0);
+  await page.evaluate(() => document.activeElement.blur());
+  await page.keyboard.press('Escape');
+  check('focus on <body>: Escape still closes (safe state) and restores focus to the trigger', !(await hasModal(page)) && (await page.evaluate(() => document.activeElement === document.querySelector('[data-dp-qo-import]'))));
+  await openModal(page);
+  await page.click('.dp-qo-import__intro');
+  check('clicking non-focusable modal text keeps focus inside the dialog', await page.evaluate(() => !!document.activeElement.closest('.dp-qo-import')));
+  await page.click('.dp-qo-import', { position: { x: 4, y: 4 } });
+  check('clicking the dim backdrop does not close the modal and keeps focus inside', (await hasModal(page)) && (await page.evaluate(() => !!document.activeElement.closest('.dp-qo-import'))));
+  await page.keyboard.press('Escape');
+  check('Escape after a backdrop click closes the modal', !(await hasModal(page)));
+  const lis = await page.evaluate(() => 1);
+  await ctx.close();
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════════════════ F. 390px
 currentGroup = 'F 390px';
 {

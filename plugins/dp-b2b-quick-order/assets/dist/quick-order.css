@@ -947,3 +947,4 @@ button.dp-qo-filter-chip:hover { background: #e6e6e6; }
     .dp-qo-import__spinner { width: 84px; height: 84px; }
 }
 .dp-qo-import__center--done .dp-qo-import__headline { margin-top: 20px; }
+.dp-qo-import:focus, .dp-qo-import__dialog:focus { outline: none; }

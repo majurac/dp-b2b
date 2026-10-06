@@ -433,3 +433,15 @@ Staging-accepted at plugin v1.0.27. Full record, evidence and the exact WBW view
 - **Visibility-safe term invariant:** inside the QO scope a `product_brand`/`pa_*` term is returned only if a published product the current user may see carries it (`DP_Quick_Order_Term_Scope`, `inc/class-term-scope.php`, memoized per request/user, no shared cache). Global `hide_empty` and term counts are NOT a B2B visibility mechanism. The same class re-attaches the visibility engine to WBW's AJAX queries (view 3 uses "remove actions", which strips `pre_get_posts`).
 - **Integration shim:** `assets/src/wbw-compat.js` fixes WBW's `getFilterParam()` so attribute chips can clear their filter. No filtering behavior is added.
 - **Still out of scope:** WBW `orderby` drop, Excel Import, row-level cart error UX, mobile QO design.
+
+---
+
+## Addendum 2026-10-06 — Slice 5: row-level cart/submit error UX (additive; local-state model and additive chunked CartSync UNCHANGED)
+
+Staging-accepted at plugin v1.0.29. Full record, validation order and acceptance evidence: `docs/decisions.md` ADR-016.
+
+- **§4.6 superseded in detail only:** failed rows still stay in local state, but the server now returns a typed `action:'failed'` + `error` (`out_of_stock` / `quantity_unavailable` / `product_unavailable` / `not_addable`) for every unsuccessful item (one result per submitted item), and the client shows the reason on that row (`.dp-qo-line__error`, `aria-invalid` + `aria-describedby`) plus one polite status line in the footer instead of `window.alert`.
+- **Transient `rowErrors` Map in `QuickOrderState`**, separate from the quantity rows; in memory only, cleared by a quantity change on that row, a successful retry or a reset to 0; not cleared by search/filter/pagination.
+- **Confirmed failure ≠ ambiguous request failure:** a chunk without a usable response (network, any non-2xx, malformed body, or the configured 10 s timeout, now enforced via `AbortController`) leaves its rows untouched (quantity kept, no row error) and shows one global "Nismo mogli potvrditi je li dodano…" message; no auto-retry. **Residual risk (documented, not solved):** because the sync is additive, a manual retry after a lost-but-applied response would add twice. No idempotency / stock reservation was added.
+- **Server:** variation ownership (`get_parent_id() === product_id`) is verified before any stock is read; hidden/nonexistent/unpublished/mismatched all return the same `product_unavailable`; an existing cart line now respects current stock (`out_of_stock` / `quantity_unavailable`). No stock figure in any client contract.
+- **Still out of scope:** Excel Import, mobile QO design, WBW `orderby` drop.

@@ -102,7 +102,7 @@ qualifying statuses are overridable via `dp_qo_already_ordered_statuses`
 - **Search:** `qo_search` URL param. Reuses the theme's ADR-014 extension (`dp_search_extended` query var: title/content, `_sku`, `_ARTICLE_CODE`, `_global_unique_id`; variation hit returns parent; min 2 chars; 200-ID cap). No QO-specific index/ranking. REST exposes `catalog_number` (parent and per variation); stock is binary only — no numeric stock reaches the client.
 - **State row:** shows "Popularne pretrage" (theme filter `dp_qo_popular_searches`, ACF `search_popular_terms`) when nothing is active, otherwise removable active-filter chips (native WBW `.wpfSelectedParameters` adopted into the row, plus the search term) and a clear-all action; structured no-results state when the query is empty.
 - **Product list:** div-based list (PROIZVOD / OPCIJA / STANJE / CIJENA), parent cards with the variations as lines inside variable cards (attribute options + catalog number beneath), joined arrow stepper, persistent selected check (`.is-added`), sticky footer with Croatian-declined counts ("N artikala", "N različitih SKU-a"), WooCommerce-formatted subtotal, "Pregled košarice" link and "Dodaj u košaricu" submit.
-- Out of scope / not built: Excel Import, mobile QO design, row-level cart error UX.
+- Out of scope / not built: Excel Import, mobile QO design.
 
 ## Native-first filter sidebar (2026-10-06, v1.0.27)
 
@@ -142,7 +142,7 @@ Namespace: `dreampoint-b2b/v1` (`DP_Quick_Order_Config::REST_NAMESPACE`)
 |--------|----------|-------------|
 | GET | `/quick-order/products` | Paginated, visibility-filtered, filter/sort-aware product list. See `class-rest-api.php::register_routes()` for the full query-arg schema (`qo_orderby`, `qo_order`, `qo_new`, `qo_best_seller`, `qo_already_ordered`, `category`, `brand`, `attributes`, `price_min`/`price_max`, `stock_status`, `search`). |
 | GET | `/quick-order/products/{id}/variations` | Lightweight per-variation payload for one variable product, fetched on demand — never via `get_available_variations()` |
-| POST | `/quick-order/cart/sync` | Batched, additive cart sync via WooCommerce's own cart API |
+| POST | `/quick-order/cart/sync` | Batched, additive cart sync via WooCommerce's own cart API. One result per submitted item: `action` `added`/`updated`/`removed`/`skipped`, or `failed` + `error` ∈ `out_of_stock` / `quantity_unavailable` / `product_unavailable` / `not_addable`. No stock figure is ever returned; hidden, nonexistent, unpublished and parent-mismatched items all return `product_unavailable`. See `docs/decisions.md` ADR-016 (theme). |
 
 All three require `is_b2b_user()` (logged-in + `dp_b2b_quick_order_user_allowed`).
 

@@ -17,6 +17,12 @@ Brand, Model (`pa_model`), Boja (`pa_boja`), Dob (`pa_dob`) and Dostupnost are n
 
 Remaining QO scope (not scheduled): Excel Import; row-level cart error UX (incl. `quantity_allowed` semantics); mobile QO design (the taller sidebar pushes search lower on narrow screens); WBW drops `orderby` when a filter is applied (pre-existing). Brand "show more" is NOT needed (native scroll + search accepted). Follow-up candidate: the theme's brand `get_terms` filter still returns all brands outside Quick Order to rule-based users without brand rules.
 
+## Update 2026-10-06 — Slice 5: row-level cart/submit error UX (staging-accepted, plugin v1.0.29)
+
+`/cart/sync` returns a normalized, non-sensitive failure contract (`failed` + `out_of_stock` / `quantity_unavailable` / `product_unavailable` / `not_addable`, one result per submitted item, no stock figure); variation ownership is verified before stock is read, hidden/nonexistent/mismatched items are indistinguishable, and an existing cart line respects current stock. The client shows the reason on the affected row (`aria-invalid` / `aria-describedby`) and a polite footer summary instead of `alert()`; an unusable response (network/HTTP/timeout) is an *ambiguous* state with its own message and no auto-retry. Commits `5c07c53`, `0aee6f1`. Record: `docs/decisions.md` ADR-016; `docs/frozen/quick-order-local-state-architecture.md` Addendum 2026-10-06 (Slice 5). Residual risk: a manual retry after a lost-but-applied response would add twice (no idempotency added).
+
+Remaining QO scope (not scheduled): Excel Import; mobile QO design; WBW drops `orderby` when a filter is applied (pre-existing); theme brand `get_terms` leak outside Quick Order.
+
 ## Milestone: COMPLETE (2026-07-21)
 
 Quick Order has completed its planned development cycle and has entered

@@ -1259,3 +1259,53 @@ WBW 3.4.5 `getFilterParam()` does `JSON.parse()` on a `filters.order` that its o
 ### Related
 
 - Commits: `d994580` (term vocabulary), `b4939da` then `0a48a01` (WBW AJAX visibility), `53bfd9d` (chip compat), `50e19a8` (CSS). Plugin `readme.md` ("Native-first filter sidebar"); `docs/frozen/quick-order-local-state-architecture.md` Addendum 2026-10-06; ADR-014 (search), ADR-003 (WBW search compat).
+
+
+---
+
+## ADR-016 — Quick Order cart submit: normalized, non-sensitive `/cart/sync` failure contract and row-level error UX (Slice 5)
+
+**Status:** accepted on staging 2026-10-06 (plugin v1.0.28 + v1.0.29). The local-state model, the additive/chunked CartSync and ADR-014/015 are unchanged; this record only adds to them.
+
+### Context
+
+Discovery (2026-10-06) found: failures reached the client as an unstructured mix (`action:'out_of_stock'`, `action:'failed'` + `error:'invalid_product'|'access_denied'|'add_failed'`, `skipped`); the UI only showed a blocking `window.alert` ("provjerite stanje na skladištu") for every kind of failure including network errors; `timeoutMs` existed in config but was never enforced. The server had three correctness/oracle gaps: (1) `product_id` was access-checked but a variation's stock was read before verifying that the variation belongs to that parent (stock-status oracle for a hidden product's variation); (2) `invalid_product` vs `access_denied` let a client tell a hidden product from a nonexistent one; (3) an already-existing cart line could still grow after its product went out of stock (no `is_in_stock()` check on that path). A submitted item with `product_id=0` was silently dropped.
+
+### Decision
+
+**Per-item contract** (`inc/class-cart-sync.php`) — one result per submitted item, never dropped:
+`{product_id, variation_id, action:'added'|'updated'|'removed'|'skipped'}` or `{product_id, variation_id, action:'failed', error:<code>}` with `error` one of:
+
+- `out_of_stock` — the unit itself is not in stock;
+- `quantity_unavailable` — in stock, but the resulting quantity cannot be fulfilled;
+- `product_unavailable` — nonexistent / unpublished / not purchasable / inaccessible / variation not belonging to the submitted parent / invalid variation / `product_id=0` / malformed item. **One** code on purpose;
+- `not_addable` — WooCommerce rejected `add_to_cart` for a reason that is not classified further.
+
+There is no `invalid_variation` code (WooCommerce does not distinguish it reliably at this boundary). `request_failed` exists only client-side.
+
+**Stock privacy invariant:** no numeric stock, "allowed/remaining quantity", `stock_quantity`, `managed` flag or `quantity_allowed` is ever part of any Quick Order client contract. Catalog stock stays binary. The residual, inherent oracle (a user who may add can probe quantities by trying) is unchanged and cannot be removed without removing server validation.
+
+**Oracle protection / validation order:** `resolve_unit()` verifies existence, that a variation is a `WC_Product_Variation` whose `get_parent_id()` equals the submitted `product_id` (and that a variation id is not submitted as a parent id), and `is_purchasable()` — all before any stock is read. The visibility gate (`dp_b2b_product_accessible`, applied to the verified parent) maps to the same `product_unavailable`. Existing-line path: still no access re-check (intentional, "no retroactive revalidation"), but it now respects current stock: `!is_in_stock()` → `out_of_stock`; WooCommerce's `has_enough_stock(<resulting total>)` → `quantity_unavailable`. `has_enough_stock()` replaces the earlier hand-rolled `get_manage_stock()` + `get_stock_quantity()` comparison, so it now also honours backorders and parent-managed variations like WooCommerce itself (no backorder product exists on staging today). `sync()` restores the WooCommerce notice queue to its pre-request state so `add_to_cart()` rejection notices do not resurface on `/cart/`.
+
+**Confirmed failure vs. ambiguous request failure (client, `cart-submit.js`):** a chunk with no usable response — fetch error, any non-2xx (403 nonce, 500, 400), unparsable/malformed body, or the existing `CART_SYNC_TIMEOUT_MS` (10 s, now enforced with `AbortController`) — is **ambiguous**: because the sync is additive, the server may have applied it. Its rows are not marked failed; they keep their quantity and get no row error; one global message is shown ("Nismo mogli potvrditi je li dodano. Provjerite košaricu prije ponovnog pokušaja."). No automatic retry. Rows with no result inside an otherwise good response are treated as ambiguous too.
+
+**Row error state:** `QuickOrderState` has a separate `rowErrors` Map (not part of the quantity row object), in memory only. Confirmed-failed rows keep their quantity and get their error; successful rows are cleared together with their error; the error is dropped when that row's quantity changes (including to 0), replaced by a newer confirmed failure, or cleared by a successful retry; ambiguous rows have any old error cleared. Search, filter, pagination and reset do **not** clear errors (re-applied by `RowController.hydrateAll()` when the row renders again). Never persisted.
+
+**Presentation / accessibility:** `.dp-qo-line__error` inside the row's own `.dp-qo-line` grid (`grid-column: 1 / -1`, text + "!" icon, red input border via `:has()`); `aria-invalid="true"` + `aria-describedby="dp-qo-err-<rowKey>"` on the quantity input, removed together with the node. One `role="status"` polite region (`.dp-qo-footer__status`) replaces `window.alert`: "Dodano: N. Nije dodano: M — pogledajte označene retke." / "Dodano: N." / "Nije dodano: M — …" (counts are Quick Order rows). A confirmed-result summary is cleared when a quantity is edited; the ambiguous warning stays until the next submit. No `role="alert"` per row, no focus movement, keyboard stepper unchanged.
+
+**Croatian row messages:** `out_of_stock` "Trenutno nije na stanju." · `quantity_unavailable` "Količina nije dostupna." · `product_unavailable` "Proizvod trenutno nije dostupan." · `not_addable` "Proizvod nije moguće dodati u košaricu."
+
+### Explicitly not added
+
+No idempotency token, no preflight or per-row requests, no polling, no stock reservation (ADR-007 stays a business decision), no change to chunking (sequential, 50), no change to the B2B visibility engine.
+
+### Residual risks / known limitations
+
+- **Duplicate-add ambiguity after a lost response remains:** if the server applied a chunk but the response never arrived, the quantities stay in the UI and a manual retry is additive (the quantity would be added twice). Mitigated only by the wording of the ambiguous message and the native "Pregled košarice" link; a real fix needs request idempotency (out of scope).
+- The 10 s timeout is the pre-existing configured value; a 50-row chunk took about 1 s on staging, so there is large headroom, but a slow server could turn a slow success into an ambiguous result.
+- Failures WooCommerce raises inside `add_to_cart()` after our pre-checks (e.g. cumulative stock across sibling variations, held stock) surface as `not_addable`, not `quantity_unavailable`.
+- On a narrow screen the product table already scrolls horizontally (no approved mobile design); the row error sits directly under the quantity stepper and is visible whenever the stepper is, but not at scroll position 0.
+
+### Acceptance (staging, `dreampoint.b2b.uncledev.cloud`, 2026-10-06)
+
+Backend contract exercised through `/cart/sync` as admin and as `vis_rule_cat`: valid simple/variation, simple and variation OOS, excessive quantity (fresh line and existing line), existing line whose product became OOS (product 18896 stock temporarily set to 0, restored to 18), nonexistent, draft, hidden, variation of another parent, invalid variation, variable parent without variation (`not_addable`), `product_id=0`/malformed items, mixed batch, 51 rows (chunks 50 + 1, a failure in each chunk). Hidden-existing, nonexistent, hidden+OOS, hidden variation, invalid variation, unpublished draft, "visible parent + hidden product's variation" and "visible parent + hidden OOS variation" all returned the identical `failed/product_unavailable`. Browser (real UI, User Switching `vis_full` / `vis_rule_cat`): all-success, partial, row error + status region + ARIA wiring, retry (successful rows are not re-sent, cart unchanged), search hide/return keeps the error, variation-row error, ambiguous scenarios (route abort, HTTP 500, 403, malformed 200, a 13 s hold → client abort at 10 s) with no automatic retry, 390 px smoke, Slice 1–4 smoke. Commits: `5c07c53` (contract + UX, v1.0.28), `0aee6f1` (stale-summary clearing, v1.0.29).

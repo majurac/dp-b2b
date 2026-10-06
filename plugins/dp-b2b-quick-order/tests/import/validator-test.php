@@ -161,6 +161,20 @@ $V2   = t_variable( 'V2 shared pool', 'P-TV2', 'TV/2', [
 ], [ 'parent_stock' => 5 ] );
 $V3   = t_variable( 'V3 draft parent', 'P-TV3', 'TV/3', [ 'A' => [ 'sku' => '930001', 'ac' => 'TV/3/A', 'stock' => 4 ] ], [ 'status' => 'draft' ] );
 
+// Boundary-whitespace regression fixtures (real ERP data stores a trailing LF in some _ARTICLE_CODE values).
+$N1   = t_simple( 'N1 trailing LF', 'P-TN01', "T-NLF-1\n" );
+$N2   = t_simple( 'N2 trailing CRLF', 'P-TN02', "T-NCRLF\r\n" );
+$N3   = t_simple( 'N3 trailing tab', 'P-TN03', "T-NTAB\t" );
+$N4   = t_simple( 'N4 leading ws', 'P-TN04', "\t  T-NLEAD" );
+$N5   = t_simple( 'N5 internal spaces', 'P-TN05', 'T INNER  SP' );
+$N6   = t_simple( 'N6 leading zero + LF', 'P-TN06', "0001230\n" );
+$N7a  = t_simple( 'N7a dup plain', 'P-TN07', 'T-DUPN' );
+$N7b  = t_simple( 'N7b dup trailing LF', 'P-TN08', "T-DUPN\n" );
+$N8a  = t_simple( 'N8a sku side', 'T-XNS', 'T-AC-N8A' );
+$N8b  = t_simple( 'N8b ac side LF', 'P-TN09', "T-XNS\n" );
+$N9   = t_simple( 'N9 nbsp/bom', 'P-TN10', "\u{00A0}T-NBSP\u{FEFF}" );
+$V4   = t_variable( 'V4 stored LF on variation', 'P-TV4', 'TV/4', [ 'A' => [ 'sku' => '940001', 'ac' => "TV/4/A\n", 'stock' => 6 ] ] );
+
 $ADMIN = 1;
 $FULL  = 3; // vis_full — full access, B2B user
 
@@ -272,6 +286,30 @@ echo "\n# ordering / shape\n";
 $r = t_rows( $FULL, [ t_r( 'NOPE-9', '1', 10 ), t_r( 'T-AC-001', '1', 11 ), t_r( 'P-T002', '1', 12 ), t_r( 'P-T001', '1', 13 ) ] );
 t_ok( [ [ 10 ], [ 11, 13 ], [ 12 ] ] === array_column( $r, 'rows' ), 'first-occurrence ordering preserved, duplicates folded into first position', array_column( $r, 'rows' ) );
 
+// ── 4b. stored boundary whitespace (symmetric normalization) ─────────────────────────────────────────────────
+echo "\n# stored boundary whitespace\n";
+foreach ( [ 'T-NLF-1' => $N1, 'T-NCRLF' => $N2, 'T-NTAB' => $N3, 'T-NLEAD' => $N4, 'T-NBSP' => $N9 ] as $ident => $unit ) {
+	$r = t_rows( $FULL, [ t_r( $ident, '1', 1 ) ] );
+	t_ok( 'ready' === $r[0]['status'] && $unit === $r[0]['product_id'], "stored boundary whitespace: \"$ident\" resolves to its unit", $r[0] );
+}
+$r = t_rows( $FULL, [ t_r( "T-NLF-1\n", '1', 1 ), t_r( "\t T-NLF-1 \r\n", '1', 2 ), t_r( 't-nlf-1', '1', 3 ) ] );
+t_ok( 1 === count( $r ) && [ 1, 2, 3 ] === $r[0]['rows'] && $N1 === $r[0]['product_id'], 'submitted-side whitespace/case variants of the same stored value merge into one unit row', $r );
+$r = t_rows( $FULL, [ t_r( 'T INNER  SP', '1', 1 ), t_r( 'T INNER SP', '1', 2 ), t_r( 'TINNER  SP', '1', 3 ), t_r( 'T-NLF 1', '1', 4 ) ] );
+t_ok( 'ready' === $r[0]['status'] && $N5 === $r[0]['product_id'], 'internal whitespace preserved: exact "T INNER  SP" (two spaces) resolves', $r[0] );
+t_ok( 'identifier_not_found' === $r[1]['code'] && 'identifier_not_found' === $r[2]['code'] && 'identifier_not_found' === $r[3]['code'], 'internal whitespace NOT collapsed / removed (no fuzzy matching)', $r );
+$r = t_rows( $FULL, [ t_r( '0001230', '1', 1 ), t_r( '1230', '1', 2 ), t_r( '001230', '1', 3 ), t_r( '00001230', '1', 4 ) ] );
+t_ok( 'ready' === $r[0]['status'] && $N6 === $r[0]['product_id'], 'leading zeros preserved: "0001230" resolves a value stored as "0001230\n"', $r[0] );
+t_ok( [ 'identifier_not_found', 'identifier_not_found', 'identifier_not_found' ] === array_column( array_slice( $r, 1 ), 'code' ), 'stripped / re-padded variants still do NOT resolve (no zero-padding)', array_slice( $r, 1 ) );
+$r = t_rows( $FULL, [ t_r( 'T-DUPN', '1', 1 ), t_r( "T-DUPN\n", '1', 2 ) ] );
+t_ok( 2 === count( $r ) || 1 === count( $r ), 'dup fixture present' );
+t_ok( 'ambiguous_identifier' === $r[0]['code'] && null === $r[0]['name'] && null === $r[0]['product_id'], 'same normalized identifier in two DIFFERENT units → ambiguous (fail closed, no precedence)', $r );
+$r = t_rows( $FULL, [ t_r( 'T-XNS', '1', 1 ) ] );
+t_ok( 'ambiguous_identifier' === $r[0]['code'] && null === $r[0]['name'], '_sku of unit A == normalized _ARTICLE_CODE of unit B → ambiguous (fail closed)', $r[0] );
+$r = t_rows( $FULL, [ t_r( 'TV/4/A', '2', 1 ), t_r( '940001', '2', 2 ) ] );
+t_ok( 1 === count( $r ) && 'ready' === $r[0]['status'] && $V4['variations']['A'] === $r[0]['variation_id'] && 4 === $r[0]['requested'], 'variation: stored "TV/4/A\n" resolves by normalized AC and merges with its _sku', $r );
+$r = t_rows( $FULL, [ t_r( 'T-NLF-1', '99', 1 ) ] );
+t_ok( 'adjusted' === $r[0]['status'] && 10 === $r[0]['quantity'], 'clamp still applies to a whitespace-normalized match', $r[0] );
+
 // ── 5. payload / protocol ────────────────────────────────────────────────────────────────────────────────────
 echo "\n# payload / protocol\n";
 $many = array_fill( 0, 501, t_r( 'T-UNM', '1', 1 ) );
@@ -330,6 +368,10 @@ foreach ( [ 4 => 'vis_rule_cat', 5 => 'vis_rule_brand', 6 => 'vis_offer' ] as $u
 		'nonexistent'                    => 'NOPE-DOES-NOT-EXIST',
 		'hidden ambiguous pair'          => 'T-AMBIG',
 		'hidden out-of-stock'            => 'T-OOS',
+		'hidden stored-LF identifier'    => 'T-NLF-1',
+		'hidden stored-LF, padded input' => " \t T-NLF-1\r\n",
+		'hidden stored-LF variation'     => 'TV/4/A',
+		'hidden whitespace-dup pair'     => 'T-DUPN',
 	];
 	$rows = [];
 	$n    = 0;

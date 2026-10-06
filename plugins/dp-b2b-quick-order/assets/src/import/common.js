@@ -30,9 +30,13 @@ export class ImportParseError extends Error {
     }
 }
 
-/** Trim surrounding whitespace incl. NBSP and a stray BOM. Nothing else (no case/zero/numeric changes). */
+/**
+ * Canonical boundary normalization (same contract as DP_Quick_Order_Import_Validator::BOUNDARY_CLASS):
+ * remove leading/trailing TAB, LF, VT, FF, CR, space, NBSP (U+00A0) and BOM (U+FEFF). Nothing else (no
+ * case / zero / numeric / internal-whitespace changes). The server stays authoritative.
+ */
 export function trimText(value) {
-    return String(value ?? '').replace(/^[\s ﻿]+|[\s ﻿]+$/g, '');
+    return String(value ?? '').replace(/^[\t\n\v\f\r \u00A0\uFEFF]+|[\t\n\v\f\r \u00A0\uFEFF]+$/g, '');
 }
 
 /** Bound hostile cell sizes without silently shortening a legitimate value: cut at limit + 1. */

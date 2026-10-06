@@ -90,6 +90,8 @@ const cases = [
   ['csv NUL bytes rejected', ['a.csv', Buffer.from([0x53, 0x00, 0x4B, 0x00])], { error: 'invalid_file' }],
   ['csv formula-looking cells stay inert text', ['a.csv', csv('SKU;Količina\n=1+1;+5\n')], { rows: 1, first: { identifier: '=1+1', quantity: '+5' } }],
   ['csv oversize identifier is bounded', ['a.csv', csv('SKU;Količina\n' + 'X'.repeat(5000) + ';1\n')], { rows: 1, lenId: 65 }],
+  ['csv boundary normalization: tab/NBSP trimmed, internal whitespace kept', ['a.csv', csv('SKU;Koli\u010dina\n\t AB  1\u00A0;\u00A07\t\n')], { rows: 1, first: { identifier: 'AB  1', quantity: '7' } }],
+  ['csv boundary normalization: only the boundary class (em-space is NOT trimmed)', ['a.csv', csv('SKU;Koli\u010dina\n\u2003AB;1\n')], { rows: 1, lenId: 3 }],
   ['csv header only', ['a.csv', csv('SKU;Količina\n')], { error: 'empty_file' }],
 ];
 

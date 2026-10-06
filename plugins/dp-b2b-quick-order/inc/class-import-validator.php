@@ -205,8 +205,17 @@ class DP_Quick_Order_Import_Validator {
 	}
 
 	/**
-	 * Conservative normalization: trim surrounding whitespace (incl. NBSP and a stray BOM). Nothing else.
+	 * Canonical identifier normalization — ONE contract for submitted input AND for stored `_sku` /
+	 * `_ARTICLE_CODE` values (the SQL lookup applies the same boundary class to the stored side):
+	 *
+	 *   remove leading/trailing U+0009–U+000D (TAB, LF, VT, FF, CR), U+0020 (space), U+00A0 (NBSP) and
+	 *   U+FEFF (BOM) — nothing else. Internal whitespace, punctuation, case, leading zeros and digits are
+	 *   never touched. Case-insensitivity comes from the DB collation (PHP re-keys with mb_strtolower).
+	 *
+	 * Real ERP data carries a trailing LF in some `_ARTICLE_CODE` values; the stored data is never mutated.
 	 */
+	private const BOUNDARY_CLASS = "[\t\n\v\f\r \u{00A0}\u{FEFF}]";
+
 	private function normalize_identifier( mixed $value ): string {
 		if ( is_int( $value ) ) {
 			$value = (string) $value;
@@ -214,7 +223,7 @@ class DP_Quick_Order_Import_Validator {
 		if ( ! is_string( $value ) ) {
 			return '';
 		}
-		return (string) preg_replace( '/^[\s\x{00A0}\x{FEFF}]+|[\s\x{00A0}\x{FEFF}]+$/u', '', $value );
+		return (string) preg_replace( '/^' . self::BOUNDARY_CLASS . '+|' . self::BOUNDARY_CLASS . '+$/u', '', $value );
 	}
 
 	/**
@@ -252,9 +261,11 @@ class DP_Quick_Order_Import_Validator {
 
 	/**
 	 * One query for the whole file. Returns only PUBLISHED units; a variation additionally needs a
-	 * published parent product. Matching is exact and relies on the DB collation (case-insensitive);
-	 * the PHP side re-keys with the same trim + lowercase normalization, so any looser DB match (e.g.
-	 * accent folding) that does not equal the input after normalization is dropped — fail closed.
+	 * published parent product. Matching is exact and relies on the DB collation (case-insensitive).
+	 * The STORED value is compared after the same boundary normalization as the input (REGEXP_REPLACE with
+	 * BOUNDARY_CLASS; MariaDB 10.0.5+ / MySQL 8 — verified on staging MariaDB 10.11), and the PHP side
+	 * re-keys with normalize_identifier() + lowercase, so any looser DB match (e.g. accent folding) that
+	 * does not equal the input after normalization is dropped — fail closed.
 	 *
 	 * @param list<string> $identifiers Normalized identifiers (not lowercased).
 	 * @return array<string, array<int, array{parent:int, type:string}>> lowercase identifier => unit_id => meta
@@ -272,11 +283,11 @@ class DP_Quick_Order_Import_Validator {
 			  INNER JOIN {$wpdb->posts} p  ON p.ID = pm.post_id
 			   LEFT JOIN {$wpdb->posts} pp ON pp.ID = p.post_parent AND p.post_type = 'product_variation'
 			  WHERE pm.meta_key IN ( '_ARTICLE_CODE', '_sku' )
-			    AND pm.meta_value IN ( {$placeholders} )
+			    AND REGEXP_REPLACE( pm.meta_value, %s, '' ) IN ( {$placeholders} )
 			    AND p.post_status = 'publish'
 			    AND ( p.post_type = 'product'
 			          OR ( p.post_type = 'product_variation' AND pp.post_type = 'product' AND pp.post_status = 'publish' ) )",
-			$identifiers
+			array_merge( [ '^' . self::BOUNDARY_CLASS . '+|' . self::BOUNDARY_CLASS . '+$' ], $identifiers )
 		);
 		// phpcs:enable
 

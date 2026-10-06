@@ -421,3 +421,15 @@ Additive note; the local-state model (§2, §4, §5), additive chunked cart sync
 - **Stock.** Binary only (dot + text). Numeric stock is never part of the client contract.
 - **Search / chips (Slices 1–2).** `qo_search` URL param with ADR-014 identifier semantics (see `docs/decisions.md` ADR-014 addendum), popular-search chips, active-filter chips (native WBW `.wpfSelectedParameters` adopted into the QO state row) and a structured no-results state with reset. This supersedes the earlier "no QO-owned chip row" recommendation in `docs/active/quick-order-catalog-filters-spec.md`.
 - **Still out of scope / open:** Excel Import, mobile-specific QO design, Model/Boja/Dob WBW blocks, brand show-more list, row-level cart error UX.
+
+---
+
+## Addendum 2026-10-06 — Slice 4: native-first filter sidebar (additive; local-state model, cart sync and WBW doctrine §11 UNCHANGED)
+
+Staging-accepted at plugin v1.0.27. Full record, evidence and the exact WBW view 3 BEFORE/AFTER state: `docs/decisions.md` ADR-015.
+
+- **Rule:** Quick Order filtering is native-first. WooCommerce global attributes remain native `pa_*` taxonomies and use the existing WBW/WooCommerce filtering pipeline. Custom Quick Order code exists only where necessary to enforce B2B visibility/security or integrate the native filter UI.
+- **Sidebar:** QO-owned Popularno (Već naručeno / Novo / Best seller) above native WBW blocks Brand (`product_brand`), Model (`pa_model`), Boja (`pa_boja`), Dob (`pa_dob`), Dostupnost (`wpfInStock`, the only stock filter). Counts off.
+- **Visibility-safe term invariant:** inside the QO scope a `product_brand`/`pa_*` term is returned only if a published product the current user may see carries it (`DP_Quick_Order_Term_Scope`, `inc/class-term-scope.php`, memoized per request/user, no shared cache). Global `hide_empty` and term counts are NOT a B2B visibility mechanism. The same class re-attaches the visibility engine to WBW's AJAX queries (view 3 uses "remove actions", which strips `pre_get_posts`).
+- **Integration shim:** `assets/src/wbw-compat.js` fixes WBW's `getFilterParam()` so attribute chips can clear their filter. No filtering behavior is added.
+- **Still out of scope:** WBW `orderby` drop, Excel Import, row-level cart error UX, mobile QO design.

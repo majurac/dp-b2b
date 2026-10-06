@@ -102,7 +102,16 @@ qualifying statuses are overridable via `dp_qo_already_ordered_statuses`
 - **Search:** `qo_search` URL param. Reuses the theme's ADR-014 extension (`dp_search_extended` query var: title/content, `_sku`, `_ARTICLE_CODE`, `_global_unique_id`; variation hit returns parent; min 2 chars; 200-ID cap). No QO-specific index/ranking. REST exposes `catalog_number` (parent and per variation); stock is binary only — no numeric stock reaches the client.
 - **State row:** shows "Popularne pretrage" (theme filter `dp_qo_popular_searches`, ACF `search_popular_terms`) when nothing is active, otherwise removable active-filter chips (native WBW `.wpfSelectedParameters` adopted into the row, plus the search term) and a clear-all action; structured no-results state when the query is empty.
 - **Product list:** div-based list (PROIZVOD / OPCIJA / STANJE / CIJENA), parent cards with the variations as lines inside variable cards (attribute options + catalog number beneath), joined arrow stepper, persistent selected check (`.is-added`), sticky footer with Croatian-declined counts ("N artikala", "N različitih SKU-a"), WooCommerce-formatted subtotal, "Pregled košarice" link and "Dodaj u košaricu" submit.
-- Out of scope / not built: Excel Import, mobile QO design, Model/Boja/Dob filter blocks, brand show-more.
+- Out of scope / not built: Excel Import, mobile QO design, row-level cart error UX.
+
+## Native-first filter sidebar (2026-10-06, v1.0.27)
+
+Quick Order filtering is native-first. WooCommerce global attributes remain native `pa_*` taxonomies and use the existing WBW/WooCommerce filtering pipeline. Custom Quick Order code exists only where necessary to enforce B2B visibility/security or integrate the native filter UI.
+
+- WBW view 3 blocks: Brand (`product_brand`), Model (`pa_model`), Boja (`pa_boja`), Dob (`pa_dob`), Dostupnost (`wpfInStock`, the only stock filter); counts off; native scroll + native search for long lists (no custom show-more). QO-owned Popularno sits above them.
+- `DP_Quick_Order_Term_Scope` (`inc/class-term-scope.php`): inside the QO template and the WBW frontend AJAX sent from the QO page, a `product_brand`/`pa_*` term is returned only if a published product the current user may see carries it. Global `hide_empty`/term counts are not a visibility mechanism. It also re-attaches the visibility engine to WBW's AJAX queries (view 3 uses WBW "remove actions").
+- `assets/src/wbw-compat.js`: replaces WBW 3.4.5's broken `getFilterParam()` lookup so attribute selected-parameter chips can clear their filter. No filtering behavior of its own.
+- Exact WBW configuration and acceptance evidence: theme `docs/decisions.md` ADR-015.
 
 ## HPOS Compatibility
 

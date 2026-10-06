@@ -1177,3 +1177,85 @@ Quick Order (plugin `dp-b2b-quick-order`) search opts into the same extension; t
 - Code: commit `b5ce399` — `inc/product-search.php`, `inc/ajax-handlers.php`, `header.php`, `js/ajax-search.js`, `js/select2-init.js`, `functions.php`, `sass/components/_header.scss`, `sass/components/_content.scss`, `acf-json/group_dp_search_panel.json`.
 - Superseded statements (kept as history, annotated): INT-01 rows in `docs/project-status-matrix.md`, `docs/stakeholder-question-matrix.md`, `docs/client-workshop-questions.md`.
 - ADR-003 (WBW filter search compatibility — separate topic), ADR-012 (visibility/test users).
+
+---
+
+## ADR-015 — Quick Order filter sidebar: native-first filtering and a visibility-safe term vocabulary
+
+**Status:** accepted and closed on staging 2026-10-06 (plugin `dp-b2b-quick-order` v1.0.27). **Scope:** Quick Order desktop filter sidebar (Slice 4). Production does not exist for this project.
+
+### Governing rule
+
+> Quick Order filtering is native-first. WooCommerce global attributes remain native `pa_*` taxonomies and use the existing WBW/WooCommerce filtering pipeline. Custom Quick Order code exists only where necessary to enforce B2B visibility/security or integrate the native filter UI.
+
+Model, Boja and Dob are native WBW `wpfAttribute` blocks over `pa_model`, `pa_boja`, `pa_dob`; Brand is the native `wpfBrand` block over `product_brand`; Dostupnost is the native `wpfInStock` block. Filtering, URL state (`wpf_filter_<attr>`, `product_brand_list`, `pr_stock`), selected-parameter chips and reset are WBW / QO Slice 2 behavior, unchanged. The design (PNG/Figma) guided hierarchy and spacing only; no custom attribute filtering, counts, show-more, search-in-filter or accordion was built to match it.
+
+### Finding that forced custom code: the global vocabulary is not B2B-safe
+
+WBW builds option lists with `get_terms()`; `hide_empty` and term counts are global (not user-visibility-aware). Measured on staging before the fix:
+
+- `vis_rule_cat` (3 visible products) received **all 61** `product_brand` terms in the rendered Brand block (the theme's brand `get_terms` filter does nothing for rule-based users without brand rules); `vis_full` received 61 although only 13 brands have a visible published product.
+- There is no visibility filter at all for `pa_*`: raw `pa_boja` (365 terms), `pa_model` (77), `pa_dob` (13) would have exposed every term to every restricted user. `hide_empty=true` still returned e.g. 276 `pa_boja` terms to a user who can see none.
+- WBW view 3 runs with "remove actions" on: its AJAX handler calls `remove_all_filters( 'pre_get_posts' )`, which removes the visibility engine from the queries behind its result count, product HTML and `filter_state.exists`. A restricted user filtering by a permitted brand received **26 products** (3 are visible to them). QO discards that HTML, but it was delivered to the browser.
+
+### Visibility-safe term invariant (enforced by `DP_Quick_Order_Term_Scope`, `inc/class-term-scope.php`)
+
+Inside the Quick Order scope a `product_brand` / `pa_*` term is returned by `get_terms()` only if at least one **published product the current user may see** carries it.
+
+- **Permitted universe:** `WP_Query` (published `product`, `suppress_filters=false`, same base args as the QO product query). The canonical engine (`pre_get_posts` + `posts_clauses`) decides; no rule is re-implemented. Terms come from the permitted PARENTS' term relationships in chunked SQL (no per-term queries); ancestors of hierarchical brands are added.
+- **Data model:** WooCommerce attaches `pa_*` terms to the parent (simple and variable); `product_variation` posts carry no term relationships, only `attribute_pa_*` meta (verified on staging: 0 variation posts with `pa_*` relationships, 0 variation-meta terms missing from the parent). An inaccessible parent therefore cannot contribute vocabulary through its variations.
+- **Scope:** active only while the QO template renders (`enter()`/`leave()` in `DP_Quick_Order_Frontend`) and for the WBW AJAX action `woobewoo_pf_filters_frontend` when the request's `currenturl` path is the Quick Order page. Inert for wp-admin, archives, REST, cron, CLI and other WBW views. `get_terms` result shapes without a term id (`fields=names|slugs|tt_ids`) fail closed to empty. Admins are also restricted to terms of published products inside QO scope (they bypass visibility for products, not for this vocabulary).
+- **AJAX:** the permitted universe is primed on `wp_loaded` (before WBW removes the engine) and the engine's own `pre_get_posts` callback (`Dreampoint_B2B_Query_Filter::filter_product_query`) is re-attached through WBW's `wpf_checkBeforeFiltersFrontendArgs` / `wpf_beforeFilterExistsTerms` filters. If the engine class is unavailable the WBW queries are pinned to `post__in=[0]`. A first attempt that pinned `post__in` to parent ids broke WBW's variation-aware result set and was replaced (commit `0a48a01`).
+- **Cache:** none shared; memoized per request and per user id. **Cost on staging (451 published products):** all four taxonomies resolved in 0-4 ms; re-measure on a production-size catalog.
+
+### Counts policy
+
+Term/filter counts stay **OFF** (`f_show_count=false`; `f_hide_empty=false`, because hide_empty is not a visibility mechanism). Do not expose `term->count` and do not build a global `get_terms()` count. The mockup's "(34)" is not reproduced.
+
+### Accepted WBW view 3 configuration (`wp_wpf_filters.id=3`, "Quick order filter")
+
+| # | Block | Source | Type / settings |
+|---|-------|--------|-----------------|
+| 1 | `wpfBrand` "Brendovi" | `product_brand` | `multi`, WBW's native "Search brands" input, list scroll `f_max_height=200`, counts off |
+| 2 | `wpfAttribute` "Model" | `f_list=1` (`pa_model`) | `list`, `f_query_logic=or`, native search input on (`f_show_search_input`), scroll 200px, counts off |
+| 3 | `wpfAttribute` "Boja" | `f_list=5` (`pa_boja`) | same as Model (276 terms: native scroll + native search) |
+| 4 | `wpfAttribute` "Dob" | `f_list=3` (`pa_dob`) | same, search off (9 terms) |
+| 5 | `wpfInStock` "Dostupnost" | `pr_stock` | `f_options[]=instock,outofstock`, `f_status_names=on`, labels "Na stanju" / "Nema na stanju" ("Po narudžbi" unused) |
+
+`f_description` is empty on every block (it duplicated the title). The stale unbound "Pakovanje" block was removed (`pa_pakovanje` does not exist). No view-level setting changed (128 top-level settings identical). A term-less block (e.g. a restricted user without any permitted `pa_boja` term) is simply not rendered.
+
+- **BEFORE** (4 blocks: Dostupnost, Brendovi, Boja `f_list=null`, Pakovanje `f_list=null`): `setting_data` length 25624, sha256 `639b8a0cacad1d21ff93351d030a4c3c676f543567ee76e1b2bf5bac783f37d4`. Verbatim backup on the staging server: `/root/wpf_view3_setting_data.BEFORE.202610061050.bak` (the PHP-serialized `setting_data` column value). Restore: `UPDATE wp_wpf_filters SET setting_data = <file contents> WHERE id = 3`, then flush the object cache.
+- **AFTER** sha256 `066bb51457ee53723b3282faa1b116ac13139d0c2f1e00226df73fd570658378`. Applied programmatically (guarded by the BEFORE sha) in three small steps (blocks, native search on Model/Boja, empty descriptions); intermediate shas `32f16cef...` and `cb8a2ccd...`.
+
+### Single stock dimension
+
+Dostupnost (`wpfInStock`, `pr_stock`) is the **only** stock filter. The mockup's "Na stanju" under Popularno is not a second filter; QO-owned Popularno stays Već naručeno / Novo / Best seller. Numeric stock stays out of the client contract.
+
+### Long lists: native behavior accepted
+
+WBW's scroll box (200px) plus its native client-side search input is sufficient for `pa_boja` (276 terms for a full-access user). The search filters only DOM terms that already passed the visibility-safe vocabulary. No custom "Prikaži više", custom search or accordion was added; WBW's own +/- block collapse is retained. The search placeholder is WBW's English "Search ..." (a WBW translation, not a QO string).
+
+### Integration fix (the only custom JS)
+
+WBW 3.4.5 `getFilterParam()` does `JSON.parse()` on a `filters.order` that its own settings parser had already turned into an array, so the change handler of every checkbox-list attribute block threw. Selecting a term still filtered, but WBW's selected-parameter x, which re-triggers `change` through jQuery, aborted: attribute chips could not clear their filter (Brand/Stock chips worked). `assets/src/wbw-compat.js` replaces that single lookup on the `window.wpfFrontendPage` instance with an equivalent accepting both shapes (commit `53bfd9d`). WBW source is untouched; remove the shim if a WBW update fixes the lookup.
+
+### Acceptance (real staging browser, User Switching, 2026-10-06)
+
+- **Vocabulary per user** (DOM and raw HTML; no non-permitted term name in the page source outside the editorial "Popularne pretrage" chips): `vis_full` Brand 13 / Model 55 / Boja 276 / Dob 9; `vis_rule_cat` 3 / 2 / none / none; `vis_rule_brand` 1 / none / none / none; `vis_offer` 5 / 3 / 12 / 1; `vis_none` access denied, no filter markup. Server-side simulation of the same counts (0 leaks in 20 user x taxonomy checks) was supplementary only.
+- **AJAX:** after the fix no WBW response carried more products than the user can see and `filter_state.exists` ids were always a subset of the rendered terms. WBW's own (discarded) product/exists result is under-inclusive or empty for some filters (variable products under the engine's EXISTS clause; also empty for admin). QO never uses it.
+- **Injected URL values** (`product_brand_list=izipizi,nuuna`; `wpf_filter_boja=abyss&wpf_filter_model=clima&wpf_filter_dob=adult`, as `vis_rule_cat`): no chip, no checked input, no term name in the DOM (only the user's own URL echo), 0 products; indistinguishable from a non-existent slug.
+- **Native combinations** (as `vis_full`): Boja; Model + Dob; Brand + Model; Boja + Dostupnost; several Boja values (OR); search + Brand; search + Model + Dob (+ Boja); Popularno + attribute. Each produces the native selected parameter / QO chip, each chip x clears exactly its filter (Brand, Model, Boja, Dob, Dostupnost), "Poništi filtere" clears all (the search term is kept by design), and local quantities/footer counts are unchanged throughout. Zero console errors.
+- Slice 1-3 smoke (catalog-number search, no-results state, popular chips, columns, binary stock, footer, native cart link) unchanged. At 390px: no page-level overflow.
+
+### Known / out of scope (unchanged backlog)
+
+- WBW drops `orderby` when a WBW filter is applied; Excel Import; row-level cart error UX; mobile QO design.
+- Mobile: the sidebar is now about 1,350px tall on a narrow screen, so the search field sits even lower than before (known limitation, no mobile design exists).
+- Outside Quick Order the theme's brand `get_terms` filter still returns all brands to rule-based users without brand rules (e.g. shop brand widgets). Not touched here; candidate follow-up.
+- The ACF "Popularne pretrage" chips are editorial and global (they may name brands a restricted user cannot browse).
+- `pa_dob` has 4 empty duplicate terms (legacy); not cleaned.
+- A rule-based user with both brand and category rules gets a brand list limited to the brand rules by the theme filter (under-inclusive; not testable with the current demo users).
+
+### Related
+
+- Commits: `d994580` (term vocabulary), `b4939da` then `0a48a01` (WBW AJAX visibility), `53bfd9d` (chip compat), `50e19a8` (CSS). Plugin `readme.md` ("Native-first filter sidebar"); `docs/frozen/quick-order-local-state-architecture.md` Addendum 2026-10-06; ADR-014 (search), ADR-003 (WBW search compat).

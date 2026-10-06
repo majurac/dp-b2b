@@ -508,6 +508,13 @@ Quick Order must remain performant on large B2B catalogs with high variation cou
 
 ---
 
+## Quick Order — Filtering Is Native-First (ADR-015)
+
+Quick Order filtering is native-first. WooCommerce global attributes remain native `pa_*` taxonomies and use the existing WBW/WooCommerce filtering pipeline. Custom Quick Order code exists only where necessary to enforce B2B visibility/security or integrate the native filter UI.
+
+- The term vocabulary in the QO sidebar must stay B2B-visibility-safe (`DP_Quick_Order_Term_Scope`): global `hide_empty` and term counts are NOT a visibility mechanism; filter counts stay off.
+- Dostupnost (WBW `wpfInStock`) is the only stock filter. Do not add custom attribute filtering, a second stock filter or fake counts to match a mockup.
+
 ## Quick Order — Page Requirement
 
 Quick Order depends on a normal WordPress page entity existing in the database.

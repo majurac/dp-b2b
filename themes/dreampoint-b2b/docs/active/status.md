@@ -11,6 +11,12 @@ Search (ADR-014 reuse, `qo_search`, `catalog_number`, binary stock), state row (
 
 Remaining QO scope (not scheduled): Excel Import; Model/Boja/Dob WBW blocks (Boja/Pakovanje blocks do not render on staging view 3); brand visibility-safe list/show-more; row-level cart error UX (incl. `quantity_allowed` semantics); mobile QO design; broader filter slice; WBW drops `orderby` when a filter is applied (pre-existing); search placement under the sidebar on mobile.
 
+## Update 2026-10-06 — Slice 4: native-first filter sidebar (staging-accepted, plugin v1.0.27)
+
+Brand, Model (`pa_model`), Boja (`pa_boja`), Dob (`pa_dob`) and Dostupnost are native WBW blocks in view 3 (Pakovanje removed); the term vocabulary is B2B-visibility-safe inside Quick Order (`DP_Quick_Order_Term_Scope`) and WBW's AJAX queries keep the visibility engine; counts off; Dostupnost is the only stock filter; one integration shim for attribute chip removal. Commits `d994580`, `b4939da`, `0a48a01`, `53bfd9d`, `50e19a8`. Record: `docs/decisions.md` ADR-015; `docs/frozen/quick-order-local-state-architecture.md` Addendum 2026-10-06.
+
+Remaining QO scope (not scheduled): Excel Import; row-level cart error UX (incl. `quantity_allowed` semantics); mobile QO design (the taller sidebar pushes search lower on narrow screens); WBW drops `orderby` when a filter is applied (pre-existing). Brand "show more" is NOT needed (native scroll + search accepted). Follow-up candidate: the theme's brand `get_terms` filter still returns all brands outside Quick Order to rule-based users without brand rules.
+
 ## Milestone: COMPLETE (2026-07-21)
 
 Quick Order has completed its planned development cycle and has entered

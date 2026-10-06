@@ -31,9 +31,11 @@ defined( 'ABSPATH' ) || exit;
  * WBW AJAX product/exists queries: view 3 has WBW's "remove actions" option on, so its
  * handler calls remove_all_filters( 'pre_get_posts' ) and thereby strips the visibility
  * engine from the queries it then runs (result count, product HTML and term `exists`
- * data would cover the whole catalog). In the scoped AJAX request only, the permitted
- * universe resolved BEFORE that removal is therefore pinned into the WBW query args
- * (`post__in`) through WBW's own args filter.
+ * data would cover the whole catalog). In the scoped AJAX request only, the engine's own
+ * pre_get_posts callback is re-attached through WBW's args filter, which fires after the
+ * removal and before WBW builds its queries. The engine stays the single source of truth
+ * and WBW's native query shape (variations etc.) is untouched. If the engine is not
+ * available the WBW queries are pinned to an empty result (fail closed).
  *
  * No shared cache: the allowed set is memoized per request and per user id only.
  */
@@ -47,6 +49,8 @@ class DP_Quick_Order_Term_Scope {
 	/** @var array<int, array<int, true>> user id => [ term_id => true ] */
 	private array $allowed = [];
 
+	private ?Dreampoint_B2B_Query_Filter $query_filter = null;
+
 	/** @var array<int, int[]> user id => permitted published product ids */
 	private array $products = [];
 
@@ -58,8 +62,8 @@ class DP_Quick_Order_Term_Scope {
 
 		if ( self::is_scoped_ajax() ) {
 			// WBW prefixes its dispatcher filters with `wpf_`. Late priority: after WBW Pro's own handler.
-			add_filter( 'wpf_checkBeforeFiltersFrontendArgs', [ $this, 'pin_wbw_query_args' ], 99 );
-			add_filter( 'wpf_beforeFilterExistsTerms', [ $this, 'pin_wbw_query_args' ], 99 );
+			add_filter( 'wpf_checkBeforeFiltersFrontendArgs', [ $this, 'restore_visibility' ], 99 );
+			add_filter( 'wpf_beforeFilterExistsTerms', [ $this, 'restore_visibility' ], 99 );
 		}
 
 		if ( self::is_scoped_ajax() ) {
@@ -199,23 +203,26 @@ class DP_Quick_Order_Term_Scope {
 	}
 
 	/**
-	 * Pins WBW's own product/exists queries to the permitted universe (scoped AJAX only).
+	 * Re-attaches the B2B visibility engine to WBW's queries (scoped AJAX only).
 	 *
 	 * @param mixed $args WBW WP_Query args (arrays only; anything else is passed through).
 	 * @return mixed
 	 */
-	public function pin_wbw_query_args( $args ) {
+	public function restore_visibility( $args ) {
 		if ( ! is_array( $args ) || ! self::is_scoped_ajax() ) {
 			return $args;
 		}
 
-		$permitted = $this->permitted_product_ids();
-		if ( ! empty( $args['post__in'] ) ) {
-			$permitted = array_values( array_intersect( array_map( 'intval', (array) $args['post__in'] ), $permitted ) );
+		if ( class_exists( 'Dreampoint_B2B_Query_Filter' ) && function_exists( 'dreampoint_b2b_visibility_engine' ) ) {
+			$this->query_filter ??= new Dreampoint_B2B_Query_Filter( dreampoint_b2b_visibility_engine() );
+			if ( false === has_action( 'pre_get_posts', [ $this->query_filter, 'filter_product_query' ] ) ) {
+				add_action( 'pre_get_posts', [ $this->query_filter, 'filter_product_query' ], 8 );
+			}
+			return $args;
 		}
 
-		// post__in => [0] matches nothing (an empty array would mean "no restriction").
-		$args['post__in'] = $permitted ?: [ 0 ];
+		// Engine unavailable: never fall back to the unrestricted catalog.
+		$args['post__in'] = [ 0 ];
 
 		return $args;
 	}

@@ -8,6 +8,23 @@ import { CartSubmit }               from './cart-submit.js';
 import { VariationChipsController } from './variation-chips.js';
 import { patchWbwFilterParam }        from './wbw-compat.js';
 
+/**
+ * Global submit summary. Detail of a confirmed failure lives on its row; an ambiguous request
+ * failure (outcome unknown — see cart-submit.js) is stated once here and is never shown as a
+ * row-level "not added".
+ */
+function submitStatusText(i18n, added, failed, ambiguous) {
+    const parts = [];
+    if (failed > 0) {
+        parts.push(((added > 0 ? i18n.submitPartial : i18n.submitNoneAdded) ?? '')
+            .replace('{added}', added).replace('{failed}', failed));
+    } else if (added > 0 && ambiguous === 0) {
+        parts.push((i18n.submitAdded ?? '').replace('{added}', added));
+    }
+    if (ambiguous > 0) parts.push(i18n.requestFailed ?? '');
+    return parts.filter(Boolean).join(' ');
+}
+
 (function () {
     const config = window.dpQuickOrder;
     if (!config || !config.cartSyncUrl || !config.wpNonce || !config.productsUrl) return;
@@ -52,13 +69,17 @@ import { patchWbwFilterParam }        from './wbw-compat.js';
         addBtn.disabled = true;
         const originalLabel = addBtn.textContent;
         addBtn.textContent = config.i18n?.adding ?? '...';
+        footer.setStatus('');
 
-        const { addedKeys, failedItems } = await submit.submit();
+        const { addedKeys, failed, ambiguousKeys } = await submit.submit();
 
-        // Only rows the server actually processed (added/updated/removed) are
-        // cleared. Rows that came back out_of_stock/failed stay in local
-        // state so the user can see and correct them.
+        // Only rows the server confirmed (added/updated/removed) are cleared (clearKeys also drops
+        // their errors). Rows the server confirmed as failed stay in local state with their error so
+        // the user can see and correct them; rows with an unknown outcome keep their quantity but
+        // get no verdict (a previous error would be stale).
         state.clearKeys(addedKeys);
+        for (const { key, error } of failed) state.setError(key, error);
+        for (const key of ambiguousKeys) state.clearError(key);
         footer.render();
         rowCtrl.hydrateAll();
         chips.render();
@@ -66,9 +87,7 @@ import { patchWbwFilterParam }        from './wbw-compat.js';
         addBtn.textContent = originalLabel;
         addBtn.disabled = state.isEmpty();
 
-        if (failedItems.length) {
-            window.alert(config.i18n?.partialFailure ?? 'Neki artikli nisu dodani u košaricu.');
-        }
+        footer.setStatus(submitStatusText(config.i18n ?? {}, addedKeys.length, failed.length, ambiguousKeys.length));
     });
 
     // Reuse the existing WC ecosystem bridge (Toastify, mini-cart HTML, .cart-contents

@@ -259,6 +259,8 @@ $dp_qo_active_filters = [
 							<?php esc_html_e( 'Dodaj u košaricu', 'dp-b2b-quick-order' ); ?>
 						</button>
 					</div>
+					<?php /* Submit result summary (single polite live region); empty = hidden via CSS. */ ?>
+					<div class="dp-qo-footer__status" role="status" aria-live="polite"></div>
 				</div>
 
 			</div><!-- .col-lg-9 -->

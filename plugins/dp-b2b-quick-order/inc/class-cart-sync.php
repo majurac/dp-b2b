@@ -1,7 +1,28 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Batched, additive WooCommerce cart sync.
+ *
+ * Per-item result contract (one result per submitted item — never silently dropped):
+ *   success: { product_id, variation_id, action: 'added'|'updated'|'removed', quantity? }
+ *   no-op:   { product_id, variation_id, action: 'skipped' }   (quantity 0 and no cart line)
+ *   failure: { product_id, variation_id, action: 'failed', error: <code> }
+ *
+ * Public failure codes (stable, non-sensitive — no stock amount is ever returned):
+ *   out_of_stock         the product/variation itself is currently not in stock
+ *   quantity_unavailable in stock, but the resulting quantity cannot be fulfilled
+ *   product_unavailable  missing / unpublished / not purchasable / inaccessible / a variation
+ *                        that does not belong to the submitted parent — deliberately ONE code so a
+ *                        guessed ID cannot reveal whether a hidden product exists
+ *   not_addable          WooCommerce rejected add_to_cart for a reason not classified further
+ */
 class DP_Quick_Order_Cart_Sync {
+
+	const ERR_OUT_OF_STOCK         = 'out_of_stock';
+	const ERR_QUANTITY_UNAVAILABLE = 'quantity_unavailable';
+	const ERR_PRODUCT_UNAVAILABLE  = 'product_unavailable';
+	const ERR_NOT_ADDABLE          = 'not_addable';
 
 	/**
 	 * Sync a batch of items into the WooCommerce cart.
@@ -13,6 +34,11 @@ class DP_Quick_Order_Cart_Sync {
 		$cart    = WC()->cart;
 		$results = [];
 
+		// WooCommerce's add_to_cart() queues an error notice in the session for every rejection. Those
+		// notices would surface on the next cart/checkout page load, duplicating (or contradicting) the
+		// row-level message Quick Order shows. Restore the notice queue to its pre-request state.
+		$notices_before = function_exists( 'wc_get_notices' ) ? wc_get_notices() : null;
+
 		// Build cart index keyed by "product_id_variation_id" for O(1) lookups.
 		$cart_index = [];
 		foreach ( $cart->get_cart() as $key => $cart_item ) {
@@ -21,6 +47,7 @@ class DP_Quick_Order_Cart_Sync {
 		}
 
 		foreach ( $items as $item ) {
+			$item            = is_array( $item ) ? $item : [];
 			$product_id      = absint( $item['product_id'] ?? 0 );
 			$variation_id    = absint( $item['variation_id'] ?? 0 );
 			$quantity        = absint( $item['quantity'] ?? 0 );
@@ -30,10 +57,8 @@ class DP_Quick_Order_Cart_Sync {
 				? array_map( 'sanitize_text_field', $item['variation'] )
 				: [];
 
-			if ( ! $product_id ) {
-				continue;
-			}
-
+			// Every submitted item gets exactly one result (a missing product_id is simply an
+			// unavailable product) so the client can always map result → row.
 			$results[] = $this->sync_item(
 				$cart,
 				$cart_index,
@@ -45,6 +70,10 @@ class DP_Quick_Order_Cart_Sync {
 		}
 
 		$cart->calculate_totals();
+
+		if ( null !== $notices_before && function_exists( 'wc_set_notices' ) ) {
+			wc_set_notices( $notices_before );
+		}
 
 		return [
 			'synced' => $results,
@@ -58,10 +87,45 @@ class DP_Quick_Order_Cart_Sync {
 	}
 
 	/**
+	 * Resolve the purchasable unit for a submitted (product_id, variation_id) pair, or null.
+	 *
+	 * Ownership is verified BEFORE anything stock-related is read: a variation must belong to the
+	 * submitted parent, otherwise the caller could pair an accessible parent with a hidden product's
+	 * variation and learn that variation's stock state from the response.
+	 */
+	private function resolve_unit( int $product_id, int $variation_id ): ?WC_Product {
+		if ( ! $product_id ) {
+			return null;
+		}
+
+		$product = wc_get_product( $variation_id ?: $product_id );
+		if ( ! $product instanceof WC_Product ) {
+			return null;
+		}
+
+		if ( $variation_id ) {
+			if ( ! $product instanceof WC_Product_Variation || (int) $product->get_parent_id() !== $product_id ) {
+				return null;
+			}
+		} elseif ( $product instanceof WC_Product_Variation ) {
+			// A variation ID submitted as a parent product ID.
+			return null;
+		}
+
+		return $product->is_purchasable() ? $product : null;
+	}
+
+	/**
+	 * @param array{product_id:int, variation_id:int} $base
+	 */
+	private function fail( array $base, string $error ): array {
+		return array_merge( $base, [ 'action' => 'failed', 'error' => $error ] );
+	}
+
+	/**
 	 * Sync a single item into the WooCommerce cart.
 	 *
-	 * Validates existence and purchasability via wc_get_product() — one call per item,
-	 * no get_available_variations(), no recursive hydration.
+	 * One wc_get_product() call per item, no get_available_variations(), no recursive hydration.
 	 * WC is authoritative: attribute validation and add_to_cart acceptance happen inside WC.
 	 *
 	 * @param array<string, string> $cart_index     Map of "pid_vid" => cart_item_key.
@@ -77,20 +141,16 @@ class DP_Quick_Order_Cart_Sync {
 	): array {
 		$base = [ 'product_id' => $product_id, 'variation_id' => $variation_id ];
 
-		// Load the specific variation if supplied, otherwise load the parent/simple product.
-		// wc_get_product() uses the WC object cache — no redundant DB hits per request.
-		$check_id = $variation_id ?: $product_id;
-		$product  = wc_get_product( $check_id );
-
-		if ( ! $product instanceof WC_Product || ! $product->is_purchasable() ) {
-			return array_merge( $base, [ 'action' => 'failed', 'error' => 'invalid_product' ] );
+		$product = $this->resolve_unit( $product_id, $variation_id );
+		if ( null === $product ) {
+			return $this->fail( $base, self::ERR_PRODUCT_UNAVAILABLE );
 		}
 
 		$index_key    = $product_id . '_' . $variation_id;
 		$existing_key = $cart_index[ $index_key ] ?? null;
 
 		if ( null !== $existing_key ) {
-			if ( $quantity === 0 ) {
+			if ( 0 === $quantity ) {
 				$cart->remove_cart_item( $existing_key );
 				unset( $cart_index[ $index_key ] );
 				return array_merge( $base, [ 'action' => 'removed' ] );
@@ -101,18 +161,19 @@ class DP_Quick_Order_Cart_Sync {
 			// owns. Submitting must therefore ADD the requested quantity on top of
 			// whatever is already in the cart, never overwrite it.
 			$current_quantity = (int) ( $cart->get_cart_item( $existing_key )['quantity'] ?? 0 );
-			$new_quantity      = $current_quantity + $quantity;
+			$new_quantity     = $current_quantity + $quantity;
 
-			// Stock check for quantity updates on managed-stock products.
-			// get_manage_stock() returns true/'parent'/false; get_stock_quantity() resolves
-			// parent delegation automatically for variations. Checked against the
-			// resulting total, not the requested increment alone.
-			if ( $product->get_manage_stock() ) {
-				$stock_qty = (int) $product->get_stock_quantity();
-				if ( $stock_qty < $new_quantity ) {
-					// Typed result only — the remaining stock amount is never returned to the client.
-					return array_merge( $base, [ 'action' => 'out_of_stock' ] );
-				}
+			// A line that is already in the cart may have gone out of stock since it was added —
+			// that must not let its quantity grow. Typed results only: the stock amount is never
+			// returned to the client. (No access re-check here: existing lines are intentionally
+			// not retroactively revalidated — see docs/active/status.md, Visibility integration.)
+			if ( ! $product->is_in_stock() ) {
+				return $this->fail( $base, self::ERR_OUT_OF_STOCK );
+			}
+			// WooCommerce's own predicate: handles managed stock, parent-managed variations and
+			// backorders. Checked against the resulting total, not the requested increment alone.
+			if ( ! $product->has_enough_stock( $new_quantity ) ) {
+				return $this->fail( $base, self::ERR_QUANTITY_UNAVAILABLE );
 			}
 
 			$cart->set_quantity( $existing_key, $new_quantity );
@@ -122,27 +183,21 @@ class DP_Quick_Order_Cart_Sync {
 		if ( $quantity > 0 ) {
 			// Visibility gate: reject new-item adds for products the user cannot access.
 			// Uses a WP filter contract so the plugin stays decoupled from theme classes.
-			// Falls back to true (allow) if no filter is attached.
+			// Falls back to true (allow) if no filter is attached. $product_id is the verified
+			// parent of the unit (resolve_unit), so a variation is judged by its real parent.
 			$user_id = get_current_user_id();
 			if ( ! (bool) apply_filters( 'dp_b2b_product_accessible', true, $product_id, $user_id ) ) {
-				return array_merge( $base, [ 'action' => 'failed', 'error' => 'access_denied' ] );
+				// Same external code as a nonexistent product — no existence oracle.
+				return $this->fail( $base, self::ERR_PRODUCT_UNAVAILABLE );
 			}
 
-			// Quick in-stock guard before calling add_to_cart — avoids WC error notices
-			// for clearly out-of-stock items and returns a typed error code.
+			// Stock guards before add_to_cart(): WC's add_to_cart() silently returns false for these
+			// cases, which would otherwise collapse into a generic failure.
 			if ( ! $product->is_in_stock() ) {
-				return array_merge( $base, [ 'action' => 'out_of_stock' ] );
+				return $this->fail( $base, self::ERR_OUT_OF_STOCK );
 			}
-
-			// Managed-stock quantity check for new adds — mirrors the existing check for
-			// updates. WC's add_to_cart() silently returns false when qty > stock, which
-			// would produce a generic action:failed. This pre-check returns a typed
-			// out_of_stock response (no stock amount) so the frontend can flag the row.
-			if ( $product->get_manage_stock() ) {
-				$stock_qty = (int) $product->get_stock_quantity();
-				if ( $stock_qty < $quantity ) {
-					return array_merge( $base, [ 'action' => 'out_of_stock' ] );
-				}
+			if ( ! $product->has_enough_stock( $quantity ) ) {
+				return $this->fail( $base, self::ERR_QUANTITY_UNAVAILABLE );
 			}
 
 			// WC handles attribute→variation resolution and all remaining validation
@@ -152,7 +207,7 @@ class DP_Quick_Order_Cart_Sync {
 				$cart_index[ $index_key ] = $new_key;
 				return array_merge( $base, [ 'action' => 'added', 'quantity' => $quantity ] );
 			}
-			return array_merge( $base, [ 'action' => 'failed', 'error' => 'add_failed' ] );
+			return $this->fail( $base, self::ERR_NOT_ADDABLE );
 		}
 
 		return array_merge( $base, [ 'action' => 'skipped' ] );

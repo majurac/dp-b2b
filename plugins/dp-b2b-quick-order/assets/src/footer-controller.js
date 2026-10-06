@@ -11,6 +11,7 @@ export class FooterController {
     #rowsEl;
     #subtotalEl;
     #addBtn;
+    #statusEl;
 
     /**
      * @param {import('./quick-order-state.js').QuickOrderState} state
@@ -21,6 +22,7 @@ export class FooterController {
         this.#rowsEl     = document.querySelector('.dp-qo-footer__rows');
         this.#subtotalEl = document.querySelector('.dp-qo-footer__subtotal-amount');
         this.#addBtn     = document.querySelector('.dp-qo-footer__add-to-cart');
+        this.#statusEl   = document.querySelector('.dp-qo-footer__status');
         this.render();
     }
 
@@ -47,6 +49,16 @@ export class FooterController {
         }
 
         this.setSubmitEnabled(!this.#state.isEmpty());
+    }
+
+    /**
+     * Submit-result summary in the footer's single polite live region (replaces the old
+     * blocking alert). Empty string clears it. Not derived from state — it describes the
+     * last submit only.
+     * @param {string} text
+     */
+    setStatus(text) {
+        if (this.#statusEl) this.#statusEl.textContent = text;
     }
 
     /** @param {boolean} enabled */

@@ -89,7 +89,19 @@ class DP_Quick_Order_Assets {
 				'emptyCatalog'       => __( 'Nema dostupnih proizvoda.', 'dp-b2b-quick-order' ),
 				/* translators: %s: filter name */
 				'removeFilter'       => __( 'Ukloni filter: %s', 'dp-b2b-quick-order' ),
-				'partialFailure'     =>__( 'Neki artikli nisu dodani u košaricu — provjerite stanje na skladištu.', 'dp-b2b-quick-order' ),
+				// Server-confirmed row failures (class-cart-sync.php error codes). No stock figure, ever.
+				'rowErrors'          => [
+					'out_of_stock'         => __( 'Trenutno nije na stanju.', 'dp-b2b-quick-order' ),
+					'quantity_unavailable' => __( 'Količina nije dostupna.', 'dp-b2b-quick-order' ),
+					'product_unavailable'  => __( 'Proizvod trenutno nije dostupan.', 'dp-b2b-quick-order' ),
+					'not_addable'          => __( 'Proizvod nije moguće dodati u košaricu.', 'dp-b2b-quick-order' ),
+				],
+				// Global submit status. {added}/{failed} count Quick Order rows.
+				'submitAdded'        => __( 'Dodano: {added}.', 'dp-b2b-quick-order' ),
+				'submitPartial'      => __( 'Dodano: {added}. Nije dodano: {failed} — pogledajte označene retke.', 'dp-b2b-quick-order' ),
+				'submitNoneAdded'    => __( 'Nije dodano: {failed} — pogledajte označene retke.', 'dp-b2b-quick-order' ),
+				// Network/HTTP/timeout: the additive sync may have been applied — outcome unknown.
+				'requestFailed'      => __( 'Nismo mogli potvrditi je li dodano. Provjerite košaricu prije ponovnog pokušaja.', 'dp-b2b-quick-order' ),
 			],
 		] );
 	}

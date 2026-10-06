@@ -11,12 +11,23 @@ export class QuickOrderState {
     #rows = new Map();
 
     /**
+     * Transient, server-confirmed row validation errors (rowKey -> error code). Kept apart from
+     * `#rows` on purpose: it is feedback about the last submit, not part of what the user is
+     * ordering. Never persisted; survives re-renders (pagination/filter/search) because it lives
+     * here, not in the DOM.
+     * @type {Map<string, string>}
+     */
+    #errors = new Map();
+
+    /**
      * Set or clear a row's quantity. quantity<=0 removes the row.
      * @param {string} rowKey
      * @param {number} quantity
      * @param {{productId:number, variationId:number, unitPrice:number}} meta
      */
     setQuantity(rowKey, quantity, meta) {
+        // Any quantity change (or reset to 0) invalidates the previous validation result.
+        this.#errors.delete(rowKey);
         if (quantity <= 0) {
             this.#rows.delete(rowKey);
             return;
@@ -69,12 +80,31 @@ export class QuickOrderState {
 
     /** Remove specific row keys — used after a submit chunk succeeds. */
     clearKeys(rowKeys) {
-        for (const key of rowKeys) this.#rows.delete(key);
+        for (const key of rowKeys) {
+            this.#rows.delete(key);
+            this.#errors.delete(key);
+        }
     }
 
     /** Discard everything — used after a fully successful submit. */
     clear() {
         this.#rows.clear();
+        this.#errors.clear();
+    }
+
+    /** Record (replace) the server-confirmed validation error of a row. */
+    setError(rowKey, code) {
+        this.#errors.set(rowKey, code);
+    }
+
+    /** Drop a row's error without touching its quantity (outcome of the last submit unknown). */
+    clearError(rowKey) {
+        this.#errors.delete(rowKey);
+    }
+
+    /** @returns {string|null} error code of the row, if any */
+    getError(rowKey) {
+        return this.#errors.get(rowKey) ?? null;
     }
 
     /** @returns {boolean} */

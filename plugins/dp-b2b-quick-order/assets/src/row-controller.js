@@ -45,7 +45,45 @@ export class RowController {
             input.value = qty;
             this.#applyAddedState(row, qty);
             this.#syncMinus(row, qty);
+            this.#renderError(row, input);
         });
+    }
+
+    /**
+     * Reflect the row's server-confirmed validation error (state.getError) as a text line inside
+     * the row's own `.dp-qo-line` grid, associated with the quantity input. The single place that
+     * creates/removes the error node and the input's aria-invalid / aria-describedby, so a stale
+     * association can never outlive its message. Called from hydrateAll (initial/re-render/after
+     * submit) and from the qty-change path (clears it).
+     * @param {HTMLElement} row    purchasable unit container
+     * @param {HTMLInputElement} input
+     */
+    #renderError(row, input) {
+        const line = row.matches('.dp-qo-line') ? row : row.querySelector('.dp-qo-line');
+        if (!line) return;
+
+        const rowKey = input.dataset.rowKey;
+        const code   = this.#state.getError(rowKey);
+        const errId  = `dp-qo-err-${rowKey}`;
+        let el       = line.querySelector(':scope > .dp-qo-line__error');
+        const text   = code ? (window.dpQuickOrder?.i18n?.rowErrors?.[code] ?? '') : '';
+
+        if (!text) {
+            el?.remove();
+            input.removeAttribute('aria-invalid');
+            input.removeAttribute('aria-describedby');
+            return;
+        }
+
+        if (!el) {
+            el = document.createElement('div');
+            el.className = 'dp-qo-line__error';
+            line.appendChild(el);
+        }
+        el.id = errId;
+        el.textContent = text;
+        input.setAttribute('aria-invalid', 'true');
+        input.setAttribute('aria-describedby', errId);
     }
 
     #bindTableEvents() {
@@ -80,6 +118,7 @@ export class RowController {
         this.#chips.render();
         this.#applyAddedState(row, qty);
         this.#syncMinus(row, qty);
+        this.#renderError(row, input); // state.setQuantity already dropped the row's old error
     }
 
     /**

@@ -102,7 +102,7 @@ qualifying statuses are overridable via `dp_qo_already_ordered_statuses`
 - **Search:** `qo_search` URL param. Reuses the theme's ADR-014 extension (`dp_search_extended` query var: title/content, `_sku`, `_ARTICLE_CODE`, `_global_unique_id`; variation hit returns parent; min 2 chars; 200-ID cap). No QO-specific index/ranking. REST exposes `catalog_number` (parent and per variation); stock is binary only — no numeric stock reaches the client.
 - **State row:** shows "Popularne pretrage" (theme filter `dp_qo_popular_searches`, ACF `search_popular_terms`) when nothing is active, otherwise removable active-filter chips (native WBW `.wpfSelectedParameters` adopted into the row, plus the search term) and a clear-all action; structured no-results state when the query is empty.
 - **Product list:** div-based list (PROIZVOD / OPCIJA / STANJE / CIJENA), parent cards with the variations as lines inside variable cards (attribute options + catalog number beneath), joined arrow stepper, persistent selected check (`.is-added`), sticky footer with Croatian-declined counts ("N artikala", "N različitih SKU-a"), WooCommerce-formatted subtotal, "Pregled košarice" link and "Dodaj u košaricu" submit.
-- Out of scope / not built: Excel Import, mobile QO design.
+- Out of scope / not built: Excel Import UI (foundation exists, see below), mobile QO design.
 
 ## Native-first filter sidebar (2026-10-06, v1.0.27)
 
@@ -112,6 +112,26 @@ Quick Order filtering is native-first. WooCommerce global attributes remain nati
 - `DP_Quick_Order_Term_Scope` (`inc/class-term-scope.php`): inside the QO template and the WBW frontend AJAX sent from the QO page, a `product_brand`/`pa_*` term is returned only if a published product the current user may see carries it. Global `hide_empty`/term counts are not a visibility mechanism. It also re-attaches the visibility engine to WBW's AJAX queries (view 3 uses WBW "remove actions").
 - `assets/src/wbw-compat.js`: replaces WBW 3.4.5's broken `getFilterParam()` lookup so attribute selected-parameter chips can clear their filter. No filtering behavior of its own.
 - Exact WBW configuration and acceptance evidence: theme `docs/decisions.md` ADR-015.
+
+## Excel / CSV import — Gate 1 foundation (v1.0.30, no UI yet)
+
+Foundation only: local parsers, static templates and a read-only server validation endpoint. There is no import modal, no cart submission from an import and no change to `/cart/sync` or to the visible `QuickOrderState` yet (Gate 2).
+
+- **Browser parsing** (`assets/src/import/`, bundle `assets/dist/quick-order-import.js`, global `window.dpQuickOrderImport`; build: `npm run build:import`). `.xlsx` via `fflate` 0.8.3 (`unzipSync` + `DOMParser`, pinned exact; ≥ 0.8.3 fixes GHSA-px8p-9vwx-vf98) and `.csv` via a dependency-free, quote-aware tokenizer. Output is only untrusted `{row, identifier, quantity}` text — never product IDs. The file is never uploaded or stored.
+- **XLSX safety:** ≤ 2 MB; ZIP central directory is read first (entry count ≤ 100, total declared uncompressed ≤ 30 MB, sheet/shared-strings XML ≤ 8 MB, small parts ≤ 1 MB) before anything is inflated; VBA/macro/embedded parts rejected; DOCTYPE/ENTITY rejected; external links ignored; formulas are never evaluated (cached scalar used as inert text, no cached value → empty cell + warning); first visible worksheet only; columns A/B only; ≤ 500 data rows. Leading zeros survive only when the cell is text — a number already coerced by Excel (`46` for `000046`) is not repaired.
+- **CSV:** UTF-8 (BOM-safe), Windows-1250 only as the fallback when the bytes are not valid UTF-8; `;` or `,` chosen by the header; wrong column count = rejected row (reported, not repaired), stray/unterminated quote = file error.
+- **Headers:** identifier `SKU` | `Kataloški broj` | `Šifra artikla`, quantity `Količina` (case/diacritics-insensitive). EAN is not an identifier.
+- **Static templates:** `assets/templates/dp-quick-order-import-template.{xlsx,csv}`, generated once by `tests/import/build-templates.py` (identifier column formatted as Text; CSV = UTF-8 BOM, `;`). No runtime spreadsheet generation.
+- **Endpoint:** `POST /wp-json/dreampoint-b2b/v1/quick-order/import/validate`, body `{rows:[{row, identifier, quantity}]}` (≤ 500). Read-only (never writes the cart, stock or any state), `Cache-Control: no-store` — the result depends on the user's cart and visibility. Implemented in `inc/class-import-validator.php`:
+  1. strict syntax (quantity = positive whole number, ≤ 99,999 per unit after merging; no coercion);
+  2. one batch lookup of `_ARTICLE_CODE` **and** `_sku` (published unit + published parent), exact, trimmed, case-insensitive per DB collation, no padding/fuzziness/precedence;
+  3. B2B authorization on the parent via `dp_b2b_product_accessible` (same contract as `/cart/sync`) **before** ambiguity, type, purchasability, stock or name — inaccessible, unpublished, orphan and nonexistent identifiers are all `identifier_not_found`;
+  4. only among authorized candidates: `ambiguous_identifier` (≠ 1 unit), `variable_parent`, `not_purchasable`;
+  5. duplicate rows merge per orderable unit (first-occurrence order; the same unit entered via `_sku` and `_ARTICLE_CODE` merges);
+  6. stock clamp with WooCommerce semantics: `final = min(requested, additional orderable)` where additional = managed stock − cart quantity − quantity granted to earlier import rows, keyed by `get_stock_managed_by_id()` (shared parent pools); unmanaged / backorders yes|notify → no finite limit; sold individually → 1 minus the cart line; `final == 0` → `unavailable`.
+- **Result row:** `{rows, identifier, status: ready|adjusted|error, code, product_id, variation_id, name, requested, quantity}` — `ready`/`adjusted` rows carry the IDs `/cart/sync` needs (it re-verifies them); no raw stock, managed flag, pool id, price, brand or `quantity_allowed`. The final `quantity` is the intentional privacy exception of the client's auto-clamp rule. Codes: `invalid_identifier`, `invalid_quantity`, `quantity_limit`, `identifier_not_found`, `ambiguous_identifier`, `variable_parent`, `not_purchasable`, `unavailable`.
+- Validation is advisory, not a reservation: the final cart write still goes through `/cart/sync`.
+- Tests (local only): `tests/import/` — `gen-fixtures.py` + `run-parser-tests.mjs` (Chromium via the local Playwright install) and `validator-test.php` (`wp eval-file`, synthetic fixtures, refuses to run off localhost).
 
 ## HPOS Compatibility
 

@@ -67,4 +67,22 @@ class DP_Quick_Order_Config {
 	// invalidation happens on woocommerce_order_status_changed.
 	const ALREADY_ORDERED_CACHE_TTL   = 12 * HOUR_IN_SECONDS;
 	const ALREADY_ORDERED_CACHE_GROUP = 'dp_quick_order';
+
+	// ── Excel / CSV Import (validation only) ──────────────────────────────────
+
+	// Hard row cap per validation request. The whole file is validated in ONE request on purpose:
+	// duplicate merging and shared-stock-pool allocation must see every row.
+	const IMPORT_MAX_ROWS = 500;
+
+	// Maximum requested quantity per orderable unit AFTER duplicate rows are merged.
+	const IMPORT_MAX_QUANTITY = 99999;
+
+	// Longest accepted identifier (the longest real _ARTICLE_CODE on staging is 29 characters).
+	const IMPORT_MAX_IDENTIFIER_LENGTH = 64;
+
+	// Uploaded file size cap (bytes) — enforced by the browser parser; the server never receives the file.
+	const IMPORT_MAX_FILE_BYTES = 2 * MB_IN_BYTES;
+
+	// Validation request timeout (ms). Validation is read-only, so a timeout is safe to retry.
+	const IMPORT_VALIDATE_TIMEOUT_MS = 30000;
 }

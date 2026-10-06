@@ -4,10 +4,12 @@
   "private": true,
   "scripts": {
     "build:js": "esbuild assets/src/quick-order.js --bundle --minify --outfile=assets/dist/quick-order.js --format=iife",
+    "build:import": "esbuild assets/src/import/entry.js --bundle --minify --outfile=assets/dist/quick-order-import.js --format=iife",
     "watch:js": "esbuild assets/src/quick-order.js --bundle --outfile=assets/dist/quick-order.js --format=iife --watch",
-    "build": "npm run build:js"
+    "build": "npm run build:js && npm run build:import"
   },
   "devDependencies": {
-    "esbuild": "^0.21.5"
+    "esbuild": "^0.21.5",
+    "fflate": "0.8.3"
   }
 }

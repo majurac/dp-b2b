@@ -5,7 +5,8 @@ class DP_Quick_Order_Rest_Api {
 
 	public function __construct(
 		private readonly DP_Quick_Order_Product_Query $product_query,
-		private readonly DP_Quick_Order_Cart_Sync $cart_sync
+		private readonly DP_Quick_Order_Cart_Sync $cart_sync,
+		private readonly DP_Quick_Order_Import_Validator $import_validator
 	) {
 		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
 	}
@@ -36,6 +37,13 @@ class DP_Quick_Order_Rest_Api {
 		register_rest_route( DP_Quick_Order_Config::REST_NAMESPACE, '/' . DP_Quick_Order_Config::REST_BASE . '/cart/sync', [
 			'methods'             => WP_REST_Server::CREATABLE,
 			'callback'            => [ $this, 'sync_cart' ],
+			'permission_callback' => [ $this, 'is_b2b_user' ],
+		] );
+
+		// Read-only validation of parsed Excel/CSV rows. Never mutates the cart, stock or any state.
+		register_rest_route( DP_Quick_Order_Config::REST_NAMESPACE, '/' . DP_Quick_Order_Config::REST_BASE . '/import/validate', [
+			'methods'             => WP_REST_Server::CREATABLE,
+			'callback'            => [ $this, 'validate_import' ],
 			'permission_callback' => [ $this, 'is_b2b_user' ],
 		] );
 
@@ -176,6 +184,55 @@ class DP_Quick_Order_Rest_Api {
 		}
 
 		return rest_ensure_response( $result );
+	}
+
+	/**
+	 * Body: {rows: [{row: int, identifier: string, quantity: string|int}, ...]} — parsed, untrusted rows
+	 * (never the spreadsheet itself). Validated in ONE request so duplicate merging and shared-stock-pool
+	 * allocation see every row. The response depends on the current user's cart and visibility, so it
+	 * must never be cached.
+	 */
+	public function validate_import( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+		// The current cart is an input (clamp = ADDITIONAL orderable quantity). Loading it is not a mutation.
+		if ( function_exists( 'wc_load_cart' ) ) {
+			wc_load_cart();
+		}
+
+		$body = $request->get_json_params();
+		$rows = is_array( $body ) ? ( $body['rows'] ?? null ) : null;
+
+		if ( ! is_array( $rows ) || ! array_is_list( $rows ) ) {
+			return new WP_Error(
+				'invalid_payload',
+				__( 'Invalid import payload.', 'dp-b2b-quick-order' ),
+				[ 'status' => 400 ]
+			);
+		}
+
+		if ( ! $rows ) {
+			return new WP_Error(
+				'no_rows',
+				__( 'The import contains no rows.', 'dp-b2b-quick-order' ),
+				[ 'status' => 400 ]
+			);
+		}
+
+		if ( count( $rows ) > DP_Quick_Order_Config::IMPORT_MAX_ROWS ) {
+			return new WP_Error(
+				'payload_too_large',
+				sprintf(
+					/* translators: %d: max allowed rows */
+					__( 'The import exceeds the maximum of %d rows.', 'dp-b2b-quick-order' ),
+					DP_Quick_Order_Config::IMPORT_MAX_ROWS
+				),
+				[ 'status' => 400 ]
+			);
+		}
+
+		$response = rest_ensure_response( $this->import_validator->validate( $rows, get_current_user_id() ) );
+		$response->header( 'Cache-Control', 'no-store, private' );
+
+		return $response;
 	}
 
 	public function is_b2b_user(): bool {

@@ -9,6 +9,7 @@ class DP_Quick_Order_Plugin {
 	private DP_Quick_Order_Filter_Bridge $filter_bridge;
 	private DP_Quick_Order_Product_Query $product_query;
 	private DP_Quick_Order_Cart_Sync $cart_sync;
+	private DP_Quick_Order_Import_Validator $import_validator;
 	private DP_Quick_Order_Already_Ordered_Resolver $already_ordered;
 	private DP_Quick_Order_Rest_Api $rest_api;
 	private DP_Quick_Order_Assets $assets;
@@ -34,7 +35,8 @@ class DP_Quick_Order_Plugin {
 		add_action( 'woocommerce_order_status_changed', [ $this->already_ordered, 'invalidate_for_order' ], 10, 4 );
 		$this->product_query = new DP_Quick_Order_Product_Query( $this->visibility, $this->already_ordered );
 		$this->cart_sync     = new DP_Quick_Order_Cart_Sync();
-		$this->rest_api      = new DP_Quick_Order_Rest_Api( $this->product_query, $this->cart_sync );
+		$this->import_validator = new DP_Quick_Order_Import_Validator();
+		$this->rest_api      = new DP_Quick_Order_Rest_Api( $this->product_query, $this->cart_sync, $this->import_validator );
 		$this->assets        = new DP_Quick_Order_Assets();
 		$this->frontend      = new DP_Quick_Order_Frontend( $this->assets );
 	}

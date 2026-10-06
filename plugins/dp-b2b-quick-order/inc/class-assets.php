@@ -43,6 +43,19 @@ class DP_Quick_Order_Assets {
 			'timeoutMs'        => DP_Quick_Order_Config::CART_SYNC_TIMEOUT_MS,
 			'cartSyncMaxBatch' => DP_Quick_Order_Config::CART_SYNC_MAX_BATCH,
 			'searchMinChars'   => DP_Quick_Order_Config::SEARCH_MIN_CHARS,
+			// Excel/CSV import foundation (parser + read-only validation). No UI yet.
+			'importValidateUrl'         => esc_url_raw( rest_url(
+				DP_Quick_Order_Config::REST_NAMESPACE . '/' .
+				DP_Quick_Order_Config::REST_BASE . '/import/validate'
+			) ),
+			'importMaxRows'             => DP_Quick_Order_Config::IMPORT_MAX_ROWS,
+			'importMaxFileBytes'        => DP_Quick_Order_Config::IMPORT_MAX_FILE_BYTES,
+			'importMaxIdentifierLength' => DP_Quick_Order_Config::IMPORT_MAX_IDENTIFIER_LENGTH,
+			'importTimeoutMs'           => DP_Quick_Order_Config::IMPORT_VALIDATE_TIMEOUT_MS,
+			'importTemplates'           => [
+				'xlsx' => esc_url_raw( DP_QUICK_ORDER_URL . 'assets/templates/dp-quick-order-import-template.xlsx' ),
+				'csv'  => esc_url_raw( DP_QUICK_ORDER_URL . 'assets/templates/dp-quick-order-import-template.csv' ),
+			],
 			'currency'         => get_woocommerce_currency(),
 			// WooCommerce's own money settings, so the footer subtotal is formatted exactly like the
 			// server-rendered prices (separators, symbol position) regardless of the site locale.

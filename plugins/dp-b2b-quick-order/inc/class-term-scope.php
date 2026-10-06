@@ -28,6 +28,13 @@ defined( 'ABSPATH' ) || exit;
  *  - the WBW frontend AJAX action when it was sent from the Quick Order page URL.
  * Not applied to wp-admin screens, normal archives, REST, cron or CLI.
  *
+ * WBW AJAX product/exists queries: view 3 has WBW's "remove actions" option on, so its
+ * handler calls remove_all_filters( 'pre_get_posts' ) and thereby strips the visibility
+ * engine from the queries it then runs (result count, product HTML and term `exists`
+ * data would cover the whole catalog). In the scoped AJAX request only, the permitted
+ * universe resolved BEFORE that removal is therefore pinned into the WBW query args
+ * (`post__in`) through WBW's own args filter.
+ *
  * No shared cache: the allowed set is memoized per request and per user id only.
  */
 class DP_Quick_Order_Term_Scope {
@@ -40,11 +47,20 @@ class DP_Quick_Order_Term_Scope {
 	/** @var array<int, array<int, true>> user id => [ term_id => true ] */
 	private array $allowed = [];
 
+	/** @var array<int, int[]> user id => permitted published product ids */
+	private array $products = [];
+
 	/** Re-entrancy guard: the universe query may itself call get_terms() (visibility engine). */
 	private bool $computing = false;
 
 	public function __construct() {
 		add_filter( 'get_terms', [ $this, 'filter_terms' ], 20, 3 );
+
+		if ( self::is_scoped_ajax() ) {
+			// WBW prefixes its dispatcher filters with `wpf_`. Late priority: after WBW Pro's own handler.
+			add_filter( 'wpf_checkBeforeFiltersFrontendArgs', [ $this, 'pin_wbw_query_args' ], 99 );
+			add_filter( 'wpf_beforeFilterExistsTerms', [ $this, 'pin_wbw_query_args' ], 99 );
+		}
 
 		if ( self::is_scoped_ajax() ) {
 			// WBW's AJAX handler calls remove_all_filters( 'pre_get_posts' ) when its
@@ -152,6 +168,59 @@ class DP_Quick_Order_Term_Scope {
 	}
 
 	/**
+	 * Published products the current user may see, resolved by the visibility engine.
+	 *
+	 * @return int[]
+	 */
+	private function permitted_product_ids(): array {
+		$user_id = get_current_user_id();
+		if ( isset( $this->products[ $user_id ] ) ) {
+			return $this->products[ $user_id ];
+		}
+
+		$this->computing = true;
+		$ids             = ( new WP_Query( [
+			'post_type'              => 'product',
+			'post_status'            => 'publish',
+			'fields'                 => 'ids',
+			'posts_per_page'         => -1,
+			'no_found_rows'          => true,
+			'ignore_sticky_posts'    => true,
+			'suppress_filters'       => false,
+			'dp_quick_order'         => true,
+			'update_post_meta_cache' => false,
+			'update_post_term_cache' => false,
+		] ) )->posts;
+		$this->computing = false;
+
+		$this->products[ $user_id ] = array_map( 'intval', $ids );
+
+		return $this->products[ $user_id ];
+	}
+
+	/**
+	 * Pins WBW's own product/exists queries to the permitted universe (scoped AJAX only).
+	 *
+	 * @param mixed $args WBW WP_Query args (arrays only; anything else is passed through).
+	 * @return mixed
+	 */
+	public function pin_wbw_query_args( $args ) {
+		if ( ! is_array( $args ) || ! self::is_scoped_ajax() ) {
+			return $args;
+		}
+
+		$permitted = $this->permitted_product_ids();
+		if ( ! empty( $args['post__in'] ) ) {
+			$permitted = array_values( array_intersect( array_map( 'intval', (array) $args['post__in'] ), $permitted ) );
+		}
+
+		// post__in => [0] matches nothing (an empty array would mean "no restriction").
+		$args['post__in'] = $permitted ?: [ 0 ];
+
+		return $args;
+	}
+
+	/**
 	 * term_id => true for every scoped term carried by a permitted published product
 	 * (plus ancestors, so hierarchical lists stay reachable).
 	 *
@@ -165,20 +234,7 @@ class DP_Quick_Order_Term_Scope {
 
 		global $wpdb;
 
-		$this->computing = true;
-		$product_ids     = ( new WP_Query( [
-			'post_type'              => 'product',
-			'post_status'            => 'publish',
-			'fields'                 => 'ids',
-			'posts_per_page'         => -1,
-			'no_found_rows'          => true,
-			'ignore_sticky_posts'    => true,
-			'suppress_filters'       => false,
-			'dp_quick_order'         => true,
-			'update_post_meta_cache' => false,
-			'update_post_term_cache' => false,
-		] ) )->posts;
-		$this->computing = false;
+		$product_ids = $this->permitted_product_ids();
 
 		$allowed = [];
 		$pa_like = $wpdb->esc_like( 'pa_' ) . '%';

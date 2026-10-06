@@ -27,7 +27,14 @@ class DP_Quick_Order_Frontend {
 	private function render_template(): void {
 		$template = DP_QUICK_ORDER_PATH . 'templates/quick-order.php';
 		if ( file_exists( $template ) ) {
-			include $template;
+			// Filter vocabulary (WBW blocks) rendered by the template must be
+			// B2B-visibility-safe — see DP_Quick_Order_Term_Scope.
+			DP_Quick_Order_Term_Scope::enter();
+			try {
+				include $template;
+			} finally {
+				DP_Quick_Order_Term_Scope::leave();
+			}
 		}
 	}
 }

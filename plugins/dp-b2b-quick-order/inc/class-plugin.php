@@ -13,6 +13,7 @@ class DP_Quick_Order_Plugin {
 	private DP_Quick_Order_Rest_Api $rest_api;
 	private DP_Quick_Order_Assets $assets;
 	private DP_Quick_Order_Frontend $frontend;
+	private DP_Quick_Order_Term_Scope $term_scope;
 
 	private function __construct() {
 		$this->init();
@@ -27,6 +28,7 @@ class DP_Quick_Order_Plugin {
 
 	private function init(): void {
 		$this->visibility    = new DP_Quick_Order_Visibility_Integration();
+		$this->term_scope    = new DP_Quick_Order_Term_Scope();
 		$this->filter_bridge = new DP_Quick_Order_Filter_Bridge();
 		$this->already_ordered = new DP_Quick_Order_Already_Ordered_Resolver();
 		add_action( 'woocommerce_order_status_changed', [ $this->already_ordered, 'invalidate_for_order' ], 10, 4 );

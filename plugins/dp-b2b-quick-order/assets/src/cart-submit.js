@@ -20,6 +20,13 @@ const ROW_ERRORS = ['out_of_stock', 'quantity_unavailable', 'product_unavailable
  *  - ambiguous no usable response (network/HTTP/timeout/malformed) -> ambiguousKeys.
  *    The sync is additive and the server may have processed the chunk even though the
  *    response was lost, so such rows are NOT claimed to be "not added".
+ *
+ * Optional (used by the Excel import modal; the main Quick Order submit passes nothing and
+ * behaves exactly as before):
+ *  - onProgress({completed, total}) is called with REAL chunk completion only.
+ *  - stopOnAmbiguous: after a chunk with an ambiguous outcome no further chunk is sent (the
+ *    additive sync must not be continued blindly past an unknown boundary); the rows of the
+ *    chunks that were never sent are returned in unsentKeys.
  */
 export class CartSubmit {
     /** @type {import('./quick-order-state.js').QuickOrderState} */
@@ -35,16 +42,20 @@ export class CartSubmit {
     constructor(state, config) {
         this.#state     = state;
         this.#config    = config;
-        this.#chunkSize = config.cartSyncMaxBatch ?? 50;
+        // wp_localize_script() delivers top-level scalars as STRINGS ("50"): `i += "50"` would concatenate and
+        // silently produce oversized chunks (the server rejects > CART_SYNC_MAX_BATCH), so coerce explicitly.
+        this.#chunkSize = Number(config.cartSyncMaxBatch) > 0 ? Math.floor(Number(config.cartSyncMaxBatch)) : 50;
         this.#timeoutMs = Number(config.timeoutMs) > 0 ? Number(config.timeoutMs) : 0;
     }
 
     /**
-     * @returns {Promise<{addedKeys: string[], failed: {key:string, error:string}[], ambiguousKeys: string[]}>}
+     * @param {{onProgress?: (p:{completed:number,total:number}) => void, stopOnAmbiguous?: boolean}} [options]
+     * @returns {Promise<{addedKeys: string[], failed: {key:string, error:string}[], ambiguousKeys: string[], unsentKeys: string[]}>}
      */
-    async submit() {
+    async submit(options = {}) {
+        const { onProgress, stopOnAmbiguous = false } = options;
         const items = this.#state.toItems();
-        if (!items.length) return { addedKeys: [], failed: [], ambiguousKeys: [] };
+        if (!items.length) return { addedKeys: [], failed: [], ambiguousKeys: [], unsentKeys: [] };
 
         const chunks = [];
         for (let i = 0; i < items.length; i += this.#chunkSize) {
@@ -54,43 +65,59 @@ export class CartSubmit {
         const addedKeys     = [];
         const failed        = [];
         const ambiguousKeys = [];
+        const unsentKeys    = [];
         let lastTotals      = null;
 
-        for (const chunk of chunks) {
+        onProgress?.({ completed: 0, total: chunks.length });
+
+        for (let c = 0; c < chunks.length; c++) {
+            const chunk     = chunks[c];
             const chunkKeys = chunk.map(i => `${i.product_id}_${i.variation_id}`);
             const data      = await this.#post(chunk);
+            const before    = ambiguousKeys.length;
 
             if (!data || !Array.isArray(data.synced)) {
                 // No usable response — the outcome for this whole chunk is unknown.
                 ambiguousKeys.push(...chunkKeys);
-                continue;
+            } else {
+                this.#collect(data, chunkKeys, addedKeys, failed, ambiguousKeys);
+                if (data.totals) lastTotals = data.totals;
             }
 
-            const resolved = new Set();
-            for (const item of data.synced) {
-                const key = `${item.product_id}_${item.variation_id}`;
-                resolved.add(key);
-                if (['added', 'updated', 'removed'].includes(item.action)) {
-                    addedKeys.push(key);
-                } else if (item.action === 'failed' || item.action === 'out_of_stock') {
-                    failed.push({ key, error: ROW_ERRORS.includes(item.error) ? item.error : 'not_addable' });
-                } else if (item.action !== 'skipped') {
-                    failed.push({ key, error: 'not_addable' });
-                }
-                // 'skipped' (quantity 0, no cart line) cannot be produced by the UI — a no-op.
+            onProgress?.({ completed: c + 1, total: chunks.length });
+
+            if (stopOnAmbiguous && ambiguousKeys.length > before) {
+                for (const rest of chunks.slice(c + 1)) unsentKeys.push(...rest.map(i => `${i.product_id}_${i.variation_id}`));
+                break;
             }
-            // A row with no result is not a confirmed failure either.
-            for (const key of chunkKeys) {
-                if (!resolved.has(key)) ambiguousKeys.push(key);
-            }
-            if (data.totals) lastTotals = data.totals;
         }
 
         document.dispatchEvent(new CustomEvent('dp:submit:complete', {
             detail: { addedKeys, failed, ambiguousKeys, totals: lastTotals },
         }));
 
-        return { addedKeys, failed, ambiguousKeys };
+        return { addedKeys, failed, ambiguousKeys, unsentKeys };
+    }
+
+    /** Fold one usable /cart/sync response into the three outcome lists. */
+    #collect(data, chunkKeys, addedKeys, failed, ambiguousKeys) {
+        const resolved = new Set();
+        for (const item of data.synced) {
+            const key = `${item.product_id}_${item.variation_id}`;
+            resolved.add(key);
+            if (['added', 'updated', 'removed'].includes(item.action)) {
+                addedKeys.push(key);
+            } else if (item.action === 'failed' || item.action === 'out_of_stock') {
+                failed.push({ key, error: ROW_ERRORS.includes(item.error) ? item.error : 'not_addable' });
+            } else if (item.action !== 'skipped') {
+                failed.push({ key, error: 'not_addable' });
+            }
+            // 'skipped' (quantity 0, no cart line) cannot be produced by the UI — a no-op.
+        }
+        // A row with no result is not a confirmed failure either.
+        for (const key of chunkKeys) {
+            if (!resolved.has(key)) ambiguousKeys.push(key);
+        }
     }
 
     /**

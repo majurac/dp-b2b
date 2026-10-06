@@ -119,6 +119,7 @@ $dp_qo_active_filters = [
 
 			<div class="col-lg-9">
 
+				<div class="dp-qo-search-row">
 				<form class="dp-qo-search" role="search" novalidate>
 					<label class="dp-qo-search__label" for="dp-qo-search-input">
 						<?php esc_html_e( 'Pretraga proizvoda', 'dp-b2b-quick-order' ); ?>
@@ -134,6 +135,12 @@ $dp_qo_active_filters = [
 					>
 					<button type="button" class="dp-qo-search__clear" aria-label="<?php esc_attr_e( 'Očisti pretragu', 'dp-b2b-quick-order' ); ?>" hidden>&times;</button>
 				</form>
+				<?php /* Excel import entry point. Hidden until the import bundle initialises, so a failed script load never leaves a dead button. */ ?>
+				<button type="button" class="dp-qo-import-trigger" data-dp-qo-import aria-haspopup="dialog" hidden>
+					<svg class="dp-qo-import-trigger__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 17v-6"/><path d="m9.5 13 2.5-2.5 2.5 2.5"/></svg>
+					<span><?php esc_html_e( 'Excel Import', 'dp-b2b-quick-order' ); ?></span>
+				</button>
+				</div>
 
 				<?php
 				/*

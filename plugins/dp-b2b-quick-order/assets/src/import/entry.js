@@ -3,12 +3,13 @@
 import { parseFile } from './parse-file.js';
 import { validateRows } from './validate-client.js';
 import { ImportParseError } from './common.js';
+import { ImportModal } from './modal.js';
 
 /**
- * Excel/CSV import foundation (Gate 1): parser + validation client. No UI.
+ * Excel/CSV import: parser + validation client (Gate 1) and the modal UI (Gate 2).
  *
- * Exposed as `window.dpQuickOrderImport` so the Gate 2 modal (and tests) can drive it. The main Quick
- * Order bundle is untouched; nothing here reads or mutates the visible QuickOrderState.
+ * Exposed as `window.dpQuickOrderImport` so tests can drive the parser/validator directly. The main Quick Order
+ * bundle is untouched by this file; the modal never reads or mutates the visible QuickOrderState.
  */
 (function () {
     const config = () => window.dpQuickOrder ?? {};
@@ -33,4 +34,29 @@ import { ImportParseError } from './common.js';
             return { parsed, validation };
         },
     });
+
+    // ── Modal wiring ───────────────────────────────────────────────────────────────────────────────────────
+    const boot = () => {
+        const c = config();
+        const triggers = [...document.querySelectorAll('[data-dp-qo-import]')];
+        if (!triggers.length || !c.importValidateUrl || !c.cartSyncUrl || !c.i18n?.import) return;
+
+        let modal = null;
+        const open = (trigger) => {
+            modal ??= new ImportModal({
+                config: c,
+                parse: (file) => parseFile(file, limitsFromConfig()),
+                validate: (rows, options) => validateRows(rows, c, options),
+            });
+            modal.open(trigger);
+        };
+
+        for (const btn of triggers) {
+            btn.hidden = false; // revealed only once the bundle is alive
+            btn.addEventListener('click', () => open(btn));
+        }
+    };
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
+    else boot();
 })();

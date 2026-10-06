@@ -112,5 +112,8 @@ function submitStatusText(i18n, added, failed, ambiguous) {
 
     // Expose internal instances for browser-console inspection (dev/staging only).
     config.state       = state;
+    // Read-only accessor for the Excel import modal (separate bundle): lets it warn when an imported unit
+    // also has an unsent manual quantity here. It never exposes or mutates the state itself.
+    config.hasSelection = (rowKey) => state.getQuantity(rowKey) > 0;
     config.productList = productList;
 })();

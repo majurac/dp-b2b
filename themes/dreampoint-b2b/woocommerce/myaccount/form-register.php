@@ -89,6 +89,66 @@ $lr_image = get_field('lr_image', 'option');
                 
                     <?php endif; ?>
                 
+                    <?php
+                    // B2B business fields — all required; server-side validation in inc/b2b-registration.php.
+                    $dp_reg_value = static function ( string $key ): string {
+                        return ! empty( $_POST[ $key ] ) ? esc_attr( wp_unslash( $_POST[ $key ] ) ) : '';
+                    };
+                    $dp_countries        = WC()->countries->get_allowed_countries();
+                    $dp_selected_country = ! empty( $_POST['billing_country'] )
+                        ? sanitize_text_field( wp_unslash( $_POST['billing_country'] ) )
+                        : WC()->countries->get_base_country();
+                    ?>
+                    <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
+                        <label for="reg_billing_company"><?php esc_html_e( 'Tvrtka', 'dreampoint-b2b' ); ?>&nbsp;<span class="required" aria-hidden="true">*</span></label>
+                        <input type="text" class="woocommerce-Input woocommerce-Input--text input-text" name="billing_company" id="reg_billing_company" autocomplete="organization" value="<?php echo $dp_reg_value( 'billing_company' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in closure. ?>" required />
+                    </p>
+
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
+                                <label for="reg_billing_oib"><?php esc_html_e( 'OIB', 'dreampoint-b2b' ); ?>&nbsp;<span class="required" aria-hidden="true">*</span></label>
+                                <input type="text" class="woocommerce-Input woocommerce-Input--text input-text" name="billing_oib" id="reg_billing_oib" inputmode="numeric" pattern="[0-9]{11}" autocomplete="off" value="<?php echo $dp_reg_value( 'billing_oib' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in closure. ?>" required />
+                            </p>
+                        </div>
+                        <div class="col-lg-6">
+                            <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
+                                <label for="reg_billing_phone"><?php esc_html_e( 'Telefon', 'dreampoint-b2b' ); ?>&nbsp;<span class="required" aria-hidden="true">*</span></label>
+                                <input type="tel" class="woocommerce-Input woocommerce-Input--text input-text" name="billing_phone" id="reg_billing_phone" autocomplete="tel" value="<?php echo $dp_reg_value( 'billing_phone' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in closure. ?>" required />
+                            </p>
+                        </div>
+                    </div>
+
+                    <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
+                        <label for="reg_billing_address_1"><?php esc_html_e( 'Adresa', 'dreampoint-b2b' ); ?>&nbsp;<span class="required" aria-hidden="true">*</span></label>
+                        <input type="text" class="woocommerce-Input woocommerce-Input--text input-text" name="billing_address_1" id="reg_billing_address_1" autocomplete="address-line1" value="<?php echo $dp_reg_value( 'billing_address_1' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in closure. ?>" required />
+                    </p>
+
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
+                                <label for="reg_billing_city"><?php esc_html_e( 'Grad', 'dreampoint-b2b' ); ?>&nbsp;<span class="required" aria-hidden="true">*</span></label>
+                                <input type="text" class="woocommerce-Input woocommerce-Input--text input-text" name="billing_city" id="reg_billing_city" autocomplete="address-level2" value="<?php echo $dp_reg_value( 'billing_city' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in closure. ?>" required />
+                            </p>
+                        </div>
+                        <div class="col-lg-6">
+                            <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
+                                <label for="reg_billing_postcode"><?php esc_html_e( 'Poštanski broj', 'dreampoint-b2b' ); ?>&nbsp;<span class="required" aria-hidden="true">*</span></label>
+                                <input type="text" class="woocommerce-Input woocommerce-Input--text input-text" name="billing_postcode" id="reg_billing_postcode" autocomplete="postal-code" value="<?php echo $dp_reg_value( 'billing_postcode' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in closure. ?>" required />
+                            </p>
+                        </div>
+                    </div>
+
+                    <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
+                        <label for="reg_billing_country"><?php esc_html_e( 'Država', 'dreampoint-b2b' ); ?>&nbsp;<span class="required" aria-hidden="true">*</span></label>
+                        <select name="billing_country" id="reg_billing_country" class="dp-reg-country" autocomplete="country" required>
+                            <option value=""><?php esc_html_e( 'Odaberite državu', 'dreampoint-b2b' ); ?></option>
+                            <?php foreach ( $dp_countries as $dp_code => $dp_name ) : ?>
+                                <option value="<?php echo esc_attr( $dp_code ); ?>" <?php selected( $dp_selected_country, $dp_code ); ?>><?php echo esc_html( $dp_name ); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </p>
+
                     <?php do_action( 'woocommerce_register_form' ); ?>
                 
                     <p class="woocommerce-form-row form-row">

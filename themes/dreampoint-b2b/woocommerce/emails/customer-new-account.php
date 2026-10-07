@@ -8,7 +8,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 10.4.0
+ * @version 10.9.0
  *
  * @var string    $email_heading
  * @var string    $additional_content
@@ -44,6 +44,11 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 <p><?php esc_html_e( 'Vaša registracija je uspješno zaprimljena i trenutno čeka odobrenje našeg tima.', 'dreampoint-b2b' ); ?></p>
 
 <p><?php esc_html_e( 'Obavijestit ćemo vas e-poštom čim vaš račun bude aktiviran — tada ćete moći pristupiti svim B2B sadržajima i cijenama.', 'dreampoint-b2b' ); ?></p>
+
+<?php if ( $password_generated && $set_password_url ) : ?>
+	<?php // Lozinka nije postavljena pri registraciji — native WooCommerce link za postavljanje lozinke. ?>
+	<p><a href="<?php echo esc_url( $set_password_url ); ?>"><?php esc_html_e( 'Kliknite ovdje za postavljanje lozinke.', 'dreampoint-b2b' ); ?></a></p>
+<?php endif; ?>
 
 <?php echo $email_improvements_enabled ? '</div>' : ''; ?>
 

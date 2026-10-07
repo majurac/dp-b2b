@@ -18,6 +18,40 @@ if ( ! defined( 'ABSPATH' ) ) {
 add_filter( 'wp_send_new_user_notification_to_admin', '__return_false' );
 
 /**
+ * Je li postavka WC emaila neprilagođena (prazna ili jednaka WC zadanoj vrijednosti)?
+ * Samo tada se primjenjuje hrvatski zadani tekst; administratorova vlastita
+ * vrijednost iz WooCommerce → Postavke → Emailovi uvijek ima prednost.
+ */
+function dreampoint_b2b_email_setting_is_default( WC_Email $email, string $key, string $default ): bool {
+    $saved = get_option( $email->get_option_key(), [] );
+    $value = is_array( $saved ) && isset( $saved[ $key ] ) ? trim( (string) $saved[ $key ] ) : '';
+    return '' === $value || $value === trim( $default );
+}
+
+// Customer new-account email: hrvatski zadani subject/heading/dodatni sadržaj
+// (WC zadani tekstovi su na engleskom jer je locale sajta en_US).
+add_filter( 'woocommerce_email_subject_customer_new_account', function ( $subject, $user, $email ) {
+    if ( $email instanceof WC_Email && dreampoint_b2b_email_setting_is_default( $email, 'subject', $email->get_default_subject() ) ) {
+        return $email->format_string( __( 'Vaša registracija na {site_title} je zaprimljena', 'dreampoint-b2b' ) );
+    }
+    return $subject;
+}, 10, 3 );
+
+add_filter( 'woocommerce_email_heading_customer_new_account', function ( $heading, $user, $email ) {
+    if ( $email instanceof WC_Email && dreampoint_b2b_email_setting_is_default( $email, 'heading', $email->get_default_heading() ) ) {
+        return $email->format_string( __( 'Registracija je zaprimljena', 'dreampoint-b2b' ) );
+    }
+    return $heading;
+}, 10, 3 );
+
+add_filter( 'woocommerce_email_additional_content_customer_new_account', function ( $content, $user, $email ) {
+    if ( $email instanceof WC_Email && dreampoint_b2b_email_setting_is_default( $email, 'additional_content', $email->get_default_additional_content() ) ) {
+        return $email->format_string( __( 'Radujemo se suradnji s vama.', 'dreampoint-b2b' ) );
+    }
+    return $content;
+}, 10, 3 );
+
+/**
  * Registrira custom WC email razred.
  *
  * @param array<string, WC_Email> $email_classes

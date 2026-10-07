@@ -118,6 +118,23 @@
         top: 22px;
     }
 
+    // Registration country <select> — same look as the text inputs in .custom-form
+    .register select.dp-reg-country {
+        @include paragraph-normal;
+        display: block;
+        width: 100%;
+        height: 46px;
+        margin-top: 8px;
+        padding: 0 16px;
+        background: $white;
+        border: 1px solid $border-primary;
+        border-radius: 0;
+        &:focus {
+            border-color: $text-disabled;
+            box-shadow: 0 0 0 3px $border-focus;
+        }
+    }
+
     #password_strength, .woocommerce-password-hint {
         @include paragraph-normal;
         color: inherit;

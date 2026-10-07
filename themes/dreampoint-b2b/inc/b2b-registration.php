@@ -69,6 +69,52 @@ function dreampoint_b2b_save_registration_fields( int $customer_id ): void {
 add_action( 'woocommerce_created_customer', 'dreampoint_b2b_save_registration_fields' );
 
 /**
+ * Server-side validacija obaveznih B2B polja registracije.
+ *
+ * Svih sedam polja je obavezno; OIB mora imati točno 11 znamenki (bez provjere
+ * kontrolne znamenke), a država mora biti među dopuštenima u WooCommerceu.
+ * Vrijednosti se čitaju sanitizirane istim putem kao pri spremanju.
+ *
+ * @param WP_Error $errors Objekt grešaka WooCommerce registracije.
+ * @return WP_Error
+ */
+function dreampoint_b2b_validate_registration_fields( $errors ) {
+    $read = static function ( string $key ): string {
+        return isset( $_POST[ $key ] ) ? sanitize_text_field( wp_unslash( $_POST[ $key ] ) ) : '';
+    };
+
+    $required = [
+        'billing_company'   => __( 'Tvrtka je obavezna.', 'dreampoint-b2b' ),
+        'billing_phone'     => __( 'Telefon je obavezan.', 'dreampoint-b2b' ),
+        'billing_address_1' => __( 'Adresa je obavezna.', 'dreampoint-b2b' ),
+        'billing_city'      => __( 'Grad je obavezan.', 'dreampoint-b2b' ),
+        'billing_postcode'  => __( 'Poštanski broj je obavezan.', 'dreampoint-b2b' ),
+    ];
+    foreach ( $required as $key => $message ) {
+        if ( '' === $read( $key ) ) {
+            $errors->add( $key . '_error', $message );
+        }
+    }
+
+    $oib = $read( 'billing_oib' );
+    if ( '' === $oib ) {
+        $errors->add( 'billing_oib_error', __( 'OIB je obavezan.', 'dreampoint-b2b' ) );
+    } elseif ( 1 !== preg_match( '/^[0-9]{11}\z/', $oib ) ) {
+        $errors->add( 'billing_oib_error', __( 'OIB mora imati točno 11 znamenki.', 'dreampoint-b2b' ) );
+    }
+
+    $country = $read( 'billing_country' );
+    if ( '' === $country ) {
+        $errors->add( 'billing_country_error', __( 'Odaberite državu.', 'dreampoint-b2b' ) );
+    } elseif ( ! array_key_exists( $country, WC()->countries->get_allowed_countries() ) ) {
+        $errors->add( 'billing_country_error', __( 'Odabrana država nije dopuštena.', 'dreampoint-b2b' ) );
+    }
+
+    return $errors;
+}
+add_filter( 'woocommerce_process_registration_errors', 'dreampoint_b2b_validate_registration_fields' );
+
+/**
  * Dodaj OIB polje ispod tvrtke u WP admin billing sekciji.
  *
  * @param array<string, mixed> $fields

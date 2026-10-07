@@ -90,6 +90,8 @@ Kao direktna posledica, `advance_only`/`free_shipping` propagacija (ranije AP-08
 - `docs/b2b-erp-migration-plan.md` — Korak 9, Korak 10
 - `docs/project-status-matrix.md` — Sekcija 1.7 (Registracija i onboarding)
 
+> **Addendum 2026-10-07 (see ADR-018):** the client formally confirmed this Apros-driven flow in `B2B odgovori na pitanja.docx` §3. The cron-based polling described above is still **NOT implemented** (only a manual, unscheduled partner sync exists). "B2B rola dodjela" never named a concrete role; none exists today. Historical text above is unchanged.
+
 ---
 
 ## ADR-003 — WBW Product Filter Multi-Type Search Compatibility Layer
@@ -483,6 +485,7 @@ Detaljna rekonsilijacija po AP-ID stavci: `docs/project-status-matrix.md` (AP-01
 - Nijedna plugin/config/data izmjena nije napravljena. Nijedan SQL upit nije izvršen direktno nad bazom — nazivi tabela/kolona su pročitani iz PHP source koda, ne upitani uživo.
 - `docs/project-status-matrix.md` §0/§5 zahtijeva ažuriranje statusa BL-01, AP-01, AP-06, AP-07, DP-01 (vidi taj dokument).
 - Novootkriveni `b2b-partner-importer` plugin treba biti dodan u sve buduće reference protected boundary liste uz `apros-pricing` i `uncle-dev-importer`.
+- **Addendum 2026-10-07 (see ADR-018):** this inspection did not record that `apros-pricing` already contains a manual partner sync (`apros_pricing_sync_partners`, run via `wp importer partners` from `uncle-dev-importer`). It reads `partnerList/get`, links/creates WP users and sets `apros_partner_code`; it is unscheduled and does not activate users. The statement above that partners are "ručno seed-ovani" refers to the unrelated Excel/CSV `b2b-partner-importer`.
 
 ### Related
 
@@ -736,6 +739,8 @@ Ovaj nalaz razrešava nesigurnost koju je ADR-008 prvi zabilježio ("nije potvr�
 ### Potvrđen izvor partner_code-a
 
 `apros_partner_code` user meta, ručno postavljen kroz WP Admin → Users → Edit User ("Apros Pricing" sekcija), sačuvan funkcijom `apros_pricing_save_user_fields()` u protected `apros-pricing` plugin-u. Ovo je jedini postojeći izvor partner_code-a za ulogovanog korisnika — buduća implementacija ga mora ponovo koristiti, ne kreirati paralelni mapping.
+
+> **Addendum 2026-10-07 (see ADR-018):** the sentence above ("jedini postojeći izvor") is incomplete. `apros_pricing_sync_partners` (`wp importer partners`, manual, unscheduled) also writes `apros_partner_code`, matching by email. Manual profile entry documents what was operationally used at the time; it did NOT supersede the ADR-002 intent that the Apros synchronization discovers the partner code. Historical text left unchanged.
 
 ### Decision — odobrena HIBRIDNA remediation arhitektura (implementacija NIJE izvršena)
 
@@ -1356,3 +1361,80 @@ Residual observations (not tasks unless decided): download-to-disk event not cap
 ### Commits
 
 `213d035` Gate 1 foundation · `ef08233` stored-identifier boundary normalization · `635a230` Gate 2 modal + `CartSubmit` chunking fix · `9282361` modal keyboard/focus fix (v1.0.33) · `729d059` removal of accidentally committed test screenshots (no code impact).
+
+---
+
+## ADR-018 — B2B partner approval/activation: Apros is the source of truth (client-confirmed); reconciliation with current implementation
+
+**Date:** 2026-10-07
+**Status:** Accepted (architecture, client-confirmed) / **Implementation INCOMPLETE — onboarding activation BLOCKED on two Apros/ZGData API-semantics answers**
+**Owner:** Customer/Partner architecture (Apros ↔ WordPress). Supplements ADR-002; does not change catalog visibility (ADR-009 / frozen visibility system).
+
+### Primary client source
+
+`B2B odgovori na pitanja.docx` (the document ADR-009 cites; recovered outside the repository, §3 "Potvrda registracijskog procesa" verified 2026-10-07). Confirmed process:
+
+1. The new partner submits a registration request through the webshop.
+2. Točka sna receives the notification.
+3. The partner is opened/created manually in Apros.
+4. The partner is approved in Apros by setting the attribute `B2B KUPAC = DA`.
+5. After approval the partner becomes available through the Apros API and is synchronized and activated in the webshop.
+
+Proposal text: "Apros ostaje jedini izvor istine za odobrenje i aktivaciju B2B partnera." Client answer: "Slažemo se s dogovorenim modelom." This is **primary client-confirmed architecture**. Supporting earlier evidence: Apros (Leo) 2026-07-02 / workshop 2026-06-09 ("…nakon toga se takav partner pojavljuje na endpointu za listu partnera"); email 2026-05-15 (attributes `B2B KUPAC DA/NE` and `B2B E-MAIL`; DreamPoint sends Apros an Excel of partners to open for B2B).
+
+**Scope limit:** the document does **not** define how `dp_bucket_id` / CMS catalog visibility is assigned, nor its order relative to approval. Do not read bucket assignment into this decision.
+
+### Wording reconciliation
+
+"Dream Point decides who gets B2B access" (earlier notes) and "Apros is the approval authority" are compatible: DreamPoint makes the business decision, it is recorded in Apros through `B2B KUPAC`, and Apros is the system of record the webshop consumes. WordPress must not independently approve a partner.
+
+### Current implementation vs the confirmed contract (verified 2026-10-07, staging `9b927c8`)
+
+| Concern | State |
+|---|---|
+| Registration + admin notification email + customer pending email | Implemented; TODO #10 remains COMPLETE/PASS |
+| New registrant starts pending | Yes: `user_register` writes `approved=false`, stored as `''`. This also holds for users created by the partner sync (an earlier claim that the meta is absent for sync-created users was wrong) |
+| Pending gate (`/approval-pending` redirect) | Implemented; inactive on staging because `DP_BYPASS_APPROVAL=true` (pending behavior is untested there) |
+| Exit from pending by detecting Apros approval | **NOT implemented** |
+| ADR-002 automatic polling | **NOT implemented** (no cron, no Action Scheduler job) |
+| Manual partner sync `apros_pricing_sync_partners` / `wp importer partners` | Exists (protected `apros-pricing` + `uncle-dev-importer`); manual, unscheduled; GET `partnerList/get` with no filter/params; matches by email, else creates a `customer` user (random password, no email to the user); sets `apros_partner_code`, `apros_legal_form_code`; does **NOT** set `approved=true`, assign a role, send the activation email or touch buckets; treats every returned row as relevant; ignores partners that later disappear |
+| Manual wp-admin "Odobri" (`approved=true` + approval email) | Legacy (April 2026, before ADR-002); **contradicts** the Apros-source-of-truth model — an admin can set `approved` with no Apros approval and no `apros_partner_code` |
+| Manual "Opozovi odobrenje" | **Unresolved** (deactivation behavior unspecified: DP-D02 open; blueprint ASSUMPTION). No sync would restore it |
+| REST `POST /dreampoint-b2b/v1/approve-user` + `DP_ERP_WEBHOOK_SECRET` | Legacy/superseded (Apros confirmed no webhook); dormant on staging (secret undefined → 500); not removed |
+| `apros_partner_code` | Intended normal source: the Apros synchronization (ADR-002 step 9). Manual profile entry = fallback / current operational path |
+| Activation email | Intended trigger: after sync-detected activation. Current trigger (manual "Odobri") is legacy |
+| B2B role | ADR-002 says "B2B rola" but never names one; only `customer`/`shop_manager` exist. Unresolved |
+| `dp_bucket_id` (catalog visibility) | Separate concern. An approved/activated account may exist without a bucket; the visibility engine then fails closed (`no_access`). Assignment workflow and approval↔bucket ordering UNRESOLVED |
+
+### partnerList / B2B KUPAC evidence (internal archaeology complete)
+
+- ZGData doc v1.0 `partnerList/get`: "popis poslovnih partnera (kupaca) s osnovnim matičnim podacima"; fields `partnerCode, name, address, city, postalCode, taxId, email, partnerLegalFormCode`. **`taxId` = "OIB partnera"** (closed for the documented domestic case). **`email` = "E-mail partnera"** only. **No `B2B KUPAC` field is exposed.**
+- Apros attributes `B2B KUPAC DA/NE` and `B2B E-MAIL` exist as separate attributes. Apros said an approved partner "se pojavljuje" on the partner-list endpoint — this supports but does NOT prove that the endpoint returns only `B2B KUPAC=DA` partners. The legal-form code list includes "Kupac građanin", a weak hint that the master data is broader than B2B.
+- No evidence describes `DA → NE`. No captures/logs of past `partnerList` calls exist. Staging pricing tables contain a single partner (2870, the ZGData sample), so the sandbox offers no negative control.
+- A fresh read-only TEST GET was **not executed** (blocked by the Claude auto-mode PII classifier; no bypass attempted). It would only prove observed behavior, not contractual semantics.
+- No evidence that `partnerList.email` is the `B2B E-MAIL` attribute rather than the general partner email. The sync matches users by email and would create a duplicate "Apros" account if the emails differ.
+
+### Open questions for Apros/ZGData (exactly two, blocking)
+
+1. Does `partnerList/get` return **exclusively** partners with `B2B KUPAC = DA`? If an existing partner is changed from `DA` to `NE`, does it stop appearing in `partnerList/get`?
+2. Does the `email` field returned by `partnerList/get` contain the **`B2B E-MAIL`** attribute (used for webshop account matching) or the partner's **general** email address?
+
+These are API-semantics facts, not new business-design decisions. (Secondary, non-blocking: `taxId` content for foreign partners, legal forms 106/111.)
+
+### Open internal questions (not to be resolved by invention)
+
+- Exact WP representation of synchronized Apros activation (`approved` as a mirror vs another canonical state).
+- Final fate of manual "Odobri"; semantics/fate of manual "Opozovi".
+- Exact activation-email trigger.
+- Whether a concrete B2B role is still required.
+- Polling trigger/frequency (ADR-002: cron, frequency an operational detail).
+- Safe matching strategy when the registration email differs from the Apros email (`taxId`/OIB is a documented candidate key, not decided).
+- `dp_bucket_id` assignment workflow and approval↔bucket ordering.
+
+### Stop state
+
+**ONBOARDING / APROS ACTIVATION: BLOCKED** pending the two API-semantics answers above. No implementation of the final activation sync should begin until they are known. This does not reopen TODO #10 (COMPLETE/PASS). DP-B06 stock reservation remains independently on HOLD (Reserved Stock Pro not delivered); TODO #11 (`/akcija/`) remains separate and PARTIAL. No production environment exists; nothing here is a production validation claim.
+
+### Related
+
+ADR-002 (flow; polling not implemented), ADR-008 (importer discovery; partner sync omitted), ADR-009 (cites the client document; visibility boundary), ADR-010 (`apros_partner_code`), `docs/project-status-matrix.md` §1.5/§1.7, `docs/active/status.md` TODO #9/#10.

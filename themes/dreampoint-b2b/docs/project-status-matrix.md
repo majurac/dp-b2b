@@ -177,7 +177,7 @@ Promjena u odnosu na plan iz `docs/b2b-erp-migration-plan.md` — cilj je razdvo
 
 - **`sif_kup`** = jedinstven identifikator poslovnog partnera u Apros-u
 - Novi Apros atributi na razini partnera: `B2B KUPAC DA/NE`, `B2B E-MAIL`
-- **Dream Point određuje ko dobija B2B pristup** — Apros nije autoritet za pristup
+- **Dream Point određuje ko dobija B2B pristup** — [ISPRAVLJENO 2026-10-07, ADR-018: DreamPoint donosi poslovnu odluku, ali se ona evidentira u Apros-u atributom `B2B KUPAC = DA`; Apros je jedini izvor istine za odobrenje i aktivaciju B2B partnera (klijent potvrdio u `B2B odgovori na pitanja.docx` §3). Ranija formulacija "Apros nije autoritet za pristup" je nadjačana; vidljivost kataloga (bucket) ostaje isključivo CMS-a (§1.6)]
 - Inicijalna lista partnera: Dream Point šalje Excel Apros-u; nije automatski import svih Apros partnera
 - Ugovorni uvjeti su statički — promjene (postotak rabata, odgoda plaćanja) idu kroz Apros, iznimno rijetko
 - **Aktivne države kupaca:** Hrvatska, Slovačka, Crna Gora, Bosna i Hercegovina, Slovenija
@@ -200,6 +200,8 @@ Potvrđen flow:
 3. Partner se ručno otvara u Apros-u
 4. Apros dodjeljuje atribut odobrenja za B2B Webshop (`B2B KUPAC = DA`)
 5. Partner se pojavljuje na partner list endpointu — CMS ga preuzima periodičnim pollingom/importom, ne webhook signalom
+
+**Dopuna 2026-10-07 (ADR-018):** klijent je ovaj tok formalno potvrdio ("Apros ostaje jedini izvor istine za odobrenje i aktivaciju B2B partnera"; "Slažemo se s dogovorenim modelom"). Polling još NIJE implementiran (postoji samo ručni `wp importer partners`); aktivacija je BLOCKED dok Apros/ZGData ne odgovore na dva pitanja o `partnerList/get` semantici (vidi ADR-018).
 
 **Implikacija:** Partner sync arhitektura mora biti dizajnirana kao cron-based polling job koji provjerava partner list endpoint za nove/promijenjene `B2B KUPAC = DA` zapise, ne kao inbound webhook receiver.
 

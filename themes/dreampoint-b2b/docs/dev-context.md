@@ -168,6 +168,8 @@ Lighthouse warns about this — ignore it. Acceptable trade-off.
 
 ## B2B Registration & Approval Flow
 
+> **SUPERSEDED 2026-10-07 (ADR-018):** steps 5–7 below (ERP calls the `approve-user` webhook) describe the April 2026 design. Apros confirmed there is no approval webhook (ADR-002) and the client confirmed that Apros (`B2B KUPAC = DA`) is the single source of truth for approval/activation, discovered by synchronization. The endpoint is legacy/dormant; `DP_ERP_WEBHOOK_SECRET` is not needed. Kept for history only.
+
 1. User fills registration form (company name, OIB, contact data)
 2. WC new-account email sent to user (pending approval state) — `woocommerce/emails/customer-new-account.php`
 3. Admin notification sent — `WC_Email_Admin_B2B_New_Registration` class in `inc/emails.php`
@@ -179,7 +181,7 @@ Lighthouse warns about this — ignore it. Acceptable trade-off.
    - Writes `_erp_approved_at` to user meta
 7. User receives approval email, gains access
 
-**CRITICAL:** `DP_ERP_WEBHOOK_SECRET` must be defined in `wp-config.php` on every environment. Without it, webhook returns 500.
+**~~CRITICAL:~~ SUPERSEDED (ADR-018):** `DP_ERP_WEBHOOK_SECRET` is NOT required for the current architecture; without it the legacy webhook returns 500 (intentional fail-closed).
 
 ---
 

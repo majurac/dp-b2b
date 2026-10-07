@@ -34,7 +34,7 @@ Eksplicitno potvrđeno od strane klijenta (Dream Point) i/ili Apros-a na osnovu 
 
 - `sif_kup` je jedinstveni identifikator poslovnog partnera u Apros-u
 - Dva nova Apros atributa na razini partnera: `B2B KUPAC DA/NE`, `B2B E-MAIL`
-- Dream Point određuje kome se otvara B2B pristup — Apros nije autoritet
+- Dream Point određuje kome se otvara B2B pristup — [ISPRAVLJENO 2026-10-07, ADR-018: odluka se evidentira u Apros-u (`B2B KUPAC = DA`) i Apros je izvor istine za odobrenje/aktivaciju; formulacija "Apros nije autoritet" je nadjačana]
 - Inicijalna lista partnera: Dream Point šalje Excel Apros-u; nije automatski import svih Apros partnera
 - Ugovorni uvjeti (koji definiraju rabat) Apros šalje Arminu; statični su — promjene (postotak rabata, odgoda plaćanja, dodatni rabat) idu kroz Apros i iznimno su rijetke
 - Aktivne države kupaca: Hrvatska, Slovačka, Crna Gora, Bosna i Hercegovina, Slovenija

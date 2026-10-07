@@ -26,6 +26,8 @@ scheduled or implied by this close-out.
 
 **Update 2026-10-06 (evening):** Excel/CSV import Gate 1 + Gate 2 passed on staging (plugin v1.0.33, ADR-017). Safe continuation point: "Gate 2 staging PASS / pre-production manual acceptance" — next steps: Microsoft Excel smoke (NOT TESTED), manual focused desktop keyboard smoke, real mobile-device smoke, evaluate findings, then an explicit production decision. Production untouched; do not mark the feature production-closed.
 
+**Update 2026-10-07:** pre-production manual acceptance (real Microsoft Excel, real focused desktop-Chrome keyboard, real physical mobile device) PASSED with no defect. Continuation point is now: "Pre-production acceptance PASS / awaiting explicit production deployment approval." Production still untouched; no code change.
+
 ## Historical record — local-state transformation phase (2026-07-10)
 
 Quick Order V1.1 (usability/completeness pass) was complete — its plan

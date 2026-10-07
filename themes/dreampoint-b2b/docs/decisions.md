@@ -1315,7 +1315,7 @@ Backend contract exercised through `/cart/sync` as admin and as `vis_rule_cat`: 
 
 ## ADR-017 — Quick Order Excel/CSV import: browser parsing, authoritative read-only validation, auto-clamp, direct cart add
 
-**Status:** Gate 1 (foundation) and Gate 2 (modal) PASSED on staging 2026-10-06 (plugin v1.0.33). **NOT deployed to production; NOT production-closed** — see "Pre-production blockers". Detail: plugin `readme.md` (Excel/CSV import sections).
+**Status:** Gate 1 (foundation) and Gate 2 (modal) PASSED on staging 2026-10-06 (plugin v1.0.33). **Pre-production manual acceptance PASS 2026-10-07 — awaiting explicit production deployment approval.** **NOT deployed to production; NOT production-closed** — see "Pre-production manual acceptance". Detail: plugin `readme.md` (Excel/CSV import sections).
 
 ### Context
 
@@ -1341,12 +1341,15 @@ Client-approved designs QO-05/06/07: a modal "File upload → Validacija → Rez
 
 Real theme/modal integration; XLSX and CSV through the real validation REST; User Switching `vis_full` / `vis_rule_cat` / `vis_rule_brand` / `vis_offer` / `vis_none` (hidden, unpublished, orphan, hidden variable parent and whitespace-normalized identifiers indistinguishable from nonexistent; `vis_none` = no access); privacy/oracle boundary; adjusted quantities; cart-aware validation (stock 5, cart 2, request 12 → 3); real direct `/cart/sync`; partial and ambiguous final results; shared chunking; manual QO selection preserved + overlap notice; close/cancel semantics; structural accessibility; 390px browser viewport; 500-row validation/render (≈1.1 s, 4.5k DOM nodes); focused Gate 1 and main-QO regression; staging fingerprint unchanged (product meta, orders, carts, options except cron). Verdict: **Gate 1 PASS, Gate 2 staging PASS.**
 
-### Pre-production blockers (NOT done — do not call the feature production-complete)
+### Pre-production manual acceptance (2026-10-07) — PASS; production NOT deployed
 
-1. **Microsoft Excel smoke — NOT TESTED:** open the XLSX template in real Excel without a repair warning; column A is Text; `000046` survives entry, save, close, reopen; no macro/formula/external-link warning.
-2. **Manual focused desktop-browser keyboard pass** (staging automation had no genuinely focused browser; local Chromium covers keyboard behaviour).
-3. **Real mobile-device smoke** (390px was a browser viewport only).
-4. **Explicit production approval/deployment decision.** Production has not been touched.
+All three manual blockers were closed on staging (plugin v1.0.33, runtime `729d059`) with no defect found and no code change:
+
+1. **Real Microsoft Excel smoke — PASS.** The committed template (SHA-256 `4e9529d9…edefc1`, identical local and staging) opened with no repair/corruption/macro/external-link warning; column A is Text by default; `000046` typed into A2 stayed exactly `000046`; saved as XLSX, Excel fully closed, reopened: still `000046`, no warnings. That saved/reopened file was then uploaded through the real staging Excel Import UI (`vis_full` via User Switching): `000046` resolved as `Boca Urban Basic`, quantity 1, status `Spremno`, no error or warning (Excel save/reopen → browser parser → staging validator, one real chain).
+2. **Real focused desktop-Chrome keyboard smoke — PASS** (manual, genuinely focused window, not synthetic events): trigger reachable and openable by keyboard; Tab/Shift+Tab stayed trapped in the modal; Escape in the upload state closed it and restored focus to the trigger; Escape during validation behaved per contract with no cart mutation; result/footer controls traversable in both directions with visible focus; Escape during the in-flight cart request did NOT dismiss the modal and no misleading close/cancel control was present. This run added one `Boca Urban Basic` unit to the staging cart of `vis_full`.
+3. **Real physical mobile-device smoke — PASS** (reported by the project owner: no layout, scrolling, modal, upload/result or usability issue observed). The exact device model/OS/browser was not recorded in the report, so iOS/Safari coverage must not be inferred (see residual observations).
+
+**Continuation point: "Pre-production acceptance PASS / awaiting explicit production deployment approval."** No known blocker to production deployment. Production has not been touched and the feature is NOT production-complete; final closure documentation is written only after an explicit production decision and deployment.
 
 Residual observations (not tasks unless decided): download-to-disk event not captured (serving, hashes and `download` attributes verified); Safari/WebKit untested; no screen-reader certification; existing cart-bridge Toastify messages can appear beside modal outcomes; hidden XLSX rows are imported with a warning (Gate 1 decision).
 

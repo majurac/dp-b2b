@@ -26,7 +26,7 @@ scheduled or implied by this close-out.
 
 **Update 2026-10-06 (evening):** Excel/CSV import Gate 1 + Gate 2 passed on staging (plugin v1.0.33, ADR-017). Safe continuation point: "Gate 2 staging PASS / pre-production manual acceptance" — next steps: Microsoft Excel smoke (NOT TESTED), manual focused desktop keyboard smoke, real mobile-device smoke, evaluate findings, then an explicit production decision. Production untouched; do not mark the feature production-closed.
 
-**Update 2026-10-07:** pre-production manual acceptance (real Microsoft Excel, real focused desktop-Chrome keyboard, real physical mobile device) PASSED with no defect. Continuation point is now: "Pre-production acceptance PASS / awaiting explicit production deployment approval." Production still untouched; no code change.
+**Update 2026-10-07:** pre-production manual acceptance (real Microsoft Excel, real focused desktop-Chrome keyboard, real physical mobile device) PASSED with no defect. Continuation point is now: "Pre-production acceptance PASS / production deployment not currently applicable — production environment not yet provisioned." DreamPoint B2B production does not exist yet (staging is the only provisioned deployment target), so there is no production action to approve; this is not an Excel Import defect. No code change. Excel Import implementation and pre-production acceptance are complete. No further Excel Import work is currently required. Resume production-related work only after DreamPoint B2B production is provisioned/defined.
 
 ## Historical record — local-state transformation phase (2026-07-10)
 

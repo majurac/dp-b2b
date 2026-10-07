@@ -29,7 +29,7 @@ Excel Import (upload → validation → result → add-to-cart → completion) i
 
 **Update 2026-10-07 — pre-production manual acceptance PASS.** Real Microsoft Excel smoke (incl. `000046` save/reopen and the saved file resolving as `Boca Urban Basic` through the staging UI), real focused desktop-Chrome keyboard smoke and real physical mobile-device smoke all passed with no defect and no code change (details: ADR-017 "Pre-production manual acceptance"). Staging runtime unchanged (`729d059`, plugin v1.0.33); production NOT touched.
 
-**Safe continuation point: "Pre-production acceptance PASS / awaiting explicit production deployment approval."** No known production blocker. Do not restart Gate 1/2 or manual acceptance. Residual (non-blocking) observations are listed in ADR-017. Final closure documentation only after an explicit production decision and deployment.
+**Safe continuation point: "Pre-production acceptance PASS / production deployment not currently applicable — production environment not yet provisioned."** Excel Import implementation and pre-production acceptance are complete. No further Excel Import work is currently required. Resume production-related work only after DreamPoint B2B production is provisioned/defined. Staging is the only provisioned DreamPoint B2B deployment target; the absence of production is a wider project-provisioning matter, not an Excel Import blocker. No known functional blocker. Do not restart Gate 1/2 or manual acceptance. Residual (non-blocking) observations are listed in ADR-017.
 
 Remaining QO scope (not scheduled): mobile QO design; WBW drops `orderby` when a filter is applied (pre-existing); theme brand `get_terms` leak outside Quick Order.
 

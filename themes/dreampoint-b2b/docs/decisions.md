@@ -1315,7 +1315,7 @@ Backend contract exercised through `/cart/sync` as admin and as `vis_rule_cat`: 
 
 ## ADR-017 — Quick Order Excel/CSV import: browser parsing, authoritative read-only validation, auto-clamp, direct cart add
 
-**Status:** Gate 1 (foundation) and Gate 2 (modal) PASSED on staging 2026-10-06 (plugin v1.0.33). **Pre-production manual acceptance PASS 2026-10-07 — awaiting explicit production deployment approval.** **NOT deployed to production; NOT production-closed** — see "Pre-production manual acceptance". Detail: plugin `readme.md` (Excel/CSV import sections).
+**Status:** Gate 1 (foundation) and Gate 2 (modal) PASSED on staging 2026-10-06 (plugin v1.0.33). **Pre-production manual acceptance PASS 2026-10-07 — production deployment not currently applicable (production environment not yet provisioned).** **Not deployed to production (none exists); production closure deferred until production is provisioned** — see "Pre-production manual acceptance". Detail: plugin `readme.md` (Excel/CSV import sections).
 
 ### Context
 
@@ -1349,7 +1349,7 @@ All three manual blockers were closed on staging (plugin v1.0.33, runtime `729d0
 2. **Real focused desktop-Chrome keyboard smoke — PASS** (manual, genuinely focused window, not synthetic events): trigger reachable and openable by keyboard; Tab/Shift+Tab stayed trapped in the modal; Escape in the upload state closed it and restored focus to the trigger; Escape during validation behaved per contract with no cart mutation; result/footer controls traversable in both directions with visible focus; Escape during the in-flight cart request did NOT dismiss the modal and no misleading close/cancel control was present. This run added one `Boca Urban Basic` unit to the staging cart of `vis_full`.
 3. **Real physical mobile-device smoke — PASS** (reported by the project owner: no layout, scrolling, modal, upload/result or usability issue observed). The exact device model/OS/browser was not recorded in the report, so iOS/Safari coverage must not be inferred (see residual observations).
 
-**Continuation point: "Pre-production acceptance PASS / awaiting explicit production deployment approval."** No known blocker to production deployment. Production has not been touched and the feature is NOT production-complete; final closure documentation is written only after an explicit production decision and deployment.
+**Continuation point: "Pre-production acceptance PASS / production deployment not currently applicable — production environment not yet provisioned."** Excel Import implementation and pre-production acceptance are complete. No further Excel Import work is currently required. Resume production-related work only after DreamPoint B2B production is provisioned/defined. No known functional blocker. DreamPoint B2B production does not exist yet (staging is the only provisioned deployment target); that is a wider project-provisioning matter and is NOT an Excel Import implementation blocker. Final production-closure documentation is written only after a production environment is provisioned and this feature is deployed there.
 
 Residual observations (not tasks unless decided): download-to-disk event not captured (serving, hashes and `download` attributes verified); Safari/WebKit untested; no screen-reader certification; existing cart-bridge Toastify messages can appear beside modal outcomes; hidden XLSX rows are imported with a warning (Gate 1 decision).
 

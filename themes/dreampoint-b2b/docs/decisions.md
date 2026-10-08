@@ -1590,3 +1590,27 @@ Staging `git status` shows untracked `wp-content/languages/` (installed packs). 
 - **Validation (runtime, `wp eval`):** gateway `get_description()` and the WooCommerce Blocks `bacs` payment-method data both return the new Croatian text; BACS/Free shipping/Flat rate titles unchanged (`Izravna bankovna uplata` / `Besplatna dostava` / `Fiksna cijena dostave`); locale `hr`, admin `en_US`; orders still 6; `DP_BYPASS_APPROVAL=true`. **Not performed:** browser DOM verification of the checkout, and any email delivery test (rendering-verified only).
 - **Rollback:** `wp option patch update woocommerce_bacs_settings description "<original English text above>"`.
 - **Separate pending tasks:** English translations of these stored settings via the future multilingual solution (HR default, EN secondary); production transactional SMTP configuration; Figma checkout design alignment; production must repeat the WC title/description settings and install hr packs.
+
+---
+
+## ADR-020 — Figma alignment program: presentation-only policy, desktop-only design reference, additive token migration
+
+**Date:** 2026-10-08
+**Status:** Accepted (policy); implementation NOT started. Plan and handoff: `docs/active/figma-alignment.md`.
+
+### Context
+
+The final design was delivered after the implementation (Figma file `Te4kr3o8kXDgBLzHewKSYU`, page **UI** `11148:22601`, all frames 1440 px). A read-only gap audit (2026-10-08) found the functional structure largely matching and the visual layer diverging systematically: the theme palette/components were inherited from JekaaStore (`$brand #8C907E`, `$pink #e3869c`, `$text-primary #303030`) while Figma uses `#0d121c`/`#384250`/`#f3f4f6`/`#d2d6db` with black pill buttons, a dark top bar, a black footer and Petrona/Montserrat typography (fonts already present).
+
+### Decisions
+
+1. **Presentation-only.** Figma governs visual presentation. It never overrides approved business logic: B2B registration/approval/Apros, authentication and guest restrictions, bucket visibility, binary stock display (ADR-016), pricing and ERP data, cart/checkout/payment/order processing, Apros orders, cart reservation architecture (ADR-007). Genuine conflicts are recorded and excluded until explicitly approved (list: `docs/active/figma-alignment.md` §11).
+2. **Desktop Figma only.** No mobile/tablet frames exist or will be supplied. Responsive layouts are developed pragmatically with each component batch; their absence in Figma is not a defect or blocker.
+3. **Additive token migration.** The existing SCSS variables (`$brand`, `$pink`, `$text-primary`, …; 100+ usages across excluded areas) keep their values. New namespaced tokens (`$dp-*` plus `:root` `--dp-*` custom properties, emitted once from `style.scss`) are introduced and consumed by migrated components via scoped selectors and new mixins. The old palette variables are retired in a later cleanup batch after all pages are aligned.
+4. **Order:** Batch 1 = tokens, shared buttons/inputs, header, footer, title/breadcrumb banner (each with its responsive pass and translation-ready strings); catalog/PDP/QO visuals, account, cart/checkout presentation follow in later batches.
+5. **Multilingual readiness:** customer-facing strings introduced or touched use `__()` with text domain `dreampoint-b2b`; ERP identifiers stay language-independent; DB content (page titles, menus, ACF options) needs a per-language content strategy deferred to the multilingual solution; no temporary translation workarounds.
+
+### Consequences
+
+- Generated CSS/JS remain tracked and deployed; every step ends with a clean `npm run build` and rebuilt generated files in the same commit.
+- Global `.button` restyle is a gated, separately validated sub-step because `button-primary`/`button-outline` are used by cart, checkout, account and shop styles.

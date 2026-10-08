@@ -236,6 +236,16 @@ Read the relevant file before modifying any completed feature.
 
 ---
 
+## Figma Alignment Program (ADR-020)
+
+Final design: Figma page **UI** (`11148:22601`, file key `Te4kr3o8kXDgBLzHewKSYU`), desktop 1440 px only — no mobile/tablet frames exist or will be supplied; build responsive layouts pragmatically alongside each component batch.
+
+- Figma governs visual presentation ONLY. Never change B2B registration/approval/Apros, auth/guest rules, bucket visibility, binary stock display (ADR-016), pricing/ERP data, cart/checkout/payment/order logic or cart reservation (ADR-007) because of a design difference — record the conflict instead.
+- Do not change values of existing SCSS palette variables (`$brand`, `$pink`, `$text-primary`, …); introduce namespaced `$dp-*` / `--dp-*` tokens and migrate components with scoped selectors.
+- Plan, audit summary, step order, validation and handoff: `docs/active/figma-alignment.md`. Do not repeat the gap audit.
+
+---
+
 ## Canonical Docs
 
 Use `docs/index.md` as the documentation entrypoint.

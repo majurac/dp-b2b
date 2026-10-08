@@ -176,7 +176,7 @@ class Dreampoint_B2B_Query_Filter {
 			return $terms;
 		}
 
-		if ( current_user_can( 'manage_options' ) ) {
+		if ( dreampoint_b2b_current_user_is_staff() ) {
 			return $terms;
 		}
 
@@ -369,7 +369,7 @@ class Dreampoint_B2B_Query_Filter {
 		}
 
 		// Admins and shop managers bypass visibility.
-		if ( current_user_can( 'manage_options' ) ) {
+		if ( dreampoint_b2b_current_user_is_staff() ) {
 			return true;
 		}
 

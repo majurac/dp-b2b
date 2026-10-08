@@ -48,6 +48,16 @@ function dreampoint_b2b_user_is_activated( int $user_id ): bool {
 }
 
 /**
+ * Je li trenutni korisnik osoblje (administrator ili shop manager) — izuzet iz B2B
+ * ograničenja vidljivosti kataloga/bucketa. Isti kriterij kao izuzeće u
+ * dreampoint_b2b_user_is_activated(), da katalog, Quick Order, košarica i checkout
+ * ostanu međusobno dosljedni.
+ */
+function dreampoint_b2b_current_user_is_staff(): bool {
+    return current_user_can( 'manage_options' ) || current_user_can( 'manage_woocommerce' );
+}
+
+/**
  * Preusmjeri logirane ali neodobrene korisnike na /approval-pending.
  */
 function dreampoint_b2b_restrict_unapproved_access(): void {
@@ -57,7 +67,7 @@ function dreampoint_b2b_restrict_unapproved_access(): void {
         return;
     }
 
-    if ( current_user_can( 'manage_options' ) ) {
+    if ( dreampoint_b2b_current_user_is_staff() ) {
         return;
     }
 

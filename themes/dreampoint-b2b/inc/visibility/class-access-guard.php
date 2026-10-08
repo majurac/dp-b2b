@@ -34,7 +34,7 @@ class Dreampoint_B2B_Access_Guard {
 		if ( ! is_product() ) {
 			return;
 		}
-		if ( current_user_can( 'manage_options' ) ) {
+		if ( dreampoint_b2b_current_user_is_staff() ) {
 			return;
 		}
 
@@ -52,7 +52,7 @@ class Dreampoint_B2B_Access_Guard {
 		if ( ! empty( $request->get_param( 'dp_skip_visibility' ) ) ) {
 			return $response;
 		}
-		if ( current_user_can( 'manage_options' ) ) {
+		if ( dreampoint_b2b_current_user_is_staff() ) {
 			return $response;
 		}
 
@@ -154,7 +154,7 @@ class Dreampoint_B2B_Access_Guard {
 	// -------------------------------------------------------------------------
 
 	public function handle_product_accessible( bool $default, int $product_id, int $user_id ): bool {
-		if ( current_user_can( 'manage_options' ) ) {
+		if ( dreampoint_b2b_current_user_is_staff() ) {
 			return true;
 		}
 		return $this->is_product_visible( $product_id, $user_id );

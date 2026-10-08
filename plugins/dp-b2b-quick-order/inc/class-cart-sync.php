@@ -149,6 +149,16 @@ class DP_Quick_Order_Cart_Sync {
 		$index_key    = $product_id . '_' . $variation_id;
 		$existing_key = $cart_index[ $index_key ] ?? null;
 
+		// Removal (quantity 0) is always allowed, so a customer can correct a cart that holds a product
+		// they can no longer buy. Any positive quantity (new line OR increase of an existing line) needs
+		// access: an existing line is preserved, but it must not be grown. Uses a WP filter contract so the
+		// plugin stays decoupled from theme classes; falls back to true (allow) if no filter is attached.
+		// $product_id is the verified parent of the unit (resolve_unit), so a variation is judged by its
+		// real parent. Same external code as a nonexistent product — no existence oracle.
+		if ( $quantity > 0 && ! (bool) apply_filters( 'dp_b2b_product_accessible', true, $product_id, get_current_user_id() ) ) {
+			return $this->fail( $base, self::ERR_PRODUCT_UNAVAILABLE );
+		}
+
 		if ( null !== $existing_key ) {
 			if ( 0 === $quantity ) {
 				$cart->remove_cart_item( $existing_key );
@@ -165,8 +175,8 @@ class DP_Quick_Order_Cart_Sync {
 
 			// A line that is already in the cart may have gone out of stock since it was added —
 			// that must not let its quantity grow. Typed results only: the stock amount is never
-			// returned to the client. (No access re-check here: existing lines are intentionally
-			// not retroactively revalidated — see docs/active/status.md, Visibility integration.)
+			// returned to the client. (Access is re-checked above for any increase; the existing
+			// line itself is never removed or altered here.)
 			if ( ! $product->is_in_stock() ) {
 				return $this->fail( $base, self::ERR_OUT_OF_STOCK );
 			}
@@ -181,15 +191,7 @@ class DP_Quick_Order_Cart_Sync {
 		}
 
 		if ( $quantity > 0 ) {
-			// Visibility gate: reject new-item adds for products the user cannot access.
-			// Uses a WP filter contract so the plugin stays decoupled from theme classes.
-			// Falls back to true (allow) if no filter is attached. $product_id is the verified
-			// parent of the unit (resolve_unit), so a variation is judged by its real parent.
-			$user_id = get_current_user_id();
-			if ( ! (bool) apply_filters( 'dp_b2b_product_accessible', true, $product_id, $user_id ) ) {
-				// Same external code as a nonexistent product — no existence oracle.
-				return $this->fail( $base, self::ERR_PRODUCT_UNAVAILABLE );
-			}
+			// (Visibility gate for new lines is enforced above, before the existing-line branch.)
 
 			// Stock guards before add_to_cart(): WC's add_to_cart() silently returns false for these
 			// cases, which would otherwise collapse into a generic failure.

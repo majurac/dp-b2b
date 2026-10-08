@@ -221,15 +221,57 @@ add_filter( 'woocommerce_add_to_cart_quantity', 'dreampoint_b2b_cart_guard_add_q
  *
  * @param bool $passed Rezultat prethodnih validacija.
  */
-function dreampoint_b2b_cart_guard_update_validation( $passed ) {
+function dreampoint_b2b_cart_guard_update_validation( $passed, $cart_item_key = '', $values = [], $quantity = 0 ) {
     $reason = dreampoint_b2b_cart_guard_block_reason();
-    if ( null === $reason ) {
-        return $passed;
+    if ( null !== $reason ) {
+        dreampoint_b2b_cart_guard_notice( $reason );
+        return false;
     }
-    dreampoint_b2b_cart_guard_notice( $reason );
-    return false;
+
+    // Postojeća linija koja više nije dopuštena (promjena bucketa): smanjenje, isto i uklanjanje ostaju
+    // dopušteni, povećanje količine se odbija (linija se ne mijenja ni ne briše).
+    if ( $passed && is_array( $values ) && (float) $quantity > (float) ( $values['quantity'] ?? 0 )
+        && ! dreampoint_b2b_cart_guard_product_eligible( (int) ( $values['product_id'] ?? 0 ) ) ) {
+        dreampoint_b2b_cart_guard_add_notice(
+            dreampoint_b2b_cart_guard_ineligible_message( get_the_title( dreampoint_b2b_cart_guard_parent_id( (int) $values['product_id'] ) ) )
+        );
+        return false;
+    }
+
+    return $passed;
 }
-add_filter( 'woocommerce_update_cart_validation', 'dreampoint_b2b_cart_guard_update_validation', 5 );
+add_filter( 'woocommerce_update_cart_validation', 'dreampoint_b2b_cart_guard_update_validation', 5, 4 );
+
+/**
+ * Store API: povećanje količine postojeće linije (POST /cart/update-item, /cart/items/{key} i dopuna preko
+ * add-item). WooCommerce 11.2.0 poziva ovaj filter iz QuantityLimits::validate_cart_item_quantity() prije
+ * set_quantity(); WP_Error se vraća kao 400 s našim kodom, a linija ostaje nepromijenjena. Smanjenje, ista
+ * količina i uklanjanje (ne prolazi ovdje) su dopušteni. Stariji WooCommerce nema ovaj filter (nema
+ * učinka); nove stavke i checkout su zaštićeni neovisno o njemu.
+ *
+ * @param true|WP_Error $valid     Dosadašnji rezultat.
+ * @param int|float     $quantity  Nova količina.
+ * @param mixed         $product   Proizvod (WC_Product).
+ * @param mixed         $cart_item Stavka košarice (pri dopuni još uvijek stara količina).
+ * @return true|WP_Error
+ */
+function dreampoint_b2b_cart_guard_store_api_quantity( $valid, $quantity, $product, $cart_item ) {
+    if ( ! is_array( $cart_item ) || (float) $quantity <= (float) ( $cart_item['quantity'] ?? 0 ) ) {
+        return $valid;
+    }
+
+    $product_id = (int) ( $cart_item['product_id'] ?? 0 );
+    if ( $product_id <= 0 || dreampoint_b2b_cart_guard_product_eligible( $product_id ) ) {
+        return $valid;
+    }
+
+    return new WP_Error(
+        'dp_b2b_product_not_available',
+        dreampoint_b2b_cart_guard_ineligible_message( get_the_title( dreampoint_b2b_cart_guard_parent_id( $product_id ) ) ),
+        [ 'status' => 400 ]
+    );
+}
+add_filter( 'woocommerce_store_api_cart_item_quantity_validation', 'dreampoint_b2b_cart_guard_store_api_quantity', 10, 4 );
 
 /**
  * Store API: dodavanje i promjena količine stavki. Store API nema vlastitu hook točku za

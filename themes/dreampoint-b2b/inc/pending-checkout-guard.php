@@ -119,7 +119,10 @@ function dreampoint_b2b_cart_guard_store_api_mutation( $response, $handler, $req
     $is_mutation = $route instanceof ( $ns . 'CartAddItem' )
         || $route instanceof ( $ns . 'CartUpdateItem' )
         || ( $route instanceof ( $ns . 'CartItems' ) && 'POST' === $method )
-        || ( $route instanceof ( $ns . 'CartItemsByKey' ) && in_array( $method, [ 'POST', 'PUT', 'PATCH' ], true ) );
+        || ( $route instanceof ( $ns . 'CartItemsByKey' ) && in_array( $method, [ 'POST', 'PUT', 'PATCH' ], true ) )
+        // Plaćanje postojeće narudžbe: POST /wc/store/v1/checkout/{id} (CheckoutOrder). Odbija se prije
+        // is_authorized(), ažuriranja narudžbe/kupca i gatewaya. Standardni POST /checkout je klasa Checkout.
+        || ( $route instanceof ( $ns . 'CheckoutOrder' ) && 'POST' === $method );
 
     if ( ! $is_mutation || ! dreampoint_b2b_cart_guard_blocks_current_user() ) {
         return $response;
@@ -161,3 +164,48 @@ function dreampoint_b2b_cart_guard_store_api_cart_errors( $errors ): void {
     }
 }
 add_action( 'woocommerce_store_api_cart_errors', 'dreampoint_b2b_cart_guard_store_api_cart_errors' );
+
+// ----------------------------------------------------------------------------
+// Existing-order payment (classic order-pay)
+// ----------------------------------------------------------------------------
+
+/**
+ * Klasično plaćanje postojeće narudžbe. WC_Form_Handler::pay_action() je registriran na `wp`
+ * prioritet 20 (class-wc-form-handler.php:47), dakle izvršava se prije `template_redirect` i prije
+ * frontend guarda. Ovdje (prioritet 10) se, samo za podnošenje order-pay forme neaktiviranog
+ * korisnika, skida upravo taj handler za trenutni zahtjev, pa nema ažuriranja narudžbe ni poziva
+ * gatewaya. Uvjeti odgovaraju onima u pay_action() (`:488`, `:501`). Narudžba, košarica i statusi
+ * se ne diraju; callbacki/webhookovi gatewaya nisu zahvaćeni (nemaju prijavljenog korisnika).
+ * Prioritet handlera se čita iz registracije (has_action), ne pretpostavlja.
+ */
+function dreampoint_b2b_cart_guard_order_pay_submission(): void {
+    global $wp;
+
+    // phpcs:ignore WordPress.Security.NonceVerification -- samo detekcija; nonce provjerava WC pay_action().
+    if ( ! isset( $_POST['woocommerce_pay'], $_GET['key'] ) || empty( $wp->query_vars['order-pay'] ) ) {
+        return;
+    }
+
+    if ( ! dreampoint_b2b_cart_guard_blocks_current_user() ) {
+        return;
+    }
+
+    $priority = has_action( 'wp', [ 'WC_Form_Handler', 'pay_action' ] );
+    if ( false !== $priority ) {
+        remove_action( 'wp', [ 'WC_Form_Handler', 'pay_action' ], $priority );
+    }
+
+    dreampoint_b2b_cart_guard_notice();
+}
+add_action( 'wp', 'dreampoint_b2b_cart_guard_order_pay_submission', 10 );
+
+/**
+ * Rezervna linija: ako je pay_action() ipak izvršen, error notice sprječava process_payment()
+ * (WC provjerava wc_notice_count('error') prije poziva gatewaya, class-wc-form-handler.php:544).
+ */
+function dreampoint_b2b_cart_guard_before_pay_action(): void {
+    if ( dreampoint_b2b_cart_guard_blocks_current_user() ) {
+        dreampoint_b2b_cart_guard_notice();
+    }
+}
+add_action( 'woocommerce_before_pay_action', 'dreampoint_b2b_cart_guard_before_pay_action', 1 );

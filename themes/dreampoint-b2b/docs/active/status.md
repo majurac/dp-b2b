@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-08 — Pending-user enforcement Phase 1–3 deployed to staging; E2E PARTIAL (ADR-018 addendum)
+
+Phases 1–3 (`3ab9467`, `514d70e`, `1c2e0c1`) are on `origin/master` and staging (`1c2e0c1`); real-HTTP staging validation confirmed catalog/Quick Order/bucket visibility, cart and checkout enforcement, approval revocation/restoration, and primary existing-order payment interception (Store API + classic order-pay); Apros sandbox export verified (order #23407 → ERP 4345). Overall: **E2E PARTIAL — SPECIFIC GAPS REMAIN**. NOT TESTED: classic checkout form (site uses Checkout Block), anonymous order creation. The Phase 3 R2 fallback stays PARTIAL. Two open pre-existing findings: **A** anonymous Store API/AJAX/`?add-to-cart=` cart mutation with guest checkout enabled, **B** `dp_bucket_id` not enforced when adding to cart by ID (checkout revalidation unestablished). Staging `DP_BYPASS_APPROVAL` is back to `true` (enforcement inactive for logged-in users); test orders #23405/#23406/#23407 are intentionally retained. Details, evidence and restoration record: `docs/decisions.md` ADR-018, addendum 2026-10-08.
+
 ## Update 2026-10-07 — B2B onboarding / Apros activation: BLOCKED on two API-semantics answers (ADR-018)
 
 Client-confirmed architecture (`B2B odgovori na pitanja.docx` §3, recovered 2026-10-07): registration → Točka sna → partner created in Apros → `B2B KUPAC = DA` → partner appears via Apros API → synchronized and **activated** in the webshop; "Apros ostaje jedini izvor istine za odobrenje i aktivaciju B2B partnera"; client: "Slažemo se s dogovorenim modelom." It does not define `dp_bucket_id` assignment. Full reconciliation, current-vs-contract table and open questions: `docs/decisions.md` ADR-018.

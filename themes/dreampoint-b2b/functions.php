@@ -150,6 +150,7 @@ if ( class_exists( 'WooCommerce' ) ) {
     require get_template_directory() . '/inc/woocommerce.php';
     require get_template_directory() . '/inc/b2b-registration.php';
     require get_template_directory() . '/inc/registration-approval.php';
+    require get_template_directory() . '/inc/pending-checkout-guard.php';
     require get_template_directory() . '/inc/myaccount-komercijalist.php';
     add_filter( 'woocommerce_email_classes', function( array $email_classes ): array {
         require_once get_template_directory() . '/inc/emails.php';

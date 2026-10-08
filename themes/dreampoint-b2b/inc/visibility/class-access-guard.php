@@ -167,6 +167,10 @@ class Dreampoint_B2B_Access_Guard {
 		if ( current_user_can( 'manage_woocommerce' ) ) {
 			return true;
 		}
+		// Approval is an additional necessary condition: a pending user is rejected even with a bucket.
+		if ( ! dreampoint_b2b_user_is_activated( $user_id ) ) {
+			return false;
+		}
 		// B2B users are identified by a bucket assignment — lightweight meta lookup.
 		return ! empty( get_user_meta( $user_id, 'dp_bucket_id', true ) );
 	}

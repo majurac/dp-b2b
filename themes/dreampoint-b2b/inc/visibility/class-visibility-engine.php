@@ -25,6 +25,13 @@ class Dreampoint_B2B_Visibility_Engine {
 	// -------------------------------------------------------------------------
 
 	public function get_context( int $user_id ): Dreampoint_B2B_Visibility_Context {
+		// Authenticated but not activated (pending Apros approval) → no_access, regardless of bucket.
+		// Checked BEFORE any cache read and returned without caching, so a pending result can never
+		// be stored under (or served from) an approved user's cache entry. Anonymous (0) is untouched.
+		if ( $user_id > 0 && ! dreampoint_b2b_user_is_activated( $user_id ) ) {
+			return Dreampoint_B2B_Visibility_Context::no_access();
+		}
+
 		// Level 1: static request cache.
 		if ( isset( self::$context_cache[ $user_id ] ) ) {
 			return self::$context_cache[ $user_id ];

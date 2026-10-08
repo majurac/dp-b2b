@@ -24,6 +24,30 @@ function dreampoint_b2b_set_default_approval_status( int $user_id ): void {
 add_action( 'user_register', 'dreampoint_b2b_set_default_approval_status' );
 
 /**
+ * Je li korisnik aktiviran za B2B pristup (jedina definicija "odobren" za API/vidljivost).
+ *
+ * Poštuje DP_BYPASS_APPROVAL i izuzima osoblje (manage_options, manage_woocommerce).
+ * Za anonimnog korisnika (ID 0) uvijek vraća false. Ne izvodi odobrenje iz
+ * dp_bucket_id ni apros_partner_code i ne mijenja nikakve meta podatke.
+ */
+function dreampoint_b2b_user_is_activated( int $user_id ): bool {
+    if ( $user_id <= 0 ) {
+        return false;
+    }
+
+    // TEMPORARY — staging/local bypass (isto značenje kao u guardovima iznad/ispod).
+    if ( defined( 'DP_BYPASS_APPROVAL' ) && DP_BYPASS_APPROVAL ) {
+        return true;
+    }
+
+    if ( get_user_meta( $user_id, 'approved', true ) ) {
+        return true;
+    }
+
+    return user_can( $user_id, 'manage_options' ) || user_can( $user_id, 'manage_woocommerce' );
+}
+
+/**
  * Preusmjeri logirane ali neodobrene korisnike na /approval-pending.
  */
 function dreampoint_b2b_restrict_unapproved_access(): void {

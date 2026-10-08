@@ -1560,3 +1560,11 @@ Before launch: choose a transactional provider; approved sender on the client's 
 
 ### Note
 Staging `git status` shows untracked `wp-content/languages/` (installed packs). Harmless to `git pull`; a `.gitignore` entry is a proposed, not yet approved, follow-up.
+
+### ADR-019 addendum — remaining gaps closed (2026-10-08, code commit `ccc0591`)
+- **Payment title** (`woocommerce_bacs_settings.title`): `Direct bank transfer` → `Izravna bankovna uplata`. **Shipping title** (flat rate, zone Croatia, `woocommerce_flat_rate_2_settings.title`): `Flat rate` → `Fiksna cijena dostave`. Only the `title` keys were patched (`wp option patch update`); cost 4.99, gateway id, bank data untouched. Rollback: patch the titles back to the original English values above.
+- **Stored on orders:** WC copies these titles into the order at creation, so already-placed orders (e.g. #23408) keep the English titles; only new orders get Croatian. Validation therefore used an in-memory (never saved) order; #23408 verified unchanged.
+- **Multilingual (HR default, EN secondary):** titles are single-language option values; the Croatian text is the default-language source and a future multilingual plugin can register them as translatable strings for English. No architectural conflict.
+- **silkypress-input-field-block:** `Additional Information`, `No`, `Yes` are translatable strings in domain `silkypress-input-field-block`, but the plugin ships no language files. Fix: own per-locale file `themes/dreampoint-b2b/languages/plugins/silkypress-input-field-block-hr.{po,mo}` loaded by an `init`-20 hook in `inc/woocommerce.php` (no plugin file edited; missing locale file = no-op, so English stays English). Rendered admin New Order: `Dodatne informacije … Ne`. The customer Processing email has no such section.
+- **Git:** `/languages/` (repo root = `wp-content/languages`, downloaded packs only, 0 tracked files) added to `.gitignore`; staging deployed to `ccc0591`, `git status` clean. The theme `languages/` folder stays tracked.
+- **Still English, deliberately not changed (out of the approved scope, awaiting approval):** free-shipping title `Free shipping` (zone Croatia, instance `free_shipping:1`) and the BACS checkout description (`Make your payment directly…`; not in emails). Production must repeat the WC title settings and install hr packs.

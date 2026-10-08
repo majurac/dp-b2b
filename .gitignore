@@ -57,3 +57,6 @@ Thumbs.db
 *.log
 error_log
 debug.log
+
+# ─── WordPress language packs (downloaded per environment via WP-CLI) ───────
+/languages/

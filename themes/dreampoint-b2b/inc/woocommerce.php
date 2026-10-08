@@ -351,3 +351,17 @@ function dreampoint_b2b_get_non_binding_mpc( WC_Product $product ): float {
 
 	return is_numeric( $value ) && (float) $value > 0 ? (float) $value : 0.0;
 }
+
+/**
+ * Translations for the third-party silkypress-input-field-block plugin.
+ * The plugin ships no language files; load our own per-locale .mo from
+ * languages/plugins/ (update-resistant, no plugin file edited). Loaded after the
+ * plugin's own init-10 textdomain registration; a missing locale file is a no-op,
+ * so an English or other locale falls through to the plugin's source strings.
+ */
+add_action( 'init', function (): void {
+	$mofile = get_template_directory() . '/languages/plugins/silkypress-input-field-block-' . determine_locale() . '.mo';
+	if ( is_readable( $mofile ) ) {
+		load_textdomain( 'silkypress-input-field-block', $mofile );
+	}
+}, 20 );

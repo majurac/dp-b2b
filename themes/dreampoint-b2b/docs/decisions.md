@@ -1524,3 +1524,39 @@ Side effects: order #23408 retained (no cleanup); test e-mails sent (including t
 **Staging validation** (real HTTP, `vis_rule_cat`, bucket temporarily 131→134 with `wp user meta update`, restored to 131; cart empty before and after; no order created — order count 6 / max ID 23408 unchanged): eligible increases allowed under bucket 131 (Store API 2→3, classic form 3→4); after the bucket change Store API `update-item` 3→4 → 400 `dp_b2b_product_not_available` (quantity unchanged), `items/{key}` PUT 3→5 → 400, add-item top-up → 400, same quantity 3→3 → 200, decrease 3→2 → 200; Quick Order +1 on an ineligible line → `failed/product_unavailable`; classic cart form: increase rejected (quantities unchanged), decrease 4→3 allowed, classic remove link removes the line; Store API `POST /checkout` with an ineligible cart → 409 `dp_b2b_product_not_available`; after restoring bucket 131 the cart page shows no ineligibility notice. Not re-tested: positive checkout (no extra order; #23408 stands), anonymous order creation, shop manager on staging, classic checkout form, external gateways, bundles (unused on staging).
 
 **Final status.** Finding B — **COMPLETE — STAGING VERIFIED**. Finding A unchanged (cart mutation staging-verified; anonymous order creation not tested). Remaining known limitations: bundle children outside a bucket are skipped silently (bundles inactive on staging); `custom_offer` cart validation costs about one indexed query per line; the `woocommerce_store_api_cart_item_quantity_validation` filter requires WooCommerce ≥ 11.2.0.
+
+---
+
+## ADR-019 — WooCommerce email localization: Croatian site locale on staging; accepted staging SMTP sender rewrite
+
+**Date:** 2026-10-08
+**Status:** Accepted / **COMPLETE — STAGING RENDERING VERIFIED; DELIVERY NOT TESTED** (production not provisioned)
+**Owner:** Staging environment configuration (not Git-tracked). No theme/plugin code changed.
+
+### Root cause
+Standard WooCommerce order emails were English because the site locale was `en_US` (`WPLANG` empty) and no Croatian language pack was installed (`wp-content/languages` did not exist). The theme only hand-translated the new-account email (`inc/emails.php`); there are no theme overrides for order emails.
+
+### Change (staging, 2026-10-08, as `dream9399`)
+- `wp language core install hr`, `wp language plugin install woocommerce hr` (WP 7.1.3, WC 11.2.0). Locale identifier and language slug are both `hr`.
+- `WPLANG`: empty (`en_US`) → `hr`.
+- Administrator (user 1, `uncledev82@gmail.com`) usermeta `locale` set explicitly to `en_US` (was unset) so wp-admin stays English. No other user touched (all other users: locale unset → follow site default).
+- `DP_BYPASS_APPROVAL=true` unchanged.
+
+### Validation (non-sending, real WC email classes, existing order #23408 read-only; order status/meta/modified date verified unchanged)
+- Runtime: `get_locale()`=`hr`; admin `get_user_locale(1)`=`en_US`; frontend `<html lang="hr">`.
+- New Order (admin) and Customer Processing Order: subject, heading, body, order-table labels, address labels, footer and `<html lang="hr">` all Croatian (e.g. `[Dreampoint B2B Shop]: Nova narudžba #23408`, `Hvala Vam na narudžbi`).
+- Still English (not translation-pack issues): payment gateway title `Direct bank transfer` and shipping title `Flat rate` (admin-saved WooCommerce settings, to be edited in WC settings); `Additional Information` + value `No` for the "use same shipping address" field (rendered by the third-party `silkypress-input-field-block` plugin).
+- `inc/emails.php` remains compatible: its "is default" check compares against the (now Croatian) WC default, empty saved values still match, so the custom Croatian new-account texts keep applying. No code change.
+- No test email sent; delivery is therefore NOT verified.
+
+### Accepted limitation — staging SMTP sender rewrite
+A real New Order email for #23408 showed application From `uncledev82@gmail.com` but delivered From `armin.lusija@gmail.com` (path via `ax42.uncledev.com` and Gmail SMTP, which rewrites the sender). The address exists nowhere in WordPress code, options, users or DB. Accepted for staging; transport intentionally untouched.
+
+### Pending production-readiness task — "DreamPoint B2B — Production Transactional Email Delivery"
+Before launch: choose a transactional provider; approved sender on the client's domain; SPF/DKIM/DMARC; WooCommerce integration; verify From/Reply-To; test Gmail, Outlook/Hotmail and others (direct Hetzner delivery has had Hotmail/Outlook problems); bounce/error handling and logging; staging-vs-production routing; validate customer and admin order notifications; document rollback and ownership. Hr language packs must also be installed on production.
+
+### Rollback
+`wp option update WPLANG ''`; optionally `wp user meta delete 1 locale`. Installed packs are harmless.
+
+### Note
+Staging `git status` shows untracked `wp-content/languages/` (installed packs). Harmless to `git pull`; a `.gitignore` entry is a proposed, not yet approved, follow-up.

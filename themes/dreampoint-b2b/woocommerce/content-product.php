@@ -125,11 +125,11 @@ if ( is_shop() || is_product_category() || is_tax('product_brand') ) :
                     ?>
                         <a 
                             href="<?php echo esc_url($permalink); ?>" 
-                            class="add-cart-variable categories-btn out-of-stock-btn" 
+                            class="out-of-stock-btn button button--outline button--sm button--icon-only"
                             aria-label="<?php echo esc_attr(sprintf(__('Proizvod %s nije na stanju', 'dreampoint-b2b'), $product_name)); ?>"
                             title="<?php echo esc_attr(__('Nije na stanju', 'dreampoint-b2b')); ?>"
                         >
-                            <span class="hide-sm"><?php esc_html_e('Nije na stanju', 'dreampoint-b2b'); ?></span> 
+                            <span class="screen-reader-text"><?php esc_html_e('Nije na stanju', 'dreampoint-b2b'); ?></span>
                             <i class="icon-chevron-right" aria-hidden="true"></i>
                         </a>
                         
@@ -138,12 +138,12 @@ if ( is_shop() || is_product_category() || is_tax('product_brand') ) :
                     ?>
                         <a 
                             href="<?php echo esc_url($permalink); ?>" 
-                            class="add-cart-variable categories-btn" 
+                            class="button button--outline button--sm button--icon-only"
                             aria-label="<?php echo esc_attr(sprintf(__('Pogledaj opcije za %s', 'dreampoint-b2b'), $product_name)); ?>"
                             title="<?php echo esc_attr(__('Pogledaj opcije', 'dreampoint-b2b')); ?>"
                         >
-                            <span class="hide-sm"><?php esc_html_e('Pogledaj opcije', 'dreampoint-b2b'); ?></span> 
-                            <i class="icon-chevron-right hide-lg" aria-hidden="true"></i>
+                            <span class="screen-reader-text"><?php esc_html_e('Pogledaj opcije', 'dreampoint-b2b'); ?></span>
+                            <i class="icon-chevron-right" aria-hidden="true"></i>
                         </a>
                         
                     <?php else : 

@@ -965,8 +965,12 @@ body.admin-bar {
                 margin-top: 10px;
             }
         }
+        // Visible availability message in the card's price slot (the action itself is the icon-only navigation button)
         .out-of-stock-price {
-            font-size: 0;
+            font-size: 14px;
+            text-transform: none;
+            letter-spacing: 0;
+            color: $dp-color-text-secondary;
         }
     }
     .action-holder {
@@ -996,7 +1000,7 @@ body.admin-bar {
             }
         }
         // The simple-product add-to-cart is the Figma icon-only .button (32px, radius 8): keep it out of the legacy card-action sizing
-        .add-to-cart:not(.button--icon-only), .add-cart-variable, a.button:not(.button--icon-only) {
+        .add-to-cart:not(.button--icon-only), a.button:not(.button--icon-only) {
             display: flex;
             width: 100%;
             @include bp(lg-down) {

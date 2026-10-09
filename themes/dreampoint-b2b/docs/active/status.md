@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-09 — Figma alignment Batch 1 Steps 0-2 deployed to staging (ADR-020)
+
+Step 0 (baseline + deterministic build), Step 1 (additive `$dp-*`/`--dp-*` tokens, `8eb2501`), the container adjustment (`26d9aa8`: 1216px at 1400-1499px, 1434px preserved at >=1500px, tiers <=1399px unchanged, wishlist 1236px kept) and Step 2 (shared title banner, breadcrumbs, dp watermark, `5d5c910`) are done, pushed and fast-forward deployed to staging (staging HEAD `5d5c910`); validated read-only as admin at 1440/1024/768/390 plus 1399/1400/1499/1500. No business logic, DB or config change. Remaining QA limitations, the My Account intro alignment follow-up, the two pre-existing console 404s (WC placeholder webp on `/brendovi/`, `img/ico/lock.svg` on `/my-account/`), the LiteSpeed note (`litespeed-purge` WP-CLI command not registered on staging; guest CSS version verified current; manual purge optional) and the recommended Step 3 first slice (3a: header QUICK ORDER button only) are recorded in `docs/active/figma-alignment.md` section 13. Next: Step 3a after approval.
+
 ## Update 2026-10-08 — Final Figma alignment: gap audit done, Batch 1 PLANNED (ADR-020)
 
 Read-only Figma-vs-staging audit completed against the final design (page UI `11148:22601`, desktop 1440 px only; no mobile/tablet frames will be supplied). Functional structure largely matches; the visual layer (palette, header, footer, buttons, title banner) does not. Business logic stays untouched (presentation-only rule, ADR-020); responsive layouts are built pragmatically with each batch. Batch 1 = tokens, shared buttons/inputs, header, footer, title/breadcrumb banner — plan, token migration strategy, validation plan, open decisions (none blocking) and next-session handoff in `docs/active/figma-alignment.md`. **No code, staging, or Figma change was made.** Next step: Step 0 (baseline screenshots + clean-build determinism check), then Step 1 (additive tokens).

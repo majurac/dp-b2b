@@ -1,6 +1,6 @@
 # Figma Alignment Program — Audit Summary, Batch 1 Plan, Handoff
 
-Status: PLANNED (no implementation started). Created 2026-10-08. Policy record: `docs/decisions.md` ADR-020.
+Status: IN PROGRESS - Batch 1 Steps 0-2 DONE and deployed to staging (commit `5d5c910`, 2026-10-09); Step 3 is next (not started). Created 2026-10-08. Policy record: `docs/decisions.md` ADR-020. Progress record: section 13.
 
 ## 1. References
 
@@ -108,9 +108,42 @@ OUT: product card, catalog filters, PDP, Quick Order, registration logic, My Acc
 5. Cart reservation (ADR-007) — Reserved Stock Pro purchase/installation; presentation (`CART-02..05`) follows the plugin state.
 6. Payment copy — approved hr ADR-019 text wins over Figma text (Figma has typos "obraduje"/"ce").
 7. "CRO" language selector — depends on the multilingual solution.
-8. Newsletter band, Figma English legal labels, footer on the Quick Order page, Brandovi dropdown content, global container 1252 -> 1216.
+8. Newsletter band, Figma English legal labels, footer on the Quick Order page, Brandovi dropdown content. (Global container question RESOLVED 2026-10-09, see section 13.)
 
 ## 12. Next-session handoff
 
 Already verified (do NOT repeat): the full Figma-vs-staging gap audit (section 4), Figma token/component values (section 6), build/enqueue/token architecture (section 5), the token migration strategy (section 7). Do not re-audit unrelated screens or run a mobile audit.
 Start here: Step 0 (baseline screenshots + clean-build determinism check), then Step 1 (additive tokens). Ask before any staging content edits or deploy. Business logic stays untouched (section 2).
+
+## 13. Progress record (2026-10-09)
+
+### Done
+- **Step 0:** `npm run build` is deterministic (clean tree before and after). Baseline screenshots 1440/1024/768/390 in the git-ignored `.playwright-mcp/baseline/` (guest: login, register, lost-password, home, kontakt, faq; admin session: shop, PDP, Quick Order, cart, checkout, my-account, brendovi at `/brendovi/`).
+- **Step 1** (`8eb2501`): additive tokens `sass/theme/_dp-tokens.scss` (45 `--dp-*` custom properties on `:root` + `$dp-*` SCSS variables), imported only from `style.scss`; no legacy variable changed; no component consumed the tokens at that point.
+- **Container** (`26d9aa8`): `.container` max-width at >=1400px changed 1252 -> 1216px in `sass/theme/_grids.scss` (border-box + 8px padding = 1200px usable content, the Figma content width). See "Container width policy".
+- **Step 2** (`5d5c910`): shared title banner `.inner-page .inner-heading` (left aligned, 24px padding, no fill, dp watermark `img/bg/dp-pattern.png` exported from Figma `11148:38224` with the 10% opacity baked in and hidden below 768px, Petrona 600 64/72 H1 -> 48/56 <=1199 -> 32/40 <=767, 12px grey breadcrumb with Bold current page, intro text 380px); checkout keeps its H1 (Montserrat Bold 40, 32 on mobile). New WooCommerce override `woocommerce/global/breadcrumb.php` (copy of core template 2.3.0 that wraps the current crumb in `<span class="breadcrumb__current">`); the custom breadcrumb `inc/custom-breadcrumb.php` already used a `<span>` and was not touched.
+- **Staging:** pushed to origin/master and fast-forward pulled on staging (`dream9399`), staging HEAD = `5d5c91067f43ab76eab9585efe572c32d6c65db7`, tree clean. `wp cache flush` succeeded.
+
+### Container width policy (confirmed 2026-10-09; the client asked for a wider layout on large monitors)
+| Viewport | `.container` max-width | Usable content |
+|---|---|---|
+| <=1399px | existing tiers (576: 526, 768: 706, 992: 946, 1200: 1100) | unchanged |
+| 1400-1499px | 1216px (Figma 1200px content) | 1200px |
+| >=1500px | 1434px (preserved; do NOT remove or reduce) | 1418px |
+
+`wishlist.scss` keeps its own hard-coded 1236px at >=1400px (explicit decision; revisit only if a concrete regression is found). Verified on staging at 1399/1400/1499/1500: 1100/1216/1216/1434, no horizontal overflow.
+
+### Staging QA (admin session, read-only) and limitations
+- Verified: banner/breadcrumb/H1 metrics on shop, category, PDP (breadcrumb only), brands, kontakt, FAQ, cart, checkout, my-account, approval-pending at 1440/1024/768/390; home and Quick Order have no banner (unchanged); no horizontal overflow anywhere; the watermark loads (200, 11 KB, `max-age=604800`).
+- Visually reviewed: kontakt, checkout, FAQ, cart, my-account, brands, approval-pending (1440), PDP (1440), shop and my-account (390). No material regression.
+- **Cosmetic follow-up (not fixed, outside the Step 2 scope):** on `/my-account/` (logged in) the dashboard intro paragraph keeps the legacy `.my-acccount-intro { max-width: 740px; margin: 0 auto }` (`sass/pages/myaccount.scss`), so it is a centered block with left-aligned text and no longer lines up with the left-aligned H1. Smallest fix: `.inner-heading .my-acccount-intro { margin-left: 0; }` (decide with the My Account batch).
+- Not covered: guest-visible pages other than login/register/lost-password (the site redirects guests); a guest/LiteSpeed-cached HTML check beyond the login page. The Figma comparison used measured Figma values (positions, sizes, fonts, colors), not an image overlay.
+- **Pre-existing console findings (not caused by Step 2, not fixed):** 404 `wp-content/uploads/woocommerce-placeholder-384x282.webp` on `/brendovi/` (present in the baseline; brand images are missing data) and 404 `img/ico/lock.svg` on `/my-account/` (file not in the repo, not referenced by the theme SCSS).
+- **LiteSpeed:** documented procedure (`docs/deploy-runbook.md`, `rules/hetzner.md`): `wp litespeed-purge purge-all`; on failure continue, do not retry; manual fallback WP Admin -> LiteSpeed Cache -> Toolbox -> Purge All (never delete the cache directory). During the deploy `wp litespeed-purge all` failed with "not a registered wp command" (not retried). A guest fetch of `/my-account/` is `no-cache, private` with `style.css?ver=1791531001`, equal to the server mtime of `style.css`, so the new CSS is served and a purge is not required for correctness. An optional manual purge stays an operator action.
+
+### Step 3 readiness (buttons and form controls) - recommended first slice: 3a header QUICK ORDER only
+- **Why this slice:** the header QUICK ORDER anchor (`header.php` ~255, `<div class="quick-order-btn"><a class="button button--sm">`) is the only element where Figma shows the new button (Primary, size L: 40px high, padding 12/20, 14px, radius 20, bg `#0d121c`, text `#f9fafb`, hover `#1f2a37`), and `.quick-order-btn` has no SCSS and no JS dependency. The generic `.button.button--sm` (`sass/theme/_mixins.scss:14-26`, with `!important` padding/height/font-size) is shared with the search dropdown (`inc/ajax-handlers.php`), filter buttons, brand/segment blocks, `form-edit-address.php` and `template-parts/loop.php`, so it must NOT be changed in this slice.
+- **Files:** `header.php` (anchor classes only: replace `button button--sm` with `dp-btn dp-btn--primary dp-btn--l`; label/URL/`esc_html_e` unchanged), new `sass/components/_dp-buttons.scss` (new `dp-btn` mixin + `.dp-btn*` selectors consuming `$dp-*`/`--dp-*`), `sass/style.scss` (one import), rebuilt `style.css`. No change to `_vars.scss` mixins, `_mixins.scss`, `_header.scss` or any page file.
+- **WooCommerce dependencies:** none (theme markup outside WC templates, not in WC Blocks, WBW, Select2 or TI Wishlist). The mobile sticky header uses the same anchor, so the mobile state must be checked.
+- **Validation:** `npm run build` clean; `style.css` diff shows only new `.dp-btn*` rules; staging (after an approved deploy) read-only at 1440/1024/768/390 + 1500: header default/hover/focus-visible, sticky state, mobile sticky bar, Quick Order page header variant (`dp-qo-header`, unaffected), touch target >=44px below 768 (`min-height: 44px` in the <768 override), no layout shift of the search/wishlist/cart cluster; other `.button` consumers unchanged (spot-check cart, checkout, my-account, shop, search dropdown).
+- **Next slices (after 3a is validated):** 3b global `.button` switch (cart `checkout.scss:230`, `myaccount.scss:547/556`, `shop-archive.scss:249/253`, `shop-single.scss:413`, `_content.scss:528-541`, one file at a time), then 3c form controls (`.custom-form`, `_content.scss` ~458+: bg `#fcfcfd`, border `#d2d6db`, radius 8, textarea 6; Search `11148:41007`). Do not touch `wc-block-components-*`, WBW, Select2 or TI Wishlist styles.

@@ -1596,7 +1596,7 @@ Staging `git status` shows untracked `wp-content/languages/` (installed packs). 
 ## ADR-020 — Figma alignment program: presentation-only policy, desktop-only design reference, additive token migration
 
 **Date:** 2026-10-08
-**Status:** Accepted (policy); implementation NOT started. Plan and handoff: `docs/active/figma-alignment.md`.
+**Status:** Accepted (policy); Batch 1 Steps 0-2 implemented and deployed to staging (2026-10-09). Plan, progress and handoff: `docs/active/figma-alignment.md`.
 
 ### Context
 
@@ -1614,3 +1614,7 @@ The final design was delivered after the implementation (Figma file `Te4kr3o8kXD
 
 - Generated CSS/JS remain tracked and deployed; every step ends with a clean `npm run build` and rebuilt generated files in the same commit.
 - Global `.button` restyle is a gated, separately validated sub-step because `button-primary`/`button-outline` are used by cart, checkout, account and shop styles.
+
+### Update 2026-10-09 — container width policy
+
+The Figma content width (1200px at 1440px) is adopted for the 1400-1499px range: `.container` max-width 1252 -> 1216px (border-box + 8px padding = 1200px usable). The client explicitly asked for a wider layout on large monitors, so the >=1500px tier (1434px) is PRESERVED and must not be removed or reduced; tiers <=1399px are unchanged; `wishlist.scss` keeps its hard-coded 1236px. Deliberate exception: the auth split layout (AUTH-01) and full-bleed backgrounds do not follow the 1200px grid. Implementation: commit `26d9aa8` (`sass/theme/_grids.scss`); Step 2 banner: `5d5c910`.

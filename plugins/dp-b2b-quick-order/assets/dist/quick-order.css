@@ -651,7 +651,7 @@ button.dp-qo-filter-chip:hover { background: #e6e6e6; }
 @media only screen and (max-width: 767.98px) {
     .dp-qo-footer { flex-wrap: wrap; padding: 12px 14px; }
     .dp-qo-footer__total { align-items: flex-start; margin-left: 0; text-align: left; }
-    .dp-qo-footer__actions { width: 100%; justify-content: space-between; }
+    .dp-qo-footer__actions { width: 100%; justify-content: space-between; flex-wrap: wrap; }
     .dp-qo-footer__cart-link,
     .dp-qo-footer__add-to-cart { flex: 1 1 0; padding: 10px 12px; }
 }

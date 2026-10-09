@@ -1689,7 +1689,7 @@ Capabilities added without a parallel system: `.button--s` (24px), `.button--des
 ## ADR-023 — Toastify add-to-cart notice: keep DreamPoint's native-WooCommerce integration; no Suplementi migration
 
 **Date:** 2026-10-09
-**Status:** Accepted; refinement `34c80a1` deployed to staging, UI QA PASS. Real AJAX add-to-cart E2E PENDING.
+**Status:** Accepted; refinement `34c80a1` deployed to staging, UI QA PASS. Simple-product AJAX add-to-cart E2E PASS on staging (2026-10-09).
 
 ### Context
 A read-only comparison with the Suplementi theme (staging, HEAD `bb4e2b7`) was run to port its Toastify experience. DreamPoint already ships Toastify 1.12.0 as its own hardened fork (`js/toastify.min.js`: `textContent` rendering, `role="status"`/`aria-live`) with `css/src/toastify.min.css`. Add-to-cart requests are owned by WooCommerce's native `wc-ajax=add_to_cart` (`add-to-cart.min.js`); the only DreamPoint notice listener is `$(document.body).on('added_to_cart')` in `js/ajax-add-to-cart.js`, which shows the toast and opens the mini-cart. The Quick Order plugin reuses it through a synthetic `added_to_cart` after its own sync.
@@ -1703,4 +1703,5 @@ A read-only comparison with the Suplementi theme (staging, HEAD `bb4e2b7`) was r
 ### Consequences / deferred
 - Re-apply the three `closeAriaLabel` edits (documented in the file header) if the fork is ever replaced.
 - Deferred: PDP max-quantity toast (`product-single.js`) still has the English close label; dormant `.is-danger` loses to the `!important` background in `toastify.min.css`; the toast offset must be revalidated if the toolbar height changes (it is derived from 14px + 44px + 14px + 1px).
-- Validation so far used synthetic notifications only (1440/390/360/320, two-toast stacking, close, 3000ms timing). One request / one event / one toast per real click is not yet proven.
+- Validation: synthetic notifications first (1440/390/360/320, two-toast stacking, close, 3000ms timing), then a controlled real-click E2E (product 7897, admin session, viewport 929px): exactly one `wc-ajax=add_to_cart` POST (200), one `adding_to_cart`, one `added_to_cart`, one success toast with the Croatian text and close label, fragments and counter 5 to 6, mini-cart opened ~100ms after, no navigation or JS errors; the added line was removed through the native remove link and the baseline cart was verified restored. This confirms that WooCommerce's native handler plus the single DreamPoint `added_to_cart` listener yields one request, one event and one toast per click.
+- Still unvalidated: guard/bucket negative paths, variable-product and out-of-stock branches, Quick Order AJAX integration, the mobile AJAX lifecycle (the mobile toast UI QA stands).

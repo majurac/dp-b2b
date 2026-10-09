@@ -67,6 +67,26 @@ $dp-color-btn-secondary-border:  #e5e7eb;
 $dp-color-btn-secondary-text:    #384250;
 $dp-color-btn-secondary-hover-bg:     #f3f4f6;
 $dp-color-btn-secondary-hover-border: #9da4ae;
+// Button states not covered above (Figma Button set 11148:40692: Size x Style x State).
+// Primary/Secondary default and hover reuse the tokens above; destructive reuses $dp-color-error
+// (default), $dp-color-error-hover and $dp-color-btn-primary-text. Figma defines no disabled or
+// focus state - none is invented here.
+$dp-color-btn-primary-pressed:          #111927;
+$dp-color-btn-text-hover:               #e5e7eb; // text on filled (primary, destructive) hover
+$dp-color-btn-text-pressed:             #f3f4f6; // text on filled (primary, destructive) pressed
+$dp-color-btn-secondary-hover-text:     #1f2a37;
+$dp-color-btn-secondary-pressed-bg:     #e5e7eb;
+$dp-color-btn-secondary-pressed-border: #0d121c;
+$dp-color-btn-secondary-pressed-text:   #0d121c;
+$dp-color-error-pressed:                #f97066;
+
+// Button typography (Montserrat SemiBold; letter-spacing 0). L and M share 14px.
+$dp-btn-font-weight:      600;
+$dp-btn-font-size-xl:     18px;
+$dp-btn-font-size:        14px;
+$dp-btn-font-size-s:      12px;
+$dp-btn-line-height:      16px;
+$dp-btn-line-height-s:    14px;
 
 // Typography
 $dp-font-heading: 'Petrona', serif;

@@ -1653,3 +1653,6 @@ Remove all theme-owned wishlist integration. Do not uninstall the plugin, delete
 - Product-card and PDP action areas contain only add-to-cart/inquiry controls; the header action area holds home (mobile), search (mobile), QUICK ORDER and cart.
 - Staging QA after an approved deploy: header at 1440/1024/768/390/360/320, product cards and PDP layout, cart/checkout/Quick Order unchanged, no console errors from removed assets (`wishlist.css` is no longer requested).
 
+### Update 2026-10-09 — deployment and page retirement
+
+The removal was deployed to staging with commit `50b98a7` and validated in the browser (no wishlist markup, requests or new console errors). On staging only, the plugin-created WordPress page ID 20 (`/wishlist/`) was moved to Trash after confirming it was not referenced by menus, widgets, ACF options or theme mods; it is restorable (`wp post untrash 20`) and the plugin options (`tinvwl-*`, including `tinvwl-page`) were left untouched. Retiring or deleting the page permanently, and uninstalling the plugin, remain separate decisions.

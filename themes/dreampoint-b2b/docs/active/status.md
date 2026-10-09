@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-09 — Step 3a + wishlist removal deployed to staging; follow-up fixes (local commits, not deployed)
+
+Commits `69ebf05` (header QUICK ORDER Figma button on the existing `.button`) and `50b98a7` (wishlist removal, ADR-021) are pushed and deployed to staging (staging HEAD `50b98a7`); browser QA PASS (QUICK ORDER 144.6x40 desktop, 4-control mobile toolbar fits at 390/360/320, no wishlist nodes/requests, only the two known 404s). Follow-ups committed locally and NOT deployed: `c091b58` (QUICK ORDER keeps 14px on phones) and `4ce51ef` (shop pagination `flex-wrap`, fixes the 360/320px page-level overflow). Staging only: the obsolete WordPress page ID 20 `/wishlist/` was moved to Trash (restorable; plugin options untouched). Open: Quick Order footer button overflows the page by ~23px at 320px (plugin CSS, see `docs/active/figma-alignment.md` section 14); desktop header is not actually sticky (pre-existing, `#main-header` is `position: sticky` inside a header-height parent).
+
 ## Update 2026-10-09 — Wishlist functionality removed from the theme (ADR-021, local commit, not deployed)
 
 The client no longer requires the wishlist and the TI WooCommerce Wishlist plugin is deactivated. All theme-owned wishlist code was removed (header/mobile-toolbar counter, product-card heart, PDP styling, three `ti-wishlist*.php` overrides, `wishlist.scss`/`wishlist.css` and its enqueue, the admin variation-fix script, dependency references). The plugin itself and its data were not touched. **Open DB-managed item:** the plugin-created WordPress page `/wishlist/` (title "Wishlist") still exists on staging (HTTP 200) — decide in WP Admin whether to trash it; menus/widgets/ACF options and plugin settings were not inspected or changed. Not deployed; staging QA scope in ADR-021.

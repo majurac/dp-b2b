@@ -98,7 +98,7 @@ $col    = 1;
 	            </address>
 	        </div>
 	        <!-- /.address-holder -->
-	        <a href="<?php echo esc_url( wc_get_endpoint_url( 'edit-address', $name ) ); ?>" class="edit button button--sm button--icon-after">
+	        <a href="<?php echo esc_url( wc_get_endpoint_url( 'edit-address', $name ) ); ?>" class="edit button button--icon-after">
 	            <?php echo esc_html__( 'Izmijeni', 'woocommerce' ); ?>
 	        </a>
 	    </div>

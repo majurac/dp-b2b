@@ -1023,7 +1023,7 @@ function dreampoint_b2b_contact_info_shortcode(): string {
                         <p><?php echo wp_kses_post( $contact_text ); ?></p>
                     <?php endif; ?>
                     <?php if ( $contact_button ) : ?>
-                        <?php the_acf_link( $contact_button, 'button' ); ?>
+                        <?php the_acf_link( $contact_button, 'button button--outline button--sm' ); ?>
                     <?php endif; ?>
                     <?php
                         $current_user_id = get_current_user_id();

@@ -31,7 +31,7 @@ $button = get_field('button');
                 <p><?php echo wp_kses_post($text); ?></p>
             <?php endif; ?>
             <?php if ($button) : ?>
-                <?php the_acf_link($button, 'button'); ?>
+                <?php the_acf_link($button, 'button button--xl'); ?>
             <?php endif; ?>
         </div>
         <!-- /.container -->

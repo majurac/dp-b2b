@@ -71,7 +71,7 @@ if (empty($items)) {
                                 $aria_label = $button_text;
                                 ?>
                                 <a href="<?php echo esc_url($button_url); ?>" 
-                                   class="button button--outline button--sm" 
+                                   class="button button--xl"
                                    aria-label="<?php echo esc_attr($aria_label); ?>">
                                     <?php echo esc_html($button_text); ?>
                                 </a>

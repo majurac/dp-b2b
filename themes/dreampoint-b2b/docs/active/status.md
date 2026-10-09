@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-09 — Mobile follow-ups and Quick Order footer fix deployed to staging
+
+Staging HEAD `02e8ca0`: QUICK ORDER keeps 14px on phones (`c091b58`), shop pagination wraps on narrow phones (`4ce51ef`, no page-level overflow at 360/320px), docs (`79c79e5`) and the Quick Order footer fix (`02e8ca0`: `flex-wrap: wrap` on `.dp-qo-footer__actions` at <=767px in `plugins/dp-b2b-quick-order/assets/dist/quick-order.css`, plugin version 1.0.33 -> 1.0.34 for `?ver=` cache invalidation). Browser QA PASS on `/quick-order/` at 1440/768/390/360/320px: served `quick-order.css?ver=1.0.34`, footer buttons side by side at >=390px and stacked inside the footer at 360/320px, `scrollWidth` equals `clientWidth` everywhere, the product table keeps its own horizontal scroll, no console errors or failed requests; header QUICK ORDER and the four-control mobile toolbar unchanged. Staging only; production has not been touched. The Wishlist page ID 20 stays in Trash on staging (ADR-021).
+
 ## Update 2026-10-09 — Step 3a + wishlist removal deployed to staging; follow-up fixes (local commits, not deployed)
 
 Commits `69ebf05` (header QUICK ORDER Figma button on the existing `.button`) and `50b98a7` (wishlist removal, ADR-021) are pushed and deployed to staging (staging HEAD `50b98a7`); browser QA PASS (QUICK ORDER 144.6x40 desktop, 4-control mobile toolbar fits at 390/360/320, no wishlist nodes/requests, only the two known 404s). Follow-ups committed locally and NOT deployed: `c091b58` (QUICK ORDER keeps 14px on phones) and `4ce51ef` (shop pagination `flex-wrap`, fixes the 360/320px page-level overflow). Staging only: the obsolete WordPress page ID 20 `/wishlist/` was moved to Trash (restorable; plugin options untouched). Open: Quick Order footer button overflows the page by ~23px at 320px (plugin CSS, see `docs/active/figma-alignment.md` section 14); desktop header is not actually sticky (pre-existing, `#main-header` is `position: sticky` inside a header-height parent).

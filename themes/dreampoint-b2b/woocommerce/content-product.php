@@ -151,7 +151,7 @@ if ( is_shop() || is_product_category() || is_tax('product_brand') ) :
                     ?>
                         <a 
                             href="<?php echo esc_url($product->add_to_cart_url()); ?>" 
-                            class="ajax_add_to_cart add_to_cart_button add-to-cart categories-btn" 
+                            class="ajax_add_to_cart add_to_cart_button add-to-cart button button--outline button--sm button--icon-only"
                             data-product_id="<?php echo esc_attr($product_id); ?>" 
                             data-product_sku="<?php echo esc_attr($sku); ?>" 
                             data-quantity="1"
@@ -161,7 +161,7 @@ if ( is_shop() || is_product_category() || is_tax('product_brand') ) :
                         >
                             <span class="hide-sm" style="display: none;"><?php esc_html_e('Dodaj u košaricu', 'dreampoint-b2b'); ?></span>
                             <span class="add_to_cart_text screen-reader-text"><?php esc_html_e('Dodaj u košaricu', 'dreampoint-b2b'); ?></span>
-                            <i class="icon-shopping-bag" aria-hidden="true"></i>
+                            <i class="icon-cart" aria-hidden="true"></i>
                         </a>
                     <?php endif; ?>
                 </div>

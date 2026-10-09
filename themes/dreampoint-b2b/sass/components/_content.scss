@@ -321,7 +321,8 @@ body.admin-bar {
     pointer-events: none;
 }
 
-.ajax_add_to_cart.loading .icon-shopping-bag {
+.ajax_add_to_cart.loading .icon-shopping-bag,
+.ajax_add_to_cart.loading .icon-cart {
     display: inline-block;
     width: 16px;
     height: 16px;
@@ -987,7 +988,8 @@ body.admin-bar {
                 display: none!important;
             }
         }
-        .add-to-cart, .add-cart-variable, a.button {
+        // The simple-product add-to-cart is the Figma icon-only .button (32px, radius 8): keep it out of the legacy card-action sizing
+        .add-to-cart:not(.button--icon-only), .add-cart-variable, a.button:not(.button--icon-only) {
             display: flex;
             width: 100%;
             @include bp(lg-down) {

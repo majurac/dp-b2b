@@ -48,8 +48,8 @@ do_action( 'woocommerce_before_edit_account_address_form' ); ?>
 		
 				<p class="action-btns-row">
 					<?php $edit_address_url = wc_get_account_endpoint_url('edit-address'); ?>
-					<a href="<?php echo esc_url($edit_address_url); ?>" class="button button--outline button--sm"><?php esc_html_e( 'Otkaži', 'dreampoint-b2b' ); ?></a>
-					<button type="submit" class="button button--sm button<?php echo esc_attr( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' ); ?>" name="save_address" value="<?php esc_attr_e( 'Save address', 'woocommerce' ); ?>"><?php esc_html_e( 'Save address', 'woocommerce' ); ?></button>
+					<a href="<?php echo esc_url($edit_address_url); ?>" class="button button--outline"><?php esc_html_e( 'Otkaži', 'dreampoint-b2b' ); ?></a>
+					<button type="submit" class="button button<?php echo esc_attr( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' ); ?>" name="save_address" value="<?php esc_attr_e( 'Save address', 'woocommerce' ); ?>"><?php esc_html_e( 'Save address', 'woocommerce' ); ?></button>
 					<?php wp_nonce_field( 'woocommerce-edit_address', 'woocommerce-edit-address-nonce' ); ?>
 					<input type="hidden" name="action" value="edit_address" />
 				</p>

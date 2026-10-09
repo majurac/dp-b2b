@@ -57,8 +57,8 @@ $company_oib = get_user_meta($user_id, 'billing_oib', true); // Fetch 'billing_o
 				 */
 				do_action( 'woocommerce_edit_account_form_fields' );
 			?>
-			<button class="save-account-details button button--sm"><?php esc_html_e( 'Spremi izmjenu', 'dreampoint-b2b' ); ?></button>
-			<!-- /.save-account-details button button--sm -->
+			<button class="save-account-details button"><?php esc_html_e( 'Spremi izmjenu', 'dreampoint-b2b' ); ?></button>
+			<!-- /.save-account-details button -->
 		</div>
 		<!-- /.form-block-holder -->
 	
@@ -97,7 +97,7 @@ $company_oib = get_user_meta($user_id, 'billing_oib', true); // Fetch 'billing_o
 
 		<p>
 			<?php wp_nonce_field( 'save_account_details', 'save-account-details-nonce' ); ?>
-			<button type="submit" class="button button--sm woocommerce-Button button<?php echo esc_attr( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' ); ?>" name="save_account_details" value="<?php esc_attr_e( 'Save changes', 'woocommerce' ); ?>"><?php esc_html_e( 'Save changes', 'woocommerce' ); ?></button>
+			<button type="submit" class="button woocommerce-Button button<?php echo esc_attr( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' ); ?>" name="save_account_details" value="<?php esc_attr_e( 'Save changes', 'woocommerce' ); ?>"><?php esc_html_e( 'Save changes', 'woocommerce' ); ?></button>
 			<input type="hidden" name="action" value="save_account_details" />
 		</p>
 

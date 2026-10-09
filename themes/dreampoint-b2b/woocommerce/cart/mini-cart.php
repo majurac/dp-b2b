@@ -120,11 +120,11 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 	<?php do_action( 'woocommerce_widget_shopping_cart_before_buttons' ); ?>
 
 	<p class="woocommerce-mini-cart__buttons buttons"> 
-		<a class="button" href="<?php echo esc_url( wc_get_checkout_url() ); ?>" title="<?php echo esc_attr__( 'Idi na naplatu', 'dreampoint-b2b' ); ?>">
+		<a class="button button--sm" href="<?php echo esc_url( wc_get_checkout_url() ); ?>" title="<?php echo esc_attr__( 'Idi na naplatu', 'dreampoint-b2b' ); ?>">
 			<?php esc_html_e( 'Idi na naplatu', 'dreampoint-b2b' ); ?>
 		</a>
 
-		<a class="button button--outline" href="<?php echo esc_url( wc_get_cart_url() ); ?>" title="<?php echo esc_attr__( 'Vidi košaricu', 'dreampoint-b2b' ); ?>">
+		<a class="button button--outline button--sm" href="<?php echo esc_url( wc_get_cart_url() ); ?>" title="<?php echo esc_attr__( 'Vidi košaricu', 'dreampoint-b2b' ); ?>">
 			<?php esc_html_e( 'Vidi košaricu', 'dreampoint-b2b' ); ?>
 		</a>
 

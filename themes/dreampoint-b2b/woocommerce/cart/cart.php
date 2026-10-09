@@ -295,8 +295,8 @@ do_action( 'woocommerce_before_cart' ); ?>
 	                        <span class="total-value"><?php wc_cart_totals_order_total_html(); ?></span>
 	                    </div>
 	                    <!-- /.total-area -->
-	                    <a href="<?php echo esc_url( wc_get_checkout_url() ); ?>" class="button button-xl proceed-to-checkout"><?php esc_html_e( 'Idi na naplatu', 'woocommerce' ); ?></a>
-	                    <!-- /.button button-xl -->
+	                    <a href="<?php echo esc_url( wc_get_checkout_url() ); ?>" class="button button--xl proceed-to-checkout"><?php esc_html_e( 'Idi na naplatu', 'woocommerce' ); ?></a>
+	                    <!-- /.button button--xl -->
 					</div>
 					<!-- /.cart_totals -->
 				</div>

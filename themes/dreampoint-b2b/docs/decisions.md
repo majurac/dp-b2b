@@ -604,6 +604,8 @@ Faza B (ADR-009 §Decision, "kad Homepage/Segment-Landing rendering arhitektura 
 
 **Cache-busting nalaz (zabilježeno, NIJE riješeno u ovom pass-u):** Pojedinačni block CSS fajlovi (`css/blocks/*.css`) dijele globalni `_S_VERSION` cache-bust query string sa `style.css`/`theme.min.js` (`_S_VERSION = max(filemtime(style.css), filemtime(theme.min.js))`) — promjena SAMO u block CSS-u ne mijenja `?ver=` vrijednost, pa postojeći posjetioci mogu zadržati stale keširanu verziju do prirodnog isteka keša. Otkriveno tokom lokalne verifikacije ovog fix-a (zaobiđeno samo za potrebe testiranja, cache-bypass fetch). Pun zapis: `docs/active/block-css-cache-busting-followup.md`.
 
+**Update 2026-10-09 — cache-busting RESOLVED (`fff3d37`, staging-verified):** theme page CSS (7), `woocommerce.css` and the 11 block CSS files are now versioned per file through `dreampoint_b2b_asset_ver()` instead of the shared `_S_VERSION`; `_S_VERSION` and the helper are unchanged. Triggered by a stale `cart.css` after the cart remove button deploy. `brands.css` keeps its own equivalent `filemtime()`; vendor CSS and some JS still use `_S_VERSION`. Record: `docs/active/block-css-cache-busting-followup.md` (Resolution).
+
 **Content-population follow-up (NIJE implementacioni defekt, konsolidovano sa prethodnim update-om):**
 - Realni ERP-sync brendovi na stagingu i dalje trebaju ručnu `brand_segment` populaciju (61/62 brand termina na stagingu je ERP-mapirano preko `product_brand`, ali segment vrijednost mora ostati ručni content unos — ne smije se izmišljati).
 - Outdoor membership posebno ostaje business/content knowledge gap — čeka validno institucionalno znanje (Josip/klijent), ne smije se pogađati.

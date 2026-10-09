@@ -1,8 +1,8 @@
 # Block CSS Cache-Busting Granularity — Accepted Technical Debt
 
-**Severity:** Low
+**Severity:** Low (originally; the cart page-CSS regression found on 2026-10-09 made it real, see Resolution)
 **Priority:** Low
-**Status:** Documented
+**Status:** RESOLVED 2026-10-09 (`fff3d37`), staging-verified — see "Resolution" at the end. The sections below describe the original problem and are kept as history.
 **Confirmed:** 2026-09-23, during local Playwright verification of the Homepage/Segment Landing frontend fix (`docs/decisions.md` ADR-009).
 
 This is not a bug in any specific fix. No action is required right now. Document this only until a trigger condition occurs.
@@ -48,3 +48,26 @@ Version each `css/blocks/*.css` handle independently, e.g. `filemtime()` of that
 - `functions.php` — `_S_VERSION` definition
 - `inc/enqueue-block-styles.php` — per-block CSS conditional enqueue (`wp_enqueue_style(..., _S_VERSION)`)
 - `css/blocks/*.css` / `sass/blocks/*.scss` — the affected assets
+
+---
+
+## Resolution (2026-10-09, commit `fff3d37`, staging-verified)
+
+**Trigger:** while deploying the Figma cart remove button (`d77b7d1`, only `css/pages/cart.css` changed) staging kept serving the cached `cart.css?ver=1791542854` (`Cache-Control: public, max-age=604800`) with the new cart markup, because `_S_VERSION` is `max(mtime(style.css), mtime(js/theme.min.js))` and neither file changed. The same mechanism applied to every theme page and block stylesheet, not only block CSS.
+
+**Fix:** the `_S_VERSION` argument of the affected `wp_enqueue_style()` calls was replaced with the existing `dreampoint_b2b_asset_ver( '<theme-relative path>' )` helper (per-file `filemtime()`, falls back to `_S_VERSION` if the file is missing). Nine version arguments in three files, nothing else changed (handles, URLs, dependencies, conditions, order, `_S_VERSION` and the helper are untouched; no Sass, JS or generated CSS):
+- `functions.php`: `cart`, `checkout`, `myaccount`, `order-details`, `shop-archive`, `shop-single`, `faq` (`css/pages/*.css`).
+- `inc/woocommerce.php`: `css/pages/woocommerce.css` (the real path; there is no `css/woocommerce.css`).
+- `inc/enqueue-block-styles.php`: the existing per-block loop now passes `'css/blocks/' . $slug . '.css'`, covering all 11 mapped block stylesheets.
+
+**Staging evidence (HEAD `fff3d37`, clean tree, `php -l` OK on the three files):**
+- `/cart/` now emits `cart.css?ver=1791548401`, equal to `stat -c %Y` of the server file; HTTP 200, `Cache-Control` unchanged; the browser loaded the new CSS without a forced refresh (the new URL bypasses the stale entry).
+- `woocommerce.css?ver=1786182087` and the four blocks loaded on the homepage (`featured-categories`, `brands`, `contact-info` = `1785484796`, `company-features` = `1790159156`) match their server mtimes; `myaccount.css` and `shop-archive.css` also match.
+- Authenticated HTML is `no-cache, private` (no public page cache), so the new `ver` reaches the HTML immediately. Anonymous requests redirect to login (B2B guest rules).
+- Cart, shop and homepage smoke tests: no fatals, no console errors, no overflow.
+
+**Known limitations / remaining scope (not part of this fix):**
+- `brands.css` keeps its own equivalent inline `filemtime()` versioning (`d95f25f`); aligning it with the helper is optional.
+- Vendor CSS (`css/src/*.min.css`, `css/vendors/slick.css`) and some JavaScript enqueues still use `_S_VERSION`.
+- `filemtime()` is timestamp-based, not content-hash-based; mtime is not tracked by Git and changes on the server only when `git pull` rewrites a file.
+- Separate and still pending: the functional (mutation) test of the cart remove button; the visual staging QA of that button passed.

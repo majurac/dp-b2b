@@ -448,34 +448,86 @@
     height: 100%;
 }
 
-@mixin button-primary {
-    @include button-text;
-    color: $white;
+// ---------------------------------------------------------------------------
+// Figma button set (11148:40692) - prepared, NOT active.
+// button-primary / button-outline keep their legacy output unless a Figma size is passed:
+//   @include button-primary('l');   // Figma Primary, size L
+//   @include button-outline('m');   // Figma Secondary, size M
+// Sizes: 'xl' (48px) | 'l' (40px) | 'm' (32px) | 's' (24px). Values come from the $dp-* tokens in
+// _vars.scss. Figma defines no disabled or focus state: the legacy disabled block is kept and
+// keyboard focus gets a box-shadow ring (the global "a:focus { outline: none !important }" would
+// swallow an outline). Labels keep their authored case (Figma buttons are not uppercase).
+// ---------------------------------------------------------------------------
+
+// Size block: height, padding, type size, radius. $icon = Figma "Left/Right icon" padding
+// (2px less vertical padding on XL/L/S). $border is subtracted from the padding so a bordered
+// button keeps the Figma outer size (Figma strokes sit inside the frame).
+@mixin button-figma-size($size, $icon: false, $border: 1px, $padding-only: false) {
+    $min-height: null;
+    $pad-v: null;
+    $pad-h: null;
+    $font-size: $dp-btn-font-size;
+    $line-height: $dp-btn-line-height;
+    $radius: null;
+    @if $size == 'xl' {
+        $min-height: 48px;
+        $pad-v: 16px;
+        @if $icon { $pad-v: 14px; }
+        $pad-h: 24px;
+        $font-size: $dp-btn-font-size-xl;
+        $radius: $dp-radius-btn-xl;
+    } @else if $size == 'l' {
+        $min-height: 40px;
+        $pad-v: 12px;
+        @if $icon { $pad-v: 10px; }
+        $pad-h: 20px;
+        $radius: $dp-radius-btn-l;
+    } @else if $size == 'm' {
+        $min-height: 32px;
+        $pad-v: 8px;
+        $pad-h: 16px;
+        $radius: $dp-radius-btn-m;
+    } @else if $size == 's' {
+        $min-height: 24px;
+        $pad-v: 5px;
+        @if $icon { $pad-v: 4px; }
+        $pad-h: 14px;
+        $font-size: $dp-btn-font-size-s;
+        $line-height: $dp-btn-line-height-s;
+        $radius: $dp-radius-btn-s;
+    } @else {
+        @error "button-figma-size: unknown size '#{$size}' (use 'xl', 'l', 'm' or 's').";
+    }
+    @if not $padding-only {
+        height: auto;
+        min-height: $min-height;
+        border-radius: $radius;
+        font-size: $font-size;
+        line-height: $line-height;
+    }
+    padding: $pad-v - $border $pad-h - $border;
+}
+
+@mixin button-figma-base($size) {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: $dp-space-8;
+    border-width: 1px;
+    border-style: solid;
+    font-family: $dp-font-body;
+    font-style: normal;
+    font-weight: $dp-btn-font-weight;
+    letter-spacing: 0;
     text-align: center;
-    padding: 0px 24px;
-    background: $pink;
-    gap: 8px;
-    height: 58px;
-    border: 1px solid $pink;
+    text-transform: none;
+    text-decoration: none;
     @include animate-fade;
-    @include bp(desktop) {
-        padding: 0 14px;
+    @include button-figma-size($size);
+    &:focus-visible {
+        box-shadow: 0 0 0 2px $dp-color-bg-primary, 0 0 0 4px $dp-color-text-primary;
     }
-    &:hover {
-        background: $brand;
-        border-color: $brand;
-        color: $white;
-    }
-    &:focus {
-        color: $white;
-        background: $brand;
-        border-color: $brand;
-        box-shadow: 0px 0px 0px 1px $brand;
-
-    }
+    // legacy disabled look is kept (Figma has no disabled state)
     &:disabled,
     &[disabled] {
         background: $white;
@@ -487,22 +539,109 @@
     }
 }
 
-@mixin button-outline {
-    @include button-primary;
-    color: $black;
-    background: $white;
-    border: 1px solid $black;
+@mixin button-figma-primary($size) {
+    @include button-figma-base($size);
+    background: $dp-color-btn-primary-bg;
+    border-color: $dp-color-btn-primary-bg;
+    color: $dp-color-btn-primary-text;
     &:hover {
-        background: $brand;
-        border-color: $brand;
-        color: $white;
+        background: $dp-color-btn-primary-hover;
+        border-color: $dp-color-btn-primary-hover;
+        color: $dp-color-btn-text-hover;
     }
-    &:focus {
-        color: $white;
-        background: $brand;
-        border-color: $brand;
-        box-shadow: 0px 0px 0px 1px $brand;
+    &:active {
+        background: $dp-color-btn-primary-pressed;
+        border-color: $dp-color-btn-primary-pressed;
+        color: $dp-color-btn-text-pressed;
+    }
+}
 
+@mixin button-figma-secondary($size) {
+    @include button-figma-base($size);
+    background: $dp-color-btn-secondary-bg;
+    border-color: $dp-color-btn-secondary-border;
+    color: $dp-color-btn-secondary-text;
+    &:hover {
+        background: $dp-color-btn-secondary-hover-bg;
+        border-color: $dp-color-btn-secondary-hover-border;
+        color: $dp-color-btn-secondary-hover-text;
+    }
+    &:active {
+        background: $dp-color-btn-secondary-pressed-bg;
+        border-color: $dp-color-btn-secondary-pressed-border;
+        color: $dp-color-btn-secondary-pressed-text;
+    }
+}
+
+// Figma "Left/Right icon" padding (2px less vertical on XL/L/S): for icon buttons, call after
+// button-primary / button-outline with the same size.
+@mixin button-figma-icon-padding($size, $border: 1px) {
+    @include button-figma-size($size, true, $border, true);
+}
+
+@mixin button-primary($figma: null) {
+    @if $figma {
+        @include button-figma-primary($figma);
+    } @else {
+        @include button-text;
+        color: $white;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 0px 24px;
+        background: $pink;
+        gap: 8px;
+        height: 58px;
+        border: 1px solid $pink;
+        @include animate-fade;
+        @include bp(desktop) {
+            padding: 0 14px;
+        }
+        &:hover {
+            background: $brand;
+            border-color: $brand;
+            color: $white;
+        }
+        &:focus {
+            color: $white;
+            background: $brand;
+            border-color: $brand;
+            box-shadow: 0px 0px 0px 1px $brand;
+
+        }
+        &:disabled,
+        &[disabled] {
+            background: $white;
+            color: $text-disabled;
+            border-color: $text-disabled;
+            box-shadow: none;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+    }
+}
+
+@mixin button-outline($figma: null) {
+    @if $figma {
+        @include button-figma-secondary($figma);
+    } @else {
+        @include button-primary;
+        color: $black;
+        background: $white;
+        border: 1px solid $black;
+        &:hover {
+            background: $brand;
+            border-color: $brand;
+            color: $white;
+        }
+        &:focus {
+            color: $white;
+            background: $brand;
+            border-color: $brand;
+            box-shadow: 0px 0px 0px 1px $brand;
+
+        }
     }
 }
 

@@ -525,6 +525,29 @@ body.admin-bar {
         padding-top: 16px;
         padding-bottom: 16px;
     }
+    .help-inline {
+        small {
+            font-size: 85%;
+        }
+    }
+}
+
+
+// Buttons inside forms.
+// .custom-form: the plain submit (contact "Posalji") is Figma Primary L; any element with .button
+// follows the shared .button rules (utilities), so --sm / --xl / --outline are not overridden.
+// .fr-request-form (refund plugin form) keeps the legacy button look.
+.custom-form {
+    input[type="submit"]:not(.button),
+    button[type="submit"]:not(.button) {
+        @include button-figma-primary('l');
+        display: flex;
+    }
+    .button {
+        display: flex;
+    }
+}
+.fr-request-form {
     input[type="submit"],
     button[type="submit"],
     .button {
@@ -533,25 +556,8 @@ body.admin-bar {
         &.button--outline {
             @include button-outline;
         }
-        /*&.button--destructive {
-            @include button-destructive;
-        }
-        &.button--sm {
-            height: 36px;
-            padding: 0px 12px;
-        }
-        &.button--xl {
-            height: 44px;
-            padding: 0px 24px;
-        }*/
-    }
-    .help-inline {
-        small {
-            font-size: 85%;
-        }
     }
 }
-
 
 .custom-checkbox {
     position: relative;

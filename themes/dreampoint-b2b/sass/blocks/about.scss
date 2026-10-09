@@ -46,6 +46,9 @@
             }
             .button {
                 @include categories-btn-reverse;
+                // keep the legacy look: the shared Figma .button adds min-height / radius
+                min-height: 0;
+                border-radius: 0;
                 align-self: flex-start;
             }
             img {

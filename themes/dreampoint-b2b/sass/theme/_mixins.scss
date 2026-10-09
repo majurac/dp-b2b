@@ -508,7 +508,9 @@
     padding: $pad-v - $border $pad-h - $border;
 }
 
-@mixin button-figma-base($size) {
+// Layout + typography shared by every Figma button. $size = null leaves the size untouched
+// (used by modifiers that only change the appearance).
+@mixin button-figma-base($size: null) {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -523,24 +525,17 @@
     text-transform: none;
     text-decoration: none;
     @include animate-fade;
-    @include button-figma-size($size);
+    @if $size {
+        @include button-figma-size($size);
+    }
     &:focus-visible {
         box-shadow: 0 0 0 2px $dp-color-bg-primary, 0 0 0 4px $dp-color-text-primary;
     }
-    // legacy disabled look is kept (Figma has no disabled state)
-    &:disabled,
-    &[disabled] {
-        background: $white;
-        color: $text-disabled;
-        border-color: $text-disabled;
-        box-shadow: none;
-        cursor: not-allowed;
-        pointer-events: none;
-    }
 }
 
-@mixin button-figma-primary($size) {
-    @include button-figma-base($size);
+// Appearance only (colors + states). The legacy disabled look is re-asserted after the state
+// colors so it still wins when these rules are used by a modifier such as .button--outline.
+@mixin button-figma-primary-colors {
     background: $dp-color-btn-primary-bg;
     border-color: $dp-color-btn-primary-bg;
     color: $dp-color-btn-primary-text;
@@ -554,10 +549,10 @@
         border-color: $dp-color-btn-primary-pressed;
         color: $dp-color-btn-text-pressed;
     }
+    @include button-figma-disabled;
 }
 
-@mixin button-figma-secondary($size) {
-    @include button-figma-base($size);
+@mixin button-figma-secondary-colors {
     background: $dp-color-btn-secondary-bg;
     border-color: $dp-color-btn-secondary-border;
     color: $dp-color-btn-secondary-text;
@@ -571,6 +566,30 @@
         border-color: $dp-color-btn-secondary-pressed-border;
         color: $dp-color-btn-secondary-pressed-text;
     }
+    @include button-figma-disabled;
+}
+
+// Figma has no disabled state: the legacy disabled look is kept.
+@mixin button-figma-disabled {
+    &:disabled,
+    &[disabled] {
+        background: $white;
+        color: $text-disabled;
+        border-color: $text-disabled;
+        box-shadow: none;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+}
+
+@mixin button-figma-primary($size: null) {
+    @include button-figma-base($size);
+    @include button-figma-primary-colors;
+}
+
+@mixin button-figma-secondary($size: null) {
+    @include button-figma-base($size);
+    @include button-figma-secondary-colors;
 }
 
 // Figma "Left/Right icon" padding (2px less vertical on XL/L/S): for icon buttons, call after

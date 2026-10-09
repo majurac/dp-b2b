@@ -68,16 +68,29 @@
     @include categories-btn;
 }
 
+// Figma Button set (11148:40692): .button = Primary L (40px), .button--sm = M (32px),
+// .button--xl = XL (48px), .button--outline = Secondary. Appearance (outline) and size (sm / xl)
+// modifiers set disjoint properties, so every combination works regardless of source order.
 .button {
-    @include button-primary;
+    @include button-figma-primary('l');
     &.button--outline {
-        @include button-outline;
+        @include button-figma-secondary-colors;
     }
     &.button--sm {
-        padding: 0px 12px!important;
-        height: 36px!important;
-        font-size: 14px!important;
-        line-height: 17px!important;
+        @include button-figma-size('m');
+    }
+    &.button--xl {
+        @include button-figma-size('xl');
+    }
+    // Figma "Left/Right icon" padding; the compound selectors outrank the size modifiers above
+    &.button--icon-after {
+        @include button-figma-icon-padding('l');
+    }
+    &.button--icon-after.button--sm {
+        @include button-figma-icon-padding('m');
+    }
+    &.button--icon-after.button--xl {
+        @include button-figma-icon-padding('xl');
     }
 }
 

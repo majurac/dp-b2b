@@ -1,0 +1,122 @@
+// Final Figma design tokens (Figma file Te4kr3o8kXDgBLzHewKSYU, page UI 11148:22601).
+// Values: docs/active/figma-alignment.md section 6. ADR-020.
+// Additive only: legacy palette variables in _vars.scss are NOT changed or aliased here.
+// This partial EMITS CSS (:root block) - import it from style.scss ONLY, never from
+// standalone pages/blocks (it would duplicate the :root declaration). Standalone files
+// consume the tokens at runtime via var(--dp-*), since dp-style loads on every page.
+
+// Colors - text
+$dp-color-text-primary:   #0d121c;
+$dp-color-text-secondary: #384250;
+$dp-color-text-tertiary:  #6c727e;
+$dp-color-text-inverse:   #f9fafb;
+
+// Colors - background / surface
+$dp-color-bg-primary:   #ffffff;
+$dp-color-bg-mono:      #fcfcfd;
+$dp-color-bg-secondary: #f9fafb;
+$dp-color-bg-tertiary:  #f3f4f6;
+$dp-color-bg-brand:     #0d121c;
+$dp-color-bg-footer:    #000000;
+
+// Colors - border / icon
+$dp-color-border-primary:   #d2d6db;
+$dp-color-border-secondary: #e5e7eb;
+$dp-color-border-inverse:   #6c727e;
+$dp-color-icon-primary:     #111927;
+$dp-color-icon-secondary:   #6c727e;
+
+// Colors - state / button
+$dp-color-success:               #17b26a;
+$dp-color-success-strong:        #067647;
+$dp-color-error:                 #f04437;
+$dp-color-error-hover:           #fca19b;
+$dp-color-btn-primary-bg:        #0d121c;
+$dp-color-btn-primary-text:      #f9fafb;
+$dp-color-btn-primary-hover:     #1f2a37;
+$dp-color-btn-secondary-bg:      #f9fafb;
+$dp-color-btn-secondary-border:  #e5e7eb;
+$dp-color-btn-secondary-text:    #384250;
+$dp-color-btn-secondary-hover-bg:     #f3f4f6;
+$dp-color-btn-secondary-hover-border: #9da4ae;
+
+// Typography
+$dp-font-heading: 'Petrona', serif;
+$dp-font-body:    'Montserrat', sans-serif;
+
+// Spacing
+$dp-space-0:   0;
+$dp-space-8:   8px;
+$dp-space-12:  12px;
+$dp-space-16:  16px;
+$dp-space-24:  24px;
+$dp-space-40:  40px;
+$dp-space-120: 120px;
+
+// Radius
+$dp-radius-xs:        2px;
+$dp-radius-textarea:  6px;
+$dp-radius-md:        8px;
+$dp-radius-btn-s:     12px;
+$dp-radius-btn-m:     16px;
+$dp-radius-btn-l:     20px;
+$dp-radius-btn-xl:    24px;
+
+// Shadows
+$dp-shadow-card-xs: 0 1px 3px rgba(10, 14, 21, .16);
+$dp-shadow-card-xl: 0 2px 5px rgba(10, 14, 21, .16), 0 10px 24px rgba(10, 14, 21, .20);
+
+:root {
+    --dp-color-text-primary: #{$dp-color-text-primary};
+    --dp-color-text-secondary: #{$dp-color-text-secondary};
+    --dp-color-text-tertiary: #{$dp-color-text-tertiary};
+    --dp-color-text-inverse: #{$dp-color-text-inverse};
+
+    --dp-color-bg-primary: #{$dp-color-bg-primary};
+    --dp-color-bg-mono: #{$dp-color-bg-mono};
+    --dp-color-bg-secondary: #{$dp-color-bg-secondary};
+    --dp-color-bg-tertiary: #{$dp-color-bg-tertiary};
+    --dp-color-bg-brand: #{$dp-color-bg-brand};
+    --dp-color-bg-footer: #{$dp-color-bg-footer};
+
+    --dp-color-border-primary: #{$dp-color-border-primary};
+    --dp-color-border-secondary: #{$dp-color-border-secondary};
+    --dp-color-border-inverse: #{$dp-color-border-inverse};
+    --dp-color-icon-primary: #{$dp-color-icon-primary};
+    --dp-color-icon-secondary: #{$dp-color-icon-secondary};
+
+    --dp-color-success: #{$dp-color-success};
+    --dp-color-success-strong: #{$dp-color-success-strong};
+    --dp-color-error: #{$dp-color-error};
+    --dp-color-error-hover: #{$dp-color-error-hover};
+    --dp-color-btn-primary-bg: #{$dp-color-btn-primary-bg};
+    --dp-color-btn-primary-text: #{$dp-color-btn-primary-text};
+    --dp-color-btn-primary-hover: #{$dp-color-btn-primary-hover};
+    --dp-color-btn-secondary-bg: #{$dp-color-btn-secondary-bg};
+    --dp-color-btn-secondary-border: #{$dp-color-btn-secondary-border};
+    --dp-color-btn-secondary-text: #{$dp-color-btn-secondary-text};
+    --dp-color-btn-secondary-hover-bg: #{$dp-color-btn-secondary-hover-bg};
+    --dp-color-btn-secondary-hover-border: #{$dp-color-btn-secondary-hover-border};
+
+    --dp-font-heading: #{$dp-font-heading};
+    --dp-font-body: #{$dp-font-body};
+
+    --dp-space-0: #{$dp-space-0};
+    --dp-space-8: #{$dp-space-8};
+    --dp-space-12: #{$dp-space-12};
+    --dp-space-16: #{$dp-space-16};
+    --dp-space-24: #{$dp-space-24};
+    --dp-space-40: #{$dp-space-40};
+    --dp-space-120: #{$dp-space-120};
+
+    --dp-radius-xs: #{$dp-radius-xs};
+    --dp-radius-textarea: #{$dp-radius-textarea};
+    --dp-radius-md: #{$dp-radius-md};
+    --dp-radius-btn-s: #{$dp-radius-btn-s};
+    --dp-radius-btn-m: #{$dp-radius-btn-m};
+    --dp-radius-btn-l: #{$dp-radius-btn-l};
+    --dp-radius-btn-xl: #{$dp-radius-btn-xl};
+
+    --dp-shadow-card-xs: #{$dp-shadow-card-xs};
+    --dp-shadow-card-xl: #{$dp-shadow-card-xl};
+}

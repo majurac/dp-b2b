@@ -252,7 +252,7 @@ $company_phone = get_field('company_phone', 'option') ?: '';
                                 <?php $quick_order_url = dreampoint_b2b_get_quick_order_url(); ?>
                                 <?php if ( $quick_order_url ) : ?>
                                 <div class="quick-order-btn">
-                                    <a href="<?php echo esc_url( $quick_order_url ); ?>" class="button button--sm"><?php esc_html_e( 'Quick Order', 'dreampoint-b2b' ); ?></a>
+                                    <a href="<?php echo esc_url( $quick_order_url ); ?>" class="button"><?php esc_html_e( 'Quick Order', 'dreampoint-b2b' ); ?></a>
                                 </div>
                                 <?php endif; ?>
                                 

@@ -183,6 +183,7 @@
         width: 100%;
         @include bp(md) {
             padding-right: 60px;
+            gap: 8px;
         }
         @include bp(sm-up) {
             text-align: right;
@@ -195,12 +196,57 @@
             left: 0;
             bottom: 0;
             justify-content: center;
+            // five controls incl. the single-line QUICK ORDER button: the gap stays 24px on wide
+            // phones and shrinks (min 6px) on narrow ones so nothing is clipped
+            gap: clamp(6px, calc((100vw - 320px) / 4), 24px);
             background-color: #fff;
-            padding: 14px 24px;
+            padding: 14px 16px;
             border-top: 1px solid #dadada;
             height: auto;
         }
+        @media (max-width: 359.98px) {
+            padding-left: 8px;
+            padding-right: 8px;
+        }
        
+        // QUICK ORDER (Figma Button Size=L, Style=Primary). Built on the existing .button; the
+        // inherited pink/58px/0.1em/square declarations are neutralised here, only for this link.
+        // To be removed when the global .button is aligned with Figma (Step 3b).
+        .quick-order-btn .button {
+            flex-shrink: 0;
+            height: auto;
+            min-height: 40px;
+            padding: $dp-space-12 20px;
+            border: 0;
+            border-radius: $dp-radius-btn-l;
+            background: $dp-color-btn-primary-bg;
+            color: $dp-color-btn-primary-text;
+            font-weight: 600;
+            line-height: 16px;
+            letter-spacing: 0;
+            white-space: nowrap;
+            &:hover,
+            &:focus {
+                background: $dp-color-btn-primary-hover;
+                color: $dp-color-btn-primary-text;
+                box-shadow: none;
+            }
+            // the global "a:focus { outline: none !important }" would swallow an outline
+            &:focus-visible {
+                box-shadow: 0 0 0 2px $dp-color-bg-primary, 0 0 0 4px $dp-color-text-primary;
+            }
+            @include bp(md-down) {
+                padding-left: $dp-space-12;
+                padding-right: $dp-space-12;
+            }
+            @include bp(sm-down) {
+                min-height: 44px;
+            }
+            @media (max-width: 359.98px) {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+        }
         .cart-btn-wrapper {
             position: relative;
             .cart-contents {

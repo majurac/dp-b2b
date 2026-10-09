@@ -1680,3 +1680,27 @@ See `docs/active/figma-alignment.md` section 15 for the outstanding list (Shop B
 
 ### Update 2026-10-09 (Step 3b-3a)
 Four template class corrections from the per-instance audit were implemented in `07faa01` and deployed to staging (contact-info Secondary M, hero Primary XL, featured-section Quick Order CTA Primary XL, My Account address edit Primary L). No decision above changed; the existing `.button` ecosystem expressed all four targets. The hero mapping in decision 5 ("mini-cart/hero M") is superseded: hero is Primary XL. Status: deployed, partially runtime-validated (contact-info and hero not rendered on staging). Record: `docs/active/figma-alignment.md` section 16.
+
+### Update 2026-10-09 (Step 3b-3b)
+Capabilities added without a parallel system: `.button--s` (24px), `.button--destructive` and `.button--icon-only` (all four sizes, radius 8), composed with the existing size/appearance modifiers (`a79f643`). First consumer: the simple-product card action (`f3438a8`), plus the card-overlay stacking fix (`5430547`). Decision 1 ("no new size modifier") is superseded for S: the Figma set uses S for the icon-only Destructive cart remove, so `.button--s` is public; `.button--sm` still means M. Staging validated; the real add-to-cart transaction is not yet exercised. Record: `docs/active/figma-alignment.md` section 17.
+
+---
+
+## ADR-023 — Toastify add-to-cart notice: keep DreamPoint's native-WooCommerce integration; no Suplementi migration
+
+**Date:** 2026-10-09
+**Status:** Accepted; refinement `34c80a1` deployed to staging, UI QA PASS. Real AJAX add-to-cart E2E PENDING.
+
+### Context
+A read-only comparison with the Suplementi theme (staging, HEAD `bb4e2b7`) was run to port its Toastify experience. DreamPoint already ships Toastify 1.12.0 as its own hardened fork (`js/toastify.min.js`: `textContent` rendering, `role="status"`/`aria-live`) with `css/src/toastify.min.css`. Add-to-cart requests are owned by WooCommerce's native `wc-ajax=add_to_cart` (`add-to-cart.min.js`); the only DreamPoint notice listener is `$(document.body).on('added_to_cart')` in `js/ajax-add-to-cart.js`, which shows the toast and opens the mini-cart. The Quick Order plugin reuses it through a synthetic `added_to_cart` after its own sync.
+
+### Decision
+1. No migration: Suplementi's custom `admin-ajax` endpoint and click handler are NOT copied. They would send a second request next to WooCommerce's own handler, cache a nonce in the page, and (as written) show a success toast on server failure (the JS reads `response.error` but the PHP error payload is `data.error`).
+2. The hardened Toastify fork is kept; the stock Suplementi library is not substituted.
+3. `dpAddToCart` / the `added_to_cart` listener stay authoritative; no new listeners, endpoints or triggers. Cart guards (`woocommerce_add_to_cart_validation`, `woocommerce_add_to_cart_quantity`), bucket visibility, ADR-007 reservation and checkout/ERP are untouched.
+4. Refinement only: success text `Proizvod dodan u košaricu!` and close label `Zatvori obavijest` via PHP `esc_html__` in `dpAddToCart`; new optional `closeAriaLabel` in the fork (default `Close notification`); at <=767.98px bottom toasts get `margin-bottom: $dp-mobile-toolbar-height` (73px) so they sit 15px above the fixed toolbar (Toastify writes an inline `bottom`, so a constant margin is the CSS-only lift). Desktop placement, 3000ms duration and the close button are unchanged.
+
+### Consequences / deferred
+- Re-apply the three `closeAriaLabel` edits (documented in the file header) if the fork is ever replaced.
+- Deferred: PDP max-quantity toast (`product-single.js`) still has the English close label; dormant `.is-danger` loses to the `!important` background in `toastify.min.css`; the toast offset must be revalidated if the toolbar height changes (it is derived from 14px + 44px + 14px + 1px).
+- Validation so far used synthetic notifications only (1440/390/360/320, two-toast stacking, close, 3000ms timing). One request / one event / one toast per real click is not yet proven.

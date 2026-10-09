@@ -222,3 +222,23 @@ A single anchor (`#header .action-btns .quick-order-btn .button`) is 40px at >=7
 - Icon-only M Secondary and S Destructive capabilities.
 - Step 3b-2c (WC Blocks, WBW, refund controls) and Step 3b-2d (QUICK ORDER override cleanup).
 - Other unresolved Figma mappings listed in section 15 Outstanding and the audit checkpoint.
+
+## 17. Step 3b-3b — button capabilities and product-card action (2026-10-09, staging PASS; real add-to-cart E2E pending)
+
+### Capabilities (`a79f643`, Sass only)
+New composable modifiers on the existing `.button` (ADR-022), emitted in `_utilities.scss`, built from mixins in `_mixins.scss`:
+- `.button--s`: Figma S, 24px, radius 12, 12/14 type.
+- `.button--destructive`: `#f04437` / hover `#fca19b` / pressed `#f97066`, text `#f9fafb` / `#e5e7eb` / `#f3f4f6` (existing `$dp-color-*` tokens; legacy disabled look kept).
+- `.button--icon-only`: square, radius 8 for every size (bare = L 40, `+ .button--sm` = M 32, `+ .button--s` = S 24, `+ .button--xl` = XL 48), glyph 16px (M, S) or 20px (XL, L). The size compounds (specificity 0,3,0) outrank the size modifiers, so class order never matters. The visible label must be hidden (`.screen-reader-text`, provided by WordPress core inline CSS) and the control needs an `aria-label`.
+Only the product card consumes them so far; the cart remove link (Destructive S icon-only 24px, `icon-trashcan`) and the auth icon corrections are still open.
+
+### Simple-product card action (`f3438a8`)
+`woocommerce/content-product.php` (simple branch only): `ajax_add_to_cart add_to_cart_button add-to-cart button button--outline button--sm button--icon-only`, glyph `icon-cart` (Figma shopping-cart; `icon-shopping-bag` did not match). WooCommerce classes, `href`, `data-product_id|sku|quantity`, `aria-label`, `title` unchanged. `_content.scss`: the legacy `.action-holder` sizing excludes `.button--icon-only`; the loading spinner rule also targets `.icon-cart`. Staging: 32×32, radius 8, Secondary M colors, centered 16px glyph, no overflow at 1440/390/320. Variable ("Pogledaj opcije") and out-of-stock actions are unchanged because Figma has no state for them (the design shows only the 32px cart button and a "Na stanju"/"Nema na stanju" badge) — a design decision is still required.
+
+### Overlay fix (`5430547`)
+Root cause (pre-existing): `.url-wrapper` (absolute, z-index 1) covered the card actions because `.action-holder` had `z-index: 2` but `position: static`. Fix in `_content.scss`: `.action-holder { position: relative; pointer-events: none; a { pointer-events: auto; } }`. The 30px holder padding stays click-through to the whole-card link. Staging hit-tests (1440/390/320, simple/variable/out-of-stock): action centre and four inner points resolve to the action; padding, photo, title and price resolve to the overlay. No real add-to-cart was clicked.
+
+### Still open
+- Variable / out-of-stock card actions (no Figma state); segment tiles (`featured-categories`, decorative frosted label with per-segment logo, not a Button; the ACF block has no logo field); `about` block has no Figma section; both keep `.categories-btn` styling.
+- `.categories-btn` mixins/selectors must stay until those consumers are migrated; then they can be removed.
+- Cart remove, auth icons, Left-icon cases, Step 3b-2c/3b-2d (see sections 15-16).

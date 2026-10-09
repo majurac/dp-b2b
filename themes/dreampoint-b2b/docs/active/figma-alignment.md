@@ -195,3 +195,30 @@ The client confirmed that wishlist functionality is no longer required and the s
 - `.categories-btn` (product-card actions, Figma M Secondary icon-only) and the PDP "Obavijesti me" (cwginstock) are deferred to catalog/PDP batches.
 - Step 3b-2c (WC Blocks checkout, WBW filters, refund controls onto the Figma mixins) is NOT implemented.
 - Step 3b-2d (remove the visual declarations of the QUICK ORDER override once the shared `.button` gives an identical computed style at >=992px and <=767px; layout-only declarations such as `flex-shrink` and the <=991/<=359 paddings stay in `_header.scss`) is deferred.
+
+## 16. Step 3b-3a — four confirmed button variant corrections (2026-10-09, DEPLOYED / PARTIALLY VALIDATED)
+
+Source: the read-only button instance-to-template audit (2026-10-09). Implementation commit `07faa01`; local HEAD, origin/master and staging were confirmed aligned. Class changes only; no Sass/CSS, no global mixin change, no ACF/data change.
+
+| Template | Classes | Figma target |
+|---|---|---|
+| `functions.php` `[contact_info]` ("Kontaktiraj predstavnika") | `button button--outline button--sm` | Secondary M, 32px (`11148:31585`, `11148:31683`, `11283:49881`, `11148:37591`) |
+| `blocks/templates/hero.php` ("Pogledaj proizvode") | `button button--xl` | Primary XL, 48px (`11148:31743`, `11283:49941`); corrects the wrong Step 3b-2b Secondary M mapping |
+| `blocks/templates/featured-section.php` ("Otvori quick order") | `button button--xl` | Primary XL, 48px (`11148:31624`, `11148:31744`) |
+| `woocommerce/myaccount/my-address.php` ("Izmijeni") | `edit button button--icon-after` (`button--sm` removed) | Primary L, 40px (`11148:37906`); icon placement (Figma Left, ours After) NOT changed here |
+
+### Validation status
+- Source/deploy: PASS (`php -l` locally and on staging; staging HEAD `07faa01`; staging tree clean).
+- Runtime PASS: featured-section CTA 48px Primary XL; My Account `Izmijeni` 40px Primary L.
+- Runtime NOT TESTABLE (do not treat as PASS): contact-info (ACF link empty on staging, block renders without the button) and hero (block absent from the staging homepage). Staging content was deliberately not altered.
+- Lightweight regression: mini-cart (M Primary / M Secondary 32px), header search, mobile toolbar and no horizontal scroll at 390 and 1440: OK. Only the known `img/ico/lock.svg` 404 on `/my-account/`.
+
+### Header QUICK ORDER measurement (closed, no defect)
+A single anchor (`#header .action-btns .quick-order-btn .button`) is 40px at >=768px and 44px at <=767px (`@media (max-width: 767.98px)` sets `min-height: 44px`); at <=767px `.action-btns` becomes the fixed mobile toolbar. A reported 44px "desktop" value was a viewport attribution error (the first query ran on a narrow viewport). Values match the Step 3a record; no regression and no fix required.
+
+### Still open (separate work, not started)
+- Runtime verification of contact-info and hero when they render naturally.
+- Auth button icon corrections (login/register drop `button--icon-after`; reset-password icon Left).
+- Icon-only M Secondary and S Destructive capabilities.
+- Step 3b-2c (WC Blocks, WBW, refund controls) and Step 3b-2d (QUICK ORDER override cleanup).
+- Other unresolved Figma mappings listed in section 15 Outstanding and the audit checkpoint.

@@ -1677,3 +1677,6 @@ The final Figma Button set (Size XL/L/M/S x Style Primary/Secondary/Destructive 
 
 ### Consequences / open
 See `docs/active/figma-alignment.md` section 15 for the outstanding list (Shop Brand size, components not renderable on staging, mobile "Filtriraj" 32px, blog hover, Steps 3b-2c/3b-2d).
+
+### Update 2026-10-09 (Step 3b-3a)
+Four template class corrections from the per-instance audit were implemented in `07faa01` and deployed to staging (contact-info Secondary M, hero Primary XL, featured-section Quick Order CTA Primary XL, My Account address edit Primary L). No decision above changed; the existing `.button` ecosystem expressed all four targets. The hero mapping in decision 5 ("mini-cart/hero M") is superseded: hero is Primary XL. Status: deployed, partially runtime-validated (contact-info and hero not rendered on staging). Record: `docs/active/figma-alignment.md` section 16.

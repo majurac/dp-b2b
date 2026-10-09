@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-09 — Figma Step 3b-3a (four button variant corrections) — DEPLOYED / PARTIALLY VALIDATED
+
+Commit `07faa01` (PHP class changes only, no Sass/CSS change) corrected four confirmed button variants from the instance-to-template audit: contact-info `button button--outline button--sm` (Secondary M), hero `button button--xl` (Primary XL; replaces the wrong Step 3b-2b Secondary M mapping), featured-section Quick Order CTA `button button--xl` (Primary XL), My Account address edit `Izmijeni` without `button--sm` (Primary L). Pushed and fast-forward deployed to staging (staging code HEAD `07faa01`); PHP syntax checked on staging. Runtime PASS: featured-section CTA (48px) and My Account `Izmijeni` (40px). Runtime NOT TESTABLE (not PASS): contact-info (ACF link empty on staging) and hero (block absent from the staging homepage). Open: runtime verification of those two when they naturally render, auth button icon corrections, icon-only M Secondary / S Destructive capability, Step 3b-2c, Step 3b-2d. Details: `docs/active/figma-alignment.md` section 16, ADR-022 update 2026-10-09 (Step 3b-3a).
+
 ## Update 2026-10-09 — Figma Step 3b-2b (shared button activation) — staging PASS
 
 The existing `.button` ecosystem now renders the Figma Button set (`11148:40692`): `.button` = Primary L (40px), `.button--outline` = Secondary, `.button--sm` = M (32px), `.button--xl` = XL (48px), Montserrat 600, no uppercase, Figma hover/pressed states and a keyboard focus ring. Deployed and validated on staging, final staging HEAD `56ce5f17fe6de728e51cd35f905843979e5919a3` (`56ce5f1`); implementation commits `52564b3` (tokens), `939e281` (opt-in mixins), `7b0a5b2` (Sass activation), `023c038` (approved template class migrations), `56ce5f1` (header search regression fix). Details, architecture and outstanding items: `docs/active/figma-alignment.md` section 15 and `docs/decisions.md` ADR-022.

@@ -216,6 +216,7 @@ jQuery(function ($) {
                 stopOnFocus: true,
                 className: typeClass,
                 close: true,
+                closeAriaLabel: ( typeof dpAddToCart !== 'undefined' && dpAddToCart.close_label ) ? dpAddToCart.close_label : 'Zatvori obavijest',
                 style: {
                     background: type === 'error' ? '#f44336' : 
                               type === 'info' ? '#2196F3' : 
@@ -245,7 +246,7 @@ jQuery(function ($) {
         // Show success notification
         const message = ( typeof dpAddToCart !== 'undefined' && dpAddToCart.added_to_cart )
             ? dpAddToCart.added_to_cart
-            : 'Proizvod dodat u košaricu!';
+            : 'Proizvod dodan u košaricu!';
         
         showNotification(message, 'success');
         

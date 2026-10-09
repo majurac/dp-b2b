@@ -88,6 +88,10 @@ $dp-btn-font-size-s:      12px;
 $dp-btn-line-height:      16px;
 $dp-btn-line-height-s:    14px;
 
+// Fixed mobile toolbar (#header .action-btns at <=767.98px): 14px + 44px QUICK ORDER + 14px + 1px border.
+// Used to lift bottom Toastify notifications above it; keep in sync with the toolbar in _header.scss.
+$dp-mobile-toolbar-height: 73px;
+
 // Typography
 $dp-font-heading: 'Petrona', serif;
 $dp-font-body:    'Montserrat', sans-serif;

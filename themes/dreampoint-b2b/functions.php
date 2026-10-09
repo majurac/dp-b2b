@@ -517,7 +517,8 @@ function dreampoint_b2b_scripts(): void {
         );
         wp_script_add_data( 'dreampoint-b2b-ajax-add-to-cart', 'strategy', 'defer' );
         wp_localize_script( 'dreampoint-b2b-ajax-add-to-cart', 'dpAddToCart', [
-            'added_to_cart' => esc_html__( 'Proizvod dodat u košaricu!', 'dreampoint-b2b' ),
+            'added_to_cart' => esc_html__( 'Proizvod dodan u košaricu!', 'dreampoint-b2b' ),
+            'close_label'   => esc_html__( 'Zatvori obavijest', 'dreampoint-b2b' ),
         ] );
     }
 

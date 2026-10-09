@@ -1002,3 +1002,11 @@
         }
     }
 }
+// Toastify (bottom): lift above the fixed mobile toolbar. Toastify.reposition() writes an inline
+// `bottom` (15px + stacked heights), so a constant margin-bottom shifts every toast by the toolbar
+// height and keeps the default 15px gap above it. Only the Toastify bottom placement is affected.
+.toastify.toastify-bottom {
+    @include bp(sm-down) {
+        margin-bottom: $dp-mobile-toolbar-height;
+    }
+}

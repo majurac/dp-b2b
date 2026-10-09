@@ -201,6 +201,14 @@ JavaScript:
 
 ---
 
+## Buttons (ADR-022)
+
+- Buttons use the existing `.button` ecosystem only: `.button` = Figma L, `.button--sm` = M, `.button--xl` = XL, `.button--outline` = Secondary. Never introduce `.dp-btn` or another parallel system.
+- `button-primary` / `button-outline` emit legacy CSS unless a Figma size is passed (`@include button-primary('l')`); do not change legacy callers (WC Blocks, WBW, refund) outside Step 3b-2c.
+- Rules that replace legacy `.custom-form` control rules must not exceed the legacy specificity (use `:where(...)`); details in `docs/active/figma-alignment.md` section 15.
+
+---
+
 ## Performance Rules
 
 - Prefer WooCommerce native APIs

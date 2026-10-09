@@ -5,6 +5,12 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-09 — Figma Step 3b-2b (shared button activation) — staging PASS
+
+The existing `.button` ecosystem now renders the Figma Button set (`11148:40692`): `.button` = Primary L (40px), `.button--outline` = Secondary, `.button--sm` = M (32px), `.button--xl` = XL (48px), Montserrat 600, no uppercase, Figma hover/pressed states and a keyboard focus ring. Deployed and validated on staging, final staging HEAD `56ce5f17fe6de728e51cd35f905843979e5919a3` (`56ce5f1`); implementation commits `52564b3` (tokens), `939e281` (opt-in mixins), `7b0a5b2` (Sass activation), `023c038` (approved template class migrations), `56ce5f1` (header search regression fix). Details, architecture and outstanding items: `docs/active/figma-alignment.md` section 15 and `docs/decisions.md` ADR-022.
+
+Not validated at runtime (components were not rendered on staging) and not presented as validated: Shop Brand CTA (no confirmed Figma size), hero block, about block, blog card hover and WooCommerce notice buttons. Still open: mobile "Filtriraj" is 32px high (touch-target adequacy to be checked), Step 3b-2c (WC Blocks / WBW / refund controls) and Step 3b-2d (QUICK ORDER override cleanup).
+
 ## Update 2026-10-09 — Figma Step 3a closeout (staging PASS)
 
 Completed and validated on staging (HEAD `02e8ca0`): Step 3a header QUICK ORDER button on the existing `.button` — PASS; wishlist theme integration removal (ADR-021) — PASS; obsolete wishlist page ID 20 moved to Trash on staging (restorable); mobile pagination overflow fix — PASS; Quick Order footer responsive fix — PASS. Non-blocking observations, intentionally not reopened: (1) desktop header is not actually sticky (`#header` gets `.sticky`, but `#main-header { position: sticky }` sits inside a header-height parent; pre-existing); (2) on shop pagination at 390px the next arrow wraps alone onto a second row (cosmetic). Next: Step 3b (global `.button` alignment with Figma) — scope proposal awaiting approval; nothing implemented.

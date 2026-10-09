@@ -1656,3 +1656,24 @@ Remove all theme-owned wishlist integration. Do not uninstall the plugin, delete
 ### Update 2026-10-09 — deployment and page retirement
 
 The removal was deployed to staging with commit `50b98a7` and validated in the browser (no wishlist markup, requests or new console errors). On staging only, the plugin-created WordPress page ID 20 (`/wishlist/`) was moved to Trash after confirming it was not referenced by menus, widgets, ACF options or theme mods; it is restorable (`wp post untrash 20`) and the plugin options (`tinvwl-*`, including `tinvwl-page`) were left untouched. Retiring or deleting the page permanently, and uninstalling the plugin, remain separate decisions.
+
+---
+
+## ADR-022 — Button system: Figma Button set on the existing `.button` ecosystem
+
+**Date:** 2026-10-09
+**Status:** Accepted; Step 3b-2b implemented, deployed to staging and validated (staging HEAD `56ce5f17fe6de728e51cd35f905843979e5919a3`). Steps 3b-2c and 3b-2d are open. Builds on ADR-020 (presentation-only, additive tokens) and the Suplementi-style Sass ownership (`_vars` tokens, `_mixins` definitions, `_utilities` emitted classes; commits `e1f5ed1`, `a48a940`).
+
+### Context
+The final Figma Button set (Size XL/L/M/S x Style Primary/Secondary/Destructive x State x Icon) had to be adopted without a parallel button system. A first attempt (`.dp-btn` classes, `4cc0421`, preserved on the local branch `backup/step3a-dp-btn-rejected`) was rejected.
+
+### Decisions
+1. The existing classes stay the public API: `.button` = Figma L (40px), `.button--sm` = M (32px), `.button--xl` = XL (48px), `.button--outline` = Secondary. No `.dp-btn`, no new size modifier (S 24px and Destructive are not used by any consumer yet).
+2. `button-primary` / `button-outline` take an optional `$figma` size; without it they emit the exact legacy CSS, so unmigrated consumers (WC Blocks checkout, WBW, refund controls, `.fr-request-form`) are untouched until Step 3b-2c.
+3. Appearance modifiers and size modifiers set disjoint properties (no dependence on source order); icon spacing uses compound selectors.
+4. Typography: Montserrat 600, no uppercase; the header QUICK ORDER override keeps its uppercase label. Focus is a box-shadow ring; disabled stays legacy (Figma defines neither).
+5. Template consumers were migrated only where a Figma target is established (My Account L, mini-cart/hero M, cart `button--xl`); the Shop Brand CTA (`brand-hero.php`) was deliberately left unchanged.
+6. Specificity doctrine for form controls: a rule that replaces a legacy `.custom-form` control rule keeps the legacy specificity (`:where(:not(.button))`), otherwise scoped overrides such as the header search button lose (regression `56ce5f1`).
+
+### Consequences / open
+See `docs/active/figma-alignment.md` section 15 for the outstanding list (Shop Brand size, components not renderable on staging, mobile "Filtriraj" 32px, blog hover, Steps 3b-2c/3b-2d).

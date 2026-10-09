@@ -976,8 +976,15 @@ body.admin-bar {
         align-items: center;
         justify-content: center;
         gap: 16px;
+        // z-index only applies to a positioned box: lift the actions above the .url-wrapper card overlay (z-index 1)
+        position: relative;
         z-index: 2;
         padding-bottom: 15px;
+        // the 30px padding is not a control: let clicks there fall through to the card link, only the actions are interactive
+        pointer-events: none;
+        a {
+            pointer-events: auto;
+        }
         .hide-lg {
             @include bp(lg-up) {
                 display: none;

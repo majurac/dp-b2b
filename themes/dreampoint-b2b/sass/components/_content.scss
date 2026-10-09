@@ -1175,20 +1175,79 @@ body.admin-bar {
 
 .inner-page {
     .inner-heading {
-        padding-top: 30px;
-        padding-bottom: 30px;
-        background-color: #F1F1F0;
-        text-align: center;
-        background-size: cover;
-        background-position: center;
+        // Final Figma title banner (ADR-020): left-aligned, 24px vertical padding, dp watermark.
+        padding-top: $dp-space-24;
+        padding-bottom: $dp-space-24;
+        background-color: transparent;
+        text-align: left;
         position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        &:not(.has-background) {
+            // Watermark is positioned from the right edge: at 1440px viewport it starts at x=336 (Figma).
+            background-image: url("img/bg/dp-pattern.png");
+            background-repeat: no-repeat;
+            background-size: 1440px 960px;
+            background-position: calc(100% + 336px) -744px;
+            @include bp(sm-down) {
+                background-image: none;
+            }
+        }
+        h1 {
+            font-family: $dp-font-heading;
+            font-weight: 600;
+            font-size: 64px;
+            line-height: 72px;
+            letter-spacing: 0;
+            text-transform: none;
+            color: $dp-color-text-primary;
+            margin: 0;
+            @include bp(lg-down) {
+                font-size: 48px;
+                line-height: 56px;
+            }
+            @include bp(sm-down) {
+                font-size: 32px;
+                line-height: 40px;
+            }
+        }
         h1 + * {
             margin-top: 16px;
         }
+        h1 + .intro-text {
+            margin-top: 4px;
+            max-width: 380px;
+            font-family: $dp-font-body;
+            font-weight: 500;
+            font-size: 16px;
+            line-height: 24px;
+            color: $dp-color-text-secondary;
+            p {
+                margin: 0;
+                font: inherit;
+                color: inherit;
+            }
+        }
+        .breadcrumb, .woocommerce-breadcrumb {
+            font-family: $dp-font-body;
+            font-weight: 400;
+            font-size: 12px;
+            line-height: normal;
+            color: $dp-color-text-tertiary;
+            margin-bottom: $dp-space-24;
+            a {
+                color: inherit;
+                &:hover {
+                    color: $dp-color-text-primary;
+                }
+            }
+            // current page: custom breadcrumb uses a bare <span>, WC breadcrumb uses .breadcrumb__current
+            > span, .breadcrumb__current {
+                font-weight: 700;
+                color: $dp-color-text-primary;
+            }
+        }
         &.has-background {
+            background-size: cover;
+            background-position: center;
             min-height: 250px;
             h1, h2, .breadcrumb, .page-breadcrumb, .woocommerce-breadcrumb {
                 color: #fff;
@@ -1201,6 +1260,17 @@ body.admin-bar {
                 background-color: rgba($black,.4);
             }
         }
+    }
+}
+
+// Checkout keeps its own H1 (Figma CH-01/02: Montserrat Bold 40)
+body.woocommerce-checkout .inner-page .inner-heading h1 {
+    font-family: $dp-font-body;
+    font-weight: 700;
+    font-size: 40px;
+    line-height: normal;
+    @include bp(sm-down) {
+        font-size: 32px;
     }
 }
 

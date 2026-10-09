@@ -376,6 +376,8 @@ body.admin-bar {
     border-top: 1px solid #EAECF0;
     text-align: center;
     display: flex;
+    // nine fixed 40px items (1 2 3 4 … 36 37 38 →) need ~361px: wrap instead of overflowing on <=360px
+    flex-wrap: wrap;
     align-items: center;
     justify-content: center;
     gap: 2px;

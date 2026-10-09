@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-09 — Figma Step 3a closeout (staging PASS)
+
+Completed and validated on staging (HEAD `02e8ca0`): Step 3a header QUICK ORDER button on the existing `.button` — PASS; wishlist theme integration removal (ADR-021) — PASS; obsolete wishlist page ID 20 moved to Trash on staging (restorable); mobile pagination overflow fix — PASS; Quick Order footer responsive fix — PASS. Non-blocking observations, intentionally not reopened: (1) desktop header is not actually sticky (`#header` gets `.sticky`, but `#main-header { position: sticky }` sits inside a header-height parent; pre-existing); (2) on shop pagination at 390px the next arrow wraps alone onto a second row (cosmetic). Next: Step 3b (global `.button` alignment with Figma) — scope proposal awaiting approval; nothing implemented.
+
 ## Update 2026-10-09 — Mobile follow-ups and Quick Order footer fix deployed to staging
 
 Staging HEAD `02e8ca0`: QUICK ORDER keeps 14px on phones (`c091b58`), shop pagination wraps on narrow phones (`4ce51ef`, no page-level overflow at 360/320px), docs (`79c79e5`) and the Quick Order footer fix (`02e8ca0`: `flex-wrap: wrap` on `.dp-qo-footer__actions` at <=767px in `plugins/dp-b2b-quick-order/assets/dist/quick-order.css`, plugin version 1.0.33 -> 1.0.34 for `?ver=` cache invalidation). Browser QA PASS on `/quick-order/` at 1440/768/390/360/320px: served `quick-order.css?ver=1.0.34`, footer buttons side by side at >=390px and stacked inside the footer at 360/320px, `scrollWidth` equals `clientWidth` everywhere, the product table keeps its own horizontal scroll, no console errors or failed requests; header QUICK ORDER and the four-control mobile toolbar unchanged. Staging only; production has not been touched. The Wishlist page ID 20 stays in Trash on staging (ADR-021).

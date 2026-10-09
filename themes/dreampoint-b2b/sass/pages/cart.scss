@@ -146,32 +146,16 @@
                         display: none;
                     }
                 }
+                // Figma Destructive S icon-only (.button--s.button--destructive.button--icon-only on the link).
+                // >=768px: flex item at the end of .product-total (right of the subtotal, vertically centered).
+                // <=767px: corner placement; .product-total is static, so the containing block stays .cart_item.
                 .product-remove {
-                    position: absolute;
-                    top: 16px;
-                    right: 16px;
-                    z-index: 1;
-                    @include bp(lg) {
-                        top: 20px;
-                        transform: none;
-                    }
+                    flex-shrink: 0;
                     @include bp(sm-down) {
+                        position: absolute;
                         top: 16px;
                         right: 0;
-                        transform: none;
-                    }
-                    a {
-                        display: flex;
-                        flex-direction: row;
-                        justify-content: center;
-                        align-items: center;
-                        width: 16px;
-                        height: 16px;
-                        color: #141414;
-                        font-size: 16px;
-                        &:hover {
-                            color: $text-primary;
-                        }
+                        z-index: 1;
                     }
                 }
                 .product-footer {

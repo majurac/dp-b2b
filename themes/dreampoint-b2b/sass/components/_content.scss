@@ -538,8 +538,10 @@ body.admin-bar {
 // follows the shared .button rules (utilities), so --sm / --xl / --outline are not overridden.
 // .fr-request-form (refund plugin form) keeps the legacy button look.
 .custom-form {
-    input[type="submit"]:not(.button),
-    button[type="submit"]:not(.button) {
+    // :where() keeps the specificity of the legacy rule (0,2,1), so scoped overrides such as the
+    // header search button (".search-area form.custom-form .search-btn") still win
+    input[type="submit"]:where(:not(.button)),
+    button[type="submit"]:where(:not(.button)) {
         @include button-figma-primary('l');
         display: flex;
     }

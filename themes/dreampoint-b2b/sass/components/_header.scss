@@ -570,6 +570,7 @@
         @include centre(y);
         left: 16px;
         height: auto;
+        min-height: 0;
         padding: 0;
         background: none;
         border: 0;

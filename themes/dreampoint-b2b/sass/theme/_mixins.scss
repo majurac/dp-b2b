@@ -569,6 +569,66 @@
     @include button-figma-disabled;
 }
 
+// Destructive appearance (Figma Style=Destructive): default / hover / pressed fills with the
+// matching inverse text colors. Reuses the shared state tokens; no border in Figma, so the border
+// color follows the fill (same convention as the primary colors).
+@mixin button-figma-destructive-colors {
+    background: $dp-color-error;
+    border-color: $dp-color-error;
+    color: $dp-color-btn-primary-text;
+    &:hover {
+        background: $dp-color-error-hover;
+        border-color: $dp-color-error-hover;
+        color: $dp-color-btn-text-hover;
+    }
+    &:active {
+        background: $dp-color-error-pressed;
+        border-color: $dp-color-error-pressed;
+        color: $dp-color-btn-text-pressed;
+    }
+    @include button-figma-disabled;
+}
+
+// Figma Icon=Only: a square of the size's height with a 16px (M, S) or 20px (XL, L) glyph and an
+// 8px radius. The visible label must be hidden (e.g. .screen-reader-text) and the control needs an
+// aria-label. Sets every property it touches so the compound selectors in _utilities.scss win over
+// the size modifiers regardless of source order.
+@mixin button-figma-icon-only($size) {
+    $box: null;
+    $glyph: 16px;
+    @if $size == 'xl' {
+        $box: 48px;
+        $glyph: 20px;
+    } @else if $size == 'l' {
+        $box: 40px;
+        $glyph: 20px;
+    } @else if $size == 'm' {
+        $box: 32px;
+    } @else if $size == 's' {
+        $box: 24px;
+    } @else {
+        @error "button-figma-icon-only: unknown size '#{$size}' (use 'xl', 'l', 'm' or 's').";
+    }
+    box-sizing: border-box;
+    width: $box;
+    height: $box;
+    min-height: $box;
+    padding: 0;
+    gap: 0;
+    border-radius: $dp-radius-md;
+    font-size: $glyph;
+    line-height: 1;
+    flex-shrink: 0;
+    i {
+        font-size: $glyph;
+        line-height: 1;
+    }
+    svg {
+        width: $glyph;
+        height: $glyph;
+    }
+}
+
 // Figma has no disabled state: the legacy disabled look is kept.
 @mixin button-figma-disabled {
     &:disabled,

@@ -82,6 +82,13 @@
     &.button--xl {
         @include button-figma-size('xl');
     }
+    // S (24px). .button--sm stays M.
+    &.button--s {
+        @include button-figma-size('s');
+    }
+    &.button--destructive {
+        @include button-figma-destructive-colors;
+    }
     // Figma "Left/Right icon" padding; the compound selectors outrank the size modifiers above
     &.button--icon-after {
         @include button-figma-icon-padding('l');
@@ -91,6 +98,23 @@
     }
     &.button--icon-after.button--xl {
         @include button-figma-icon-padding('xl');
+    }
+    &.button--icon-after.button--s {
+        @include button-figma-icon-padding('s');
+    }
+    // Figma Icon=Only. The bare rule is size L; the three compounds (0,3,0) outrank the size
+    // modifiers (0,2,0) and set the same properties, so source order never matters.
+    &.button--icon-only {
+        @include button-figma-icon-only('l');
+    }
+    &.button--icon-only.button--sm {
+        @include button-figma-icon-only('m');
+    }
+    &.button--icon-only.button--s {
+        @include button-figma-icon-only('s');
+    }
+    &.button--icon-only.button--xl {
+        @include button-figma-icon-only('xl');
     }
 }
 

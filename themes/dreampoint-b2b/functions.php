@@ -358,22 +358,22 @@ function dreampoint_b2b_scripts(): void {
 
     // --- CSS: Page-specific styles ---
     if ( is_cart() ) {
-        wp_enqueue_style( 'dp-page-cart', get_template_directory_uri() . '/css/pages/cart.css', [ 'dp-style' ], _S_VERSION );
+        wp_enqueue_style( 'dp-page-cart', get_template_directory_uri() . '/css/pages/cart.css', [ 'dp-style' ], dreampoint_b2b_asset_ver( 'css/pages/cart.css' ) );
     }
     if ( is_checkout() ) {
-        wp_enqueue_style( 'dp-page-checkout', get_template_directory_uri() . '/css/pages/checkout.css', [ 'dp-style' ], _S_VERSION );
+        wp_enqueue_style( 'dp-page-checkout', get_template_directory_uri() . '/css/pages/checkout.css', [ 'dp-style' ], dreampoint_b2b_asset_ver( 'css/pages/checkout.css' ) );
     }
     if ( is_account_page() ) {
-        wp_enqueue_style( 'dp-page-myaccount', get_template_directory_uri() . '/css/pages/myaccount.css', [ 'dp-style' ], _S_VERSION );
+        wp_enqueue_style( 'dp-page-myaccount', get_template_directory_uri() . '/css/pages/myaccount.css', [ 'dp-style' ], dreampoint_b2b_asset_ver( 'css/pages/myaccount.css' ) );
     }
     if ( is_wc_endpoint_url( 'order-received' ) || is_wc_endpoint_url( 'view-order' ) ) {
-        wp_enqueue_style( 'dp-page-order-details', get_template_directory_uri() . '/css/pages/order-details.css', [ 'dp-style' ], _S_VERSION );
+        wp_enqueue_style( 'dp-page-order-details', get_template_directory_uri() . '/css/pages/order-details.css', [ 'dp-style' ], dreampoint_b2b_asset_ver( 'css/pages/order-details.css' ) );
     }
     if ( is_shop() || is_product_category() || is_product_tag() || is_tax( 'product_brand' ) ) {
-        wp_enqueue_style( 'dp-page-shop-archive', get_template_directory_uri() . '/css/pages/shop-archive.css', [ 'dp-style' ], _S_VERSION );
+        wp_enqueue_style( 'dp-page-shop-archive', get_template_directory_uri() . '/css/pages/shop-archive.css', [ 'dp-style' ], dreampoint_b2b_asset_ver( 'css/pages/shop-archive.css' ) );
     }
     if ( is_product() ) {
-        wp_enqueue_style( 'dp-page-shop-single', get_template_directory_uri() . '/css/pages/shop-single.css', [ 'dp-style' ], _S_VERSION );
+        wp_enqueue_style( 'dp-page-shop-single', get_template_directory_uri() . '/css/pages/shop-single.css', [ 'dp-style' ], dreampoint_b2b_asset_ver( 'css/pages/shop-single.css' ) );
     }
     if ( is_page_template( 'brands.php' ) || is_tax( 'product_brand' ) ) {
         // Versioned by its own mtime: _S_VERSION only tracks style.css / theme.min.js, so a
@@ -382,7 +382,7 @@ function dreampoint_b2b_scripts(): void {
         wp_enqueue_style( 'dp-page-brands', get_template_directory_uri() . '/css/pages/brands.css', [ 'dp-style' ], $brands_css_mtime ? (string) $brands_css_mtime : _S_VERSION );
     }
     if ( is_page_template( 'faq.php' ) ) {
-        wp_enqueue_style( 'dp-page-faq', get_template_directory_uri() . '/css/pages/faq.css', [ 'dp-style' ], _S_VERSION );
+        wp_enqueue_style( 'dp-page-faq', get_template_directory_uri() . '/css/pages/faq.css', [ 'dp-style' ], dreampoint_b2b_asset_ver( 'css/pages/faq.css' ) );
     }
 
     // --- JS: Core ---

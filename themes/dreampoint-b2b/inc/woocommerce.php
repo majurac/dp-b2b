@@ -66,7 +66,7 @@ function dreampoint_b2b_seed_product_grid_options(): void {
  * @return void
  */
 function dreampoint_b2b_woocommerce_scripts() {
-	wp_enqueue_style( 'dreampoint-b2b-woocommerce-style', get_template_directory_uri() . '/css/pages/woocommerce.css', array(), _S_VERSION );
+	wp_enqueue_style( 'dreampoint-b2b-woocommerce-style', get_template_directory_uri() . '/css/pages/woocommerce.css', array(), dreampoint_b2b_asset_ver( 'css/pages/woocommerce.css' ) );
 
 	$font_path   = WC()->plugin_url() . '/assets/fonts/';
 	$inline_font = '@font-face {

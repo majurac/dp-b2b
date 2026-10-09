@@ -54,7 +54,7 @@ function dreampoint_b2b_enqueue_block_styles(): void {
             'dp-block-' . $slug,
             get_template_directory_uri() . '/css/blocks/' . $slug . '.css',
             [ 'dp-style' ],
-            _S_VERSION
+            dreampoint_b2b_asset_ver( 'css/blocks/' . $slug . '.css' )
         );
     }
 }

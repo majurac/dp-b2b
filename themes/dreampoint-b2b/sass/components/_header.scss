@@ -220,6 +220,8 @@
             border-radius: $dp-radius-btn-l;
             background: $dp-color-btn-primary-bg;
             color: $dp-color-btn-primary-text;
+            // 14px at every width: the .button base drops to 12px on phones (button-text mixin)
+            font-size: 14px;
             font-weight: 600;
             line-height: 16px;
             letter-spacing: 0;

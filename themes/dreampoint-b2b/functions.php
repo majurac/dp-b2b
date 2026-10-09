@@ -384,9 +384,6 @@ function dreampoint_b2b_scripts(): void {
     if ( is_page_template( 'faq.php' ) ) {
         wp_enqueue_style( 'dp-page-faq', get_template_directory_uri() . '/css/pages/faq.css', [ 'dp-style' ], _S_VERSION );
     }
-    if ( function_exists( 'tinv_wishlist_is_wishlist' ) && tinv_wishlist_is_wishlist() ) {
-        wp_enqueue_style( 'dp-page-wishlist', get_template_directory_uri() . '/css/pages/wishlist.css', [ 'dp-style' ], _S_VERSION );
-    }
 
     // --- JS: Core ---
     wp_enqueue_script( 'jquery' );
@@ -1066,27 +1063,4 @@ function dreampoint_b2b_contact_info_shortcode(): string {
     </div>
     <?php
     return ob_get_clean();
-}
-
-// ============================================================================
-// ADMIN / EDITOR FIXES
-// ============================================================================
-
-/**
- * Ispravka varijacija wishlist-e za administratore na frontend stranicama proizvoda.
- * Sprečava pogrešno ponašanje tinvwl wishlist dodatka pri pregledu varijacija.
- *
- * Inline skripta je opravdana — uslov je isključivo PHP-side (admin + stranica proizvoda),
- * kod je minimalan i ne sadrži korisničke podatke.
- */
-add_action( 'wp_footer', 'dreampoint_b2b_admin_wishlist_variation_fix', 999 );
-function dreampoint_b2b_admin_wishlist_variation_fix(): void {
-    if ( ! current_user_can( 'administrator' ) || is_admin() || ! is_product() ) return;
-    ?>
-    <script>
-    jQuery(document).ready(function($) {
-        $('form.variations_form').off('found_variation.tinvwl').off('reset_data.tinvwl');
-    });
-    </script>
-    <?php
 }

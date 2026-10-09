@@ -213,9 +213,6 @@ Lighthouse warns about this — ignore it. Acceptable trade-off.
 | `woocommerce/emails/customer-new-account.php` | New account email (pending approval state) |
 | `woocommerce/emails/admin-b2b-new-registration.php` | Admin notification email (HTML) |
 | `woocommerce/emails/plain/admin-b2b-new-registration.php` | Admin notification email (plain text) |
-| `woocommerce/ti-wishlist.php` | TI Wishlist override |
-| `woocommerce/ti-wishlist-empty.php` | TI Wishlist empty state |
-| `woocommerce/ti-wishlist-product-counter.php` | TI Wishlist counter |
 
 WC 10.4.0 email compatibility: both email templates include `FeaturesUtil` import, `$email_improvements_enabled` flag, and `.email-introduction` wrapper.
 
@@ -321,7 +318,6 @@ Do not implement anything from a future phase while current phase is not stable.
 
 | Plugin | Feature |
 |--------|---------|
-| `tinvwl` (TI WooCommerce Wishlist) | Wishlist / save products |
 | `cwginstock` (Back In Stock Notifier) | Product availability notifications |
 | _(none — search is native)_ | Product search by name / `_sku` / catalog number / EAN: native WP search + `inc/product-search.php` (ADR-014). Relevanssi was proposed earlier but is NOT installed |
 | GLS plugin | Shipping + label print (Phase 7) |

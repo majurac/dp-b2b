@@ -183,7 +183,6 @@
         width: 100%;
         @include bp(md) {
             padding-right: 60px;
-            gap: 8px;
         }
         @include bp(sm-up) {
             text-align: right;
@@ -196,9 +195,9 @@
             left: 0;
             bottom: 0;
             justify-content: center;
-            // five controls incl. the single-line QUICK ORDER button: the gap stays 24px on wide
+            // four controls incl. the single-line QUICK ORDER button: the gap stays 24px on wide
             // phones and shrinks (min 6px) on narrow ones so nothing is clipped
-            gap: clamp(6px, calc((100vw - 320px) / 4), 24px);
+            gap: clamp(6px, calc((100vw - 280px) / 3), 24px);
             background-color: #fff;
             padding: 14px 16px;
             border-top: 1px solid #dadada;
@@ -291,25 +290,7 @@
                 background: none;
             }
         }
-        .wishlist-area {
-            .wishlist_products_counter {
-                position: relative;
-                &.top_wishlist-heart:before {
-                    font-size: 34px;
-                    margin-right: 0;
-                }
-            }
-
-            .wishlist_products_counter_text {
-                display: none;
-            }
-            .wishlist-counter-with-products {
-                &:before {
-                    content: "\e909";
-                }
-            }
-        }
-        .count, .wishlist_products_counter_number {
+        .count {
             right: -5px;
             top: -5px;
             position: absolute;

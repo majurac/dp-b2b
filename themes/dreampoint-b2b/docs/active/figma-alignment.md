@@ -103,7 +103,7 @@ OUT: product card, catalog filters, PDP, Quick Order, registration logic, My Acc
 
 1. Registration fields (Figma AUTH-02 vs 7 mandatory B2B fields, ADR-018/TODO #10) — keep implementation.
 2. Figma "Na stanju 46 kom" in QO vs ADR-016 binary stock — keep binary.
-3. Coupon field and wishlist (not in Figma) — keep until client decides.
+3. Coupon field (not in Figma) — keep until client decides. (Wishlist: REMOVED 2026-10-09, see section 14.)
 4. "Dodaj novu adresu" / default-address card (hidden in Figma) — needs client decision with ERP.
 5. Cart reservation (ADR-007) — Reserved Stock Pro purchase/installation; presentation (`CART-02..05`) follows the plugin state.
 6. Payment copy — approved hr ADR-019 text wins over Figma text (Figma has typos "obraduje"/"ce").
@@ -131,7 +131,7 @@ Start here: Step 0 (baseline screenshots + clean-build determinism check), then 
 | 1400-1499px | 1216px (Figma 1200px content) | 1200px |
 | >=1500px | 1434px (preserved; do NOT remove or reduce) | 1418px |
 
-`wishlist.scss` keeps its own hard-coded 1236px at >=1400px (explicit decision; revisit only if a concrete regression is found). Verified on staging at 1399/1400/1499/1500: 1100/1216/1216/1434, no horizontal overflow.
+`wishlist.scss` kept its own hard-coded 1236px at >=1400px (decision superseded: the wishlist feature and `wishlist.scss` were removed 2026-10-09, section 14). Verified on staging at 1399/1400/1499/1500: 1100/1216/1216/1434, no horizontal overflow.
 
 ### Staging QA (admin session, read-only) and limitations
 - Verified: banner/breadcrumb/H1 metrics on shop, category, PDP (breadcrumb only), brands, kontakt, FAQ, cart, checkout, my-account, approval-pending at 1440/1024/768/390; home and Quick Order have no banner (unchanged); no horizontal overflow anywhere; the watermark loads (200, 11 KB, `max-age=604800`).
@@ -147,3 +147,11 @@ Start here: Step 0 (baseline screenshots + clean-build determinism check), then 
 - **WooCommerce dependencies:** none (theme markup outside WC templates, not in WC Blocks, WBW, Select2 or TI Wishlist). The mobile sticky header uses the same anchor, so the mobile state must be checked.
 - **Validation:** `npm run build` clean; `style.css` diff shows only new `.dp-btn*` rules; staging (after an approved deploy) read-only at 1440/1024/768/390 + 1500: header default/hover/focus-visible, sticky state, mobile sticky bar, Quick Order page header variant (`dp-qo-header`, unaffected), touch target >=44px below 768 (`min-height: 44px` in the <768 override), no layout shift of the search/wishlist/cart cluster; other `.button` consumers unchanged (spot-check cart, checkout, my-account, shop, search dropdown).
 - **Next slices (after 3a is validated):** 3b global `.button` switch (cart `checkout.scss:230`, `myaccount.scss:547/556`, `shop-archive.scss:249/253`, `shop-single.scss:413`, `_content.scss:528-541`, one file at a time), then 3c form controls (`.custom-form`, `_content.scss` ~458+: bg `#fcfcfd`, border `#d2d6db`, radius 8, textarea 6; Search `11148:41007`). Do not touch `wc-block-components-*`, WBW, Select2 or TI Wishlist styles.
+
+## 14. Wishlist removal (2026-10-09, ADR-021)
+
+The client confirmed that wishlist functionality is no longer required and the site owner deactivated the TI WooCommerce Wishlist plugin. All theme-owned wishlist integration was removed (see `docs/decisions.md` ADR-021): the header/mobile-toolbar heart counter, the product-card heart (`.add-to-fav`), the PDP add-to-wishlist styling, the three `ti-wishlist*.php` template overrides, the wishlist page stylesheet (`sass/pages/wishlist.scss`, `css/pages/wishlist.css`) and its enqueue, plus the related admin script and dependency references.
+- Earlier statements in this document that mention the wishlist heart (section 4 header row, section 11 item 3, section 13 container notes, Step 4 header text) are historical; the wishlist control no longer exists, so the header action area now holds only home (mobile), search (mobile), QUICK ORDER and cart.
+- The mobile fixed toolbar gap formula was re-derived for four controls: `gap: clamp(6px, calc((100vw - 280px) / 3), 24px)`; the tablet (768-991px) 8px gap workaround was dropped because three controls fit with the default 24px gap.
+- The wishlist-heart presentation question for later batches (product cards, PDP) is moot; product-card and PDP action areas only contain the add-to-cart/inquiry controls.
+

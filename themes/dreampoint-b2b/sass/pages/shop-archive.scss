@@ -1,6 +1,6 @@
 @import '../theme/mixins';
 
-#products-page, .tinv-wishlist .product-listing-wrap {
+#products-page {
     .inner-intro {
         margin-bottom: 56px;
         @include bp(md-down) {

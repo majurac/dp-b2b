@@ -977,57 +977,6 @@ body.admin-bar {
                 display: none!important;
             }
         }
-        .add-to-fav {
-            padding: 0;
-            min-width: 34px;
-            width: 34px;
-            height: 34px;
-            margin-left: auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: $white;
-            border-radius: 50%;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-            .tinv-wraper {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 100%;
-                height: 100%;
-            }
-            button {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 0;
-                background: none;
-                color: $pink;
-                border: 0;
-                font-size: 22px;
-                width: 100%;
-                height: 100%;
-            }
-            a {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 100%!important;
-                height: 100%!important;
-                &:before {
-                    @include animate-fade;
-                    font-size: 22px;
-                    margin: 0!important;
-                    @include centre(both);
-                    color: $pink;
-                }
-                &:hover {
-                    &:before {
-                        content: "\e908";
-                    }
-                }
-            }
-        }
         .add-to-cart, .add-cart-variable, a.button {
             display: flex;
             width: 100%;
@@ -1046,22 +995,6 @@ body.admin-bar {
     }
     .added_to_cart.wc-forward {
         display: none;
-    }
-    &.wishlist_item.out-of-stock {
-        .product-action>.button {
-            font-size: 0;
-            gap: 0;
-            &:after {
-                content: '';
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: $white;
-                font-size: 18px;
-                font-family: icomoon;
-                content: "\e907";
-            }
-        }
     }
     &:hover {
         .photo-holder {
@@ -1160,18 +1093,6 @@ body.admin-bar {
         }
     }
 }
-
-.tinv-wishlist .tinv-txt {
-    @include paragraph-normal;
-    margin-bottom: 25px!important;
-}
-
-.tinv-wishlist .tinvwl-buttons-group button i.ftinvwl-heart-o::before, 
-.tinv-wishlist .tinvwl-buttons-group button i.ftinvwl-key::before, 
-.tinv-wishlist .tinvwl-buttons-group button i.ftinvwl-times::before {
-    top: -1px!important;
-}
-
 
 .inner-page {
     .inner-heading {

@@ -38,7 +38,7 @@ Do not modify or re-analyze the visibility system unless explicitly requested.
 - LiteSpeed Cache
 - Cloudflare on staging/production
 - WooCommerce Product Filter
-- TI WooCommerce Wishlist
+- ~~TI WooCommerce Wishlist~~ - removed 2026-10-09 (`docs/decisions.md` ADR-021); no wishlist code remains in the theme
 
 ---
 

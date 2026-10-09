@@ -113,7 +113,7 @@ if ( is_shop() || is_product_category() || is_tax('product_brand') ) :
             </a>
 
             <div class="price-action">
-                <!-- Action Buttons (Add to Cart / Wishlist / Inquiry) -->
+                <!-- Action Buttons (Add to Cart / Inquiry) -->
                 <div class="action-holder">
                     <?php 
                     /**
@@ -163,15 +163,6 @@ if ( is_shop() || is_product_category() || is_tax('product_brand') ) :
                             <span class="add_to_cart_text screen-reader-text"><?php esc_html_e('Dodaj u košaricu', 'dreampoint-b2b'); ?></span>
                             <i class="icon-shopping-bag" aria-hidden="true"></i>
                         </a>
-                    <?php endif; ?>
-
-                    <!-- Wishlist Button -->
-                    <?php if (function_exists('tinv_get_option')) : ?>
-                        <div class="add-to-fav">
-                            <?php 
-                            echo do_shortcode('[ti_wishlists_addtowishlist product_id="' . absint($product_id) . '"]'); 
-                            ?>
-                        </div>
                     <?php endif; ?>
                 </div>
                 <!-- /.action-holder --> 

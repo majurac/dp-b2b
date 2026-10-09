@@ -158,7 +158,7 @@ function dreampoint_b2b_cart_guard_ineligible_message( string $name ): string {
 
 /**
  * Standardni add-to-cart putevi koji primjenjuju filter: ?add-to-cart=, forma,
- * wc-ajax=add_to_cart, wishlist, ponovna narudžba. Prije mutacije košarice.
+ * wc-ajax=add_to_cart, ponovna narudžba. Prije mutacije košarice.
  *
  * Osim blokade (anonimni / neodobreni) provjerava i bucket: proizvod izvan korisnikova bucketa se ne dodaje.
  * Hook NIJE univerzalna granica (poziva ga form handler, wc-ajax i Store API, ali ne i WC_Cart::add_to_cart),

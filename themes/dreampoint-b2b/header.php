@@ -256,13 +256,6 @@ $company_phone = get_field('company_phone', 'option') ?: '';
                                 </div>
                                 <?php endif; ?>
                                 
-                                <!-- Wishlist -->
-                                <?php if (function_exists('tinv_get_option')) : ?>
-                                    <div class="wishlist-area action-btn">
-                                        <?php echo do_shortcode('[ti_wishlist_products_counter]'); ?>
-                                    </div>
-                                <?php endif; ?>
-                                
                                 <!-- User Account -->
                                 <div class="user-area action-btn" style="display: none;">
                                     <a 

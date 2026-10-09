@@ -1618,3 +1618,38 @@ The final design was delivered after the implementation (Figma file `Te4kr3o8kXD
 ### Update 2026-10-09 — container width policy
 
 The Figma content width (1200px at 1440px) is adopted for the 1400-1499px range: `.container` max-width 1252 -> 1216px (border-box + 8px padding = 1200px usable). The client explicitly asked for a wider layout on large monitors, so the >=1500px tier (1434px) is PRESERVED and must not be removed or reduced; tiers <=1399px are unchanged; `wishlist.scss` keeps its hard-coded 1236px. Deliberate exception: the auth split layout (AUTH-01) and full-bleed backgrounds do not follow the 1200px grid. Implementation: commit `26d9aa8` (`sass/theme/_grids.scss`); Step 2 banner: `5d5c910`.
+
+---
+
+## ADR-021 — Wishlist functionality removed (client decision)
+
+**Date:** 2026-10-09
+**Status:** Accepted. Implemented locally (not yet deployed). Supersedes the wishlist-related notes in ADR-020 (open decision 3, the wishlist heart as "EXTRA", and the `wishlist.scss` 1236px container exception).
+
+### Context
+
+TI WooCommerce Wishlist (`tinvwl`) was integrated into the header action area (desktop and the mobile fixed bottom toolbar), the product cards, the PDP and a wishlist page with theme template overrides. The final Figma design does not contain a wishlist and the client confirmed it is no longer required; the site owner deactivated the plugin.
+
+### Decision
+
+Remove all theme-owned wishlist integration. Do not uninstall the plugin, delete its data or touch the database.
+
+### Removed
+
+- Markup: header wishlist counter (`header.php`), product-card heart (`woocommerce/content-product.php`).
+- Templates: `woocommerce/ti-wishlist.php`, `ti-wishlist-empty.php`, `ti-wishlist-product-counter.php`.
+- PHP: wishlist page stylesheet enqueue and the `dreampoint_b2b_admin_wishlist_variation_fix` footer script (`functions.php`), `tinvwl-js` footer handle (`inc/enqueue-plugin-overrides.php`), a wishlist mention in a comment (`inc/pending-checkout-guard.php`).
+- Sass/CSS: `.wishlist-area` and the counter selector in `_header.scss`, `.add-to-fav`, `.wishlist_item.out-of-stock` and `.tinv-wishlist` rules in `_content.scss`, `.add-to-fav` and `.tinvwl-after-add-to-cart` in `shop-single.scss`, the `.tinv-wishlist` selector in `shop-archive.scss`, `sass/pages/wishlist.scss` and `css/pages/wishlist.css`; generated outputs rebuilt.
+- Mobile toolbar spacing re-derived for four controls (see `docs/active/figma-alignment.md` section 14).
+
+### Not touched / follow-up
+
+- The plugin and its data stay as they are. The icomoon font glyphs used by the wishlist stay in the font file.
+- DB-managed content is not part of this change: the plugin-created page `/wishlist/` still exists on staging (HTTP 200), and menus, widgets, ACF options and plugin options were not inspected. Decide separately in WP Admin.
+- Historical records that mention the wishlist (for example the 2026-09 audit note about a TI Wishlist script and `localStorage`) are kept as history.
+
+### Consequences
+
+- Product-card and PDP action areas contain only add-to-cart/inquiry controls; the header action area holds home (mobile), search (mobile), QUICK ORDER and cart.
+- Staging QA after an approved deploy: header at 1440/1024/768/390/360/320, product cards and PDP layout, cart/checkout/Quick Order unchanged, no console errors from removed assets (`wishlist.css` is no longer requested).
+

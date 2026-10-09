@@ -48,7 +48,6 @@ add_action( 'wp_enqueue_scripts', function (): void {
         'woocommerce',
         'woocommerce-order-attribution',
         'sourcebuster',
-        'tinvwl-js',
     ] as $handle ) {
         $script = wp_scripts()->query( $handle );
         if ( $script ) {

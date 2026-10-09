@@ -70,4 +70,4 @@ Version each `css/blocks/*.css` handle independently, e.g. `filemtime()` of that
 - `brands.css` keeps its own equivalent inline `filemtime()` versioning (`d95f25f`); aligning it with the helper is optional.
 - Vendor CSS (`css/src/*.min.css`, `css/vendors/slick.css`) and some JavaScript enqueues still use `_S_VERSION`.
 - `filemtime()` is timestamp-based, not content-hash-based; mtime is not tracked by Git and changes on the server only when `git pull` rewrites a file.
-- Separate and still pending: the functional (mutation) test of the cart remove button; the visual staging QA of that button passed.
+- Separate (closed): the cart remove button's visual staging QA passed and its functional test was manually confirmed as PASS by the user on 2026-10-09 (`docs/active/figma-alignment.md` section 18).

@@ -74,10 +74,43 @@
     } 
 }
 
+// Secondary bar (Figma 11019:19695): 40px, #0d121c, Montserrat 12/600, tracking 2%.
 #top-header {
-    background-color: $brand;
-    padding-top: 5px;
-    padding-bottom: 5px;
+    background-color: $dp-color-bg-brand;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    .row {
+        align-items: center;
+        justify-content: space-between;
+    }
+    .col {
+        flex: 0 0 auto;
+        width: auto;
+        max-width: none;
+    }
+    .my-acc-sm {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 0;
+        font-family: 'Montserrat';
+        font-weight: 600;
+        font-size: 12px;
+        line-height: 16px;
+        letter-spacing: 0.02em;
+        color: $dp-color-text-inverse;
+        i {
+            font-size: 16px;
+            line-height: 1;
+        }
+        &:hover {
+            opacity: 0.7;
+        }
+        // the global "a:focus { outline: none !important }" would swallow an outline
+        &:focus-visible {
+            box-shadow: 0 0 0 2px $dp-color-bg-brand, 0 0 0 4px $dp-color-text-inverse;
+        }
+    }
     &.hide-md-sm {
         @include bp(md-down) {
             display: none;
@@ -85,17 +118,23 @@
     }
     ul.links {
         display: flex;
-        gap: 16px;
+        gap: 24px;
         @include bp(sm-down) {
             display: none;
         }
         li {
             a {
                 @include button-text;
+                font-weight: 600;
+                font-size: 12px;
+                line-height: 16px;
+                letter-spacing: 0.02em;
+                text-transform: none;
                 text-align: left;
-                color: $white;
-                padding-top: 5px;
-                padding-bottom: 5px;
+                color: $dp-color-text-inverse;
+                display: block;
+                padding-top: 4px;
+                padding-bottom: 4px;
                 &:hover {
                     opacity: 0.7;
                 }
@@ -128,8 +167,8 @@
 }
 
 #header {
-    
-    background: $white;
+    // Primary bar (Figma 11019:19694)
+    background: $dp-color-bg-secondary;
     @include animate-fade;
         //border-bottom: 1px solid rgba(17, 17, 17, 0.1);
     &.sticky {
@@ -141,7 +180,7 @@
     #logo {
         img {
             width: auto;
-            height: 60px;
+            height: 56px;
             @include bp(lg-down) {
                 height: 48px;
             }
@@ -407,20 +446,24 @@
                 height: 100%;
                 a {
                     @include button-text;
-                    font-weight: 500;
-                    padding-top: 5px;
-                    padding-bottom: 5px;
+                    font-weight: 600;
+                    font-size: 12px;
+                    line-height: 16px;
+                    letter-spacing: 0.02em;
+                    text-transform: none;
+                    color: $dp-color-text-primary;
+                    padding: 4px;
                     height: 100%;
                     display: flex;
                     align-items: center;
                     text-align: left;
                     &:hover {
-                        color: $brand;
+                        color: $dp-color-text-secondary;
                     }
                 }
                 &.current-menu-item {
                     a {
-                        color: $brand;
+                        color: $dp-color-text-secondary;
                     }
                 }
                 .sub-menu {

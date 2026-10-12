@@ -128,7 +128,8 @@ $company_phone = get_field('company_phone', 'option') ?: '';
                         <!-- /.col -->
                          <div class="col">
                             <a href="<?php echo esc_url( get_permalink( get_option('woocommerce_myaccount_page_id') ) ); ?>" class="my-acc-sm">
-                                <?php _e('Moj Račun', 'dreampoint-b2b'); ?>
+                                <i class="icon-user" aria-hidden="true"></i>
+                                <span><?php esc_html_e( 'Moj račun', 'dreampoint-b2b' ); ?></span>
                             </a>
                          </div>
                          <!-- /.col -->

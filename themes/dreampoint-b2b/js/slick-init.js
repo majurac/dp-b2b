@@ -207,11 +207,16 @@ jQuery( function ( $ ) {
 
         // --- Segments Slider (acf/segments-section) ---
         // Tile je pravi link, pa mu ostaje fokus; uklanjamo samo dodatni tabindex sa slajd wrappera
-        // (Slick ADA) da ne bude dvostrukog tab zaustavljanja.
+        // (Slick ADA) da ne bude dvostrukog tab zaustavljanja. Slick ga postavlja u initADA() NAKON
+        // 'init' eventa, zato se uklanja nakon initSlider() i odloženo na reInit/afterChange/breakpoint.
         const $segments = $( '.segments-slider' );
         if ( $segments.length ) {
-            $segments.on( 'init reInit afterChange', function () {
-                $( this ).find( '.slick-slide' ).removeAttr( 'tabindex' );
+            const stripSlideTabindex = function () {
+                $segments.find( '.slick-slide' ).removeAttr( 'tabindex' );
+            };
+
+            $segments.on( 'reInit afterChange breakpoint', function () {
+                setTimeout( stripSlideTabindex, 0 );
             } );
 
             initSlider( $segments, {
@@ -232,6 +237,8 @@ jQuery( function ( $ ) {
                     },
                 ],
             } );
+
+            stripSlideTabindex();
         }
 
         // --- Related Posts Slider — jedini sa prilagođenom navigacijom ---

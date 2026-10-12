@@ -565,7 +565,7 @@ function dreampoint_b2b_scripts(): void {
             'dreampoint-b2b-slick-init',
             get_template_directory_uri() . '/js/slick-init.js',
             [ 'dreampoint-b2b-slick' ],
-            _S_VERSION,
+            dreampoint_b2b_asset_ver( 'js/slick-init.js' ),
             true
         );
         wp_script_add_data( 'dreampoint-b2b-slick-init', 'strategy', 'defer' );

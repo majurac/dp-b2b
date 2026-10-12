@@ -30,9 +30,17 @@
         background: $dp-color-bg-tertiary;
         color: $dp-color-text-primary;
         text-decoration: none;
-        &:focus-visible {
-            outline: 2px solid $dp-color-text-primary;
-            outline-offset: 2px;
+        // The global "a:focus { outline: none !important }" swallows an outline, so the ring is a
+        // box-shadow (same two-tone pattern as the button system). It is drawn inset, on an overlay
+        // above the photo: the Slick list clips anything outside the tile and the image covers the
+        // tile's own inset shadow.
+        &:focus-visible::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            box-shadow: inset 0 0 0 2px $dp-color-bg-primary, inset 0 0 0 4px $dp-color-text-primary;
+            pointer-events: none;
         }
     }
     .segment-tile__image {

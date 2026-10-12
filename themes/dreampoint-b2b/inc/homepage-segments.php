@@ -214,3 +214,47 @@ function dreampoint_b2b_get_segment_pages( array &$conflicts = [] ): array {
 
     return $result;
 }
+
+/**
+ * Block editor: informational image-size note under the native Featured Image control
+ * of Segment Landing pages (the homepage Segments Section shows that image).
+ *
+ * The note itself is rendered by js/admin-segment-image-hint.js through the official
+ * `editor.PostFeaturedImage` filter. Here we only decide whether it applies: the page
+ * must carry a valid segment context (ACF `dp_page_segment_context`, as saved) — the
+ * script additionally requires the Segment Landing template to be currently selected.
+ * Nothing is enforced; uploads and assignments are not touched.
+ */
+add_action( 'enqueue_block_editor_assets', 'dreampoint_b2b_enqueue_segment_image_hint' );
+function dreampoint_b2b_enqueue_segment_image_hint(): void {
+    $screen = get_current_screen();
+    $post   = get_post();
+
+    if ( ! $screen || 'page' !== $screen->post_type || ! $post instanceof WP_Post ) {
+        return;
+    }
+
+    if ( '' === dreampoint_b2b_get_page_segment( $post->ID ) ) {
+        return;
+    }
+
+    $handle = 'dreampoint-b2b-segment-image-hint';
+
+    wp_enqueue_script(
+        $handle,
+        get_template_directory_uri() . '/js/admin-segment-image-hint.js',
+        [ 'wp-hooks', 'wp-element', 'wp-data', 'wp-editor' ],
+        dreampoint_b2b_asset_ver( 'js/admin-segment-image-hint.js' ),
+        true
+    );
+
+    wp_add_inline_script(
+        $handle,
+        'window.dpSegmentImageHint = ' . wp_json_encode( [
+            'template' => 'page-segment-landing.php',
+            'title'    => __( 'Preporučena veličina slike: 500 × 750 px (omjer 2:3).', 'dreampoint-b2b' ),
+            'text'     => __( 'Koristite okomitu fotografiju visoke rezolucije. Slika se automatski prilagođava okviru i može biti djelomično odrezana.', 'dreampoint-b2b' ),
+        ], JSON_HEX_TAG | JSON_HEX_AMP ) . ';', // HEX flags keep a translated string from closing the inline <script>.
+        'before'
+    );
+}

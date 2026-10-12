@@ -173,38 +173,6 @@ jQuery( function ( $ ) {
             initSlider( $( selector ), slickDefaults );
         } );
 
-        // --- Featured Categories Slider ---
-        // tabindex="-1" na .url-wrapper sprečava dvostruki fokus (Slick + link)
-        const $featuredCats = $( '.featured-categories-slider' );
-        if ( $featuredCats.length ) {
-            $featuredCats.on( 'init reInit', function () {
-                $( this ).find( '.url-wrapper' ).attr( 'tabindex', '-1' );
-            } );
-
-            initSlider( $featuredCats, {
-                dots:           false,
-                arrows:         true,
-                infinite:       false,
-                speed:          300,
-                slidesToShow:   3,
-                slidesToScroll: 1,
-                lazyLoad:       'ondemand',
-                responsive: [
-                    {
-                        breakpoint: 991,
-                        settings: { slidesToShow: 2, slidesToScroll: 1, dots: true, arrows: false },
-                    },
-                    {
-                        breakpoint: 767,
-                        settings: { slidesToShow: 1, slidesToScroll: 1, dots: true, arrows: false },
-                    },
-                ],
-            } );
-
-            // Override nakon inicijalizacije — Slick postavlja sopstveni tabindex
-            $featuredCats.find( '.url-wrapper' ).attr( 'tabindex', '-1' );
-        }
-
         // --- Segments Slider (acf/segments-section) ---
         // Tile je pravi link, pa mu ostaje fokus; uklanjamo samo dodatni tabindex sa slajd wrappera
         // (Slick ADA) da ne bude dvostrukog tab zaustavljanja. Slick ga postavlja u initADA() NAKON

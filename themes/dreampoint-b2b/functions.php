@@ -265,7 +265,6 @@ function dreampoint_b2b_needs_slick(): bool {
     // Samo ACF blokovi čiji template renderuje .{slug}-slider markup (js/slick-init.js).
     static $slider_blocks = [
         'acf/hero-section',
-        'acf/featured-categories-section',
         'acf/segments-section',
         'acf/latest-products-section',
         'acf/discounted-products-section',

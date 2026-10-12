@@ -1713,7 +1713,7 @@ A read-only comparison with the Suplementi theme (staging, HEAD `bb4e2b7`) was r
 ## ADR-024 — Homepage Segments Section: dynamic tiles from segment landing pages
 
 **Date:** 2026-10-12
-**Status:** Accepted; implemented and STAGING VERIFIED (commits `2582ea0`, `3e5928a`). Production has no DreamPoint deployment.
+**Status:** Accepted; implemented and STAGING VERIFIED (commits `2582ea0`, `3e5928a`; focus ring `370a722`). Item 5 below was carried out on 2026-10-12: the legacy block code (`04077060`) and its ACF group plus JSON (`549ef5c`) are removed. Production has no DreamPoint deployment.
 
 ### Context
 The homepage Segment tiles (Lifestyle / Toys / Outdoor, ADR-009 implementation) reused the generic `acf/featured-categories-section` block with a manually maintained ACF repeater (`main_categories`: image, label, custom link). That is a hand-kept copy of data that already exists: the three segment landing pages (`page-segment-landing.php`, `dp_page_segment_context`). `brand_segment` is an ACF select on `product_brand` terms and is not a taxonomy; there are no segment terms and no segment archives (ADR-009 rejected a new taxonomy). The Figma Segmenti design (`11149:69872`) adds a per-segment DP logo that has no existing data source.

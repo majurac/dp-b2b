@@ -1,0 +1,75 @@
+@import '../theme/mixins';
+
+// Figma "Segmenti" (11149:69872): portrait tiles 384x573, 24px gap, 1px border, 4px radius,
+// full-bleed cover image (no overlay) and a centred frosted label. Desktop-only design;
+// narrower widths follow the Slick breakpoints (2 / 1 slides). The label is a visual element -
+// the whole tile is the single link.
+.segments-section {
+    .segments-slider {
+        // Figma gap is 24px (global .slick-slide gutter is 20px).
+        .slick-slide {
+            margin: 0 12px;
+        }
+        .slick-list {
+            margin: 0 -12px;
+        }
+    }
+    .segment-box {
+        line-height: 0;
+    }
+    .segment-tile {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        aspect-ratio: 384 / 573;
+        overflow: hidden;
+        border: 1px solid $dp-color-border-secondary;
+        border-radius: 4px;
+        background: $dp-color-bg-tertiary;
+        color: $dp-color-text-primary;
+        text-decoration: none;
+        &:focus-visible {
+            outline: 2px solid $dp-color-text-primary;
+            outline-offset: 2px;
+        }
+    }
+    .segment-tile__image {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .segment-tile__label {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        width: 160px;
+        max-width: calc(100% - 32px);
+        padding: 16px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.6);
+        -webkit-backdrop-filter: blur(2px);
+        backdrop-filter: blur(2px);
+        line-height: normal;
+    }
+    .segment-tile__logo {
+        display: block;
+        width: 64px;
+        height: 64px;
+    }
+    .segment-tile__name {
+        font-family: $dp-font-body;
+        font-weight: 600;
+        font-size: 20px;
+        line-height: normal;
+        text-align: center;
+        text-transform: uppercase;
+        color: $dp-color-text-primary;
+        overflow-wrap: anywhere;
+    }
+}

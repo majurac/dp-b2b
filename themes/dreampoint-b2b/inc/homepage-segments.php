@@ -145,3 +145,72 @@ function dreampoint_b2b_segment_section_enabled( string $field, ?int $post_id = 
 
     return (bool) get_post_meta( $post_id, $field, true );
 }
+
+/**
+ * Approved segment keys in canonical display order (Lifestyle → Toys → Outdoor).
+ * Same values as the `dp_page_segment_context` segment choices and `brand_segment`.
+ *
+ * @return string[]
+ */
+function dreampoint_b2b_get_segment_keys(): array {
+    return [ 'lifestyle', 'toys', 'outdoor' ];
+}
+
+/**
+ * Published Segment Landing pages keyed by segment, in canonical order.
+ *
+ * A segment is eligible only when exactly one published page uses the
+ * `page-segment-landing.php` template with the matching `dp_page_segment_context`.
+ * Segments with no such page are omitted. Segments claimed by more than one page
+ * are omitted as well (no arbitrary pick) and reported through $conflicts as
+ * segment => page IDs. Pages only — no product or product_brand queries, so the
+ * visibility engine is not involved.
+ *
+ * @param array<string,int[]> $conflicts Filled with segment => page IDs on duplicates.
+ * @return array<string,WP_Post>
+ */
+function dreampoint_b2b_get_segment_pages( array &$conflicts = [] ): array {
+    $keys = dreampoint_b2b_get_segment_keys();
+
+    $pages = get_posts( [
+        'post_type'      => 'page',
+        'post_status'    => 'publish',
+        'posts_per_page' => -1,
+        'orderby'        => 'ID',
+        'order'          => 'ASC',
+        'no_found_rows'  => true,
+        'meta_query'     => [
+            'relation' => 'AND',
+            [
+                'key'     => 'dp_page_segment_context',
+                'value'   => $keys,
+                'compare' => 'IN',
+            ],
+            [
+                'key'   => '_wp_page_template',
+                'value' => 'page-segment-landing.php',
+            ],
+        ],
+    ] );
+
+    $by_segment = [];
+    foreach ( $pages as $page ) {
+        $by_segment[ (string) get_post_meta( $page->ID, 'dp_page_segment_context', true ) ][] = $page;
+    }
+
+    $result = [];
+    foreach ( $keys as $key ) {
+        if ( empty( $by_segment[ $key ] ) ) {
+            continue;
+        }
+
+        if ( count( $by_segment[ $key ] ) > 1 ) {
+            $conflicts[ $key ] = wp_list_pluck( $by_segment[ $key ], 'ID' );
+            continue;
+        }
+
+        $result[ $key ] = $by_segment[ $key ][0];
+    }
+
+    return $result;
+}

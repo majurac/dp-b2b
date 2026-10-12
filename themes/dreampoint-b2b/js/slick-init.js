@@ -205,6 +205,35 @@ jQuery( function ( $ ) {
             $featuredCats.find( '.url-wrapper' ).attr( 'tabindex', '-1' );
         }
 
+        // --- Segments Slider (acf/segments-section) ---
+        // Tile je pravi link, pa mu ostaje fokus; uklanjamo samo dodatni tabindex sa slajd wrappera
+        // (Slick ADA) da ne bude dvostrukog tab zaustavljanja.
+        const $segments = $( '.segments-slider' );
+        if ( $segments.length ) {
+            $segments.on( 'init reInit afterChange', function () {
+                $( this ).find( '.slick-slide' ).removeAttr( 'tabindex' );
+            } );
+
+            initSlider( $segments, {
+                dots:           false,
+                arrows:         true,
+                infinite:       false,
+                speed:          300,
+                slidesToShow:   3,
+                slidesToScroll: 1,
+                responsive: [
+                    {
+                        breakpoint: 991,
+                        settings: { slidesToShow: 2, slidesToScroll: 1, dots: true, arrows: false },
+                    },
+                    {
+                        breakpoint: 767,
+                        settings: { slidesToShow: 1, slidesToScroll: 1, dots: true, arrows: false },
+                    },
+                ],
+            } );
+        }
+
         // --- Related Posts Slider — jedini sa prilagođenom navigacijom ---
         if ( $( '.related-posts-slider' ).length ) {
             initializeSlickSlider(

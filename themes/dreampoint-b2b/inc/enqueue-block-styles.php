@@ -39,6 +39,7 @@ function dreampoint_b2b_enqueue_block_styles(): void {
         'acf/featured-categories-section'  => 'featured-categories',
         'acf/gallery-section'              => 'gallery',
         'acf/hero-section'                 => 'hero',
+        'acf/segments-section'             => 'segments-section',
         'acf/testimonials-section'         => 'testimonials',
         'acf/wysiwyg-section'              => 'wysiwyg',
     ];

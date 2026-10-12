@@ -266,6 +266,7 @@ function dreampoint_b2b_needs_slick(): bool {
     static $slider_blocks = [
         'acf/hero-section',
         'acf/featured-categories-section',
+        'acf/segments-section',
         'acf/latest-products-section',
         'acf/discounted-products-section',
         'acf/featured-products-section',

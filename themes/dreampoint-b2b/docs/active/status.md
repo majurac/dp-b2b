@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-12 — Figma Step 4B.1: header visual alignment STAGING VERIFIED
+
+Commits `50f06af` and `6e24eea` (staging HEAD `6e24eea`; production not touched): secondary bar 40px `#0d121c` with "Moj račun" icon + text, primary bar `#f9fafb`, 56px logo, nav typography, 40px search field. Staging QA PASS at 1500/1440/1024/768/390 (no overflow, no page errors; catalog hover/keyboard, AJAX search, QUICK ORDER, mobile menu and toolbar intact). Owner-assigned class `brands-toggler` on Brandovi is preserved; the Brandovi dropdown is pending (next: Step 4B.2). Details: `docs/active/figma-alignment.md` section 21.
+
 ## Update 2026-10-12 — Segments Section: interaction QA and legacy cleanup COMPLETE on staging
 
 Staging HEAD `549ef5c` (production not touched). Keyboard focus ring fixed (`370a722`: the global `a:focus { outline: none !important }` swallowed the outline; now an inset box-shadow overlay) and verified with real keyboard input at 1440px; touch swipe and tap on the tiles confirmed by the project owner on a physical device (owner-confirmed, not automated). The legacy Featured Categories block (`04077060`: block, template, Sass/CSS, enqueue mapping, `$slider_blocks` entry, Slick initializer) and its exclusive ACF group `23359` with seven fields plus the JSON file (`549ef5c`) are removed; the earlier "five fields" count was wrong, the guarded preflight found seven. The shared `.categories-btn` mixins and utility, the `category-slider` image size and the `company-features` selectors stay on purpose. Rollback backup: `/home/dreampoint.b2b/dp-backups/acf-featured-categories-20261012/`. Details: `docs/active/figma-alignment.md` section 20. The previously listed Segments Section follow-ups (keyboard focus, physical swipe, legacy cleanup) are closed; the source-photo resolution limit and the wide-screen tile size remain accepted. This does not make the Figma alignment programme or the project complete.

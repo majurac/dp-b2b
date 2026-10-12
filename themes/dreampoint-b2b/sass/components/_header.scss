@@ -606,6 +606,13 @@
     form.custom-form input[type="text"] {
         padding-left: 44px;
         margin-top: 0;
+        // Figma search field: 40px tall (width stays fluid within the action row)
+        @include bp(md-up) {
+            height: 40px;
+            min-height: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
     }
     // form.custom-form prefix: must outrank the generic `.custom-form button[type="submit"]` pink button rule
     form.custom-form .search-btn {

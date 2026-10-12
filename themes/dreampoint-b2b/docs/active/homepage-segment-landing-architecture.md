@@ -4,6 +4,8 @@
 
 **Update (2026-10-12) — homepage Segments tiles are now dynamic:** the manual Featured Categories repeater on the homepage was replaced on staging by the dedicated `acf/segments-section` block, which reads the three segment landing pages (title, permalink, Featured Image) via `dreampoint_b2b_get_segment_pages()` in `inc/homepage-segments.php`. The segment model above is unchanged (`brand_segment` remains an ACF select on `product_brand`, not a taxonomy). See ADR-024 and `docs/active/figma-alignment.md` section 20.
 
+**Editor guidance (2026-10-12):** in the block editor, Segment Landing pages show a note under the native Featured Image control recommending 500 x 750 px (2:3) for the tile photograph (`inc/homepage-segments.php`, `js/admin-segment-image-hint.js`, commit `884e9f1`); informational only, based on the saved `dp_page_segment_context` and the selected `page-segment-landing.php` template.
+
 **Verifikacija:** potpuno lokalno (Playwright, browser, real HTTP). Na stagingu: hash potvrđen + server-side/statička provera; stvarna browser/JS inicijalizacija NIJE direktno posmatrana tamo (nema staging test-korisničkih kredencijala u ovoj sesiji, sajt globalno redirektuje neautentifikovane posjetioce).
 
 **Figma vernost:** strukturna/sadržajna, iz Figma metadata (ne pixel-perfect — `get_screenshot` je bio rate-limited cijelu sesiju, nikad izvršen).

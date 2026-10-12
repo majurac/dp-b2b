@@ -1707,3 +1707,26 @@ A read-only comparison with the Suplementi theme (staging, HEAD `bb4e2b7`) was r
 - Deferred: PDP max-quantity toast (`product-single.js`) still has the English close label; dormant `.is-danger` loses to the `!important` background in `toastify.min.css`; the toast offset must be revalidated if the toolbar height changes (it is derived from 14px + 44px + 14px + 1px).
 - Validation: synthetic notifications first (1440/390/360/320, two-toast stacking, close, 3000ms timing), then a controlled real-click E2E (product 7897, admin session, viewport 929px): exactly one `wc-ajax=add_to_cart` POST (200), one `adding_to_cart`, one `added_to_cart`, one success toast with the Croatian text and close label, fragments and counter 5 to 6, mini-cart opened ~100ms after, no navigation or JS errors; the added line was removed through the native remove link and the baseline cart was verified restored. This confirms that WooCommerce's native handler plus the single DreamPoint `added_to_cart` listener yields one request, one event and one toast per click.
 - Still unvalidated: guard/bucket negative paths, variable-product and out-of-stock branches, Quick Order AJAX integration, the mobile AJAX lifecycle (the mobile toast UI QA stands).
+
+---
+
+## ADR-024 — Homepage Segments Section: dynamic tiles from segment landing pages
+
+**Date:** 2026-10-12
+**Status:** Accepted; implemented and STAGING VERIFIED (commits `2582ea0`, `3e5928a`). Production has no DreamPoint deployment.
+
+### Context
+The homepage Segment tiles (Lifestyle / Toys / Outdoor, ADR-009 implementation) reused the generic `acf/featured-categories-section` block with a manually maintained ACF repeater (`main_categories`: image, label, custom link). That is a hand-kept copy of data that already exists: the three segment landing pages (`page-segment-landing.php`, `dp_page_segment_context`). `brand_segment` is an ACF select on `product_brand` terms and is not a taxonomy; there are no segment terms and no segment archives (ADR-009 rejected a new taxonomy). The Figma Segmenti design (`11149:69872`) adds a per-segment DP logo that has no existing data source.
+
+### Decision
+1. A dedicated block `acf/segments-section` (no fields) renders the segments dynamically; it is an additional block, not a rename of the old one.
+2. Source = published pages with template `page-segment-landing.php` and `dp_page_segment_context` in `lifestyle|toys|outdoor` (`dreampoint_b2b_get_segment_pages()`); canonical order Lifestyle, Toys, Outdoor; a segment with no page or with more than one page is skipped (never picked arbitrarily). Name = page title, link = `get_permalink()`, background = the page's native Featured Image. No product or `product_brand` queries, so the visibility engine is not involved.
+3. The three per-segment logos are static optimized PNG theme assets (`img/segments/{lifestyle,toys,outdoor}.png`), because the Figma logos are raster textured discs, not vectors. No ACF logo field, no new taxonomy, no new image size.
+4. The homepage migration is a content change (page 17), done structure-aware via `parse_blocks` / `serialize_blocks` with an out-of-web-root backup; Git does not carry it, so it must be repeated per environment.
+5. The legacy Featured Categories block, template, Sass/CSS and ACF group `group_68b81d764f72a` stay in place until the unused-components cleanup.
+
+### Consequences / deferred
+- Adding a fourth segment still needs a code change (the fixed key list, `dp_page_segment_context` choices, the logo asset) plus ACF choices — unchanged from ADR-009.
+- Source photographs are only ~792x474 landscape, so the portrait tiles are soft on high-density screens; portrait originals are a content task.
+- Lesson: Slick `initADA()` sets `tabindex="0"` on slide wrappers after the `init` event (duplicate tab stops); and `slick-init.js` must be versioned by its own mtime (`dreampoint_b2b_asset_ver()`), not by `_S_VERSION`.
+- Not verified: real keyboard Tab and the visible focus ring, physical touch swipe (see `docs/active/figma-alignment.md` section 20). Legacy cleanup is NOT done.

@@ -2,6 +2,8 @@
 
 **Status (2026-09-23):** IMPLEMENTIRANO I DEPLOYOVANO — Homepage rebuild + 3 Segment Landing stranice (Lifestyle/Toys/Outdoor) + ADR-009 Faza B vidljivost wiring, plus focused frontend fix (Brands slider enqueue, Company Features de-slider). Deployovan na staging (`dreampoint.b2b.uncledev.cloud`), commit `c4dc61d4f5674a3eb6da59490210f243019fee1e` (gradi na `feef07b61b59bbaec50a39b6ec306126bad51457`). Puna evidencija: `docs/decisions.md` ADR-009 (svi §Update unosi, 2026-09-23).
 
+**Update (2026-10-12) — homepage Segments tiles are now dynamic:** the manual Featured Categories repeater on the homepage was replaced on staging by the dedicated `acf/segments-section` block, which reads the three segment landing pages (title, permalink, Featured Image) via `dreampoint_b2b_get_segment_pages()` in `inc/homepage-segments.php`. The segment model above is unchanged (`brand_segment` remains an ACF select on `product_brand`, not a taxonomy). See ADR-024 and `docs/active/figma-alignment.md` section 20.
+
 **Verifikacija:** potpuno lokalno (Playwright, browser, real HTTP). Na stagingu: hash potvrđen + server-side/statička provera; stvarna browser/JS inicijalizacija NIJE direktno posmatrana tamo (nema staging test-korisničkih kredencijala u ovoj sesiji, sajt globalno redirektuje neautentifikovane posjetioce).
 
 **Figma vernost:** strukturna/sadržajna, iz Figma metadata (ne pixel-perfect — `get_screenshot` je bio rate-limited cijelu sesiju, nikad izvršen).

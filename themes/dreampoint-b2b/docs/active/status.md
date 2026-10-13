@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-13 (brand logos) — recovery from dream-point.hr PARTIAL
+
+19 logos imported from the first-party `dream-point.hr/brendovi/` (exact name match) to staging; 28 of 61 brands now have a logo, 33 still need an owner upload (CHILLYS attachment 108 is a product photo, not a logo). Backup/rollback in `/home/dreampoint.b2b/dp-backups/brand-logos-20261013/`. Found a pre-existing defect: brand links `/marka/<slug>/` 404 on staging because stored rewrite rules still use `/brand/` (needs a rewrite flush + URL decision, not done). Details: `docs/active/figma-alignment.md` section 22, last subsection.
+
 ## Update 2026-10-13 (later) — brand logo provenance and sticky header
 
 Brand logos are VERIFIED locally maintained (Apros `brandList` gives only `brandId`/`title`; the importer writes only `remote_category_id`); 52 of 61 staging brands still need a logo (owner, WP Admin -> Products -> Brands -> "Thumbnail"; NOT "Featured Image"). Unexplained drift: CHILLYS (283) lost `thumbnail_id` (attachment 108 still exists). Sticky `#header` (owner's Sass change, compiled) deployed in `484af58` and staging-verified at 1440/1024/390. Details: `docs/active/figma-alignment.md` section 22 follow-up.

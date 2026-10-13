@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-13 (later) — brand logo provenance and sticky header
+
+Brand logos are VERIFIED locally maintained (Apros `brandList` gives only `brandId`/`title`; the importer writes only `remote_category_id`); 52 of 61 staging brands still need a logo (owner, WP Admin -> Products -> Brands -> "Thumbnail"; NOT "Featured Image"). Unexplained drift: CHILLYS (283) lost `thumbnail_id` (attachment 108 still exists). Sticky `#header` (owner's Sass change, compiled) deployed in `484af58` and staging-verified at 1440/1024/390. Details: `docs/active/figma-alignment.md` section 22 follow-up.
+
 ## Update 2026-10-13 — Figma Step 4B.2: Brandovi logo dropdown STAGING VERIFIED
 
 Commits `eb6796b` and `94f8895` (staging HEAD `94f8895`; production not touched): server-rendered logo panel on the desktop `brands-toggler` menu item (`inc/nav-brands.php`, `js/brands-menu.js`, `sass/components/_brands-menu.scss`), real `product_brand` terms name ASC with `thumbnail_id` logos and text fallback, visibility-filtered per user (no bypass, no cache), hover/focus/Escape/touch-first-tap, mobile stays a plain link. Visibility verified per test user at function level; touch is synthetic-only. Details: `docs/active/figma-alignment.md` section 22.

@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-13 (brand URLs) — /marka/ 404 fixed on staging
+
+Root cause: `hr` locale makes WooCommerce's brand slug `marka`, but stored rewrite rules still had `brand/`. Fixed with `wp rewrite flush` (snapshot in `/home/dreampoint.b2b/dp-backups/rewrite-flush-20261013/`); all 61 `/marka/<slug>/` pages verified. Open: production flush/decision, optional 301s from `/brand/`, pin "Brand base"; and the 19 newly logoed brands have invisible cards on `/brendovi/` until they get a `brand_image` (see `figma-alignment.md` section 22, last two subsections).
+
 ## Update 2026-10-13 (brand logos) — recovery from dream-point.hr PARTIAL
 
 19 logos imported from the first-party `dream-point.hr/brendovi/` (exact name match) to staging; 28 of 61 brands now have a logo, 33 still need an owner upload (CHILLYS attachment 108 is a product photo, not a logo). Backup/rollback in `/home/dreampoint.b2b/dp-backups/brand-logos-20261013/`. Found a pre-existing defect: brand links `/marka/<slug>/` 404 on staging because stored rewrite rules still use `/brand/` (needs a rewrite flush + URL decision, not done). Details: `docs/active/figma-alignment.md` section 22, last subsection.

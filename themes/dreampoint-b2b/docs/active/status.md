@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-13 — Figma Step 4B.2: Brandovi logo dropdown STAGING VERIFIED
+
+Commits `eb6796b` and `94f8895` (staging HEAD `94f8895`; production not touched): server-rendered logo panel on the desktop `brands-toggler` menu item (`inc/nav-brands.php`, `js/brands-menu.js`, `sass/components/_brands-menu.scss`), real `product_brand` terms name ASC with `thumbnail_id` logos and text fallback, visibility-filtered per user (no bypass, no cache), hover/focus/Escape/touch-first-tap, mobile stays a plain link. Visibility verified per test user at function level; touch is synthetic-only. Details: `docs/active/figma-alignment.md` section 22.
+
 ## Update 2026-10-12 — Figma Step 4B.1: header visual alignment STAGING VERIFIED
 
 Commits `50f06af` and `6e24eea` (staging HEAD `6e24eea`; production not touched): secondary bar 40px `#0d121c` with "Moj račun" icon + text, primary bar `#f9fafb`, 56px logo, nav typography, 40px search field. Staging QA PASS at 1500/1440/1024/768/390 (no overflow, no page errors; catalog hover/keyboard, AJAX search, QUICK ORDER, mobile menu and toolbar intact). Owner-assigned class `brands-toggler` on Brandovi is preserved; the Brandovi dropdown is pending (next: Step 4B.2). Details: `docs/active/figma-alignment.md` section 21.

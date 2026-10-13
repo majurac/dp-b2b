@@ -51,10 +51,12 @@
     // Bounded height for real brand counts (5 rows); the "Vidi sve brendove" action stays outside it.
     .brands-menu__grid {
         display: grid;
-        grid-template-columns: repeat(4, 112px);
+        // 1fr = 112px when no scrollbar is shown; shrinks slightly instead of overflowing when one is.
+        grid-template-columns: repeat(4, minmax(0, 1fr));
         column-gap: 23px;
         row-gap: 0;
         max-height: min(280px, calc(100vh - 280px));
+        overflow-x: hidden;
         overflow-y: auto;
         overscroll-behavior: contain;
     }
@@ -69,7 +71,7 @@
         align-items: center;
         justify-content: center;
         box-sizing: border-box;
-        width: 112px;
+        width: 100%;
         height: 56px;
         padding: 8px 4px;
         color: $dp-color-text-primary;

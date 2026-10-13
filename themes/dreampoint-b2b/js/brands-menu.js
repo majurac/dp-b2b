@@ -58,8 +58,8 @@
             return;
         }
 
-        const holder = document.querySelector( '.brands-toggler' );
-        if ( ! hasPanel( holder ) ) {
+        const holder = document.querySelector( '.brands-toggler:has(> .brands-menu)' );
+        if ( ! holder ) {
             return;
         }
 

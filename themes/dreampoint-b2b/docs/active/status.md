@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-13 (brand directory) — /brendovi/ cards fixed on staging
+
+All 61 cards visible again (commit `751cd6a`): stable 236px card with name/dark fallback, broken placeholder `<img>` removed; 17 hero photos imported from dream-point.hr (Secrid and Done by Deer reverted: source only 282x236, pixelated on brand pages). Backup/rollback in `/home/dreampoint.b2b/dp-backups/brand-heroes-20261013/`. Details: `docs/active/figma-alignment.md` section 22, last subsection.
+
 ## Update 2026-10-13 (brand URLs) — /marka/ 404 fixed on staging
 
 Root cause: `hr` locale makes WooCommerce's brand slug `marka`, but stored rewrite rules still had `brand/`. Fixed with `wp rewrite flush` (snapshot in `/home/dreampoint.b2b/dp-backups/rewrite-flush-20261013/`); all 61 `/marka/<slug>/` pages verified. Open: production flush/decision, optional 301s from `/brand/`, pin "Brand base"; and the 19 newly logoed brands have invisible cards on `/brendovi/` until they get a `brand_image` (see `figma-alignment.md` section 22, last two subsections).

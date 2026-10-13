@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-13 (footer implemented) — Step 5: two-variant footer STAGING VERIFIED (limits noted)
+
+Commit `edaf4a1`: compact footer on the homepage (owner screenshot), full Figma footer elsewhere; new menu location `footer-primary` + staging menu "Footer primary"; valid-links-only helpers (`inc/footer.php`); newsletter band only for a working Mailchimp form; contact column / cards no longer rendered. Real ACF content (socials, sitemap columns, legal pages) is still empty, so icons/columns/legal links were verified by simulated markup only. Details and NEXT SESSION HANDOFF: `docs/active/figma-alignment.md` section 24. The preflight (section 23) status line is superseded by this update.
+
 ## Update 2026-10-13 (footer) — Step 5 preflight: FOOTER STEP 5 — PREFLIGHT COMPLETE / IMPLEMENTATION NOT STARTED
 
 Read-only Figma-vs-staging footer audit finished; plan and owner decisions in `docs/active/figma-alignment.md` section 23. Key facts: staging footer ACF (`socials`, `footer_sitemaps`, `copyright`, `cards`, `logo_extended`) is empty; most legal/service pages in the Figma columns do not exist; newsletter (Mailchimp for WP) is unconfigured and its empty band renders for all visitors; no cookie-consent plugin. TODO #8 resolved (`footer-shop.php` is the shop-archive closing partial); TODO #6 (GTM in `footer.php`) is stale.

@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-13 (JEKAA assets) — brand asset recovery PARTIAL
+
+JEKAA B2C lists only 13 brands; just 3 assets filled real gaps (Eat My Socks logo + hero, SECRID hero 990 px). Coverage on staging: logos 29/61, heroes 28/61, 32 brands with neither, Done by Deer still without hero. Backup/rollback `/home/dreampoint.b2b/dp-backups/brand-jekaa-20261013/`. Details: `docs/active/figma-alignment.md` section 22, last subsection.
+
 ## Update 2026-10-13 (brand directory) — /brendovi/ cards fixed on staging
 
 All 61 cards visible again (commit `751cd6a`): stable 236px card with name/dark fallback, broken placeholder `<img>` removed; 17 hero photos imported from dream-point.hr (Secrid and Done by Deer reverted: source only 282x236, pixelated on brand pages). Backup/rollback in `/home/dreampoint.b2b/dp-backups/brand-heroes-20261013/`. Details: `docs/active/figma-alignment.md` section 22, last subsection.

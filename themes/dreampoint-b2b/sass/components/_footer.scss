@@ -58,137 +58,197 @@
     border-top: 0!important;
 }
 
+// Footer (Figma Step 5, node 11148:38330): one markup, two layouts.
+//  - .page-footer--compact (front page): wordmark + socials, divider, credits (owner screenshot).
+//  - .page-footer--full (all other pages): + primary links row and up to three sitemap columns.
+// Desktop values are Figma: padding 40, row gap 24, links 16/20 SemiBold uppercase 4%, columns gap 16
+// (title 20 SemiBold, links 14/18 gap 12), credits 12/20 SemiBold uppercase 4% on a 1px divider, gap 32.
+// Tablet / mobile are derived (no Figma frames): top row wraps, columns stack, 44px touch targets.
 .page-footer {
-    background-color: #fff;
-    border-top: 1px solid rgba($black, .1);
-    .main-footer {
-        padding-top: 64px;
-        padding-bottom: 64px;
-        .col {
-            &:first-of-type {
-                min-width: 30%;
-            }
+    background-color: $dp-color-bg-footer;
+    color: $dp-color-text-inverse;
+    padding: 40px 0;
+    border-top: 0;
+    font-family: inherit;
+    // The global "a:focus { outline: none !important }" would swallow an outline, so use a two-tone ring.
+    a {
+        color: inherit;
+        text-decoration: none;
+        &:focus-visible {
+            outline: 0;
+            border-radius: 2px;
+            box-shadow: 0 0 0 2px $dp-color-bg-footer, 0 0 0 4px $dp-color-text-inverse;
         }
-        .footer-block {
-            p {
-                @media (min-width: 992px) and (max-width: 1550px) {
-                    font-size: 16px;
-                }
-                a {
-                    @media (min-width: 992px) and (max-width: 1550px) {
-                        display: block;
-                    }
-                }
-            }
+    }
+    ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    .container {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+    &__top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px 24px;
+        // Logo left, socials right even when the links row is absent.
+        > :only-child {
+            margin-right: auto;
         }
-        .footer-logo {
-            margin-bottom: 15px;
-            img {
-                max-width: 240px;
-                //width: 100%;
-                @include bp(lg-down) {
-                    max-width: 200px;
-                }
-                @include bp(lg-down) {
-                    max-width: 150px;
-                }
-            }
-        }
-        .row {
-            @include bp(sm-down) {
-                row-gap: 32px;
-            }
-        }
-        .footer-title {
-            @include card;
+    }
+    &__logo {
+        display: block;
+        flex: none;
+        img {
             display: block;
-            margin-bottom: 20px;
-            @include bp(lg-down) {
-                font-size: 18px;
-            }
-        }
-        .footer-sitemap {
-            ul {
-                display: flex;
-                flex-direction: column;
-                gap: 4px;
-                li {
-                    a {
-                        display: inline-block;
-                        @include button-text;
-                        text-align: left;
-                        color: $black;
-                        &:hover {
-                            color: $brand;
-                        }
-                    }
-                }
-            }
-        }
-        .footer-about {
-            max-width: 339px;
+            width: 124.71px;
+            height: auto;
         }
     }
-    .copyright-area {
-        border-top: 1px solid rgba($black, .1);
-        padding-top: 23px;
-        padding-bottom: 23px;
-        .row {
+    &__links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 32px;
+        a {
+            display: inline-flex;
             align-items: center;
-            @include bp(md-down) {
-                row-gap: 24px;
-            }
-        }
-        .copyright {
-            @include paragraph-normal;
-            color: $text-primary;
-            text-align: right;
-            @include bp(sm-down) {
-                text-align: center;
-            }
-            a {
-                color: inherit;
-                text-decoration: underline;
+            min-height: 20px;
+            font-size: 16px;
+            line-height: 20px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: $dp-color-text-inverse;
+            &:hover {
+                color: $dp-color-text-tertiary;
             }
         }
     }
-    .company-description {
-        margin-top: 15px;
-        margin-bottom: 26px;
+    &__socials {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-left: auto;
+        a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            color: $dp-color-text-inverse;
+            font-size: 24px;
+            line-height: 1;
+            &:hover {
+                opacity: 0.7;
+            }
+        }
+        img {
+            display: block;
+            width: 24px;
+            height: 24px;
+        }
     }
-    .socials {
+    &__columns {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+    }
+    &__heading {
+        display: block;
+        margin-bottom: 16px;
+        font-size: 20px;
+        line-height: normal;
+        font-weight: 600;
+        color: $dp-color-text-inverse;
+    }
+    &__column {
         ul {
             display: flex;
-            gap: 26px;
-            align-items: center;
-            li {
-                a {
-                    display: block;
-                    color: $icon-brand;
-                    font-size: 16px;
-                    &:hover {
-                        color: $black;
-                    }
-                }
+            flex-direction: column;
+            gap: 12px;
+        }
+        a {
+            display: inline-block;
+            font-size: 14px;
+            line-height: 18px;
+            font-weight: 400;
+            color: $dp-color-text-inverse;
+            &:hover {
+                color: $dp-color-text-tertiary;
             }
         }
     }
-}
-
-.credit-cards {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 12px;
-    @include bp(md-down) {
+    &__credits {
+        display: flex;
+        flex-wrap: wrap;
         justify-content: center;
+        gap: 8px 24px;
+        margin-top: 0;
+        padding-top: 32px;
+        border-top: 1px solid $dp-color-border-inverse;
+        font-size: 12px;
+        line-height: 20px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        text-align: center;
+        color: $dp-color-text-tertiary;
+        a {
+            color: $dp-color-text-tertiary;
+            &:hover {
+                color: $dp-color-text-inverse;
+            }
+        }
     }
-    img {
-        align-self: center;
-        width: auto;
-        height: 30px;
-        @include bp(lg) {
-            height: 22px;
+    @include bp(md-down) {
+        // Wordmark left, socials right; the links row drops under them.
+        &__nav {
+            order: 3;
+            flex-basis: 100%;
+        }
+    }
+    @include bp(sm-down) {
+        padding: 32px 0;
+        &__columns {
+            grid-template-columns: 1fr;
+            gap: 32px;
+        }
+        &__links {
+            flex-direction: column;
+            gap: 0;
+            a {
+                min-height: 44px;
+            }
+        }
+        &__column a {
+            display: inline-flex;
+            align-items: center;
+            min-height: 44px;
+        }
+        &__column ul {
+            gap: 0;
+        }
+        &__socials {
+            gap: 0;
+            a {
+                width: 44px;
+                height: 44px;
+            }
+        }
+        &__credits {
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+            a {
+                display: inline-flex;
+                align-items: center;
+                min-height: 44px;
+            }
         }
     }
 }

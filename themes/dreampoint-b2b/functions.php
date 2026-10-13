@@ -96,7 +96,12 @@ function dreampoint_b2b_setup(): void {
         'gallery', 'caption', 'style', 'script',
     ] );
 
-    register_nav_menus( [ 'menu-1' => esc_html__( 'Primary', 'dreampoint-b2b' ) ] );
+    register_nav_menus(
+        [
+            'menu-1'         => esc_html__( 'Primary', 'dreampoint-b2b' ),
+            'footer-primary' => esc_html__( 'Footer primary', 'dreampoint-b2b' ),
+        ]
+    );
 
     // Prilagođene veličine slika.
     // Nakon dodavanja nove veličine pokrenuti: wp media regenerate --yes (WP-CLI)
@@ -170,6 +175,7 @@ if ( class_exists( 'WooCommerce' ) ) {
 
 require get_template_directory() . '/inc/nav-categories.php';
 require get_template_directory() . '/inc/nav-brands.php';
+require get_template_directory() . '/inc/footer.php';
 require get_template_directory() . '/inc/enqueue-block-styles.php';
 require get_template_directory() . '/inc/enqueue-plugin-overrides.php';
 require get_template_directory() . '/inc/enqueue-navigation.php';

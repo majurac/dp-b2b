@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-13 (footer) — Step 5 preflight: FOOTER STEP 5 — PREFLIGHT COMPLETE / IMPLEMENTATION NOT STARTED
+
+Read-only Figma-vs-staging footer audit finished; plan and owner decisions in `docs/active/figma-alignment.md` section 23. Key facts: staging footer ACF (`socials`, `footer_sitemaps`, `copyright`, `cards`, `logo_extended`) is empty; most legal/service pages in the Figma columns do not exist; newsletter (Mailchimp for WP) is unconfigured and its empty band renders for all visitors; no cookie-consent plugin. TODO #8 resolved (`footer-shop.php` is the shop-archive closing partial); TODO #6 (GTM in `footer.php`) is stale.
+
 ## Update 2026-10-13 (JEKAA assets) — brand asset recovery PARTIAL
 
 JEKAA B2C lists only 13 brands; just 3 assets filled real gaps (Eat My Socks logo + hero, SECRID hero 990 px). Coverage on staging: logos 29/61, heroes 28/61, 32 brands with neither, Done by Deer still without hero. Backup/rollback `/home/dreampoint.b2b/dp-backups/brand-jekaa-20261013/`. Details: `docs/active/figma-alignment.md` section 22, last subsection.

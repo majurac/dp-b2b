@@ -36,6 +36,16 @@ add_action( 'wp_enqueue_scripts', function (): void {
             true
         );
         wp_script_add_data( 'dreampoint-b2b-catalog-menu', 'strategy', 'defer' );
+
+        // Brandovi logo dropdown — touch first-tap, Escape, outside tap (panel opens with CSS on hover/focus).
+        wp_enqueue_script(
+            'dreampoint-b2b-brands-menu',
+            get_template_directory_uri() . '/js/brands-menu.js',
+            [],
+            (string) ( @filemtime( get_template_directory() . '/js/brands-menu.js' ) ?: _S_VERSION ), // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+            true
+        );
+        wp_script_add_data( 'dreampoint-b2b-brands-menu', 'strategy', 'defer' );
     }
 
     // --- JS: Sticky header — vanilla JS, sve stranice osim account login stranice ---

@@ -1,0 +1,158 @@
+// Brandovi logo dropdown (Figma 11148:32172, panel 11148:32547): 574px panel, 24px padding,
+// 4 x 112x56 logo cells (23px column pitch gap, no row gap), "Vidi sve brendove" below.
+// Markup comes from inc/nav-brands.php, appended to the desktop `li.brands-toggler` main-menu item.
+// Rules sit under the same ID chain as the catalog panel to win over the generic header link styles.
+//
+// Horizontal placement: Figma puts the panel at the same x as the Katalog panel (167px at 1440), i.e.
+// 29px left of the start of the nav. The item itself is static, so the panel is positioned against
+// the nav (`.products-menu nav`), exactly like the catalog panel is against its own item.
+
+#header #main-header .products-menu nav {
+    position: relative;
+}
+
+#header #main-header ul.links li.brands-toggler {
+    position: static;
+}
+
+#header #main-header ul.links li .brands-menu {
+    position: absolute;
+    top: 100%;
+    left: -29px;
+    z-index: 9999;
+    // Transparent top padding bridges the Figma 8px gap so the pointer never leaves the item while
+    // moving from the link to the panel.
+    padding-top: 8px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.15s ease, visibility 0.15s ease;
+    text-align: left;
+
+    @include bp(md-down) {
+        display: none;
+    }
+
+    .brands-menu__panel {
+        box-sizing: border-box;
+        width: 574px;
+        padding: 24px;
+        background-color: $dp-color-bg-mono;
+        border-radius: 4px;
+        box-shadow: $dp-shadow-card-xl;
+    }
+
+    ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    // Bounded height for real brand counts (5 rows); the "Vidi sve brendove" action stays outside it.
+    .brands-menu__grid {
+        display: grid;
+        grid-template-columns: repeat(4, 112px);
+        column-gap: 23px;
+        row-gap: 0;
+        max-height: min(280px, calc(100vh - 280px));
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+    li {
+        height: 56px;
+    }
+
+    a.brands-menu__link {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        width: 112px;
+        height: 56px;
+        padding: 8px 4px;
+        color: $dp-color-text-primary;
+        text-align: center;
+        &:hover {
+            color: $dp-color-text-primary;
+            opacity: 0.7;
+        }
+        // The global "a:focus { outline: none !important }" would swallow an outline.
+        &:focus-visible {
+            opacity: 1;
+            box-shadow: inset 0 0 0 2px $dp-color-bg-brand, inset 0 0 0 4px $dp-color-bg-mono;
+        }
+    }
+
+    // Logos keep their proportions (contain-style fit inside the 112x56 cell).
+    img.brands-menu__logo {
+        display: block;
+        width: auto;
+        height: auto;
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+
+    .brands-menu__name {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        font-size: 14px;
+        line-height: 18px;
+        font-weight: 600;
+        overflow-wrap: anywhere;
+    }
+
+    a.brands-menu__all {
+        display: inline-block;
+        height: auto;
+        margin-top: 16px;
+        padding: 4px;
+        font-size: 12px;
+        line-height: 18px;
+        font-weight: 500;
+        text-transform: none;
+        letter-spacing: normal;
+        color: $dp-color-text-primary;
+        &:hover {
+            color: $dp-color-text-secondary;
+            opacity: 1;
+        }
+        &:focus-visible {
+            box-shadow: 0 0 0 2px $dp-color-bg-mono, 0 0 0 4px $dp-color-bg-brand;
+        }
+    }
+}
+
+// Open: hover, keyboard focus inside, or touch first tap; unless dismissed with Escape.
+#header #main-header ul.links li.brands-toggler:hover > .brands-menu,
+#header #main-header ul.links li.brands-toggler:focus-within > .brands-menu,
+#header #main-header ul.links li.brands-toggler.is-touch-open > .brands-menu {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+#header #main-header ul.links li.brands-toggler[data-dismissed] > .brands-menu {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+// Chevron only when the item actually has a panel (a user who sees no brands gets a plain link).
+#header #main-header ul.links li.brands-toggler:has(> .brands-menu) > a::after {
+    content: "\e91a"; // icon-chevron-down (icomoon), same glyph as the Katalog item
+    font-family: 'icomoon';
+    margin-left: 8px;
+    font-size: 10px;
+    transition: transform 0.15s ease;
+}
+
+// The owner-assigned `menu-item-has-children` class would draw the mobile drill-down arrow, but
+// Brandovi has no sub-menu on mobile: it stays a plain link to the brand directory.
+.mobile-menu__menu li.brands-toggler.menu-item-has-children::after {
+    display: none;
+}

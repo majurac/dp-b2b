@@ -171,6 +171,11 @@
     background: $dp-color-bg-secondary;
     @include animate-fade;
         //border-bottom: 1px solid rgba(17, 17, 17, 0.1);
+        position: sticky;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 9998;
     &.sticky {
         background-color: #FAFAFA;
     }
@@ -358,11 +363,7 @@
     }
     #main-header {
         //background: linear-gradient(to right, #025788 0%, #025788 10%, #eaf2f7 40%, #ffffff 100%);
-        position: sticky;
-        top: 0;
-        left: 0;
-        width: 100%;
-        z-index: 9998;
+        
         .row {
             align-items: stretch;
             height: 72px;   

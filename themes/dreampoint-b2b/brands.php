@@ -88,20 +88,20 @@ get_header();
 
                     <div class="col"<?php echo $brand_segment_attr !== '' ? ' data-segment="' . esc_attr( $brand_segment_attr ) . '"' : ''; ?>>
                         <div class="brand-item">
-                            <a href="<?php echo esc_url($link); ?>">
+                            <?php
+                            // Stable card area for every asset combination (logo/hero/none): modifier classes
+                            // drive the fallback in sass/pages/brands.scss. No <img> placeholder: the WooCommerce
+                            // placeholder file does not exist on this site and rendered a broken image.
+                            $card_classes = 'brand-card ' . ( $acf_image_url ? 'has-hero' : 'no-hero' ) . ' ' . ( $logo_url ? 'has-logo' : 'no-logo' );
+                            ?>
+                            <a href="<?php echo esc_url($link); ?>" class="<?php echo esc_attr( $card_classes ); ?>">
                                 <?php if ($logo_url) : ?>
                                     <img src="<?php echo esc_url($logo_url); ?>" alt="<?php echo esc_attr($brand->name); ?>" class="brand-logo">
+                                <?php else : ?>
+                                    <span class="brand-name"><?php echo esc_html($brand->name); ?></span>
                                 <?php endif; ?>
                                 <?php if ($acf_image_url) : ?>
-                                    <img src="<?php echo esc_url($acf_image_url); ?>" alt="<?php echo esc_attr($brand->name); ?>" class="brand-image">
-                                    <?php elseif (!$logo_url) :
-                                    // Neither logo nor brand_image exists — fall back to the WC placeholder.
-                                    // Get default placeholder and replace 150x150 with 384x282
-                                    $placeholder_url = str_replace( '150x150', '384x282', wc_placeholder_img_src() );
-                                ?>
-                                    <img src="<?php echo esc_url( $placeholder_url ); ?>"
-                                         width="384" height="282"
-                                         alt="<?php echo esc_attr( get_the_title() ); ?>"  class="brand-image" />
+                                    <img src="<?php echo esc_url($acf_image_url); ?>" alt="<?php echo $logo_url ? esc_attr($brand->name) : ''; ?>" class="brand-image">
                                 <?php endif; ?>
                             </a>
                         </div>

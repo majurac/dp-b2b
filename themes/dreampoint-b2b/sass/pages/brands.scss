@@ -92,6 +92,26 @@
                 height: 236px;
                 object-fit: cover;
             }
+            // Card without a hero photograph: keep the same 236px area on the brand colour (no broken
+            // placeholder image); the logo / brand name stays centred and white as on photo cards.
+            a.no-hero {
+                min-height: 236px;
+                background: $dp-color-bg-brand;
+                &:after {
+                    display: none;
+                }
+            }
+            .brand-name {
+                @include centre(both);
+                width: 80%;
+                z-index: 1;
+                text-align: center;
+                color: $dp-color-text-inverse;
+                font-size: 20px;
+                line-height: 28px;
+                font-weight: 600;
+                overflow-wrap: anywhere;
+            }
         }
     }
 }

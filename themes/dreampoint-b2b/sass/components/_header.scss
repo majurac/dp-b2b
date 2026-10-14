@@ -1085,6 +1085,8 @@
     box-shadow: 0 0 0 2px $dp-color-bg-brand, 0 0 0 4px $dp-color-text-inverse;
 }
 #header #main-header ul.links > li > a:focus-visible,
+#header #logo a:focus-visible,
+#header #main-header .home-icon a:focus-visible,
 #header #main-header .cart-contents:focus-visible,
 #header #main-header .mobile-toggler:focus-visible,
 #header #main-header .mobile-search-toggle:focus-visible {

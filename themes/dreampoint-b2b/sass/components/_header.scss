@@ -512,6 +512,12 @@
     @include sliding-content;
     display: flex;
     flex-direction: column;
+    // Closed panel is off-screen: hide it from the keyboard and AT too. The mixin's `transition: all` keeps it
+    // visible for the slide-out and makes it visible immediately on open (visibility is interpolated discretely).
+    visibility: hidden;
+    &.active {
+        visibility: visible;
+    }
 }
 
 .top-notification {
@@ -569,9 +575,14 @@
         z-index: 9999;
         align-items: flex-start;
         background-color: #fff;
+        // Inactive overlay is invisible: keep its input / buttons out of the tab order (visible again immediately on open).
+        visibility: hidden;
         @include animate-fade;
     }
     .close-mobile-search {
+        @include bp(md-up) {
+            display: none;
+        }
         margin-left: auto;
         padding: 0;
         border: 0;
@@ -589,6 +600,7 @@
         @include bp(md-down) {
             opacity: 1;
             pointer-events: auto;
+            visibility: visible;
         }
         .close-mobile-search {
             @include bp(md-down) {
@@ -1060,4 +1072,28 @@
     @include bp(sm-down) {
         margin-bottom: $dp-mobile-toolbar-height;
     }
+}
+
+// Keyboard focus rings (Step 6 accessibility fix). The global "a:focus { outline: none !important }" swallows an
+// outline, so, like the footer / QUICK ORDER, use a two-tone box-shadow ring: inner colour = the bar background,
+// outer = the text colour, so it is visible on both the dark top bar and the light main bar. Scoped to the
+// controls that had no indicator; pointer interaction is untouched (:focus-visible only).
+#top-header ul.links a:focus-visible,
+#top-header .my-acc-sm:focus-visible {
+    outline: 0;
+    border-radius: 2px;
+    box-shadow: 0 0 0 2px $dp-color-bg-brand, 0 0 0 4px $dp-color-text-inverse;
+}
+#header #main-header ul.links > li > a:focus-visible,
+#header #main-header .cart-contents:focus-visible,
+#header #main-header .mobile-toggler:focus-visible,
+#header #main-header .mobile-search-toggle:focus-visible {
+    outline: 0;
+    border-radius: 2px;
+    box-shadow: 0 0 0 2px $dp-color-bg-secondary, 0 0 0 4px $dp-color-text-primary;
+}
+.skip-link:focus-visible {
+    background-color: $dp-color-bg-primary;
+    color: $dp-color-text-primary;
+    box-shadow: 0 0 0 2px $dp-color-bg-primary, 0 0 0 4px $dp-color-text-primary;
 }

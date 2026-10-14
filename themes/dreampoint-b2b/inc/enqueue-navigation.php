@@ -22,7 +22,7 @@ add_action( 'wp_enqueue_scripts', function (): void {
             'dreampoint-b2b-mobile-menu',
             get_template_directory_uri() . '/js/mobile-menu.js',
             [ 'jquery' ],
-            _S_VERSION,
+            (string) ( @filemtime( get_template_directory() . '/js/mobile-menu.js' ) ?: _S_VERSION ), // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
             true
         );
         wp_script_add_data( 'dreampoint-b2b-mobile-menu', 'strategy', 'defer' );

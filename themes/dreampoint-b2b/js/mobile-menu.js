@@ -57,6 +57,17 @@
 
         const $elementsToToggleVisibility = $( '.mobile-menu__bottom, .mobile-menu__contact' );
 
+        // aria-expanded on submenu triggers mirrors the real state of their submenu (`ul.sub-menu.active`).
+        function syncSubmenuAria() {
+            $( '.mobile-menu__menu li.menu-item-has-children > a' ).each( function () {
+                const $sub = $( this ).parent().children( 'ul.sub-menu' );
+                if ( $sub.length ) {
+                    $( this ).attr( 'aria-expanded', $sub.hasClass( 'active' ) ? 'true' : 'false' );
+                }
+            } );
+        }
+        syncSubmenuAria();
+
         // --- Otvori / zatvori mobile menu ---
         $( '.mobile-toggler' ).on( 'click', function () {
             $( '.mobile-menu' )
@@ -105,6 +116,7 @@
                 $elementsToToggleVisibility.addClass( 'hide' );
 
             }
+            syncSubmenuAria();
         } );
 
         // --- Back dugme: zatvori najdublji aktivni submenu ---
@@ -126,6 +138,7 @@
                 $( this ).removeClass( 'active' );
                 $elementsToToggleVisibility.removeClass( 'hide' );
             }
+            syncSubmenuAria();
 
         } );
 

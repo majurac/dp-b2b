@@ -64,6 +64,10 @@
 // Desktop values are Figma: padding 40, row gap 24, links 16/20 SemiBold uppercase 4%, columns gap 16
 // (title 20 SemiBold, links 14/18 gap 12), credits 12/20 SemiBold uppercase 4% on a 1px divider, gap 32.
 // Tablet / mobile are derived (no Figma frames): top row wraps, columns stack, 44px touch targets.
+// Credits text colour: owner-approved ACCESSIBILITY DEVIATION from Figma (#6c727e = 4.35:1 on black, fails 4.5:1).
+// #9ca3af = 8.27:1. Not a Figma specification update; revert to $dp-color-text-tertiary only if Figma and a11y are reconciled.
+$footer-credits-color: #9ca3af;
+
 .page-footer {
     background-color: $dp-color-bg-footer;
     color: $dp-color-text-inverse;
@@ -197,9 +201,9 @@
         font-weight: 600;
         letter-spacing: 0.04em;
         text-transform: uppercase;
-        color: $dp-color-text-tertiary;
+        color: $footer-credits-color;
         a {
-            color: $dp-color-text-tertiary;
+            color: $footer-credits-color;
             &:hover {
                 color: $dp-color-text-inverse;
             }
@@ -213,7 +217,7 @@
         font-weight: 600;
         letter-spacing: 0.04em;
         text-transform: uppercase;
-        color: $dp-color-text-tertiary;
+        color: $footer-credits-color;
         small {
             font-size: 11px;
             line-height: 20px;
@@ -225,7 +229,7 @@
             font-weight: inherit;
             letter-spacing: inherit;
             text-transform: inherit;
-            color: $dp-color-text-tertiary;
+            color: $footer-credits-color;
             &:hover {
                 color: $dp-color-text-inverse;
             }

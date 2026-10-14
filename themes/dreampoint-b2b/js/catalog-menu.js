@@ -100,4 +100,34 @@
             collapseAll( menu );
         }
     } );
+    // ---------------------------------------------------------------------
+    // ARIA disclosure state on the trigger link: aria-expanded mirrors the real open state of the CSS-driven panel
+    // (hover, keyboard focus inside, unless dismissed with Escape). No aria-haspopup: this is a disclosure of
+    // links, not an ARIA menu.
+    // ---------------------------------------------------------------------
+    function syncAria() {
+        const holder = document.querySelector( '#main-header ul.links li.cat-toggler' );
+        const link = holder && holder.querySelector( ':scope > a' );
+        if ( ! link || ! holder.querySelector( ':scope > .catalog-menu' ) ) {
+            return;
+        }
+        const open = ! holder.hasAttribute( 'data-dismissed' )
+            && ( holder.matches( ':hover' ) || holder.matches( ':focus-within' ) );
+        link.setAttribute( 'aria-controls', 'catalog-menu' );
+        link.setAttribute( 'aria-expanded', open ? 'true' : 'false' );
+    }
+
+    function scheduleSyncAria() {
+        window.requestAnimationFrame( syncAria );
+    }
+
+    [ 'mouseover', 'mouseout', 'focusin', 'focusout', 'click', 'keydown', 'pointerdown' ].forEach( function ( type ) {
+        document.addEventListener( type, scheduleSyncAria, true );
+    } );
+    // Escape handler above runs in the bubbling phase: sync again afterwards.
+    document.addEventListener( 'keydown', function () {
+        window.setTimeout( syncAria, 0 );
+    } );
+    document.addEventListener( 'DOMContentLoaded', syncAria );
+    window.addEventListener( 'load', syncAria );
 }() );

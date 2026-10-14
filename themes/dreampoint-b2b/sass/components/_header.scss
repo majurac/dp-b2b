@@ -578,6 +578,9 @@
         // Inactive overlay is invisible: keep its input / buttons out of the tab order (visible again immediately on open).
         visibility: hidden;
         @include animate-fade;
+        // Hide only after the fade-out; on open `visibility` flips at once (below), so the search field can take
+        // focus in the same click handler (iOS only allows focus inside the tap).
+        transition: opacity .25s ease-in-out, visibility 0s linear .25s;
     }
     .close-mobile-search {
         @include bp(md-up) {
@@ -601,6 +604,7 @@
             opacity: 1;
             pointer-events: auto;
             visibility: visible;
+            transition: opacity .25s ease-in-out, visibility 0s;
         }
         .close-mobile-search {
             @include bp(md-down) {

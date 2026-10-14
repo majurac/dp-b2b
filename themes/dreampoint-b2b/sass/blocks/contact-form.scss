@@ -20,6 +20,8 @@
                 font-weight: 600;
                 font-size: 40px;
                 line-height: 1.2;
+                letter-spacing: 0;
+                text-transform: none; // global h2 is uppercase with tracking; Figma heading is sentence case
                 color: $dp-color-text-primary;
                 @include bp(sm-down) {
                     font-size: 32px;

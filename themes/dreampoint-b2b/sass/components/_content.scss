@@ -640,6 +640,11 @@ div.custom-form:not(.subscription-form) {
         display: block;
         margin-top: 8px;
     }
+    // Figma message box is 96px high (CF7 renders rows="10" by default); the user can still resize it.
+    .wpcf7-form textarea {
+        height: 96px;
+        resize: vertical;
+    }
     // Error text colour is the accessible #d92d20 (Figma #f04437 = 3.67:1, owner-approved 2026-10-14).
     .wpcf7-not-valid-tip {
         display: block;

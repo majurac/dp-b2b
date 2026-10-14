@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-14 (footer typography) — FOOTER STEP 5 TYPOGRAPHY — FIGMA ALIGNED, STAGING VERIFIED
+
+Commit `e81fd95`: copyright / credit / legal text 12/20 SemiBold 4% uppercase per Figma (was the corporate 16 px); layout unchanged. Details: `docs/active/figma-alignment.md` section 27.
+
 ## Update 2026-10-14 (footer copyright area) — FOOTER STEP 5 COPYRIGHT AREA — STAGING VERIFIED
 
 Owner-requested correction (commits `f1929f7`, `310027a`, `766387f`): copyright/credits left and legal list right, per the dream-point.hr `.copyright-area`; the three legal items link to the corporate pages by owner decision (supersedes the plain-text rule of the entry below). Details: `docs/active/figma-alignment.md` section 26.

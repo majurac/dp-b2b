@@ -28,6 +28,8 @@ $subscribe_form_id = get_field('subscribe_form_id', 'option');
 $footer_socials  = dreampoint_b2b_footer_social_links( get_field('socials', 'option') );
 $footer_columns  = $is_compact ? [] : dreampoint_b2b_footer_sitemap_columns( get_field('footer_sitemaps', 'option') );
 $footer_legal    = dreampoint_b2b_footer_legal_links();
+$copyright       = get_field('copyright', 'option');
+$logo_extended   = get_field('logo_extended', 'option');
 $footer_img_uri  = get_template_directory_uri() . '/img/footer/';
 
 ?>
@@ -91,9 +93,11 @@ if (!is_cart() && !is_checkout() && !is_account_page() && !dreampoint_b2b_is_qui
     <div class="container">
 
         <div class="page-footer__top">
+             <?php if (!empty($logo_extended) && !empty($logo_extended['url'])) : ?>
             <a class="page-footer__logo" href="<?php echo esc_url( home_url( '/' ) ); ?>" aria-label="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>">
-                <img src="<?php echo esc_url( $footer_img_uri . 'dreampoint-wordmark.svg' ); ?>" alt="" width="125" height="48">
+                <img src="<?php echo esc_url($logo_extended['url']); ?>" alt="<?php esc_attr_e( 'Dreampoint Logo', 'dreampoint-b2b' ); ?>"<?php echo ! empty( $logo_extended['width'] ) && ! empty( $logo_extended['height'] ) ? ' width="' . absint( $logo_extended['width'] ) . '" height="' . absint( $logo_extended['height'] ) . '"' : ''; ?>>
             </a>
+            <?php endif; ?>
 
             <?php if ( ! $is_compact && has_nav_menu( 'footer-primary' ) ) : ?>
                 <nav class="page-footer__nav" aria-label="<?php esc_attr_e( 'Podnožje – glavni linkovi', 'dreampoint-b2b' ); ?>">
@@ -151,11 +155,8 @@ if (!is_cart() && !is_checkout() && !is_account_page() && !dreampoint_b2b_is_qui
         <div class="page-footer__credits">
             <?php // Structure follows the corporate site (dream-point.hr .copyright-area): credits left, legal list right. Wording is fixed English by owner request. ?>
             <p class="page-footer__copyright">
-                <?php echo esc_html( sprintf( '© %s Dreampoint. All rights reserved.', date_i18n( 'Y' ) ) ); ?>
-                <br>
-                Crafted with soul by <a href="https://uncledev.com/" target="_blank" rel="noopener noreferrer">Uncle Dev</a>
-                <br>
-                <small>Consulted by <a href="https://www.webroomagency.com/" target="_blank" rel="noopener noreferrer">webroom</a></small>
+                © <?php echo date('Y'); ?> Dreampoint.
+                <?php echo wp_kses_post($copyright ?? ''); ?>
             </p>
             <ul class="page-footer__legal">
                 <?php foreach ( $footer_legal as $legal ) : ?>

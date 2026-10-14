@@ -663,9 +663,9 @@
             "default_value": "",
             "maxlength": "",
             "allow_in_bindings": 0,
-            "rows": 1,
+            "rows": 2,
             "placeholder": "",
-            "new_lines": ""
+            "new_lines": "br"
         },
         {
             "key": "field_683414b4aefe1",

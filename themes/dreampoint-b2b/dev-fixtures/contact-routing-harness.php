@@ -88,6 +88,10 @@ $login_cookie = static function ( int $uid, int $expiry_offset = 3600 ) use ( &$
 
 $run = static function ( string $label, array $opts ) use ( $form, $mask ) {
     $GLOBALS['dp_h_mails'] = array();
+    // CF7 keeps ONE submission object per PHP process (singleton); a real HTTP request is a fresh process, so reset it.
+    $ref = new ReflectionProperty( 'WPCF7_Submission', 'instance' );
+    $ref->setAccessible( true );
+    $ref->setValue( null, null );
     $_COOKIE = array();
     if ( ! empty( $opts['cookie'] ) ) {
         $_COOKIE[ LOGGED_IN_COOKIE ] = $opts['cookie'];

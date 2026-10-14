@@ -104,6 +104,7 @@ $run = static function ( string $label, array $opts ) use ( $form, $mask ) {
 
     $req = new WP_REST_Request( 'POST', '/contact-form-7/v1/contact-forms/' . $form->id() . '/feedback' );
     $req->set_header( 'origin', $opts['origin'] ?? home_url() );
+    $req->set_header( 'content-type', 'multipart/form-data; boundary=----dpharness' ); // CF7 rejects other media types (415).
     $req->set_body_params( $post );
     $req->set_param( '_wpcf7_unit_tag', $post['_wpcf7_unit_tag'] );
 

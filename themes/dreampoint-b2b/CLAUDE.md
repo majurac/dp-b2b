@@ -123,6 +123,8 @@ Rule of thumb: an empty `product_brand` result is a visibility-context signal, n
 
 See `.claude/environment.md`
 
+Environments: only localhost and staging (`dreampoint.b2b.uncledev.cloud`) exist. This project has NO production environment; never plan, mention or prepare a production deployment. Staging is the only remote target; localhost needs explicit owner approval for execution.
+
 ---
 
 ## Claude Operating Rules

@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-14 (contact field) — `contact_info_button` is now an ACF Text field (staging verified)
+
+Commit `e18ab86`: Link -> Text, same key `field_6a9021b3c9e03`; only the label is stored, destination stays automatic. Staging value empty (enter a label to show the button). See `docs/active/figma-alignment.md` section 31 addendum.
+
 ## Update 2026-10-14 (contact) — Contact Info button: context-aware contact form anchor (staging verified)
 
 Commit `4a9c2c6`: `[contact_info]` button goes to `#contact-form` on the Contact page and to `<contact page>#contact-form` elsewhere (`dreampoint_b2b_contact_form_url()`); ACF `contact_info_button` supplies only the label (staging value empty: enter a label to show the button). Details: `docs/active/figma-alignment.md` section 31.

@@ -28,7 +28,6 @@ $subscribe_form_id = get_field('subscribe_form_id', 'option');
 $footer_socials  = dreampoint_b2b_footer_social_links( get_field('socials', 'option') );
 $footer_columns  = $is_compact ? [] : dreampoint_b2b_footer_sitemap_columns( get_field('footer_sitemaps', 'option') );
 $footer_legal    = dreampoint_b2b_footer_legal_links();
-$copyright_text  = dreampoint_b2b_footer_copyright( get_field('copyright', 'option') );
 $footer_img_uri  = get_template_directory_uri() . '/img/footer/';
 
 ?>
@@ -150,15 +149,19 @@ if (!is_cart() && !is_checkout() && !is_account_page() && !dreampoint_b2b_is_qui
         <?php endif; ?>
 
         <div class="page-footer__credits">
-            <span class="page-footer__copyright"><?php echo wp_kses_post( $copyright_text ); ?></span>
-            <?php foreach ( $footer_legal as $legal ) : ?>
-                <?php if ( $legal['url'] ) : ?>
-                    <a href="<?php echo esc_url( $legal['url'] ); ?>"><?php echo esc_html( $legal['label'] ); ?></a>
-                <?php else : ?>
-                    <?php // Destination or action not available yet: the label stays visible as plain text. ?>
-                    <span class="page-footer__legal"><?php echo esc_html( $legal['label'] ); ?></span>
-                <?php endif; ?>
-            <?php endforeach; ?>
+            <?php // Structure follows the corporate site (dream-point.hr .copyright-area): credits left, legal list right. Wording is fixed English by owner request. ?>
+            <p class="page-footer__copyright">
+                <?php echo esc_html( sprintf( '© %s Dreampoint. All rights reserved.', date_i18n( 'Y' ) ) ); ?>
+                <br>
+                Crafted with soul by <a href="https://uncledev.com/" target="_blank" rel="noopener noreferrer">Uncle Dev</a>
+                <br>
+                <small>Consulted by <a href="https://www.webroomagency.com/" target="_blank" rel="noopener noreferrer">webroom</a></small>
+            </p>
+            <ul class="page-footer__legal">
+                <?php foreach ( $footer_legal as $legal ) : ?>
+                    <li><a href="<?php echo esc_url( $legal['url'] ); ?>"><?php echo esc_html( $legal['label'] ); ?></a></li>
+                <?php endforeach; ?>
+            </ul>
         </div>
 
     </div>

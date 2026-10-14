@@ -181,20 +181,21 @@
             }
         }
     }
+    // Copyright area (owner-requested structure from dream-point.hr .copyright-area): credits left, legal list right.
+    // Type follows the corporate site (16/20 SemiBold uppercase 4%, "Consulted by" 14/20) in the DreamPoint footer tokens.
     &__credits {
         display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 8px 24px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px 24px;
         margin-top: 0;
         padding-top: 32px;
         border-top: 1px solid $dp-color-border-inverse;
-        font-size: 12px;
+        font-size: 16px;
         line-height: 20px;
         font-weight: 600;
         letter-spacing: 0.04em;
         text-transform: uppercase;
-        text-align: center;
         color: $dp-color-text-tertiary;
         a {
             color: $dp-color-text-tertiary;
@@ -203,7 +204,28 @@
             }
         }
     }
+    &__copyright {
+        margin: 0;
+        small {
+            font-size: 14px;
+            line-height: 20px;
+        }
+    }
+    &__legal {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 8px 24px;
+    }
     @include bp(md-down) {
+        // Credits stack (copyright, then legal list) so the two groups never cramp.
+        &__credits {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        &__legal {
+            justify-content: flex-start;
+        }
         // Wordmark left, socials right; the links row drops under them.
         &__nav {
             order: 3;
@@ -239,6 +261,12 @@
             }
         }
         &__credits {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 16px;
+        }
+        &__legal {
             flex-direction: column;
             align-items: center;
             gap: 0;

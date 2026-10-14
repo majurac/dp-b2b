@@ -103,45 +103,18 @@ function dreampoint_b2b_footer_sitemap_columns( $rows ): array {
 }
 
 /**
- * The three legal items of the credits row, always in this order. `url` is '' when no confirmed destination
- * exists yet, and footer.php then renders the label as plain text (never a dead link):
- *  - Politika privatnosti: the WordPress privacy page, only when published (get_privacy_policy_url() is '' for drafts);
- *  - Opći uvjeti poslovanja: the WooCommerce terms page, only when assigned and published;
- *  - Postavke kolačića: only through the `dreampoint_b2b_cookie_settings_url` filter (no consent mechanism yet).
+ * The three legal items of the credits area, in this order. By owner request they point to the corporate
+ * dream-point.hr pages (the B2B shop has no legal pages of its own yet); replace the URLs here once
+ * shop-specific pages exist.
  *
  * @return array<int, array{label: string, url: string}>
  */
 function dreampoint_b2b_footer_legal_links(): array {
-	$privacy = function_exists( 'get_privacy_policy_url' ) ? get_privacy_policy_url() : '';
-
-	$terms    = '';
-	$terms_id = function_exists( 'wc_terms_and_conditions_page_id' ) ? (int) wc_terms_and_conditions_page_id() : 0;
-	if ( $terms_id && 'publish' === get_post_status( $terms_id ) ) {
-		$terms = (string) get_permalink( $terms_id );
-	}
-
-	$cookies = apply_filters( 'dreampoint_b2b_cookie_settings_url', '' );
-
 	return [
-		[ 'label' => __( 'Politika privatnosti', 'dreampoint-b2b' ), 'url' => dreampoint_b2b_footer_valid_url( $privacy ) ? $privacy : '' ],
-		[ 'label' => __( 'Opći uvjeti poslovanja', 'dreampoint-b2b' ), 'url' => dreampoint_b2b_footer_valid_url( $terms ) ? $terms : '' ],
-		[ 'label' => __( 'Postavke kolačića', 'dreampoint-b2b' ), 'url' => dreampoint_b2b_footer_valid_url( $cookies ) ? (string) $cookies : '' ],
+		[ 'label' => __( 'Politika privatnosti', 'dreampoint-b2b' ), 'url' => 'https://dream-point.hr/privacy-policy/' ],
+		[ 'label' => __( 'Opći uvjeti poslovanja', 'dreampoint-b2b' ), 'url' => 'https://dream-point.hr/opci-uvjeti-poslovanja/' ],
+		[ 'label' => __( 'Postavke kolačića', 'dreampoint-b2b' ), 'url' => 'https://dream-point.hr/postavke-kolacica/' ],
 	];
-}
-
-/**
- * Copyright line. A non-empty ACF `copyright` replaces the whole line (owner-controlled);
- * otherwise "© {current year} DreamPoint. Sva prava pridržana."
- *
- * @param mixed $acf_text ACF `copyright` value.
- */
-function dreampoint_b2b_footer_copyright( $acf_text ): string {
-	$acf_text = is_string( $acf_text ) ? trim( $acf_text ) : '';
-	if ( '' !== $acf_text ) {
-		return $acf_text;
-	}
-	/* translators: %s: current year */
-	return sprintf( __( '© %s DreamPoint. Sva prava pridržana.', 'dreampoint-b2b' ), date_i18n( 'Y' ) );
 }
 
 /**

@@ -119,6 +119,8 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
+    padding-top: 9px; // Figma: 20px icon + 2 x 10px = 40px (9px + the 1px border)
+    padding-bottom: 9px;
     &:before {
         content: '';
         flex: none;

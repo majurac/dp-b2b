@@ -640,6 +640,10 @@ div.custom-form:not(.subscription-form) {
         display: block;
         margin-top: 8px;
     }
+    .wpcf7-form-control-wrap select {
+        display: block;
+        width: 100%;
+    }
     // Figma message box is 96px high (CF7 renders rows="10" by default); the user can still resize it.
     .wpcf7-form textarea {
         height: 96px;

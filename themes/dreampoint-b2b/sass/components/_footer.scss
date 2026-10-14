@@ -134,18 +134,16 @@
         align-items: center;
         gap: 12px;
         margin-left: auto;
-        a {
+        // .page-footer__social is a link when a profile URL is configured, otherwise a plain decorative span.
+        .page-footer__social {
             display: flex;
             align-items: center;
             justify-content: center;
             width: 24px;
             height: 24px;
-            color: $dp-color-text-inverse;
-            font-size: 24px;
-            line-height: 1;
-            &:hover {
-                opacity: 0.7;
-            }
+        }
+        a.page-footer__social:hover {
+            opacity: 0.7;
         }
         img {
             display: block;
@@ -235,7 +233,7 @@
         }
         &__socials {
             gap: 0;
-            a {
+            .page-footer__social {
                 width: 44px;
                 height: 44px;
             }

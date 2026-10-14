@@ -37,39 +37,33 @@ function dreampoint_b2b_footer_valid_url( $url ): bool {
 }
 
 /**
- * Social links from the ACF `socials` repeater. An entry is shown only with a valid URL and a known icon.
- * Figma has SVGs for Facebook, Instagram, X, LinkedIn and YouTube (the ACF choice `twitter` renders the X icon);
- * TikTok / Pinterest fall back to the existing icon-font glyph; WhatsApp / Viber have no icon and are skipped.
+ * The five footer social icons, always returned in Figma order. The URL comes from the ACF `socials` repeater
+ * (choice `twitter` = X); an empty / invalid URL yields '' so footer.php renders a non-interactive icon.
+ * Other repeater choices (tiktok, pinterest, whatsapp, viber) are intentionally not rendered.
  *
  * @param mixed $rows Raw ACF repeater value.
- * @return array<int, array{label: string, url: string, svg: string, glyph: string}>
+ * @return array<int, array{label: string, url: string, svg: string}>
  */
 function dreampoint_b2b_footer_social_links( $rows ): array {
-	$map = [
-		'facebook'  => [ 'Facebook', 'facebook.svg', '' ],
-		'instagram' => [ 'Instagram', 'instagram.svg', '' ],
-		'twitter'   => [ 'X', 'x.svg', '' ],
-		'linkedin'  => [ 'LinkedIn', 'linkedin.svg', '' ],
-		'youtube'   => [ 'YouTube', 'youtube.svg', '' ],
-		'tiktok'    => [ 'TikTok', '', 'icon-tiktok' ],
-		'pinterest' => [ 'Pinterest', '', 'icon-pinterest' ],
+	$icons = [
+		'facebook'  => [ 'Facebook', 'facebook.svg' ],
+		'instagram' => [ 'Instagram', 'instagram.svg' ],
+		'twitter'   => [ 'X', 'x.svg' ],
+		'linkedin'  => [ 'LinkedIn', 'linkedin.svg' ],
+		'youtube'   => [ 'YouTube', 'youtube.svg' ],
 	];
-	$out = [];
-	if ( ! is_array( $rows ) ) {
-		return $out;
-	}
-	foreach ( $rows as $row ) {
+	$urls = [];
+	foreach ( is_array( $rows ) ? $rows : [] as $row ) {
 		$key = is_array( $row ) ? (string) ( $row['social_title'] ?? '' ) : '';
 		$url = is_array( $row ) ? ( $row['social_url'] ?? '' ) : '';
-		if ( ! isset( $map[ $key ] ) || ! dreampoint_b2b_footer_valid_url( $url ) ) {
-			continue;
+		// First valid URL per platform wins.
+		if ( isset( $icons[ $key ] ) && ! isset( $urls[ $key ] ) && dreampoint_b2b_footer_valid_url( $url ) ) {
+			$urls[ $key ] = trim( $url );
 		}
-		$out[] = [
-			'label' => $map[ $key ][0],
-			'url'   => $url,
-			'svg'   => $map[ $key ][1],
-			'glyph' => $map[ $key ][2],
-		];
+	}
+	$out = [];
+	foreach ( $icons as $key => [ $label, $svg ] ) {
+		$out[] = [ 'label' => $label, 'url' => $urls[ $key ] ?? '', 'svg' => $svg ];
 	}
 	return $out;
 }
@@ -109,31 +103,45 @@ function dreampoint_b2b_footer_sitemap_columns( $rows ): array {
 }
 
 /**
- * Legal links of the credits row. Each one appears only when its destination really exists and is published:
- * the WordPress privacy page, the WooCommerce terms page, and a cookie-settings URL supplied through the
- * `dreampoint_b2b_cookie_settings_url` filter (no consent mechanism exists yet, so none by default).
+ * The three legal items of the credits row, always in this order. `url` is '' when no confirmed destination
+ * exists yet, and footer.php then renders the label as plain text (never a dead link):
+ *  - Politika privatnosti: the WordPress privacy page, only when published (get_privacy_policy_url() is '' for drafts);
+ *  - Opći uvjeti poslovanja: the WooCommerce terms page, only when assigned and published;
+ *  - Postavke kolačića: only through the `dreampoint_b2b_cookie_settings_url` filter (no consent mechanism yet).
  *
  * @return array<int, array{label: string, url: string}>
  */
 function dreampoint_b2b_footer_legal_links(): array {
-	$out = [];
-
 	$privacy = function_exists( 'get_privacy_policy_url' ) ? get_privacy_policy_url() : '';
-	if ( dreampoint_b2b_footer_valid_url( $privacy ) ) {
-		$out[] = [ 'label' => __( 'Politika privatnosti', 'dreampoint-b2b' ), 'url' => $privacy ];
-	}
 
+	$terms    = '';
 	$terms_id = function_exists( 'wc_terms_and_conditions_page_id' ) ? (int) wc_terms_and_conditions_page_id() : 0;
 	if ( $terms_id && 'publish' === get_post_status( $terms_id ) ) {
-		$out[] = [ 'label' => __( 'Uvjeti korištenja', 'dreampoint-b2b' ), 'url' => (string) get_permalink( $terms_id ) ];
+		$terms = (string) get_permalink( $terms_id );
 	}
 
 	$cookies = apply_filters( 'dreampoint_b2b_cookie_settings_url', '' );
-	if ( dreampoint_b2b_footer_valid_url( $cookies ) ) {
-		$out[] = [ 'label' => __( 'Postavke kolačića', 'dreampoint-b2b' ), 'url' => (string) $cookies ];
-	}
 
-	return $out;
+	return [
+		[ 'label' => __( 'Politika privatnosti', 'dreampoint-b2b' ), 'url' => dreampoint_b2b_footer_valid_url( $privacy ) ? $privacy : '' ],
+		[ 'label' => __( 'Opći uvjeti poslovanja', 'dreampoint-b2b' ), 'url' => dreampoint_b2b_footer_valid_url( $terms ) ? $terms : '' ],
+		[ 'label' => __( 'Postavke kolačića', 'dreampoint-b2b' ), 'url' => dreampoint_b2b_footer_valid_url( $cookies ) ? (string) $cookies : '' ],
+	];
+}
+
+/**
+ * Copyright line. A non-empty ACF `copyright` replaces the whole line (owner-controlled);
+ * otherwise "© {current year} DreamPoint. Sva prava pridržana."
+ *
+ * @param mixed $acf_text ACF `copyright` value.
+ */
+function dreampoint_b2b_footer_copyright( $acf_text ): string {
+	$acf_text = is_string( $acf_text ) ? trim( $acf_text ) : '';
+	if ( '' !== $acf_text ) {
+		return $acf_text;
+	}
+	/* translators: %s: current year */
+	return sprintf( __( '© %s DreamPoint. Sva prava pridržana.', 'dreampoint-b2b' ), date_i18n( 'Y' ) );
 }
 
 /**

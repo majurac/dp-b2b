@@ -28,7 +28,7 @@ $subscribe_form_id = get_field('subscribe_form_id', 'option');
 $footer_socials  = dreampoint_b2b_footer_social_links( get_field('socials', 'option') );
 $footer_columns  = $is_compact ? [] : dreampoint_b2b_footer_sitemap_columns( get_field('footer_sitemaps', 'option') );
 $footer_legal    = dreampoint_b2b_footer_legal_links();
-$copyright_extra = get_field('copyright', 'option') ?: '';
+$copyright_text  = dreampoint_b2b_footer_copyright( get_field('copyright', 'option') );
 $footer_img_uri  = get_template_directory_uri() . '/img/footer/';
 
 ?>
@@ -113,21 +113,22 @@ if (!is_cart() && !is_checkout() && !is_account_page() && !dreampoint_b2b_is_qui
                 </nav>
             <?php endif; ?>
 
-            <?php if ( $footer_socials ) : ?>
-                <ul class="page-footer__socials">
-                    <?php foreach ( $footer_socials as $social ) : ?>
-                        <li>
-                            <a href="<?php echo esc_url( $social['url'] ); ?>" target="_blank" rel="noopener noreferrer" aria-label="<?php echo esc_attr( $social['label'] ); ?>">
-                                <?php if ( $social['svg'] ) : ?>
-                                    <img src="<?php echo esc_url( $footer_img_uri . $social['svg'] ); ?>" alt="" width="24" height="24">
-                                <?php else : ?>
-                                    <i class="<?php echo esc_attr( $social['glyph'] ); ?>" aria-hidden="true"></i>
-                                <?php endif; ?>
+            <ul class="page-footer__socials">
+                <?php foreach ( $footer_socials as $social ) : ?>
+                    <li>
+                        <?php if ( $social['url'] ) : ?>
+                            <a class="page-footer__social" href="<?php echo esc_url( $social['url'] ); ?>" target="_blank" rel="noopener noreferrer" aria-label="<?php echo esc_attr( $social['label'] ); ?>">
+                                <img src="<?php echo esc_url( $footer_img_uri . $social['svg'] ); ?>" alt="" width="24" height="24">
                             </a>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
-            <?php endif; ?>
+                        <?php else : ?>
+                            <?php // No configured profile URL: decorative, non-interactive icon (no href, not focusable). ?>
+                            <span class="page-footer__social" aria-hidden="true">
+                                <img src="<?php echo esc_url( $footer_img_uri . $social['svg'] ); ?>" alt="" width="24" height="24">
+                            </span>
+                        <?php endif; ?>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
         </div>
         <!-- /.page-footer__top -->
 
@@ -149,12 +150,14 @@ if (!is_cart() && !is_checkout() && !is_account_page() && !dreampoint_b2b_is_qui
         <?php endif; ?>
 
         <div class="page-footer__credits">
-            <span class="page-footer__copyright">
-                © <?php echo esc_html( date_i18n( 'Y' ) ); ?> <?php echo esc_html( get_bloginfo( 'name' ) ); ?>.
-                <?php echo wp_kses_post( $copyright_extra ); ?>
-            </span>
+            <span class="page-footer__copyright"><?php echo wp_kses_post( $copyright_text ); ?></span>
             <?php foreach ( $footer_legal as $legal ) : ?>
-                <a href="<?php echo esc_url( $legal['url'] ); ?>"><?php echo esc_html( $legal['label'] ); ?></a>
+                <?php if ( $legal['url'] ) : ?>
+                    <a href="<?php echo esc_url( $legal['url'] ); ?>"><?php echo esc_html( $legal['label'] ); ?></a>
+                <?php else : ?>
+                    <?php // Destination or action not available yet: the label stays visible as plain text. ?>
+                    <span class="page-footer__legal"><?php echo esc_html( $legal['label'] ); ?></span>
+                <?php endif; ?>
             <?php endforeach; ?>
         </div>
 

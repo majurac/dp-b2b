@@ -176,6 +176,7 @@ if ( class_exists( 'WooCommerce' ) ) {
 require get_template_directory() . '/inc/nav-categories.php';
 require get_template_directory() . '/inc/nav-brands.php';
 require get_template_directory() . '/inc/footer.php';
+require get_template_directory() . '/inc/acf-hidden-fields.php';
 require get_template_directory() . '/inc/enqueue-block-styles.php';
 require get_template_directory() . '/inc/enqueue-plugin-overrides.php';
 require get_template_directory() . '/inc/enqueue-navigation.php';

@@ -213,8 +213,8 @@
             "label": "Contact Info - Button",
             "name": "contact_info_button",
             "aria-label": "",
-            "type": "link",
-            "instructions": "",
+            "type": "text",
+            "instructions": "Button label only. The destination is automatic: the contact form on the Contact page.",
             "required": 0,
             "conditional_logic": 0,
             "wrapper": {
@@ -222,8 +222,12 @@
                 "class": "",
                 "id": ""
             },
-            "return_format": "array",
-            "allow_in_bindings": 0
+            "default_value": "",
+            "maxlength": "",
+            "allow_in_bindings": 0,
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
         },
         {
             "key": "field_67335492e8df9",

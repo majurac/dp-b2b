@@ -1073,8 +1073,8 @@ function dreampoint_b2b_contact_info_shortcode(): string {
                         <p><?php echo wp_kses_post( $contact_text ); ?></p>
                     <?php endif; ?>
                     <?php
-                    // ACF Link field: only the label (title) is used; the destination is resolved from context.
-                    $contact_label = is_array( $contact_button ) ? trim( (string) ( $contact_button['title'] ?? '' ) ) : '';
+                    // ACF Text field: the label only; the destination is resolved from context.
+                    $contact_label = is_string( $contact_button ) ? trim( $contact_button ) : '';
                     $contact_url   = dreampoint_b2b_contact_form_url();
                     if ( '' !== $contact_label && '' !== $contact_url ) :
                         ?>

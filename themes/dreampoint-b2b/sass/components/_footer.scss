@@ -204,11 +204,20 @@
             }
         }
     }
+    // Explicit values: the global `p` rules would otherwise override weight, tracking and colour.
     &__copyright {
         margin: 0;
+        font-size: 16px;
+        line-height: 20px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: $dp-color-text-tertiary;
         small {
             font-size: 14px;
             line-height: 20px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
         }
     }
     &__legal {

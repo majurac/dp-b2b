@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-14 (footer content) — Step 5: FOOTER STEP 5 PARTIAL — LEGAL/CONTENT DEPENDENCIES REMAIN
+
+Commit `8f1190b` (staging HEAD): five social icons always visible (non-interactive without a URL), three exact legal labels (plain text until a destination exists), Croatian copyright line. Staging ACF: LinkedIn URL from the corporate footer, sitemap column "Mapa stranice". Real-data browser QA passed at 1440/1024/768/390. Open: legal pages, cookie consent, other social URLs, hidden columns. Details, rollback and QA: `docs/active/figma-alignment.md` section 25.
+
 ## Update 2026-10-13 (footer implemented) — Step 5: two-variant footer STAGING VERIFIED (limits noted)
 
 Commit `edaf4a1`: compact footer on the homepage (owner screenshot), full Figma footer elsewhere; new menu location `footer-primary` + staging menu "Footer primary"; valid-links-only helpers (`inc/footer.php`); newsletter band only for a working Mailchimp form; contact column / cards no longer rendered. Real ACF content (socials, sitemap columns, legal pages) is still empty, so icons/columns/legal links were verified by simulated markup only. Details and NEXT SESSION HANDOFF: `docs/active/figma-alignment.md` section 24. The preflight (section 23) status line is superseded by this update.

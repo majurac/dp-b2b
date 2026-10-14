@@ -212,7 +212,8 @@ $add( $r, 'aborted' === $r['cf7'] && 0 === $r['mail_count'], 'aborted, no mail' 
 $tampered = substr( $cookie, 0, -4 ) . ( substr( $cookie, -4 ) === 'aaaa' ? 'bbbb' : 'aaaa' );
 $r = $run( '6a tampered cookie', array( 'cookie' => $tampered ) );
 $add( $r, 'aborted' === $r['cf7'] && 0 === $r['mail_count'], 'aborted, no mail' );
-$r = $run( '6b expired cookie', array( 'cookie' => $login_cookie( $with_rep_id, -100 ) ) );
+// WordPress itself allows a 1 hour grace period for POST / AJAX requests, so the cookie must be older than that.
+$r = $run( '6b expired cookie (older than the POST grace)', array( 'cookie' => $login_cookie( $with_rep_id, -7300 ) ) );
 $add( $r, 'aborted' === $r['cf7'] && 0 === $r['mail_count'], 'aborted, no mail' );
 $r = $run( '6c cookie of a non-existent user', array( 'cookie' => wp_generate_auth_cookie( 999999, time() + 3600, 'logged_in', 'x' ) ) );
 $add( $r, 'aborted' === $r['cf7'] && 0 === $r['mail_count'], 'aborted, no mail' );

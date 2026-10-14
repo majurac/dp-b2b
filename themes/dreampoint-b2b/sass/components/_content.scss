@@ -614,11 +614,16 @@ div.custom-form:not(.subscription-form) {
     // Figma shows the placeholder in the Focus state; the global `input:focus::placeholder { transparent }`
     // rule (_typography.scss) is lifted only for these controls.
     input:focus::placeholder,
+    textarea:focus::placeholder {
+        color: $dp-color-text-secondary !important;
+    }
+    // The legacy vendor-prefixed variants in _typography.scss need their own rules (an unknown pseudo-element
+    // invalidates a whole selector list).
     input:focus::-webkit-input-placeholder,
-    input:focus::-moz-placeholder,
-    textarea:focus::placeholder,
-    textarea:focus::-webkit-input-placeholder,
-    textarea:focus::-moz-placeholder {
+    textarea:focus::-webkit-input-placeholder {
+        color: $dp-color-text-secondary !important;
+    }
+    input:focus::-moz-placeholder {
         color: $dp-color-text-secondary !important;
     }
     label + select {

@@ -295,6 +295,10 @@ ignore it completely.
 - After introducing or syncing a field group, verify: it appears in **Custom Fields → Field Groups** without a permanent "Sync available" badge, Local JSON sync is functioning correctly, and no other field group targets the same location (duplicate) or exists without a matching JSON/DB counterpart (orphan).
 - Known pre-existing exceptions (JSON-only, `ID = 0`, not to be "fixed" proactively): `group_dp_bucket_fields` (Customer Bucket Rules — part of the frozen visibility system; do not touch without explicit request) and `group_685f00b0c4d10` (Page Intro Text). `group_udp_product_bundle` is registered via PHP by a plugin (`local => php`, not JSON) and is entirely out of theme scope.
 
+### JSON / DB Mirror Must Stay In Sync BEFORE Editing A Group In The Admin (2026-10-14 incident)
+
+Saving a field group in the WordPress ACF editor exports the DATABASE definition over `acf-json/<group>.json`. If the DB mirror is stale (fields added only through JSON never reach it), the save silently deletes those fields from the JSON (General Settings lost 9 definitions, `copyright` config reverted). Before any admin edit of a group: confirm the DB mirror equals the canonical JSON (no "Sync available", compare field counts / definitions). Prefer editing field definitions in JSON via Git. Staging also needs a clean working tree (`git status`) or the next pull fails. The DB mirror is aligned with a by-ID update of the existing group post (never `acf_import_field_group()` by key: it creates a duplicate group and duplicate field posts). Details: `docs/active/figma-alignment.md` section 32.
+
 ### Local JSON Priority
 
 When a field group already exists in `acf-json/`, ACF treats the local JSON file as authoritative.

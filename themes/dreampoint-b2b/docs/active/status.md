@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-14 (ACF recovery) — General Settings ACF recovered, canonical JSON and DB sync verified (staging)
+
+Commit `e28c0c0` (JSON; 38 -> 35 fields, unused `company_info` intentionally gone) plus a by-ID sync of DB group 37; option values unchanged. Root cause: stale DB mirror overwrote newer JSON on an admin save. Rule added to the theme `CLAUDE.md`. Details: `docs/active/figma-alignment.md` section 32.
+
 ## Update 2026-10-14 (contact field) — `contact_info_button` is now an ACF Text field (staging verified)
 
 Commit `e18ab86`: Link -> Text, same key `field_6a9021b3c9e03`; only the label is stored, destination stays automatic. Staging value empty (enter a label to show the button). See `docs/active/figma-alignment.md` section 31 addendum.

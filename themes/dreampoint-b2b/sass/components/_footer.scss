@@ -219,6 +219,16 @@
             font-weight: 600;
             letter-spacing: 0.04em;
         }
+        // Credit links keep the surrounding type (global `p a` rules would thin them out).
+        a {
+            font-weight: inherit;
+            letter-spacing: inherit;
+            text-transform: inherit;
+            color: $dp-color-text-tertiary;
+            &:hover {
+                color: $dp-color-text-inverse;
+            }
+        }
     }
     &__legal {
         display: flex;

@@ -182,7 +182,8 @@
         }
     }
     // Copyright area (owner-requested structure from dream-point.hr .copyright-area): credits left, legal list right.
-    // Type follows the corporate site (16/20 SemiBold uppercase 4%, "Consulted by" 14/20) in the DreamPoint footer tokens.
+    // Layout follows the corporate site; typography is Figma 11022:47177: Montserrat SemiBold 12/20, 4% tracking, uppercase.
+    // "Consulted by" is not in Figma: one step smaller (11px) to keep the corporate secondary-line hierarchy.
     &__credits {
         display: flex;
         align-items: center;
@@ -191,7 +192,7 @@
         margin-top: 0;
         padding-top: 32px;
         border-top: 1px solid $dp-color-border-inverse;
-        font-size: 16px;
+        font-size: 12px;
         line-height: 20px;
         font-weight: 600;
         letter-spacing: 0.04em;
@@ -207,14 +208,14 @@
     // Explicit values: the global `p` rules would otherwise override weight, tracking and colour.
     &__copyright {
         margin: 0;
-        font-size: 16px;
+        font-size: 12px;
         line-height: 20px;
         font-weight: 600;
         letter-spacing: 0.04em;
         text-transform: uppercase;
         color: $dp-color-text-tertiary;
         small {
-            font-size: 14px;
+            font-size: 11px;
             line-height: 20px;
             font-weight: 600;
             letter-spacing: 0.04em;

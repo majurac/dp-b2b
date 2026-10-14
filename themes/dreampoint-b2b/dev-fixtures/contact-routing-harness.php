@@ -65,6 +65,18 @@ echo "form id=" . $form->id() . " hash=" . substr( $form->hash(), 0, 7 ) . "\n\n
 
 // ---- helpers ----
 $snapshots = array();
+// Restore the users' session_tokens even if the run dies half way (e.g. a fatal error inside CF7).
+register_shutdown_function(
+    static function () use ( &$snapshots ) {
+        foreach ( $snapshots as $uid => $orig ) {
+            if ( null === $orig ) {
+                delete_user_meta( $uid, 'session_tokens' );
+            } else {
+                update_user_meta( $uid, 'session_tokens', $orig );
+            }
+        }
+    }
+);
 $login_cookie = static function ( int $uid, int $expiry_offset = 3600 ) use ( &$snapshots ): string {
     if ( ! isset( $snapshots[ $uid ] ) ) {
         $snapshots[ $uid ] = metadata_exists( 'user', $uid, 'session_tokens' ) ? get_user_meta( $uid, 'session_tokens', true ) : null;
@@ -100,7 +112,8 @@ $run = static function ( string $label, array $opts ) use ( $form, $mask ) {
         $post = array_merge( $post, $opts['post_override'] );
     }
     $_POST = $post;
-    $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+    $_SERVER['REMOTE_ADDR']    = '127.0.0.1';
+    $_SERVER['REQUEST_METHOD'] = 'POST'; // CF7's submission object only exists for POST requests.
 
     $req = new WP_REST_Request( 'POST', '/contact-form-7/v1/contact-forms/' . $form->id() . '/feedback' );
     $req->set_header( 'origin', $opts['origin'] ?? home_url() );

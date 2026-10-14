@@ -167,27 +167,6 @@
             "new_lines": "br"
         },
         {
-            "key": "field_685f00a2b3c02",
-            "label": "Adresa",
-            "name": "company_address",
-            "aria-label": "",
-            "type": "textarea",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "50",
-                "class": "",
-                "id": ""
-            },
-            "default_value": "",
-            "maxlength": "",
-            "allow_in_bindings": 0,
-            "rows": 2,
-            "placeholder": "",
-            "new_lines": "br"
-        },
-        {
             "key": "field_6a9021b3c9e01",
             "label": "Contact Info - Title",
             "name": "contact_info_title",

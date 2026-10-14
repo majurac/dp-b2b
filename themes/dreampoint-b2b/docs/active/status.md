@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-14 (ACF JSON reconciliation) — FOOTER STEP 5 ACF RECONCILIATION — VERIFIED
+
+Only `company_address` removed from `group_6733549273639.json`; `company_timings`, Brands tab / `intro_text_brands`, `contact_info_*`, `popup_title` kept; the open conflict in the entry below is resolved. See `docs/active/figma-alignment.md` (end of section 28).
+
 ## Update 2026-10-14 (footer ACF) — Owner's ACF-driven logo/copyright deployed; OPEN: ACF JSON conflict
 
 Commit `b6a4850`: footer logo from `logo_extended`, credits from `copyright` (staging values set, attachment 23458); owner typo `$$logo_extended` fixed. The owner's local `acf-json/group_6733549273639.json` also drops `company_timings`, `company_address`, `intro_text_brands` (still used) and was NOT deployed (kept uncommitted locally). Needs an owner decision. Details and rollback: `docs/active/figma-alignment.md` section 28.

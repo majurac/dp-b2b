@@ -7,6 +7,20 @@
 
 defined('ABSPATH') || exit;
 
+/**
+ * The product inquiry modal is DEACTIVATED (owner decision 2026-10-14: it does not exist in the Figma design).
+ * Nothing below is registered and the PDP button is not rendered while this returns false. Reversible:
+ * add_filter( 'dreampoint_b2b_product_inquiry_enabled', '__return_true' ); (the PDP button and this file come back).
+ * The code is intentionally kept dormant; no data, ACF definition or shared asset was removed.
+ */
+function dreampoint_b2b_product_inquiry_enabled(): bool {
+    return (bool) apply_filters('dreampoint_b2b_product_inquiry_enabled', false);
+}
+
+if (!dreampoint_b2b_product_inquiry_enabled()) {
+    return;
+}
+
 add_action('init', 'dreampoint_b2b_product_inquiry_rewrite_rule');
 function dreampoint_b2b_product_inquiry_rewrite_rule(): void {
     add_rewrite_rule(

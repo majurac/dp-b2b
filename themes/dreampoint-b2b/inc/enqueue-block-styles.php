@@ -77,3 +77,21 @@ function dreampoint_b2b_collect_block_names( array $blocks ): array {
     }
     return array_unique( $names );
 }
+
+/**
+ * The Contact page template (contact.php) includes blocks/templates/contact-form.php directly, so there is no
+ * `acf/contact-form-section` block in post_content for the pre-scan above to find. Load the same block CSS
+ * for that template (Figma CON-01 two-column layout, CF7 validation tip).
+ */
+add_action( 'wp', 'dreampoint_b2b_enqueue_contact_template_styles' );
+function dreampoint_b2b_enqueue_contact_template_styles(): void {
+    if ( ! is_page_template( 'contact.php' ) ) {
+        return;
+    }
+    wp_enqueue_style(
+        'dp-block-contact-form',
+        get_template_directory_uri() . '/css/blocks/contact-form.css',
+        [ 'dp-style' ],
+        dreampoint_b2b_asset_ver( 'css/blocks/contact-form.css' )
+    );
+}

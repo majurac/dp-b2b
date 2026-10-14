@@ -5,7 +5,8 @@ if (!defined('ABSPATH')) {
 
 
 $form_id = get_field('contact_form_id', 'option');
-$title = get_field('title');
+// Figma CON-01 heading; the contact.php template has no block data, so fall back to the design's text.
+$title = get_field('title') ?: __('Pošaljite poruku', 'dreampoint-b2b');
 $text  = get_field('text');
 ?>
 <div class="contact block" id="contact-form">

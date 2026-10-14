@@ -243,6 +243,7 @@ $permalink = get_permalink($product_id);
                             
                             <?php woocommerce_template_single_add_to_cart(); ?>
 
+                            <?php if (function_exists('dreampoint_b2b_product_inquiry_enabled') && dreampoint_b2b_product_inquiry_enabled()) : // Inquiry modal deactivated 2026-10-14 (inc/product-inquiry.php). ?>
                             <a
                                 href="<?php echo esc_url(home_url('/product-inquiry/' . $product_id . '/')); ?>"
                                 class="product-inquiry-btn"
@@ -256,6 +257,7 @@ $permalink = get_permalink($product_id);
                                 <i class="icon-envelope" aria-hidden="true"></i>
                                 <?php esc_html_e('Pošaljite upit', 'dreampoint-b2b'); ?>
                             </a>
+                            <?php endif; ?>
 
                             <!-- Social Share -->
                             <div class="share">

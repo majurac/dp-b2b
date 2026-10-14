@@ -1,19 +1,45 @@
 @import '../theme/mixins';
 
+// Contact form, Figma CON-01 (11148:37535): heading + text on the left, form on the right (>= 992px).
+// Derived responsive: stacked below 992px. Only the label/field look comes from the shared `div.custom-form` rules.
 .contact {
+    padding-bottom: 64px;
+    @include bp(sm-down) {
+        padding-bottom: 32px;
+    }
     .contact-content {
-        max-width: 700px;
-        margin-left: auto;
-        margin-right: auto;
+        @include bp(lg-up) {
+            display: grid;
+            grid-template-columns: minmax(280px, 402px) minmax(0, 654px);
+            column-gap: 24px;
+            align-items: start;
+        }
         .contact-intro {
             h2 {
-                @include heading-3;
+                font-family: $dp-font-heading;
+                font-weight: 600;
+                font-size: 40px;
+                line-height: 1.2;
+                color: $dp-color-text-primary;
+                @include bp(sm-down) {
+                    font-size: 32px;
+                }
                 +p {
-                    margin-top: 20px;
+                    margin-top: 16px;
                 }
             }
+            p {
+                font-family: $dp-font-body;
+                font-weight: 500;
+                font-size: 16px;
+                line-height: 24px;
+                color: $dp-color-text-secondary;
+            }
             +.custom-form {
-                margin-top: 30px;
+                margin-top: 24px;
+                @include bp(lg-up) {
+                    margin-top: 0;
+                }
             }
         }
     }
@@ -81,8 +107,4 @@
     }
 }
 
-.wpcf7-not-valid-tip {
-    @include paragraph-normal;
-    font-size: 1em;
-    margin-top: 5px;
-}
+// CF7 validation tip, response output and field spacing: shared `div.custom-form` rules in _content.scss.

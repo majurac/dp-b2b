@@ -560,6 +560,10 @@
     }
 }
 
+// Search field colours: boundary #868c96 = 3.24:1 on #f9fafb (Figma #d2d6db fails 3:1); focus = Figma #141414.
+$search-field-border: #868c96;
+$search-field-focus: #141414;
+
 .search-area  {
     flex-grow: 1;
     position: relative;
@@ -621,8 +625,28 @@
         }
     }
     form.custom-form input[type="text"] {
-        padding-left: 44px;
+        // Figma Search 11148:41007: 16px icon at 16px + 8px gap, #fcfcfd, radius 8, 16px/400 text
+        padding-left: 40px;
         margin-top: 0;
+        background: $dp-color-bg-mono;
+        // ACCESSIBILITY DEVIATION from Figma (#d2d6db = 1.4:1): field boundary needs >= 3:1 (WCAG 1.4.11)
+        border: 1px solid $search-field-border;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 400;
+        color: $dp-color-text-primary;
+        @include input-placeholder {
+            color: $dp-color-text-secondary;
+        }
+        &:hover {
+            border-color: $dp-color-text-tertiary;
+        }
+        // Figma Focus: 1.5px #141414 (1px border + 0.5px ring, no layout shift)
+        &:focus {
+            background: $dp-color-bg-mono;
+            border-color: $search-field-focus;
+            box-shadow: 0 0 0 .5px $search-field-focus;
+        }
         // Figma search field: 40px tall (width stays fluid within the action row)
         @include bp(md-up) {
             height: 40px;
@@ -641,7 +665,11 @@
         padding: 0;
         background: none;
         border: 0;
-        color: $text-secondary;
+        color: $dp-color-text-secondary;
+        // Figma icon 16px (was 14px, #9c9c9c = 2.75:1)
+        i {
+            font-size: 16px;
+        }
     }
 
 }

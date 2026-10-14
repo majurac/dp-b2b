@@ -61,6 +61,8 @@ $rep_id    = (int) get_user_meta( $with_rep_id, 'assigned_komercijalist', true )
 $rep_email = (string) get_post_meta( $rep_id, 'email_commercialist', true );
 $other_ids = get_posts( array( 'post_type' => 'page', 'numberposts' => 1, 'fields' => 'ids' ) ); // a post that is not a komercijalist
 echo "fixtures: with_rep user=$with_rep_id rep_post=$rep_id rep_email=" . $mask( $rep_email ) . " | without_rep user=$without_id | fallback=" . $mask( $fallback ) . "\n";
+echo "representative email equals fallback: " . ( $rep_email === $fallback ? "yes (case 1b disambiguates)" : "no" ) . "
+";
 echo "form id=" . $form->id() . " hash=" . substr( $form->hash(), 0, 7 ) . "\n\n";
 
 // ---- helpers ----
@@ -168,6 +170,15 @@ $r = $run( '1 partner + valid representative', array( 'cookie' => $cookie ) );
 $add( $r, 'mail_sent' === $r['cf7'] && 1 === $r['mail_count'] && array( $rep_email ) === $r['to_raw'] && ! $r['extra_rcp'] && 0 === $r['cur_user'], 'to = representative only, no Cc/Bcc, WP current user = 0' );
 $body_1 = $r['body'];
 $subject_1 = $r['subject'];
+
+// 1b. The same with a representative address that differs from the fallback, so "representative only" is unambiguous
+//     (on staging the real representative and the fallback may be the same mailbox).
+add_filter( 'get_post_metadata', $f1b = static function ( $v, $oid, $key ) use ( $rep_id ) {
+    return ( (int) $oid === $rep_id && 'email_commercialist' === $key ) ? array( 'rep.harness@example.test' ) : $v;
+}, 10, 3 );
+$r = $run( '1b partner + representative with a distinct address', array( 'cookie' => $cookie ) );
+remove_filter( 'get_post_metadata', $f1b, 10 );
+$add( $r, 'mail_sent' === $r['cf7'] && 1 === $r['mail_count'] && array( 'rep.harness@example.test' ) === $r['to_raw'] && ! $r['extra_rcp'] && false === stripos( $r['headers'], $fallback ) && false === stripos( $r['headers'], 'cc:' ), 'to = ONLY rep.harness@example.test (fallback absent from recipients and headers)' );
 
 // 2. Partner without an assignment -> fallback
 $r = $run( '2 partner without assignment', array( 'cookie' => $login_cookie( $without_id ) ) );

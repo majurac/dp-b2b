@@ -178,7 +178,7 @@ add_filter( 'get_post_metadata', $f1b = static function ( $v, $oid, $key ) use (
 }, 10, 3 );
 $r = $run( '1b partner + representative with a distinct address', array( 'cookie' => $cookie ) );
 remove_filter( 'get_post_metadata', $f1b, 10 );
-$add( $r, 'mail_sent' === $r['cf7'] && 1 === $r['mail_count'] && array( 'rep.harness@example.test' ) === $r['to_raw'] && ! $r['extra_rcp'] && false === stripos( $r['headers'], $fallback ) && false === stripos( $r['headers'], 'cc:' ), 'to = ONLY rep.harness@example.test (fallback absent from recipients and headers)' );
+$add( $r, 'mail_sent' === $r['cf7'] && 1 === $r['mail_count'] && array( 'rep.harness@example.test' ) === $r['to_raw'] && ! $r['extra_rcp'] && ! preg_match( '/^reply-to:/im', $r['headers'] ), 'to = ONLY rep.harness@example.test (no Cc / Bcc / extra To / Reply-To header; From is the CF7 sender, not a recipient)' );
 
 // 2. Partner without an assignment -> fallback
 $r = $run( '2 partner without assignment', array( 'cookie' => $login_cookie( $without_id ) ) );

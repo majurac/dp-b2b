@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-14 (footer copyright area) — FOOTER STEP 5 COPYRIGHT AREA — STAGING VERIFIED
+
+Owner-requested correction (commits `f1929f7`, `310027a`, `766387f`): copyright/credits left and legal list right, per the dream-point.hr `.copyright-area`; the three legal items link to the corporate pages by owner decision (supersedes the plain-text rule of the entry below). Details: `docs/active/figma-alignment.md` section 26.
+
 ## Update 2026-10-14 (footer content) — Step 5: FOOTER STEP 5 PARTIAL — LEGAL/CONTENT DEPENDENCIES REMAIN
 
 Commit `8f1190b` (staging HEAD): five social icons always visible (non-interactive without a URL), three exact legal labels (plain text until a destination exists), Croatian copyright line. Staging ACF: LinkedIn URL from the corporate footer, sitemap column "Mapa stranice". Real-data browser QA passed at 1440/1024/768/390. Open: legal pages, cookie consent, other social URLs, hidden columns. Details, rollback and QA: `docs/active/figma-alignment.md` section 25.

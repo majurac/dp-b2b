@@ -80,6 +80,16 @@ $dp-color-btn-secondary-pressed-border: #0d121c;
 $dp-color-btn-secondary-pressed-text:   #0d121c;
 $dp-color-error-pressed:                #f97066;
 
+// Form controls (Figma "Input field" 5040:2413 / messageBox 5043:*; Step 3c). Rest border, hover border
+// and error message text are ACCESSIBILITY DEVIATIONS from Figma (#d2d6db 1.4:1, #9da4ae 2.45:1,
+// #f04437 text 3.67:1): boundary >= 3:1 (WCAG 1.4.11), text >= 4.5:1. Rest/hover pair is the owner-approved
+// Search pair (figma-alignment.md section 33); the error text colour awaits owner approval.
+$dp-color-border-control:       #868c96;
+$dp-color-focus-ring-primary:   #c7d7fe;
+$dp-color-focus-ring-error:     #fee4e2;
+$dp-color-text-disabled:        #9da4ae;
+$dp-color-error-text:           #d92d20;
+
 // Button typography (Montserrat SemiBold; letter-spacing 0). L and M share 14px.
 $dp-btn-font-weight:      600;
 $dp-btn-font-size-xl:     18px;

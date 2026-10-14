@@ -538,6 +538,99 @@ body.admin-bar {
 }
 
 
+// Form controls, Figma "Input field" (5040:2413 text, 5043:4839 message box; Step 3c).
+// `div.custom-form` is the wrapper used by every theme form (login, register, lost / reset password, account,
+// address, contact, inquiry modal). It deliberately does NOT match the header search (`form.custom-form`), the
+// cart coupon row (`tr.coupon-expand`) or the footer newsletter (`.subscription-form`), which keep their own rules.
+// Select2 (`.select2-container`, address country/state) is third party and untouched.
+// Figma: bg #fcfcfd, 1px border, radius 6, 14/18 Montserrat 400, padding 12/16 (44px high), label 16/600 #384250 gap 8;
+// hover border + 3px ring, focus border #0d121c + 3px #c7d7fe, error border #f04437 + 3px #fee4e2, disabled #f3f4f6.
+// Derived (no Figma): 16px text below md (no iOS focus zoom); success state is not styled here.
+div.custom-form:not(.subscription-form) {
+    label:not(.screen-reader-text):not(.woocommerce-form__label-for-checkbox) {
+        font-weight: 600;
+        font-size: 16px;
+        line-height: 1.25;
+        letter-spacing: 0;
+        color: $dp-color-text-secondary;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="tel"],
+    input[type="number"],
+    select,
+    textarea {
+        height: 44px;
+        padding: 12px 16px;
+        background: $dp-color-bg-mono;
+        border: 1px solid $dp-color-border-control;
+        border-radius: $dp-radius-textarea;
+        font-family: $dp-font-body;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 18px;
+        letter-spacing: 0;
+        color: $dp-color-text-primary;
+        @include bp(md-down) {
+            font-size: 16px;
+        }
+        @include input-placeholder {
+            color: $dp-color-text-secondary;
+        }
+        &:hover {
+            border-color: $dp-color-text-tertiary;
+            box-shadow: 0 0 0 3px $dp-color-bg-tertiary;
+        }
+        &:focus {
+            background: $dp-color-bg-mono;
+            border-color: $dp-color-text-primary;
+            box-shadow: 0 0 0 3px $dp-color-focus-ring-primary;
+        }
+        // Server / CF7 / WooCommerce validation states
+        &.wpcf7-not-valid,
+        &[aria-invalid="true"] {
+            border-color: $dp-color-error;
+            box-shadow: 0 0 0 3px $dp-color-focus-ring-error;
+        }
+        &:disabled {
+            background: $dp-color-bg-tertiary;
+            border-color: $dp-color-border-secondary;
+            box-shadow: none;
+            color: $dp-color-text-disabled;
+            cursor: not-allowed;
+        }
+    }
+    .woocommerce-invalid input.input-text,
+    .woocommerce-invalid select {
+        border-color: $dp-color-error;
+        box-shadow: 0 0 0 3px $dp-color-focus-ring-error;
+    }
+    textarea {
+        height: auto;
+        min-height: 96px;
+    }
+    // Figma shows the placeholder in the Focus state; the global `input:focus::placeholder { transparent }`
+    // rule (_typography.scss) is lifted only for these controls.
+    input:focus::placeholder,
+    input:focus::-webkit-input-placeholder,
+    input:focus::-moz-placeholder,
+    textarea:focus::placeholder,
+    textarea:focus::-webkit-input-placeholder,
+    textarea:focus::-moz-placeholder {
+        color: $dp-color-text-secondary !important;
+    }
+    label + select {
+        margin-top: 8px;
+        display: block;
+    }
+    .wpcf7-not-valid-tip {
+        color: $dp-color-error-text;
+    }
+}
+
+
 // Buttons inside forms.
 // .custom-form: the plain submit (contact "Posalji") is Figma Primary L; any element with .button
 // follows the shared .button rules (utilities), so --sm / --xl / --outline are not overridden.

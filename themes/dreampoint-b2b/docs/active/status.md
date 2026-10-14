@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-14 (contact) — Contact Info button: context-aware contact form anchor (staging verified)
+
+Commit `4a9c2c6`: `[contact_info]` button goes to `#contact-form` on the Contact page and to `<contact page>#contact-form` elsewhere (`dreampoint_b2b_contact_form_url()`); ACF `contact_info_button` supplies only the label (staging value empty: enter a label to show the button). Details: `docs/active/figma-alignment.md` section 31.
+
 ## Update 2026-10-14 (a11y) — Step 6 accessibility P1 fixes: PASS WITH KNOWN ISSUES — ACCESSIBILITY P1 FIXES VERIFIED (staging)
 
 Commits `8a832dd`, `c8b12bc`, `d22c9a0`: visible focus rings on header controls and skip link, closed mini-cart / mobile-search overlay no longer in the tab order, `aria-expanded` / `aria-controls` on the Katalog and Brendovi triggers (and mobile submenu triggers), footer credits `#9ca3af` (owner-approved accessibility deviation from Figma). Search contrast, mobile touch targets and screen-reader testing remain open. Details: `docs/active/figma-alignment.md` section 30.

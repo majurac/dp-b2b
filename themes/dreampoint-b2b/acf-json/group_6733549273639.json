@@ -230,75 +230,6 @@
             "append": ""
         },
         {
-            "key": "field_67335492e8df9",
-            "label": "Company Info",
-            "name": "company_info",
-            "aria-label": "",
-            "type": "repeater",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "layout": "table",
-            "pagination": 0,
-            "min": 0,
-            "max": 0,
-            "collapsed": "",
-            "button_label": "Add Row",
-            "rows_per_page": 20,
-            "sub_fields": [
-                {
-                    "key": "field_673354c6e8dfa",
-                    "label": "Label",
-                    "name": "label",
-                    "aria-label": "",
-                    "type": "text",
-                    "instructions": "",
-                    "required": 0,
-                    "conditional_logic": 0,
-                    "wrapper": {
-                        "width": "",
-                        "class": "",
-                        "id": ""
-                    },
-                    "default_value": "",
-                    "maxlength": "",
-                    "allow_in_bindings": 0,
-                    "placeholder": "",
-                    "prepend": "",
-                    "append": "",
-                    "parent_repeater": "field_67335492e8df9"
-                },
-                {
-                    "key": "field_673354e2e8dfb",
-                    "label": "Value",
-                    "name": "value",
-                    "aria-label": "",
-                    "type": "textarea",
-                    "instructions": "",
-                    "required": 0,
-                    "conditional_logic": 0,
-                    "wrapper": {
-                        "width": "",
-                        "class": "",
-                        "id": ""
-                    },
-                    "relevanssi_exclude": 0,
-                    "default_value": "",
-                    "maxlength": "",
-                    "allow_in_bindings": 0,
-                    "rows": 2,
-                    "placeholder": "",
-                    "new_lines": "br",
-                    "parent_repeater": "field_67335492e8df9"
-                }
-            ]
-        },
-        {
             "key": "field_681b42c74b775",
             "label": "Logo",
             "name": "",
@@ -842,5 +773,5 @@
     "display_title": "",
     "allow_ai_access": false,
     "ai_description": "",
-    "modified": 1785752338
+    "modified": 1791976538
 }

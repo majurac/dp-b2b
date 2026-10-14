@@ -173,6 +173,10 @@ if ( class_exists( 'WooCommerce' ) ) {
     require get_template_directory() . '/inc/contact-form.php';
 }
 
+// Contact form routing: outside the WooCommerce guard on purpose. Without it the (public) CF7 REST route would fall
+// back to the CF7 defaults, so it is always loaded and fails closed (no activation function = every submission rejected).
+require get_template_directory() . '/inc/contact-form-routing.php';
+
 require get_template_directory() . '/inc/nav-categories.php';
 require get_template_directory() . '/inc/nav-brands.php';
 require get_template_directory() . '/inc/footer.php';

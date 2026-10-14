@@ -110,3 +110,20 @@
 }
 
 // CF7 validation tip, response output and field spacing: shared `div.custom-form` rules in _content.scss.
+
+// Submit "Pošalji" (Figma 11148:37604: Primary L with the 20px `send-square` icon on the left). The CF7 form uses a
+// semantic <button type="submit" class="button"> (native submit and keyboard behaviour); the icon is a CSS
+// background (img/ico/send-square.svg, Figma asset, stroke #F3F4F6 on the dark button), no JavaScript.
+.contact .custom-form .wpcf7-submit.dp-contact-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    &:before {
+        content: '';
+        flex: none;
+        width: 20px;
+        height: 20px;
+        background: url('../../img/ico/send-square.svg') center / contain no-repeat;
+    }
+}

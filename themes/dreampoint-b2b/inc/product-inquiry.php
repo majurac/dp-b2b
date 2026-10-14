@@ -18,6 +18,15 @@ function dreampoint_b2b_product_inquiry_enabled(): bool {
 }
 
 if (!dreampoint_b2b_product_inquiry_enabled()) {
+    // The rewrite rule stays cached in the database until the next flush: answer the old endpoint with a real 404.
+    add_action('template_redirect', static function (): void {
+        global $wp, $wp_query;
+        if (preg_match('#^product-inquiry/\d+/?$#', (string) $wp->request)) {
+            $wp_query->set_404();
+            status_header(404);
+            nocache_headers();
+        }
+    }, 1);
     return;
 }
 

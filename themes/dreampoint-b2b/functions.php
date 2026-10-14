@@ -1010,6 +1010,47 @@ function dreampoint_b2b_product_features_shortcode(): string {
  * telefon, email) iz ACF opcija (Theme Settings).
  * Upotreba: [contact_info]
  */
+/**
+ * Canonical Contact page: a published page that uses the `contact.php` template. Preference: the page with the
+ * slug `kontakt` (the Croatian one), otherwise the lowest ID. Overridable via `dreampoint_b2b_contact_page_id`.
+ */
+function dreampoint_b2b_get_contact_page_id(): int {
+    $ids = get_posts( [
+        'post_type'      => 'page',
+        'post_status'    => 'publish',
+        'meta_key'       => '_wp_page_template', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+        'meta_value'     => 'contact.php',       // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+        'orderby'        => 'ID',
+        'order'          => 'ASC',
+        'posts_per_page' => 10,
+        'fields'         => 'ids',
+        'no_found_rows'  => true,
+    ] );
+    $page_id = $ids ? (int) $ids[0] : 0;
+    foreach ( $ids as $id ) {
+        if ( 'kontakt' === get_post_field( 'post_name', $id ) ) {
+            $page_id = (int) $id;
+            break;
+        }
+    }
+    return (int) apply_filters( 'dreampoint_b2b_contact_page_id', $page_id );
+}
+
+/**
+ * Destination of the Contact Info button: the form anchor on the current page when it already renders the contact
+ * form (contact.php template), otherwise the canonical Contact page + the same anchor. The anchor id lives in
+ * blocks/templates/contact-form.php. Returns '' when no Contact page exists.
+ */
+function dreampoint_b2b_contact_form_url(): string {
+    $anchor = '#contact-form';
+    if ( is_page_template( 'contact.php' ) ) {
+        return $anchor;
+    }
+    $page_id = dreampoint_b2b_get_contact_page_id();
+    $url     = $page_id ? get_permalink( $page_id ) : '';
+    return $url ? $url . $anchor : '';
+}
+
 add_shortcode( 'contact_info', 'dreampoint_b2b_contact_info_shortcode' );
 function dreampoint_b2b_contact_info_shortcode(): string {
     $company_phone   = get_field( 'company_phone', 'option' );
@@ -1031,8 +1072,13 @@ function dreampoint_b2b_contact_info_shortcode(): string {
                     <?php if ( $contact_text ) : ?>
                         <p><?php echo wp_kses_post( $contact_text ); ?></p>
                     <?php endif; ?>
-                    <?php if ( $contact_button ) : ?>
-                        <?php the_acf_link( $contact_button, 'button button--outline button--sm' ); ?>
+                    <?php
+                    // ACF Link field: only the label (title) is used; the destination is resolved from context.
+                    $contact_label = is_array( $contact_button ) ? trim( (string) ( $contact_button['title'] ?? '' ) ) : '';
+                    $contact_url   = dreampoint_b2b_contact_form_url();
+                    if ( '' !== $contact_label && '' !== $contact_url ) :
+                        ?>
+                        <a class="button button--outline button--sm" href="<?php echo esc_url( $contact_url ); ?>"><?php echo esc_html( $contact_label ); ?></a>
                     <?php endif; ?>
                     <?php
                         $current_user_id = get_current_user_id();

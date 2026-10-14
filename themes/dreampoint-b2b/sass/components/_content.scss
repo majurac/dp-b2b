@@ -1,6 +1,10 @@
 html {
     scroll-behavior: smooth;
 }
+// Canonical contact form anchor (blocks/templates/contact-form.php); the [contact_info] button links here. Keeps it clear of the sticky header.
+#contact-form {
+    scroll-margin-top: 104px;
+}
 .container, .container-fluid, .container-sm, .container-md, .container-lg, .container-xl {
     @include bp(sm-down) {
         padding-right: 16px;

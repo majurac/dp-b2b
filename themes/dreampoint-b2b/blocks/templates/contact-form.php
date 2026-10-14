@@ -8,7 +8,7 @@ $form_id = get_field('contact_form_id', 'option');
 $title = get_field('title');
 $text  = get_field('text');
 ?>
-<div class="contact block">
+<div class="contact block" id="contact-form">
     <div class="container">
         <div class="contact-content">
             <div class="contact-intro">

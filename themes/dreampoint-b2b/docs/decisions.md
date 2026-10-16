@@ -1730,3 +1730,12 @@ The homepage Segment tiles (Lifestyle / Toys / Outdoor, ADR-009 implementation) 
 - Source photographs are only ~792x474 landscape, so the portrait tiles are soft on high-density screens; portrait originals are a content task.
 - Lesson: Slick `initADA()` sets `tabindex="0"` on slide wrappers after the `init` event (duplicate tab stops); and `slick-init.js` must be versioned by its own mtime (`dreampoint_b2b_asset_ver()`), not by `_S_VERSION`.
 - Not verified: real keyboard Tab and the visible focus ring, physical touch swipe (see `docs/active/figma-alignment.md` section 20). Legacy cleanup is NOT done.
+
+## ADR-025 — Catalog menu panel rendered by PHP inside `li.cat-toggler` (no JS relocation)
+
+- Date: 2026-10-16. Commit `ba67bcb` (staging verified).
+- Before: `dreampoint_b2b_catalog_menu_desktop()` was echoed as a child of the header `<nav>` and `js/mobile-menu.js` moved it into `li.cat-toggler` on DOMContentLoaded (cause of the FOUC fixed in `299770a` by a pre-move CSS rule).
+- Now: filter `walker_nav_menu_start_el` (`dreampoint_b2b_append_catalog_panel()`, `inc/nav-categories.php`) appends the panel right after the link of the `cat-toggler` item, only when the desktop `wp_nav_menu()` call passes `'dp_catalog_panel' => true` (header.php). The mobile menu-1 render passes no arg, so there is exactly one `#catalog-menu`. Desktop JS relocation and the `nav > .catalog-menu` pre-move CSS rule were removed.
+- Retained: the mobile submenu (`.sub-menu.catalog-menu-mobile`) is still moved by `mobile-menu.js` (out of scope).
+- Verified on staging (1440/768/390): panel in final DOM position in server HTML; hidden at rest and opens on hover/focus-within even with JS blocked; no flash with delayed JS; `aria-expanded` sync, Escape, Tab/Shift+Tab, no focusable links while hidden; mobile drill-down; no horizontal overflow; no console errors.
+- Known pre-existing behavior (unchanged): Escape only dismisses when focus is inside the item; a pure mouse hover is not dismissed.

@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-16 (catalog menu FOUC) — CATALOG MENU FOUC FIXED AND VERIFIED (staging `299770a`)
+
+Root cause (measured on staging, rAF sampling): `header.php` renders `#catalog-menu` as a direct child of the header `<nav>`, but every hide/position rule is scoped to `#header #main-header ul.links li .catalog-menu`. Until the deferred `js/mobile-menu.js` moves the panel into `li.cat-toggler` on DOMContentLoaded, it was `position:static; visibility:visible` (132x706 px, ~340-420 ms) and then snapped hidden. Fix: one pre-move rule `#header #main-header nav > .catalog-menu { position:absolute; visibility:hidden; opacity:0; pointer-events:none }` in `sass/components/_catalog-menu.scss` (+ compiled `style.css`); no PHP/JS change. Verified at 1440/768/390 with `mobile-menu.js` delayed 2 s: 0 visible frames; hover, focus-within, Tab into panel, Escape, `aria-expanded`, no tabbable links while closed, no console errors, header height/trigger position unchanged. Known limitation: the existing 0.15 s visibility transition means focus opens the panel after ~150 ms (pre-existing). Localhost not used.
+
 ## Update 2026-10-14 (ACF recovery) — General Settings ACF recovered, canonical JSON and DB sync verified (staging)
 
 Commit `e28c0c0` (JSON; 38 -> 35 fields, unused `company_info` intentionally gone) plus a by-ID sync of DB group 37; option values unchanged. Root cause: stale DB mirror overwrote newer JSON on an admin save. Rule added to the theme `CLAUDE.md`. Details: `docs/active/figma-alignment.md` section 32.

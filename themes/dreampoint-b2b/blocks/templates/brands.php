@@ -42,7 +42,7 @@ if (empty($brands) || is_wp_error($brands)) {
 $brands_data = [];
 foreach ($brands as $brand) {
     $logo_id  = (int) get_term_meta($brand->term_id, 'thumbnail_id', true);
-    $logo_src = $logo_id ? wp_get_attachment_image_src($logo_id, 'thumbnail') : null;
+    $logo_src = $logo_id ? wp_get_attachment_image_src($logo_id, 'medium') : null;
 
     $brands_data[] = [
         'name'     => $brand->name,
@@ -75,31 +75,31 @@ if ($initial_count > 0 && $initial_count < 8) {
         <?php if ($title) : ?>
             <h2><?php echo esc_html($title); ?></h2>
         <?php endif; ?>
-        <div class="brands-slider">
-            <?php foreach ($brands_to_display as $brand) : ?>
-
-                <div class="brand-item">
-                    <a href="<?php echo esc_url($brand['link']); ?>">
-                        <?php if ($brand['logo_url']) : ?>
-                            <img
-                                src="<?php echo esc_url($brand['logo_url']); ?>"
-                                alt="<?php echo esc_attr($brand['name']); ?>"
-                                <?php if ($brand['logo_w'] && $brand['logo_h']) : ?>
-                                    width="<?php echo absint($brand['logo_w']); ?>"
-                                    height="<?php echo absint($brand['logo_h']); ?>"
-                                <?php endif; ?>
-                                loading="lazy"
-                                decoding="async"
-                            >
-                        <?php else : ?>
-                            <span><?php echo esc_html($brand['name']); ?></span>
-                        <?php endif; ?>
-                    </a>
-                </div>
-
-            <?php endforeach; ?>
-        </div>
-        <!-- /.brands-slider -->
     </div>
     <!-- /.container -->
+    <div class="brands-slider">
+        <?php foreach ($brands_to_display as $brand) : ?>
+
+            <div class="brand-item">
+                <a href="<?php echo esc_url($brand['link']); ?>">
+                    <?php if ($brand['logo_url']) : ?>
+                        <img
+                            src="<?php echo esc_url($brand['logo_url']); ?>"
+                            alt="<?php echo esc_attr($brand['name']); ?>"
+                            <?php if ($brand['logo_w'] && $brand['logo_h']) : ?>
+                                width="<?php echo absint($brand['logo_w']); ?>"
+                                height="<?php echo absint($brand['logo_h']); ?>"
+                            <?php endif; ?>
+                            loading="lazy"
+                            decoding="async"
+                        >
+                    <?php else : ?>
+                        <span><?php echo esc_html($brand['name']); ?></span>
+                    <?php endif; ?>
+                </a>
+            </div>
+
+        <?php endforeach; ?>
+    </div>
+    <!-- /.brands-slider -->
 </div>

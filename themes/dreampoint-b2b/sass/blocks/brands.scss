@@ -25,6 +25,15 @@
             display: flex!important;
             align-items: center;
             justify-content: center;
+            color: inherit;
+        }
+        // Brand without a logo: name as text, neutral colour (not the default link blue).
+        span {
+            color: inherit;
+            font-weight: 600;
+            font-size: 18px;
+            line-height: 1.2;
+            white-space: nowrap;
         }
         // Whole logo, original ratio: bounded box, never stretched or cropped.
         img {

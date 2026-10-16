@@ -6,8 +6,8 @@
  *  - Escape to dismiss the panel, restored on next hover/focus of the menu item,
  *  - reset of expanded rows when the panel closes.
  *
- * The panel is moved into the "Katalog proizvoda" menu item by mobile-menu.js
- * (DOMContentLoaded), so everything is resolved lazily on first interaction.
+ * The panel is rendered inside the "Katalog proizvoda" menu item by PHP
+ * (inc/nav-categories.php), so everything is resolved lazily on first interaction.
  */
 ( function () {
     'use strict';

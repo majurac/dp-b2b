@@ -165,12 +165,12 @@ $company_phone = get_field('company_phone', 'option') ?: '';
 
                         <div class="col-md-4 products-menu">
                             <nav role="navigation" aria-label="<?php esc_attr_e('Glavni meni', 'dreampoint-b2b'); ?>">
-                                <?php echo dreampoint_b2b_catalog_menu_desktop(); ?>
-                                <?php 
+                                <?php
                                 wp_nav_menu([
                                     'theme_location' => 'menu-1',
                                     'container'      => false,
                                     'menu_class'     => 'links',
+                                    'dp_catalog_panel' => true, // catalog panel rendered inside li.cat-toggler (inc/nav-categories.php)
                                     'items_wrap'     => '<ul class="%2$s">%3$s</ul>',
                                     'fallback_cb'    => false,
                                 ]); 

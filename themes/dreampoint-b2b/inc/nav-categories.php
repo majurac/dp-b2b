@@ -173,7 +173,7 @@ function dreampoint_b2b_catalog_menu_popular_html( string $wrapper_tag = 'div' )
 }
 
 /**
- * Desktop panel (moved into the "Katalog proizvoda" menu item by js/mobile-menu.js).
+ * Desktop panel (rendered inside the "Katalog proizvoda" menu item by dreampoint_b2b_append_catalog_panel()).
  *
  * @return string HTML, escaped while building.
  */
@@ -338,3 +338,28 @@ function dreampoint_b2b_mark_catalog_menu_item( $items, $args ) {
     return $items;
 }
 add_filter( 'wp_nav_menu_objects', 'dreampoint_b2b_mark_catalog_menu_item', 10, 2 );
+
+/**
+ * Renders the desktop catalog panel inside the "Katalog proizvoda" <li>, right after its link.
+ *
+ * Opt-in via the 'dp_catalog_panel' wp_nav_menu() argument (set only on the desktop header render),
+ * so the mobile render of menu-1 never receives a duplicate #catalog-menu.
+ *
+ * @param string   $item_output Rendered link markup.
+ * @param WP_Post  $item        Menu item.
+ * @param int      $depth       Item depth.
+ * @param stdClass $args        wp_nav_menu() arguments.
+ * @return string
+ */
+function dreampoint_b2b_append_catalog_panel( $item_output, $item, $depth, $args ) {
+    if ( empty( $args->dp_catalog_panel ) || 0 !== (int) $depth ) {
+        return $item_output;
+    }
+
+    if ( ! in_array( 'cat-toggler', (array) $item->classes, true ) ) {
+        return $item_output;
+    }
+
+    return $item_output . dreampoint_b2b_catalog_menu_desktop();
+}
+add_filter( 'walker_nav_menu_start_el', 'dreampoint_b2b_append_catalog_panel', 10, 4 );

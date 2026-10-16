@@ -7,17 +7,6 @@
     position: relative;
 }
 
-// Pre-move state: the server renders the panel as a direct child of the header nav; js/mobile-menu.js (deferred)
-// moves it into li.cat-toggler on DOMContentLoaded. Until then the rule below does not match, so keep it
-// out of flow and hidden to avoid a flash of the unstyled panel. Already absolute/hidden after the move,
-// so the final layout is unchanged.
-#header #main-header nav > .catalog-menu {
-    position: absolute;
-    visibility: hidden;
-    opacity: 0;
-    pointer-events: none;
-}
-
 #header #main-header ul.links li .catalog-menu {
     position: absolute;
     top: 100%;

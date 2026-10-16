@@ -17,16 +17,7 @@
 
     document.addEventListener( 'DOMContentLoaded', function () {
 
-        // --- Desktop: inject catalog menu panel unutar .cat-toggler ---
-        const categoriesList = document.querySelector( '.catalog-menu' );
-        const catToggler     = document.querySelector( '.cat-toggler' );
-
-        if ( categoriesList && catToggler ) {
-            const link = catToggler.querySelector( 'a' );
-            if ( link ) {
-                link.insertAdjacentElement( 'afterend', categoriesList );
-            }
-        }
+        // Desktop catalog panel is rendered inside li.cat-toggler by PHP (inc/nav-categories.php) — no relocation.
 
         // --- Mobile: inject catalog menu submenu unutar .cat-toggler (mobile menu) ---
         const mobileSubmenu   = document.querySelector( '.sub-menu.catalog-menu-mobile' );

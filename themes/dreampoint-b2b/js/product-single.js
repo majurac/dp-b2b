@@ -195,6 +195,22 @@ jQuery(function ($) {
         // Note: Image switching is handled by sliders.js (lines 478-494)
     });
     
+    /**
+     * Single-option attributes (marked server-side with .dp-single-option)
+     * are hidden and pre-selected in PHP. WooCommerce "Clear" blanks every
+     * variation select, so restore them after the reset.
+     */
+    $(document).on('reset_data', 'form.variations_form', function() {
+        $(this).find('select.dp-single-option').each(function() {
+            const $select = $(this);
+            const $option = $select.find('option').not('[value=""]').first();
+
+            if ($option.length && $select.val() !== $option.val()) {
+                $select.val($option.val()).trigger('change');
+            }
+        });
+    });
+
     // Reinitialize after cart update
     $(document).on('updated_cart_totals', function() {
         initQuantityControls();

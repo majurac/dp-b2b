@@ -353,6 +353,38 @@ function dreampoint_b2b_get_non_binding_mpc( WC_Product $product ): float {
 }
 
 /**
+ * Variable products: an attribute whose variations use exactly one value is
+ * pre-selected server-side and flagged with `.dp-single-option` so CSS hides its
+ * row (sass/pages/shop-single.scss). Options come from WooCommerce's
+ * get_variation_attributes() (values actually used by variations), so unused
+ * terms do not count. Attributes with several values are left untouched, and
+ * dependent narrowing is never treated as "single" (no row jumping mid-selection).
+ *
+ * @param array $args Arguments of wc_dropdown_variation_attribute_options().
+ * @return array
+ */
+function dreampoint_b2b_single_option_attribute_args( array $args ): array {
+	$options = $args['options'] ?? [];
+
+	if ( empty( $options ) && ! empty( $args['product'] ) && ! empty( $args['attribute'] ) ) {
+		$attributes = $args['product']->get_variation_attributes();
+		$options    = $attributes[ $args['attribute'] ] ?? [];
+	}
+
+	$options = array_values( array_filter( (array) $options, 'strlen' ) );
+
+	if ( 1 !== count( $options ) ) {
+		return $args;
+	}
+
+	$args['selected'] = $options[0];
+	$args['class']    = trim( ( $args['class'] ?? '' ) . ' dp-single-option' );
+
+	return $args;
+}
+add_filter( 'woocommerce_dropdown_variation_attribute_options_args', 'dreampoint_b2b_single_option_attribute_args' );
+
+/**
  * Translations for the third-party silkypress-input-field-block plugin.
  * The plugin ships no language files; load our own per-locale .mo from
  * languages/plugins/ (update-resistant, no plugin file edited). Loaded after the

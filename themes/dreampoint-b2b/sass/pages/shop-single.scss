@@ -248,6 +248,19 @@
                             @include paragraph-normal;
                         }
                     }
+                    // Single-option attributes: pre-selected in PHP, control hidden.
+                    // The row holding the "Clear" link (last attribute) keeps only that link.
+                    tr:has(.dp-single-option) {
+                        display: none;
+                        &:has(.reset_variations) {
+                            display: flex;
+                            th,
+                            .select2,
+                            .dp-single-option {
+                                display: none;
+                            }
+                        }
+                    }
                     .reset_variations {
                         @include paragraph-normal;
                         color: $text-primary;

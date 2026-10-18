@@ -10,8 +10,6 @@ $text-secondary: #9C9C9C;
 $text-tertiary: #000; /*#525252*/
 $text-hover: #A8A9A5;
 $text-disabled: #BFBFBF;
-$text-brand-disabled: #CDCFD4;
-$text-brand-inverse: #141414;
 $text-primary-inverse: #FAFAFA;
 $text-secondary-inverse: $white;
 $border-primary: #BBBBBB;
@@ -19,12 +17,9 @@ $border-secondary: #E5E7EB;
 $border-focus: #F3F4F6;
 $border-brand: #7C4982;
 $background-brand: #111111;
-$background-brand-500: #877F5B;
 $background-secondary: #fff;
 $background-brand-hover: #535038;
-$icon-brand: #A8A9A5;
 $icon-secondary: #6C727E;
-$icon-tertiary: #B8B8B8;
 $error: #F04437;
 
 $header-height: 135px;
@@ -59,6 +54,7 @@ $dp-color-success:               #17b26a;
 $dp-color-success-strong:        #067647;
 $dp-color-error:                 #f04437;
 $dp-color-error-hover:           #fca19b;
+$dp-color-badge-discount:        #c51216; // Figma Product card "Badge" (fill + border, CAT-01 11148:31500); white text
 $dp-color-btn-primary-bg:        #0d121c;
 $dp-color-btn-primary-text:      #f9fafb;
 $dp-color-btn-primary-hover:     #1f2a37;

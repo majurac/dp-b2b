@@ -355,7 +355,8 @@ function dreampoint_b2b_get_non_binding_mpc( WC_Product $product ): float {
 /**
  * Variable products: an attribute whose variations use exactly one value is
  * pre-selected server-side and flagged with `.dp-single-option` so CSS hides its
- * row (sass/pages/shop-single.scss). Options come from WooCommerce's
+ * row (sass/pages/shop-single.scss); `pa_boja` is the exception and stays visible
+ * (ADR-026 addendum). Options come from WooCommerce's
  * get_variation_attributes() (values actually used by variations), so unused
  * terms do not count. Attributes with several values are left untouched, and
  * dependent narrowing is never treated as "single" (no row jumping mid-selection).
@@ -378,7 +379,14 @@ function dreampoint_b2b_single_option_attribute_args( array $args ): array {
 	}
 
 	$args['selected'] = $options[0];
-	$args['class']    = trim( ( $args['class'] ?? '' ) . ' dp-single-option' );
+
+	// `.dp-single-selected`: value is auto-restored after "Clear" (product-single.js).
+	// `.dp-single-option`: row is hidden (CSS). Colour stays visible as product information.
+	$classes = 'dp-single-selected';
+	if ( 'pa_boja' !== $args['attribute'] ) {
+		$classes .= ' dp-single-option';
+	}
+	$args['class'] = trim( ( $args['class'] ?? '' ) . ' ' . $classes );
 
 	return $args;
 }

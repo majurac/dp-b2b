@@ -23,7 +23,9 @@ jQuery(function($) {
      * Handle variation found event
      * Display appropriate stock status message
      */
-    $form.on('found_variation', function(event, variation) {
+    // show_variation: fires last after "Clear" restores pre-selected single-option
+    // attributes (reset_image would otherwise leave a resolved variation without a message).
+    $form.on('found_variation show_variation', function(event, variation) {
         // Remove any existing stock status messages
         $('.stock-status').remove();
         

@@ -606,7 +606,7 @@ p.no-comments {
 .show-password-input {
     @include btn-reset;
     @include centre(y);
-    color: $text-secondary;
+    color: $dp-color-icon-secondary;
     font-family: 'icomoon';
     font-size: 20px;
     right: 16px;

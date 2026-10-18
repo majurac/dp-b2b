@@ -1,7 +1,7 @@
 @import '../theme/mixins';
 
 .about {
-    background-color: #F1F1F0;
+    background-color: $dp-color-bg-tertiary;
     .about-content {
         background-color: #fff;
         .row {

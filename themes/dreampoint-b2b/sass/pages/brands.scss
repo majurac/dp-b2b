@@ -17,7 +17,7 @@
         &__tab {
             appearance: none;
             background: none;
-            border: 1px solid $border-primary;
+            border: 1px solid $dp-color-border-control;
             border-radius: 100px;
             color: $text-primary;
             cursor: pointer;
@@ -27,7 +27,7 @@
                 border-color: $text-primary;
             }
             &:focus-visible {
-                outline: 2px solid $border-brand;
+                outline: 2px solid $dp-color-bg-brand;
                 outline-offset: 2px;
             }
             &.is-active {
@@ -148,7 +148,7 @@
                 top: 0;
                 &:hover {
                     &:before {
-                        color: $text-tertiary;
+                        color: $dp-color-text-primary;
                     }
                 }
             }

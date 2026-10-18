@@ -13,12 +13,12 @@
         background: $white;
         border-top: 1px solid $border-secondary;
         &.active {
-            background: #F5F3F0;
+            background: $dp-color-bg-tertiary;
         }
         h3 {
             @include heading-6;
             font-weight: 500;
-            color: $text-secondary;
+            color: $dp-color-text-secondary;
             padding: 16px;
             padding-right: 50px;
             position: relative;
@@ -29,7 +29,7 @@
                 @include centre(y);
                 right: 16px;
                 font-size: 18px;
-                color: $text-secondary;
+                color: $dp-color-icon-secondary;
             }
             &.active {
                 &:after {

@@ -139,10 +139,10 @@
         width: 100%;
         height: 36px;
         background: $white;
-        color: $text-secondary;
+        color: $dp-color-text-secondary;
         padding-right: 28px;
         @include bp(md-down) {
-            border: 1px solid $border-primary!important;
+            border: 1px solid $dp-color-border-control!important;
         }
         .selection {
             height: 100%;
@@ -152,7 +152,7 @@
             height: 100%;
             display: flex;
             align-items: center;
-            color: $text-secondary;
+            color: $dp-color-text-secondary;
             @include bp(md-down) {
                 text-align: center;
                 justify-content: center;
@@ -180,7 +180,7 @@
             &:after {
                 @include centre(y);
                 font-family: icomoon;
-                color: $text-secondary;
+                color: $dp-color-icon-secondary;
                 font-size: 16px;
                 content: "\e902";
                 @include animate-fade;
@@ -223,7 +223,7 @@
             align-items: center;
             padding: 8px 16px;
             gap: 8px;
-            background: #F5F3F0;
+            background: $dp-color-bg-tertiary;
             font-family: 'Montserrat';
             font-style: normal;
             font-weight: 500;

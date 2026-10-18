@@ -191,11 +191,11 @@
     width: 36px;
     height: 36px;
     &:hover {
-        background: $text-tertiary;
+        background: $dp-color-btn-primary-hover;
         color: $text-primary-inverse;
     }
     &:focus {
-        background: $text-secondary;
+        background: $dp-color-btn-primary-pressed;
         color: $text-primary-inverse;
     }
 }

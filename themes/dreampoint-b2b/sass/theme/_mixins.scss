@@ -629,13 +629,13 @@
     }
 }
 
-// Figma has no disabled state: the legacy disabled look is kept.
+// Figma disabled tokens: white bg, #e5e7eb border; the text uses the accessible $dp-color-text-disabled.
 @mixin button-figma-disabled {
     &:disabled,
     &[disabled] {
         background: $white;
-        color: $text-disabled;
-        border-color: $text-disabled;
+        color: $dp-color-text-disabled;
+        border-color: $dp-color-border-secondary;
         box-shadow: none;
         cursor: not-allowed;
         pointer-events: none;
@@ -692,8 +692,8 @@
         &:disabled,
         &[disabled] {
             background: $white;
-            color: $text-disabled;
-            border-color: $text-disabled;
+            color: $dp-color-text-disabled;
+            border-color: $dp-color-border-secondary;
             box-shadow: none;
             cursor: not-allowed;
             pointer-events: none;
@@ -762,7 +762,7 @@
     ul {
         display: flex;
         gap: 24px;
-        border-bottom: 1px solid $text-disabled;
+        border-bottom: 1px solid $dp-color-border-secondary;
         margin-bottom: 60px;
         @include bp(sm-down) {
             display: flex;
@@ -856,7 +856,7 @@
                         line-height: 20px;
                         letter-spacing: 0.05em;
                         text-transform: uppercase;
-                        color: $text-secondary;
+                        color: $dp-color-text-secondary;
                         padding: 16px 10px 16px 10px;
                         display: inline-flex;
                         padding-right: 30px;
@@ -923,14 +923,14 @@
             align-items: center;
             @include heading-5;
             font-weight: 500;
-            color: #101828;
+            color: $dp-color-text-primary;
             &:after {
                 content: "";
                 display: flex;
                 flex: 1;
                 height: 1px;
                 width: 100%;
-                background: $border-primary;
+                background: $dp-color-border-primary;
                 margin-left: 24px;
                 margin-right: 8px;
             }

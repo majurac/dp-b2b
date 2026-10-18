@@ -22,7 +22,7 @@
         border: 0;
         border-collapse: collapse;
         td { 
-            border: 1px solid #BFBFBF;
+            border: 1px solid $dp-color-border-primary;
             padding: 5px;
         }
     }
@@ -55,7 +55,7 @@
         }
         figcaption {
             @include caption-m;
-            color: $text-secondary;
+            color: $dp-color-text-secondary;
         }
         ul {
             @include list-style;
@@ -87,7 +87,7 @@
         p {
             @include paragraph-large;
             font-weight: 400;
-            color: $text-secondary;
+            color: $dp-color-text-secondary;
         }
         h1 {
             @include heading-2;
@@ -172,12 +172,12 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                color: #6D6D6D;
+                color: $dp-color-icon-secondary;
                 font-size: 18px;
                 &#copyLink {
                     @include paragraph-normal;
                     font-weight: 500;
-                    color: $text-secondary;
+                    color: $dp-color-icon-secondary;
                     gap: 8px;
                     i {
                         font-size: 20px;
@@ -188,7 +188,7 @@
                         display: block;
                         width: 1px;
                         height: 36px;
-                        background: $border-primary;
+                        background: $dp-color-border-primary;
                         margin-left: 12px;
                         margin-right: 8px;
                     }

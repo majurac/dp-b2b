@@ -2,17 +2,9 @@
 // Import directly, or get via _mixins.scss (which imports this file).
 
 $white: #ffffff;
-$text-secondary: #9C9C9C;
-$text-tertiary: #000; /*#525252*/
-$text-hover: #A8A9A5;
-$text-disabled: #BFBFBF;
 $text-secondary-inverse: $white;
-$border-primary: #BBBBBB;
 $border-secondary: #E5E7EB;
-$border-focus: #F3F4F6;
-$border-brand: #7C4982;
 $background-secondary: #fff;
-$background-brand-hover: #535038;
 $icon-secondary: #6C727E;
 $error: #F04437;
 
@@ -123,4 +115,6 @@ $dp-radius-btn-xl:    24px;
 
 // Shadows
 $dp-shadow-card-xs: 0 1px 3px rgba(10, 14, 21, .16);
-$dp-shadow-card-xl: 0 2px 5px rgba(10, 14, 21, .16), 0 10px 24px rgba(10, 14, 21, .20);
+// Figma card/lg (CART-03): same layers and order as the former header/catalog-menu literals.
+$dp-shadow-card-lg: 0px 10px 16px rgba(10, 14, 21, 0.12), 0px 2px 5px rgba(10, 14, 21, 0.16);
+$dp-shadow-card-xl:0 2px 5px rgba(10, 14, 21, .16), 0 10px 24px rgba(10, 14, 21, .20);

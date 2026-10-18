@@ -171,7 +171,7 @@
             span.product-sku {
                 display: block;
                 @include caption-m;
-                color: $text-tertiary;
+                color: $dp-color-text-secondary;
                 margin-bottom: 8px;
             }
             .tag + .tag {
@@ -418,7 +418,7 @@
                         display: flex;
                         align-items: center;
                         justify-content: center;
-                        color: #6D6D6D;
+                        color: $dp-color-icon-secondary;
                         font-size: 18px;
                         &:hover {
                             color: $text-primary;

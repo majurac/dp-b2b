@@ -17,7 +17,7 @@
         justify-content: space-between;
         align-items: center;
         padding: 22px 0;
-        border-bottom: 1px solid #d0d5dd;
+        border-bottom: 1px solid $dp-color-border-primary;
         .mobile-toggle-black-js {
             display: none;
             font-size: 32px;
@@ -48,7 +48,7 @@
         }
         ul {
             li {
-                border-bottom: 1px solid $border-primary;
+                border-bottom: 1px solid $dp-color-border-primary;
                 padding: 15px 16px;
                 a {
                     @include paragraph-normal;

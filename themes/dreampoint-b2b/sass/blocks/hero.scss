@@ -13,7 +13,7 @@ $hero-height-sm: calc(100vh - 150px);
 .homehero {
     position: relative;
     line-height: 0;
-    background-color: $border-focus;
+    background-color: $dp-color-bg-tertiary;
     padding: 0;
 
     .container {
@@ -92,7 +92,7 @@ $hero-height-sm: calc(100vh - 150px);
                 transform: translateZ(0);
                 backface-visibility: hidden;
                 will-change: transform;
-                background-color: #f5f5f5;
+                background-color: $dp-color-bg-tertiary;
             }
         }
 

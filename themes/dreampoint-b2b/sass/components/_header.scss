@@ -177,7 +177,7 @@
         width: 100%;
         z-index: 9998;
     &.sticky {
-        background-color: #FAFAFA;
+        background-color: $dp-color-bg-secondary;
     }
     .row {
         align-items: center;
@@ -244,7 +244,7 @@
             gap: clamp(6px, calc((100vw - 280px) / 3), 24px);
             background-color: #fff;
             padding: 14px 16px;
-            border-top: 1px solid #dadada;
+            border-top: 1px solid $dp-color-border-primary;
             height: auto;
         }
         @media (max-width: 359.98px) {
@@ -479,7 +479,7 @@
                     //width: 100%;
                     margin-left: auto;
                     margin-right: auto;
-                    box-shadow: 0px 10px 16px rgba(10, 14, 21, 0.12), 0px 2px 5px rgba(10, 14, 21, 0.16);
+                    box-shadow: $dp-shadow-card-lg;
                     background-color: $white;
                     padding-top: 20px;
                     padding: 28px;
@@ -650,14 +650,14 @@ $search-field-focus: #141414;
             border: 0;
             padding: 0 55px 8px 64px;
             height: 64px;
-            border-bottom: 1px solid #D0D5DD;
+            border-bottom: 1px solid $dp-color-border-primary;
             background-color: transparent;
             font-family: 'Petrona';
             font-style: normal;
             font-weight: 200;
             font-size: 48px;
             line-height: normal;
-            color: #475467;
+            color: $dp-color-text-secondary;
             width: 100%;
             @include bp(lg-down) {
                 font-size: 40px;
@@ -675,7 +675,7 @@ $search-field-focus: #141414;
             padding: 0;
             border: 0;
             background: none;
-            color: #475467;
+            color: $dp-color-text-secondary;
             font-size: 48px;
             display: flex;
             align-items: center;
@@ -709,14 +709,14 @@ $search-field-focus: #141414;
     text-align: left; // header .action-btns is text-align:right on sm-up
     padding: 16px;
     background: #FFFFFF;
-    box-shadow: 0px 10px 16px rgba(10, 14, 21, 0.12), 0px 2px 5px rgba(10, 14, 21, 0.16);
+    box-shadow: $dp-shadow-card-lg;
     border-radius: 8px;
     @include bp(md-down) {
         top: 115px;
         width: calc(100% - 32px);
         @include centre(x);
         box-shadow: none;
-        border: 1px solid $border-primary;
+        border: 1px solid $dp-color-border-primary;
     }
     .search-default__section + .search-default__section {
         margin-top: 16px;
@@ -725,7 +725,7 @@ $search-field-focus: #141414;
         margin: 0 0 8px;
         font-size: 12px;
         font-weight: 600;
-        color: $text-secondary;
+        color: $dp-color-text-tertiary;
     }
     .search-chips {
         display: flex;
@@ -740,7 +740,7 @@ $search-field-focus: #141414;
         align-items: center;
         min-height: 32px;
         padding: 4px 12px;
-        border: 1px solid $border-primary;
+        border: 1px solid $dp-color-border-control;
         border-radius: 16px;
         font-size: 14px;
         color: $text-primary;
@@ -778,7 +778,7 @@ $search-field-focus: #141414;
     }
     .search-recent__icon {
         flex-shrink: 0;
-        color: $text-secondary;
+        color: $dp-color-icon-secondary;
     }
     .search-recent__remove {
         @include btn-reset;
@@ -788,7 +788,7 @@ $search-field-focus: #141414;
         padding: 0;
         background: none;
         border: 0;
-        color: $text-secondary;
+        color: $dp-color-icon-secondary;
         font-size: 16px;
         &:hover,
         &:focus-visible {
@@ -802,9 +802,9 @@ $search-field-focus: #141414;
         gap: 8px;
         margin: 16px 0 0;
         padding-top: 16px;
-        border-top: 1px solid $border-primary;
+        border-top: 1px solid $dp-color-border-primary;
         font-size: 14px;
-        color: $text-secondary;
+        color: $dp-color-text-tertiary;
         em {
             font-style: italic;
         }
@@ -825,7 +825,7 @@ $search-field-focus: #141414;
     .sajx-nofund-prod {
         padding: 24px;
         background: #FFFFFF;
-        box-shadow: 0px 10px 16px rgba(10, 14, 21, 0.12), 0px 2px 5px rgba(10, 14, 21, 0.16);
+        box-shadow: $dp-shadow-card-lg;
         border-radius: 8px;
         min-height: 150px;
         overflow: auto;
@@ -837,7 +837,7 @@ $search-field-focus: #141414;
         text-align: center;
         @include bp(md-down) {
             box-shadow: none;
-            border: 1px solid $border-primary;
+            border: 1px solid $dp-color-border-primary;
         }
         p, .ud3-head, .ud3-item a {
             color: $text-primary;
@@ -858,7 +858,7 @@ $search-field-focus: #141414;
     .product-rows {
         padding: 24px;
         background: #FFFFFF;
-        box-shadow: 0px 10px 16px rgba(10, 14, 21, 0.12), 0px 2px 5px rgba(10, 14, 21, 0.16);
+        box-shadow: $dp-shadow-card-lg;
         border-radius: 8px;
         max-height: 539px;
         overflow: auto;
@@ -870,7 +870,7 @@ $search-field-focus: #141414;
         flex-direction: column;
         @include bp(md-down) {
             box-shadow: none;
-            border: 1px solid $border-primary;
+            border: 1px solid $dp-color-border-primary;
             // overlay je fixed: lista (sa footerom) mora stati u visinu ekrana ispod inputa (top: 115px + 16px razmak)
             max-height: calc(100vh - 131px);
             max-height: calc(100dvh - 131px);
@@ -895,14 +895,14 @@ $search-field-focus: #141414;
                 .product-sku {
                     margin-top: -8px;
                     font-size: 12px;
-                    color: $text-secondary;
+                    color: $dp-color-text-tertiary;
                 }
                 .product-title {
                     color: $text-primary;
                     a {
                         color: inherit;
                         &:hover {
-                            color: $text-secondary;
+                            color: $dp-color-text-tertiary;
                         }
                     }
                 }
@@ -913,7 +913,7 @@ $search-field-focus: #141414;
                     font-weight: 400;
                     del {
                         font-weight: 400;
-                        color: $text-secondary;
+                        color: $dp-color-text-tertiary;
                     }
                     ins {
                         text-decoration: none;
@@ -1020,7 +1020,7 @@ $search-field-focus: #141414;
                 font-size: 16px;
                 color: $text-primary;
                 &:hover {
-                    color: $text-secondary;
+                    color: $dp-color-text-tertiary;
                 }
             }
         }
@@ -1032,7 +1032,7 @@ $search-field-focus: #141414;
             margin-top: auto;
             padding-top: 24px;
             padding-bottom: 24px;
-            border-top: 1px solid $border-primary;
+            border-top: 1px solid $dp-color-border-primary;
             color: $text-primary;
             strong {
                 font-weight: 400;

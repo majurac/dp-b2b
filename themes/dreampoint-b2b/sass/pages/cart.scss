@@ -25,7 +25,7 @@
                 gap: 0;
                 &:hover {
                     @include bp(md-up) {
-                        color: $text-hover;
+                        color: $dp-color-btn-secondary-hover-text;
                     }
                 }
                 +button {
@@ -118,7 +118,7 @@
                     .sku {
                         display: block;
                         @include caption-m;
-                        color: $text-secondary;
+                        color: $dp-color-text-tertiary;
                         margin-bottom: 4px;
                         strong {
                             font-weight: 400;
@@ -178,7 +178,7 @@
                             .label {
                                 display: block;
                                 @include paragraph-normal;
-                                color: $text-secondary;
+                                color: $dp-color-text-tertiary;
                             }
                             .amount {
                                 @include card-price;
@@ -195,7 +195,7 @@
                     }
                 }
                 +.cart_item {
-                    border-top: 1px solid $text-disabled;
+                    border-top: 1px solid $dp-color-border-secondary;
                 }
                 .qty-number {
                     .number {

@@ -157,7 +157,7 @@
     align-items: center;
     padding: 0px 16px;
     height: 28px;
-    background: $pink;
+    background: $dp-color-bg-brand;
     @include button-text;
     text-align: center;
     color: $white;
@@ -170,7 +170,7 @@
     }
     &.tag--out-of-stock {
         background-color: $white;
-        color: $pink;
+        color: $dp-color-error-text;
         font-weight: 500;
         @include bp(sm-down) {
             height: 18px;

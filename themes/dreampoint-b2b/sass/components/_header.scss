@@ -27,7 +27,7 @@
 }
 
 .notification-bar {
-    background-color: $pink;
+    background-color: $dp-color-bg-brand;
     max-height: 44px;
      padding-left: 40px;
     padding-right: 40px;
@@ -37,7 +37,7 @@
         .slick-prev, .slick-next {
             color: #fff;
             &:hover {
-                color: $brand;
+                color: $dp-color-btn-text-hover;
             }
             &:before {
                 font-size: 22px;
@@ -345,7 +345,7 @@
             min-height: 18px;
             padding: 2px;
             aspect-ratio: 1/1;
-            background: $pink;
+            background: $dp-color-bg-brand;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -358,7 +358,7 @@
             text-align: center;
             letter-spacing: 0.02em;
             text-align: center;
-            color: $white;
+            color: $dp-color-text-inverse;
         }
     }
     #main-header {
@@ -468,7 +468,7 @@
                     }
                 }
                 .sub-menu {
-                    border-top: 4px solid $brand;
+                    border-top: 4px solid $dp-color-bg-brand;
                     position: absolute;
                     margin: 0;
                     display: block;
@@ -517,46 +517,6 @@
     visibility: hidden;
     &.active {
         visibility: visible;
-    }
-}
-
-.top-notification {
-    text-align: center;
-    background-color: $brand;
-    padding: 8px 0;
-    @include bp(sm-down) {
-        text-align: left;
-    }
-    .tn-wrapper {
-        @include bp(sm-down) {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            justify-content: space-between;
-        }
-    }
-    .my-acc-sm {
-        font-family: 'Montserrat';
-        font-style: normal;
-        font-weight: 500;
-        font-size: 12px;
-        line-height: 15px;
-        color: $white;
-        @include bp(sm-up) {
-            display: none;
-        }
-    }
-    p {
-        @include paragraph-normal;
-        font-weight: 500;
-        color: $white;
-        @include bp(md) {
-            font-size: 14px;
-        }
-        @include bp(sm-down) {
-            font-weight: 500;
-            font-size: 12px;
-        }
     }
 }
 
@@ -887,7 +847,7 @@ $search-field-focus: #141414;
         }
         .ud3-item a {
             text-decoration: underline;
-            color: $brand;
+            color: $dp-color-text-primary;
         }
         .tvoja-prava-klasa {
             display: flex;

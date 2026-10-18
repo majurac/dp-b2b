@@ -133,7 +133,7 @@
             height: 20px !important;
 
             &:checked {
-                background: $brand;
+                background: $dp-color-bg-brand;
 
                 &:before {
                     background: $white;
@@ -147,7 +147,7 @@
             padding: 0 0 0 32px !important;
 
             &--checked-option-highlighted {
-                border: 2px solid $brand !important;
+                border: 2px solid $dp-color-bg-brand !important;
             }
         }
 

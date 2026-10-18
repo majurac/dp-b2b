@@ -53,7 +53,7 @@ $hero-height-sm: calc(100vh - 150px);
             &-prev, &-next {
                 color: $white;
                 z-index: 10;
-                &:hover { color: $brand; }
+                &:hover { color: $dp-color-btn-text-hover; }
             }
             &-prev {
                 @media (min-width: 1200px) and (max-width: 1699px) { left: 20px; }

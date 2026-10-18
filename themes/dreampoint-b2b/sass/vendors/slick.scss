@@ -40,7 +40,7 @@
             cursor: pointer;
             z-index: 99;
             transition: none;
-            background: $brand;
+            background: $dp-color-icon-secondary;
             border-radius: 50%;
         }
         &.slick-active button, &:hover button {
@@ -111,11 +111,11 @@
     background: transparent;
     @include bp(lg) {
         color: #fff;
-        background-color: $brand;
+        background-color: $dp-color-btn-primary-bg;
     }
     &:hover {
         color: #fff;
-        background-color: $pink;
+        background-color: $dp-color-btn-primary-hover;
     }
     &.slick-disabled {
         color: rgba($black, .3);

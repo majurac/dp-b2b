@@ -280,11 +280,16 @@ p {
         font-weight: 500;
     }
     a {
-        color: $brand;
-        text-decoration: none;
+        color: $dp-color-text-primary;
+        text-decoration: underline;
         font-weight: 400;
         &:hover {
-            color: $pink;
+            color: $dp-color-btn-secondary-hover-text;
+        }
+        // the global `a:focus { outline: none !important }` removes the native ring; restore it for content links
+        &:focus-visible {
+            outline: 2px solid $dp-color-bg-brand !important;
+            outline-offset: 2px;
         }
     }
 }

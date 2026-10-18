@@ -669,24 +669,24 @@
         justify-content: center;
         text-align: center;
         padding: 0px 24px;
-        background: $pink;
+        background: $dp-color-btn-primary-bg;
         gap: 8px;
         height: 58px;
-        border: 1px solid $pink;
+        border: 1px solid $dp-color-btn-primary-bg;
         @include animate-fade;
         @include bp(desktop) {
             padding: 0 14px;
         }
         &:hover {
-            background: $brand;
-            border-color: $brand;
+            background: $dp-color-btn-primary-hover;
+            border-color: $dp-color-btn-primary-hover;
             color: $white;
         }
         &:focus {
             color: $white;
-            background: $brand;
-            border-color: $brand;
-            box-shadow: 0px 0px 0px 1px $brand;
+            background: $dp-color-btn-primary-pressed;
+            border-color: $dp-color-btn-primary-pressed;
+            box-shadow: 0px 0px 0px 1px $dp-color-btn-primary-pressed;
 
         }
         &:disabled,
@@ -710,15 +710,15 @@
         background: $white;
         border: 1px solid $black;
         &:hover {
-            background: $brand;
-            border-color: $brand;
-            color: $white;
+            background: $dp-color-btn-secondary-hover-bg;
+            border-color: $dp-color-btn-secondary-hover-border;
+            color: $dp-color-btn-secondary-hover-text;
         }
         &:focus {
-            color: $white;
-            background: $brand;
-            border-color: $brand;
-            box-shadow: 0px 0px 0px 1px $brand;
+            color: $dp-color-btn-secondary-pressed-text;
+            background: $dp-color-btn-secondary-pressed-bg;
+            border-color: $dp-color-btn-secondary-pressed-border;
+            box-shadow: 0px 0px 0px 1px $dp-color-btn-secondary-pressed-border;
 
         }
     }
@@ -742,15 +742,19 @@
         font-size: 12px;
     }
     &:hover {
-        background: $brand;
-        color: $white;
+        background: $dp-color-btn-secondary-hover-bg;
+        color: $dp-color-btn-secondary-hover-text;
     }
 }
 
 @mixin categories-btn-reverse {
     @include categories-btn;
-    background-color: $brand;
-    color: $white;
+    background-color: $dp-color-btn-primary-bg;
+    color: $dp-color-btn-primary-text;
+    &:hover {
+        background-color: $dp-color-btn-primary-hover;
+        color: $dp-color-btn-primary-text;
+    }
 }
 
 

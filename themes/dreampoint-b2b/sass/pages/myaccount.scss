@@ -548,7 +548,7 @@
     table.woocommerce-table-refund-details tr {
         td a {
             color: inherit;
-            &:hover { color: $brand; }
+            &:hover { color: $dp-color-btn-secondary-hover-text; }
         }
         th { font-weight: 500; }
         input[type="number"].qty-input { border: 1px solid #D2D6DB; }

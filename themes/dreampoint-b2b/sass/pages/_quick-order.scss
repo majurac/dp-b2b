@@ -36,7 +36,7 @@
         @include bp(sm-down) {
             span { display: none; } // icon-only on mobile — label kept in DOM for accessibility
         }
-        &:hover { color: $brand; }
+        &:hover { color: $dp-color-btn-secondary-hover-text; }
     }
 
     &__center {
@@ -56,7 +56,7 @@
     // Restore a visible indicator scoped to this header's own links only.
     &__back:focus-visible,
     &__logo:focus-visible {
-        outline: 2px solid $brand !important;
+        outline: 2px solid $dp-color-bg-brand !important;
         outline-offset: 2px;
     }
 }

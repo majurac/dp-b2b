@@ -52,7 +52,7 @@
         font-family: inherit;
         color: $black;
         &:hover {
-            color: $brand;
+            color: $dp-color-btn-secondary-hover-text;
         }
     }
 
@@ -93,7 +93,7 @@
         }
         &:hover,
         &:focus-visible {
-            color: $brand;
+            color: $dp-color-btn-secondary-hover-text;
         }
         &[aria-expanded="true"] i {
             transform: rotate(180deg);

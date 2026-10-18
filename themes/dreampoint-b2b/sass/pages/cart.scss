@@ -129,7 +129,7 @@
                         @include card;
                         color: $black;
                         &:hover {
-                            color: $brand;
+                            color: $dp-color-btn-secondary-hover-text;
                         }
                     }
                     &.hide-sm {

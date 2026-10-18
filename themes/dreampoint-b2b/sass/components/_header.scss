@@ -214,7 +214,7 @@
             background: none;
             svg {
                 path {
-                    fill: $brand;
+                    fill: $dp-color-icon-primary;
                 }
             }
         }
@@ -320,9 +320,9 @@
             }  
             &:hover {
                 >a, >button {
-                    color: $brand;
+                    color: $dp-color-btn-secondary-hover-text;
                     >i {
-                        color: $brand;
+                        color: $dp-color-btn-secondary-hover-text;
                     }
                 }
             }   
@@ -787,8 +787,8 @@ $search-field-focus: #141414;
         text-decoration: none;
         &:hover,
         &:focus-visible {
-            border-color: $brand;
-            color: $brand;
+            border-color: $dp-color-bg-brand;
+            color: $dp-color-btn-secondary-hover-text;
         }
     }
     .search-recent {
@@ -813,7 +813,7 @@ $search-field-focus: #141414;
         text-decoration: none;
         &:hover,
         &:focus-visible {
-            color: $brand;
+            color: $dp-color-btn-secondary-hover-text;
         }
     }
     .search-recent__icon {
@@ -1020,7 +1020,7 @@ $search-field-focus: #141414;
                 a {
                     color: inherit;
                     &:hover {
-                        color: $brand;
+                        color: $dp-color-btn-secondary-hover-text;
                     }
                 }
                 + .price-container {
@@ -1042,7 +1042,7 @@ $search-field-focus: #141414;
                 }
                 .quantity {
                     @include card-price-sm;
-                    color: $brand;
+                    color: $dp-color-text-primary;
                     del {
                         color: #6C727E;
                     }

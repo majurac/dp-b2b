@@ -774,14 +774,14 @@
                 padding-bottom: 10px;
                 border-bottom: 3px solid transparent;
                 &.active, &:hover {
-                    color: $brand;
-                    border-color: $brand;
+                    color: $dp-color-text-primary;
+                    border-color: $dp-color-bg-brand;
                 }
             }
             &.active {
                 a {
-                    color: $brand;
-                    border-color: $brand;
+                    color: $dp-color-text-primary;
+                    border-color: $dp-color-bg-brand;
                 }
             }
         }

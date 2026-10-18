@@ -249,8 +249,8 @@ body.admin-bar {
             }
         }
         .button {
-            background-color: $brand;
-            border-color: $brand;
+            background-color: $dp-color-btn-primary-hover;
+            border-color: $dp-color-btn-primary-hover;
         }
     }
 }
@@ -1220,13 +1220,13 @@ body.woocommerce-account .select2-dropdown {
         .price-container {
             display: block;
             @include card-price;
-            color: $brand;
+            color: $dp-color-text-primary;
             del {
                 color: #6C727E;
             }
             ins {
                 text-decoration: none;
-                color: $brand;
+                color: $dp-color-text-primary;
             }
             +.action-holder {
                 margin-top: 10px;

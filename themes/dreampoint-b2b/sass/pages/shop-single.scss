@@ -261,6 +261,10 @@
                             }
                         }
                     }
+                    // Nothing left to choose (every attribute single-option): no "Clear" link.
+                    &:not(:has(select:not(.dp-single-option))) .reset_variations {
+                        display: none;
+                    }
                     .reset_variations {
                         @include paragraph-normal;
                         color: $text-primary;

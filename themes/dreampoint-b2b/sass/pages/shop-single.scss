@@ -191,6 +191,9 @@
             .stock.out-of-stock {
                 display: none;
             }
+            p.stock {
+                display: none;
+            }
             .size-finder-wrap {
                 @include sliding-content;
                 .size-finder-heading {

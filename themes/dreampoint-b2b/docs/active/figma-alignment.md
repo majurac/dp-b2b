@@ -602,3 +602,28 @@ Follow-up to section 29 (owner-approved). Commits `8a832dd`, `c8b12bc`, `d22c9a0
 **Verified (staging, admin, 1440/768/390):** slider not in `.container`, Slick initialized and moving, 7 of 7 logos keep the intrinsic aspect ratio (0 distorted), none clipped in-track, no horizontal overflow, 0 console errors, local/staging commit hash match (`a70c48f`).
 
 **Residual (not CSS-fixable):** the source attachments are small (e.g. 72px-tall PNGs recovered from `dream-point.hr`, see logo recovery above), so some logos render at ~27-48px height and look soft on high-DPI screens; replace with higher-resolution originals via Products -> Brands -> Thumbnail (owner). 33 brands have no logo and render the name as text. Pixel-perfect Figma alignment of the section was not attempted by design.
+
+## 38. Legacy olive/pink cleanup, stage 1 (2026-10-18, code `1c1cc8e` + `e5a021b`, STAGING VERIFIED) — PARTIAL, OWNER DECISION REQUIRED
+
+Owner confirmed that inherited JekaaStore olive (`$brand #8C907E`) and pink (`$pink #e3869c`) do not belong in DreamPoint B2B. Audit found 58 active `$brand`/`$pink` references (no literal hex outside `_vars.scss`, no Sass colour functions, no interpolation); 23 migrated, 35 left unchanged on purpose. `$brand` and `$pink` definitions therefore REMAIN.
+
+**Removed (zero references in SCSS/PHP/JS/ACF JSON; compiled CSS byte-identical, `1c1cc8e`):** `$text-brand-disabled`, `$text-brand-inverse`, `$background-brand-500`, `$icon-brand`, `$icon-tertiary`. **Added:** `$dp-color-badge-discount #c51216` (Figma Product card "Badge" 11148:31500: fill and border `#c51216`, white text).
+
+**Migrated (Figma evidence):**
+- Price text (`.product-item .price-container` + `ins`, PDP `.eur`, mini-cart `.quantity`) `$brand` -> `$dp-color-text-primary` `#0d121c` (card price and PDP price use text-primary in 11148:31500 / 11148:32792). Mini-cart has no Figma frame: role-based inference.
+- Tabs (`custom-tabs` mixin: PDP tabs, blog categories, search tabs) `$brand` -> text `#0d121c`, border `$dp-color-bg-brand` `#0d121c` (PDP tab active underline stroke `#0D121C`, 11148:32828).
+- `.tag--discount` `$pink` -> `$dp-color-badge-discount`.
+- Neutral hover/focus-visible text (header action buttons, search chips and recent links, mini-cart title, catalog menu link and toggler, Quick Order header back link, cart product-name link) -> `$dp-color-btn-secondary-hover-text` `#1f2a37` (Figma `defaults/hover/text-hover`; same precedent as the search icon in section 15). Search chip focus/hover border and QO header focus outline -> `$dp-color-bg-brand` `#0d121c` (Figma `defaults/focus/border-focus`). Note: hover contrast against the base colour is intentionally subtle, as in Figma.
+- Blog card `.post-item:hover .button` -> `$dp-color-btn-primary-hover` `#1f2a37` (Figma primary hover).
+- Mobile toggler SVG fill -> `$dp-color-icon-primary` `#111927`.
+
+**Unresolved (35 references, no change):**
+- Legacy `button-primary` / `button-outline` mixin branches (`_mixins.scss` 672-721; callers: WC Blocks checkout, WBW, refund) — ADR-022 / Step 3b-2c scope, checkout is high-risk. WC Blocks radio (`checkout.scss` 136/150), refund link hover (`myaccount.scss` 551).
+- Header cart count badge (pink; Figma shows a plain cart icon), `.notification-bar` (pink bg + arrow hover; ACF-driven, no Figma), submenu `border-top`, ajax-search "no results" link.
+- `.tag` base (pink; also `tag--featured`, `tag--new`) and `tag--out-of-stock` text (Figma only has the green "Na stanju" badge).
+- Global `p a` colour/hover (`_typography.scss` 283/287): no Figma link style; accessibility decision (colour-only link affordance).
+- Slick arrows/dots (`vendors/slick.scss`, `shop-single.scss:151`, `hero.scss:56`): no Figma depiction; hero not testable on staging.
+- `categories-btn` / `categories-btn-reverse` (about block, not rendered), Select2 option hover (`_content.scss` 1139; Select2 aligned in 3c with other rules), `.add-to-cart:not(.button--icon-only)` colour at <=1199px (`_content.scss` 1282).
+- Dead selectors with no markup anywhere: `.top-notification` (`_header.scss`), `.custom-switch` (`_content.scss`) — candidates for deletion with owner approval.
+
+**QA (staging `e5a021b`, hashes local = server, admin session, read-only):** served `style.css` / `css/pages/cart.css` / `shop-single.css` carry the new values; computed: shop card price `rgb(13,18,28)`, PDP active tab text and underline `rgb(13,18,28)`, mobile toggler fill `rgb(17,25,39)`; no horizontal overflow at 390; console clean on `/shop/`, PDP, `/quick-order/`, `/cart/`. NOT verified visually: `.tag--discount` (no discounted product visible on staging; CSS value verified only), hover/focus states (verified in the served CSS, not by pointer), cart/hover on the cart page.

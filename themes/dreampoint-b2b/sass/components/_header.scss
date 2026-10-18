@@ -996,7 +996,7 @@ $search-field-focus: #141414;
                     display: block;
                     @include caption-m;
                     font-weight: 400;
-                    color: #6C727E;
+                    color: $dp-color-text-tertiary;
                     margin-bottom: 3px;
                     text-align: right;
                 }
@@ -1004,7 +1004,7 @@ $search-field-focus: #141414;
                     @include card-price-sm;
                     color: $dp-color-text-primary;
                     del {
-                        color: #6C727E;
+                        color: $dp-color-text-tertiary;
                     }
                     ins {
                         text-decoration: none;

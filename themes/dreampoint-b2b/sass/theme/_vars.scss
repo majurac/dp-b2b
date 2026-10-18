@@ -2,19 +2,15 @@
 // Import directly, or get via _mixins.scss (which imports this file).
 
 $white: #ffffff;
-$black: #111111;
-$text-primary: #303030;
 $text-secondary: #9C9C9C;
 $text-tertiary: #000; /*#525252*/
 $text-hover: #A8A9A5;
 $text-disabled: #BFBFBF;
-$text-primary-inverse: #FAFAFA;
 $text-secondary-inverse: $white;
 $border-primary: #BBBBBB;
 $border-secondary: #E5E7EB;
 $border-focus: #F3F4F6;
 $border-brand: #7C4982;
-$background-brand: #111111;
 $background-secondary: #fff;
 $background-brand-hover: #535038;
 $icon-secondary: #6C727E;
@@ -46,6 +42,13 @@ $dp-color-border-secondary: #e5e7eb;
 $dp-color-border-inverse:   #6c727e;
 $dp-color-icon-primary:     #111927;
 $dp-color-icon-secondary:   #6c727e;
+
+// Legacy names now alias the final Figma tokens (colour-only; every consumer is a primary dark text,
+// brand fill or inverse light colour). Defined here because they must follow the $dp-* values.
+$black:                 $dp-color-text-primary;
+$text-primary:          $dp-color-text-primary;
+$background-brand:      $dp-color-bg-brand;
+$text-primary-inverse:  $dp-color-text-inverse;
 
 // Colors - state / button
 $dp-color-success:               #17b26a;

@@ -139,7 +139,7 @@
 
     .woocommerce-password-hint {
         padding: 10px 10px 10px 34px;
-        background: #F3F4F6;
+        background: $dp-color-bg-tertiary;
         border-radius: 8px;
         margin-top: 10px;
         display: block;
@@ -151,7 +151,7 @@
             content: "\e91a";
             display: block;
             font-size: 14px;
-            color: #111927;
+            color: $dp-color-icon-primary;
             font-family: icomoon;
         }
     }
@@ -527,30 +527,3 @@
     }
 }
 
-.refund-front-form {
-    .fr-request-form {
-        margin-top: 40px;
-        label { margin-bottom: 8px; }
-    }
-
-    .check-all-button .check {
-        @include button-primary;
-        padding: 0 12px !important;
-        height: 36px !important;
-        font-size: 14px !important;
-        line-height: 17px !important;
-        margin-top: 16px;
-        border-radius: 0 !important;
-    }
-
-    .submit input[type="submit"] { @include button-primary; }
-
-    table.woocommerce-table-refund-details tr {
-        td a {
-            color: inherit;
-            &:hover { color: $dp-color-btn-secondary-hover-text; }
-        }
-        th { font-weight: 500; }
-        input[type="number"].qty-input { border: 1px solid #D2D6DB; }
-    }
-}

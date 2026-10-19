@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-19 (T2 completion: commercialist photo) — IMPLEMENTATION COMPLETE / VERIFIED; PHOTO CONTENT PENDING (staging `f68b0f9`)
+
+New optional ACF image field `photo_commercialist` (`field_6a0c4e7b91d3a`, return format ID) on the existing `komercijalist` group `group_67b45eed142b8` (JSON-only group on staging, live without DB sync); the homepage contact card renders the caption "Vaš prodajni predstavnik" and, when set, the photo of the logged-in partner's assigned representative (selection logic unchanged). Empty state verified on staging at 1280/390/360; the populated state only by non-persistent injection (no real photo exists, no record changed). Owner action: upload representative photos. Details: `docs/active/figma-alignment.md` section 42, "T2 completion".
+
 ## Update 2026-10-19 (T2 homepage lower sections) — T2 IMPLEMENTED AND VERIFIED ON STAGING (`e837c96`), contact-card photo BLOCKED
 
 Brands/Quick Order headings (Figma 40px / 64px), Quick Order panel (478px, ACF photo right 50%), four-column USP row and contact card are aligned and QA-verified at 1280/390/360. Not done (content dependencies, no invented assets): the sales-representative photograph and caption (`komercijalist` has no photo field) and the USP icon order in the `features_items` option. Record, deviations and Figma nodes: `docs/active/figma-alignment.md` section 42, "T2 implemented". Next backlog item: T3.

@@ -1775,3 +1775,38 @@ The homepage Segment tiles (Lifestyle / Toys / Outdoor, ADR-009 implementation) 
 - Decision: the existing `p.stock { display: none; }` (commit `932877c`, staging verified) is sufficient and approved; `.stock-status` remains the binary availability indicator. Minimum/maximum order quantity rules, quantity input limits (`max`, `max_qty`), WooCommerce stock validation and error messages, cart, checkout and Store API stay unchanged.
 - Superseded: the broader stock-confidentiality proposal from the 2026-10-18 read-only audit (stock-format override, `max_qty`/`max_value` removal, Store API maximum filter, generic cart messages) is NOT APPROVED / NOT REQUIRED under this scope. The audit findings in ADR-027 and the 2026-10-18 notes are kept as historical evidence only; technical visibility of quantities is an acknowledged limitation of CSS-only hiding, not an open defect.
 - Status: COMPLETE — VERIFIED.
+
+## ADR-028 — PDP shows only the native Description tab; ERP data audit for future tabs (2026-10-19)
+
+**Status:** Implemented and verified on staging (`76e4162`, `657508c`, `4ecd403`, `a2750fb`). Staging only (no production environment exists).
+
+### Context
+
+`woocommerce/content-single-product.php` wrapped `woocommerce_output_product_data_tabs()` in `<div class="wc-tabs-section block" style="display: none;">` since the monorepo migration (recorded as a known pre-existing item in ADR-014). The whole tab section (Description, Additional information, Reviews) was hidden on every PDP. Figma PDP-01/02 (`11148:32726`, `11148:32859`) show the tabs Opis / Specifikacije / Sadrzaj paketa / Dokumenti and no reviews. Owner decision: show ONLY "Opis" now.
+
+### Decision
+
+- Inline `display: none` removed. The tab section is rendered through the native WooCommerce tabs API; the filter `dreampoint_b2b_product_tabs()` (`inc/woocommerce.php`, `woocommerce_product_tabs` priority 99) keeps only `description`. Additional information, Reviews and plugin-added tabs are removed from the PDP tab UI only; reviews/attribute data and WooCommerce settings are untouched (reviews are NOT disabled globally).
+- Source: native long description (`post_content`) via WooCommerce's own description panel. WooCommerce registers the Description tab only when `post_content` is non-empty, and the template renders the `.wc-tabs-section` wrapper only if the tab output is non-empty, so a product without a long description shows no tab, no empty panel and no spacing (staging: 370 of 451 published products have a long description).
+- Duplicate fix: no product has a `post_excerpt`, so `the_excerpt()` auto-generated a copy of the long description in the summary column. The `.short-description` block now renders only when `has_excerpt()` is true. The short description is never used as a substitute for the Opis tab.
+- Mobile: the old rules that hid the tab list and panel at `sm-down` were removed (they would have hidden the only tab on mobile) and `js/tabs-dropdown.js` returns early when fewer than 2 tabs exist; the dropdown logic is preserved for future multi-tab use.
+- Figma alignment (scoped to `#product-single-main .wc-tabs-section`; the shared `custom-tabs` mixin is untouched): 14px/600, 0.28px tracking, sentence case, 2px active underline, 28px gap to content, two-tone `:focus-visible` ring (the global `a:focus { outline: none !important }` swallowed any outline).
+
+### ERP data audit (read-only; source `uncle-dev-importer` `AprosProvider` + staging DB SELECTs, 451 published products)
+
+Payload: `articleList/get` returns exactly `articleId, code, title, barcode, wholesalePrice, vatRate, stock, classification, virtualArticle, visible, brandId, isNew, isSpecialOffer, description` (ADR-011 record, 2026-09-30, 10,186 articles) plus separate attribute endpoints (`articleAttributeList/get`, `attributeList/get`, `attributeItemList/get`, variation variants) and image endpoints. The provider maps `description` -> `set_description()` (`Importer.php:163`), ERP attributes -> WooCommerce global `pa_*` attributes (`AprosProvider.php:93-111,374-378`, `Importer.php:196-306`; attribute id 154 "Kolekcija" skipped), `barcode` -> `_global_unique_id`/`_erp_barcode`, `code` -> `_ARTICLE_CODE`. `ProductToImport::$attachments` exists but the provider never populates it; weight/dimensions/unit/min-quantity/package fields are never assigned.
+
+| Potential tab | ERP source field | WooCommerce storage | Population evidence (staging) | Already displayed? | Recommendation |
+|---|---|---|---|---|---|
+| Opis | `articleList.description` | `post_content` | 370/451 non-empty; 240 plain text, 130 with HTML; median 621 chars; no variation descriptions | YES (this ADR) | DONE |
+| Specifikacije | `articleAttributeList` (attribute title + item) | global `pa_*` taxonomies + `_product_attributes` | only 5 attributes exist: `pa_model` (303 products; 123 visible non-variation, e.g. "Adapter"), `pa_boja` (214, mostly variation), `pa_dob` (65; 3 visible non-variation, "ADULT"), `pa_dioptrija` (60, variation), `pa_volumen` (24, variation). Weight / length / width / height: 0 populated. 132/451 products have a visible non-variation attribute | Variation attributes appear in the variation selectors; non-variation ones are not shown (native Additional information tab removed) | PARTIAL: thin (model/age only, no technical specs, no weight/dimensions/material); a tab would be mostly empty. Real specs need an importer/ERP extension |
+| Sadrzaj paketa | none in the payload | none | no package-contents/unit/multipack field imported (Figma "Multipack 1 kom" has no ERP source here) | n/a | NOT AVAILABLE; needs an ERP field + importer extension |
+| Dokumenti | none in the payload | none (`ProductToImport::$attachments` unused) | 0 PDF/document attachments in the Media Library (only png/jpeg/webp/svg) | n/a | NOT AVAILABLE; needs an ERP document endpoint/field + importer + attachment handling |
+
+UNKNOWN: whether the ZGData API offers additional endpoints/fields beyond those the importer reads. The statements above cover only the payload documented/observed in ADR-011 and the importer code.
+
+### Consequences / deferred
+
+- Specifikacije, Sadrzaj paketa and Dokumenti tabs are NOT implemented; adding any tab means extending `dreampoint_b2b_product_tabs()` deliberately. Reviews stay out of the PDP UI (no Figma design); WooCommerce review settings unchanged.
+- ADR-014 known item 1 (tabs hidden) is superseded by this ADR. The "review tabs zero-size" follow-up (status.md 2026-10-19) is explained by the same inline style.
+- Auto-excerpt duplication is fixed only on the PDP summary; archive/search excerpts are untouched.

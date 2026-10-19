@@ -413,7 +413,7 @@ add_action( 'init', function (): void {
  * no wrapper. Additional information, Reviews and tabs added by plugins are
  * removed from the PDP tab UI only; reviews/attribute data and settings are
  * untouched. Future tabs (Specifikacije, Sadržaj paketa, Dokumenti) must be
- * added here deliberately (ADR-027).
+ * added here deliberately (ADR-028).
  *
  * @param array<string, array<string, mixed>> $tabs Registered product tabs.
  * @return array<string, array<string, mixed>>

@@ -15,13 +15,15 @@ function register_block_segments_section_block()
         'category' => 'blocks',
         'icon' => 'block-default',
         'keywords' => array('segments', 'lifestyle', 'toys', 'outdoor'),
-        'mode' => 'preview',
+        // Like every other ACF block: compact "Edit Block" card in the editor canvas (preview mode rendered the
+        // whole tile list unstyled). Legacy saved `"mode":"preview"` attributes are normalised in the editor by
+        // js/admin-segments-block-mode.js; the frontend output does not depend on the mode.
+        'mode' => 'edit',
         'align' => 'wide',
         'supports' => array(
             'align' => false,
             'mode' => false,
         ),
-        'example' => array(),
     ));
 }
 

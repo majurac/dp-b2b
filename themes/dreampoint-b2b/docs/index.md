@@ -46,6 +46,7 @@ Active engineering guidance lives in:
 | `docs/active/quick-order-catalog-filters-spec.md` | Catalog Filters (New/Best Seller/Already Ordered) design rationale — **implementation COMPLETE**, retained as historical design record; current behavior documented in the plugin's `readme.md` |
 | `docs/active/homepage-segment-landing-architecture.md` | Homepage + Segment Landing (Lifestyle/Toys/Outdoor) structure and shared-visibility rule — **IMPLEMENTED & DEPLOYED 2026-09-23** (staging, commit `c4dc61d`). ADR-009 Phase B wiring complete; real `brand_segment` content population and pixel-level Figma visual polish remain open. |
 | `docs/active/figma-alignment.md` | Final Figma alignment program (page UI `11148:22601`): gap-audit summary, Batch 1 plan (tokens, buttons/inputs, header, footer, title banner), validation plan, open decisions, next-session handoff — **IN PROGRESS: Batch 1 Steps 0-3b-2b deployed to staging and validated (2026-10-09, ADR-022); Steps 3b-2c/3b-2d open**. Policy: `docs/decisions.md` ADR-020. |
+| `docs/active/erp-product-documents-feasibility.md` | APROS/ZGData product documents feasibility (2026-10-19) — RESEARCH ONLY / NOT APPROVED; classification UNKNOWN — VENDOR CONFIRMATION REQUIRED; conditional effort 17/30/26h (options A/B/C) |
 | `docs/active/block-css-cache-busting-followup.md` | RESOLVED 2026-10-09 (`fff3d37`, staging-verified) — theme page, WooCommerce and block CSS now use per-file `dreampoint_b2b_asset_ver()` versions instead of the shared `_S_VERSION`; original problem and evidence kept as history. |
 
 ---

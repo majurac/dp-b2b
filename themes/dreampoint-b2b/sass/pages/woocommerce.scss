@@ -324,7 +324,7 @@ ul.products li.product .button {
 	top: 0;
 	position: absolute;
 	left: 0;
-	color: #4169e1;
+	color: $dp-color-bg-brand;
 }
 
 p.stars a {
@@ -348,38 +348,38 @@ p.stars a::before {
 	line-height: 1;
 	font-family: star;
 	content: "\53";
-	color: #404040;
+	color: $dp-color-text-secondary;
 	text-indent: 0;
 	opacity: 0.25;
 }
 
 p.stars a:hover ~ a::before {
 	content: "\53";
-	color: #404040;
+	color: $dp-color-text-secondary;
 	opacity: 0.25;
 }
 
 p.stars:hover a::before {
 	content: "\53";
-	color: #4169e1;
+	color: $dp-color-bg-brand;
 	opacity: 1;
 }
 
 p.stars.selected a.active::before {
 	content: "\53";
-	color: #4169e1;
+	color: $dp-color-bg-brand;
 	opacity: 1;
 }
 
 p.stars.selected a.active ~ a::before {
 	content: "\53";
-	color: #404040;
+	color: $dp-color-text-secondary;
 	opacity: 0.25;
 }
 
 p.stars.selected a:not(.active)::before {
 	content: "\53";
-	color: #4169e1;
+	color: $dp-color-bg-brand;
 	opacity: 1;
 }
 
@@ -416,34 +416,34 @@ p.stars.selected a:not(.active)::before {
 }
 
 .woocommerce-password-strength.strong {
-	color: #0f834d;
+	color: $dp-color-success-strong;
 }
 
 .woocommerce-password-strength.short {
-	color: #e2401c;
+	color: $dp-color-error-text;
 }
 
 .woocommerce-password-strength.bad {
-	color: #e2401c;
+	color: $dp-color-error-text;
 }
 
 .woocommerce-password-strength.good {
-	color: #3d9cd2;
+	color: $dp-color-text-secondary;
 }
 
 /**
  * Forms
  */
 .form-row.woocommerce-validated input.input-text {
-	box-shadow: inset 2px 0 0 #0f834d;
+	box-shadow: inset 2px 0 0 $dp-color-success;
 }
 
 .form-row.woocommerce-invalid input.input-text {
-	box-shadow: inset 2px 0 0 #e2401c;
+	box-shadow: inset 2px 0 0 $dp-color-error;
 }
 
 .required {
-	color: #f00;
+	color: $dp-color-error-text;
 }
 
 /**
@@ -454,18 +454,18 @@ p.stars.selected a:not(.active)::before {
 .woocommerce-error,
 .woocommerce-noreviews,
 p.no-comments {
-	background-color: #0f834d;
+	background-color: $dp-color-success-strong;
 	clear: both;
 }
 
 .woocommerce-info,
 .woocommerce-noreviews,
 p.no-comments {
-	background-color: #3d9cd2;
+	background-color: $dp-color-text-secondary;
 }
 
 .woocommerce-error {
-	background-color: #e2401c;
+	background-color: $dp-color-error-text;
 }
 
 .demo_store {
@@ -475,7 +475,7 @@ p.no-comments {
 	right: 0;
 	margin: 0;
 	padding: 1em;
-	background-color: #3d9cd2;
+	background-color: $dp-color-text-secondary;
 	z-index: 9999;
 }
 
@@ -533,7 +533,7 @@ p.no-comments {
 	height: 1em;
 	cursor: ew-resize;
 	outline: none;
-	background: #4169e1;
+	background: $dp-color-bg-brand;
 	box-sizing: border-box;
 	margin-top: -0.25em;
 	opacity: 1;
@@ -553,7 +553,7 @@ p.no-comments {
 	z-index: 1;
 	display: block;
 	border: 0;
-	background: #4169e1;
+	background: $dp-color-bg-brand;
 }
 
 .widget_price_filter .price_slider_wrapper .ui-widget-content {
@@ -570,7 +570,7 @@ p.no-comments {
 
 
 .woocommerce-error {
-    background-color: $error!important;
+    background-color: $dp-color-error-text!important;
 }
 
 

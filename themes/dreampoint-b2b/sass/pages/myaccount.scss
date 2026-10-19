@@ -132,9 +132,9 @@
     }
 
     .woocommerce-password-strength {
-        &.short, &.bad { color: #e2401c !important; }
-        &.good { color: #3d9cd2 !important; }
-        &.strong { color: #0f834d !important; }
+        &.short, &.bad { color: $dp-color-error-text !important; }
+        &.good { color: $dp-color-text-secondary !important; }
+        &.strong { color: $dp-color-success-strong !important; }
     }
 
     .woocommerce-password-hint {

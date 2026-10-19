@@ -90,7 +90,7 @@
     margin-bottom: 20px;
     p, span, .posts-count {
         @include paragraph-normal;
-        color: #000;
+        color: $dp-color-text-primary;
     }
     .items-per-page-form {
         @include bp(md-down) {
@@ -99,17 +99,17 @@
     }
     .select2-container {
         font-weight: 500!important;
-        color: #000000!important;
+        color: $dp-color-text-primary!important;
         border: 0!important;
         padding-left: 0!important;
         padding-right: 30px!important;
         .select2-selection__rendered {
-            color: #000!important;
+            color: $dp-color-text-primary!important;
         }
         .select2-selection__arrow {
             right: 0!important;
             &:after {
-                color: #000!important;
+                color: $dp-color-text-primary!important;
             }
         }
     }

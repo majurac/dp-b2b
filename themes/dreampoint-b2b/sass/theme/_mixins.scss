@@ -801,7 +801,7 @@
         padding: 0px 24px;
         height: 36px;
         background: $white;
-        background: #000;
+        background: $dp-color-bg-brand;
         color: $text-primary-inverse;
         @include bp(md-up) {
             display: none;

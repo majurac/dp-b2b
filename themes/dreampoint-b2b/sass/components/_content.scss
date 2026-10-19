@@ -507,7 +507,7 @@ body.admin-bar {
             color: $dp-color-text-tertiary;
         }
         &.wpcf7-not-valid {
-            border-color: #dc3232;
+            border-color: $dp-color-error;
         }
     }
     label + .wpcf7-form-control-wrap, label + .input-holder, label + input, label + span {

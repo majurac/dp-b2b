@@ -135,7 +135,7 @@
         .category-label {
             @include heading-6;
             font-weight: 500;
-            color: #000;
+            color: $dp-color-text-primary;
             margin-right: 24px;
         }
         .post-category {

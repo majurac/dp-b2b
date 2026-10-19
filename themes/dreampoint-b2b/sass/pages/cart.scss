@@ -10,7 +10,7 @@
         }
         .cart-items-counter {
             @include paragraph-normal;
-            color: #000;
+            color: $dp-color-text-primary;
             flex-grow: 1;
         }
         .cart-action-buttons {
@@ -30,7 +30,7 @@
                 }
                 +button {
                     &:before {
-                        background: #000;
+                        background: $dp-color-bg-brand;
                         display: block;
                         content: '';
                         width: 1px;

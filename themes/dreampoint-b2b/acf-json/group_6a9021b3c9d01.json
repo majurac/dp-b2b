@@ -3,8 +3,26 @@
     "title": "Block \/ Contact Info",
     "fields": [
         {
-            "key": "field_6a9021b3c9d03",
+            "key": "field_22fb8544a5c3b",
             "label": "Contact Info Block",
+            "name": "",
+            "aria-label": "",
+            "type": "accordion",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "open": 1,
+            "multi_expand": 0,
+            "endpoint": 0
+        },
+        {
+            "key": "field_6a9021b3c9d03",
+            "label": "Note",
             "name": "",
             "aria-label": "",
             "type": "message",
@@ -42,5 +60,5 @@
     "display_title": "",
     "allow_ai_access": false,
     "ai_description": "",
-    "modified": 1785752338
+    "modified": 1792406270
 }

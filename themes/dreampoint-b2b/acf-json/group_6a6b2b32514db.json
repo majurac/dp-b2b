@@ -16,7 +16,7 @@
                 "class": "",
                 "id": ""
             },
-            "open": 0,
+            "open": 1,
             "multi_expand": 0,
             "endpoint": 0
         },
@@ -135,5 +135,5 @@
     "display_title": "",
     "allow_ai_access": false,
     "ai_description": "",
-    "modified": 1785408768
+    "modified": 1792406270
 }

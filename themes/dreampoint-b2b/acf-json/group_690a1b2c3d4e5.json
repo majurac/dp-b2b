@@ -3,6 +3,24 @@
     "title": "Block \/ Brands",
     "fields": [
         {
+            "key": "field_183fe44da07ba",
+            "label": "Brands Block",
+            "name": "",
+            "aria-label": "",
+            "type": "accordion",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "open": 1,
+            "multi_expand": 0,
+            "endpoint": 0
+        },
+        {
             "key": "field_690a1b2c9f1a2",
             "label": "Title",
             "name": "title",
@@ -70,5 +88,5 @@
     "display_title": "",
     "allow_ai_access": false,
     "ai_description": "",
-    "modified": 1785411999
+    "modified": 1792406270
 }

@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-19 (T2 photo content) — T2 COMMERCIALIST PHOTO COMPLETE / VERIFIED ON STAGING (temporary dummy portrait, attachment 23506)
+
+Staging content only (no code change, staging HEAD `f68b0f9`): the dummy commercialist `1745` has a temporary original placeholder portrait in `photo_commercialist`; the homepage contact card shows it with the caption "Vaš prodajni predstavnik" at 1280/768/390/360 (persisted state, no injection). Replace it with a real photograph if the representative becomes real. Open T2 item: USP icon order (content). Details: `docs/active/figma-alignment.md` section 42, "T2 photo content assigned".
+
 ## Update 2026-10-19 (T2 completion: commercialist photo) — IMPLEMENTATION COMPLETE / VERIFIED; PHOTO CONTENT PENDING (staging `f68b0f9`)
 
 New optional ACF image field `photo_commercialist` (`field_6a0c4e7b91d3a`, return format ID) on the existing `komercijalist` group `group_67b45eed142b8` (JSON-only group on staging, live without DB sync); the homepage contact card renders the caption "Vaš prodajni predstavnik" and, when set, the photo of the logged-in partner's assigned representative (selection logic unchanged). Empty state verified on staging at 1280/390/360; the populated state only by non-persistent injection (no real photo exists, no record changed). Owner action: upload representative photos. Details: `docs/active/figma-alignment.md` section 42, "T2 completion".

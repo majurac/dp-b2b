@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-19 (T1 checkout visual fix) — T1 CHECKOUT VISUAL FIX IMPLEMENTED AND VERIFIED ON STAGING (`1a98eab`)
+
+Theme-only CSS (`sass/pages/checkout.scss`, compiled `css/pages/checkout.css`): injected company/billing headings aligned to Figma (Montserrat 14/600), floated labels no longer cover filled inputs and selects. QA at 1280/390/360 without typing or submitting; invalid/autofill/disabled states unverified; checkout PHP/JS, payment, shipping and validation untouched. Details, before/after and new out-of-scope observations (pre-existing "(optional)" checkbox-row overlap at 390, radio-dot offset): `docs/active/figma-alignment.md` section 42, "T1 implemented". Next backlog item: T2.
+
 ## Update 2026-10-19 (remaining Figma audit) — REMAINING FIGMA ALIGNMENT AUDIT COMPLETE (read-only; staging `7b5ea10`, docs HEAD `1e33d26`)
 
 Single prioritized backlog (T1-T10, whole-hour estimates) in `docs/active/figma-alignment.md` section 42. Confirmed: checkout oversized headings and label overlap (CSS root cause: `padding-top:0` on inputs with absolute labels), UA-blue order-number link (no Figma target), unaligned homepage lower blocks, login/registration split layout (photo is empty ACF `lr_image` data), no horizontal overflow at 390/360 on 10 pages. Recommended first task: T1 checkout visual repair (theme CSS only). No code, build, deploy or staging change.

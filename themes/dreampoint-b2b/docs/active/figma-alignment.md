@@ -722,7 +722,7 @@ Scope: desktop 1280 + mobile 390/360 on staging (admin session for authenticated
 **Backlog (priority | area | task | scope | estimate):**
 | P | Task | Scope | h |
 |---|---|---|---|
-| P2 | T1 Checkout visual repair (headings, label overlap, radio dots) | theme CSS only, no checkout logic | 4 |
+| P2 | T1 Checkout visual repair (headings, label overlap) - DONE 2026-10-19, STAGING VERIFIED (`1a98eab`); radio-dot offset deliberately NOT part of T1 | theme CSS only, no checkout logic | 4 |
 | P2 | T2 Homepage lower blocks (brands/featured/features/contact) | theme block templates + SCSS | 6 |
 | P2 | T3 Auth split layout (grey panel, logo, title case) + owner uploads `lr_image` | theme SCSS/template + owner data | 3 |
 | P2 | T4 PDP + product-card typography and PDP details | theme SCSS/templates | 4 |
@@ -734,3 +734,11 @@ Scope: desktop 1280 + mobile 390/360 on staging (admin session for authenticated
 | plugin | T10 Quick Order page header/typography/chips (own plugin) | needs explicit approval | 4 |
 
 **Recommended first task: T1** (reproducible, root cause identified at CSS level, theme-only, on the critical order flow; Playwright checkout verification required after, no order submission).
+
+**T1 implemented (2026-10-19, code `1a98eab`, STAGING VERIFIED; staging HEAD `1a98eab`, no root-owned files):** `sass/pages/checkout.scss` + compiled `css/pages/checkout.css` only (three added rules, `npm run build` clean, compiled diff = exactly those rules; no PHP/JS change).
+- **Root causes:** (1) the read-only company/billing blocks injected by `js/checkout-b2b-info.js` use bare `<h2>` inside `.dp-b2b-billing-info .ma-header`, which no checkout rule styled, so the global h2 (Petrona 48px uppercase, letter-spacing 1.92px) applied; (2) `.woocommerce-checkout .wc-block-components-text-input input` forces `padding: 0 16px !important` and height 44px, so the WC Blocks floated label (absolute, top 6px, scaled 0.82) sat on top of the value; select labels were never scaled at all (16px, `.custom-form label` font-size rules outrank any simple override, so a transform is used).
+- **Change:** headings Montserrat 14 / 600 / 0.28px uppercase `$dp-color-text-primary` (Figma CH-01 text node `11148:38261`); active text inputs and all selects `padding-top: 22px !important; padding-bottom: 0 !important`; select label `transform: scale(.82)` from top left (same mechanic as the floated text-input label). Field height unchanged (44px).
+- **Before / after (computed, 1280):** h2 `Petrona 48px/400 uppercase 1.92px` -> `Montserrat 14px/600 uppercase 0.28px`; e-mail input padding-top 0 -> 22px (label bottom 22px = value top 22px); Drzava/Regija and Zupanija select label bottom 26px (16px font) -> 22px, padding-top 0 -> 22px.
+- **QA (staging, admin session, no typing, no submit):** 1280 / 390 / 360: 2 of 2 headings `Montserrat 14px/600`, 0 overlapping filled fields (3 filled of 9 visible), empty fields unchanged (label as placeholder, padding 0), no horizontal overflow (scrollWidth = clientWidth), 0 console errors; real focus on `#shipping-first_name`: floated label, ring `0 0 0 3px #c7d7fe`, border `#0d121c`, padding-top 22px (screenshot-checked); payment radios (bank transfer checked, cash on delivery) visible at 1280/360, switching and restoring worked, orders list unchanged (6 orders, latest #23408 of 2026-10-08).
+- **Not verified:** invalid state (blurring an empty required field showed no error without typing/submit), autofill, disabled state, typed values (typing triggers a Store API customer update, so it was not done). Switching the payment method sent the standard WC Blocks `POST /wc/store/v1/checkout` (draft-order refresh, not an order); the original method was restored.
+- **New observations (not T1, not fixed):** the optional "Koristite istu adresu za dostavu (optional)" checkbox row overlaps its own "(optional)" text at 390 (reproduced with the previous CSS too, so pre-existing); the radio-dot offset in the shipping/payment options and the missing divider/spacing under the injected headings remain (payment radio layout was explicitly out of scope). The CH-01 card layout is still a separate structural decision.

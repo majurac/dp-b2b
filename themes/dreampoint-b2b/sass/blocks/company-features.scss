@@ -57,11 +57,7 @@
                     }
                 }
                 p {
-                    font-family: 'Montserrat';
-                    font-weight: 500;
-                    font-size: 12px;
-                    line-height: 20px;
-                    letter-spacing: -0.132px;
+                    @include text-sm-medium;
                     color: $dp-color-text-secondary;
                     padding: 0;
                     margin: 0 auto;

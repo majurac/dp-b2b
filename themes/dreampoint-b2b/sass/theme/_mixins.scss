@@ -212,6 +212,16 @@
 
 
 
+// Montserrat Medium 12/20 (-0.132px tracking): Figma small body text used by the homepage USP row and contact card.
+// Typography only: colour, margins and layout stay with the consumer.
+@mixin text-sm-medium {
+    font-family: 'Montserrat';
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 20px;
+    letter-spacing: -0.132px;
+}
+
 @mixin heading-1 {
     font-family: 'Petrona';
     font-style: normal;

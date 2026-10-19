@@ -1236,9 +1236,6 @@ body.woocommerce-account .select2-dropdown {
         @include bp(sm-down) {
             justify-content: center;
         }
-        h2 {
-            @include heading-3;
-        }
         a.link {
             @include bp(sm-down) {
                 display: none;

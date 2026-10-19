@@ -111,10 +111,7 @@
             grid-row: 3;
             max-width: 191px;
             margin: 0;
-            font-weight: 500;
-            font-size: 12px;
-            line-height: 20px;
-            letter-spacing: -0.132px;
+            @include text-sm-medium;
             color: $dp-color-text-secondary;
         }
 
@@ -132,10 +129,7 @@
 
         p {
             margin: 0;
-            font-weight: 500;
-            font-size: 12px;
-            line-height: 20px;
-            letter-spacing: -0.132px;
+            @include text-sm-medium;
             color: $dp-color-text-secondary;
         }
 
@@ -162,10 +156,7 @@
 
         p {
             margin: 0;
-            font-weight: 500;
-            font-size: 12px;
-            line-height: 20px;
-            letter-spacing: -0.132px;
+            @include text-sm-medium;
             color: $dp-color-text-secondary;
         }
 

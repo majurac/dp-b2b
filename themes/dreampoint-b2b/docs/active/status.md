@@ -5,6 +5,14 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-19 (closeout) — FINAL FIGMA COLOUR ALIGNMENT: IMPLEMENTATION COMPLETE / VERIFIED WITH DOCUMENTED QA LIMITATIONS (staging `14ed363`; docs HEAD `9352aaa`; staging only)
+
+Phases 1-3 complete and verified (`0329887`, `48af45d`). Phase 4 implemented (`14ed363`, `docs/active/figma-alignment.md` §41): Sass build and compiled-CSS diff passed, WCAG AA passed for the modified notice pairs, deployed to staging, authenticated (admin session, read-only) QA found no regression in the tested scope. This supersedes the "NEXT TASK - Phase 4 (NOT STARTED)" paragraph of the 2026-10-18 entry below (kept as history). THEME colour alignment is finished; Quick Order and WBW plugin palettes are separate future scopes.
+
+**Verified on real rendered elements:** `.woocommerce-noreviews` (PDP), `.woocommerce-info` (My Account orders), `.required`, password strength `short`/`bad`/`strong`, focus ring, unchanged stock colour, cart and checkout (view only), 9-page overflow sweep at 390 and 360, 0 console errors.
+**NOT verified on real rendered elements (compiled CSS and/or synthetic DOM only):** success and error notices, checkout valid/invalid field states, CF7 invalid state, review stars, password strength `good`.
+**Separate follow-ups (not Phase 4, not fixed):** (A) staging PDP `/product/cleansing-cloth/` review tabs/panel render with zero-size bounds, so review stars are invisible - root cause unknown, separate display/functional investigation; (B) `/my-account/orders/` order-number link is UA-default `rgb(0,0,238)` (no theme colour rule), low-priority design alignment; (C) pre-existing checkout issues (oversized "Podaci tvrtke / Adresa naplate" headings, e-mail label overlapping its value) - already recorded in §39; (D) Quick Order and WBW plugin palettes.
+
 ## Update 2026-10-18 (end of day) — FINAL FIGMA COLOUR ALIGNMENT: PHASES 1–3 COMPLETE AND VERIFIED (staging `a1fba35`; staging only, no production environment exists)
 
 Closed: legacy olive/pink cleanup (`docs/active/figma-alignment.md` §38), `img/ico/lock.svg` deployed (`ffb9761`), old refund-form SCSS removed (§39), colour phases 1–2 (code `0329887`, §39) and phase 3 (code `48af45d`, §40). Each phase: clean Sass build, rule-by-rule compiled-CSS diff, staging QA. Details and mappings live in `figma-alignment.md` §38–40 (not repeated here).

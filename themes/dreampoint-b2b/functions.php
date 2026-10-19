@@ -281,6 +281,7 @@ function dreampoint_b2b_needs_slick(): bool {
         'acf/latest-products-section',
         'acf/discounted-products-section',
         'acf/featured-products-section',
+        'acf/bestseller-section',
         'acf/brands-section',
         'acf/testimonials-section',
         'acf/gallery-section',

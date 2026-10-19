@@ -170,9 +170,11 @@ body.admin-bar {
         gap: 24px;
         // Global `button:focus { outline: none !important }` removes the default ring; the shared
         // slider nav (template-parts/slider-nav.php) needs its own keyboard focus indicator.
+        // Two-tone ring (same pattern as the header/footer links): the light-blue input ring
+        // token has too little contrast against the white page for a borderless icon button.
         .slick-prev, .slick-next {
             &:focus-visible {
-                box-shadow: 0 0 0 3px $dp-color-focus-ring-primary;
+                box-shadow: 0 0 0 2px $dp-color-bg-primary, 0 0 0 4px $dp-color-text-primary;
             }
         }
     }

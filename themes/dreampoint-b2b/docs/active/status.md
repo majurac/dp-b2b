@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-19 (Segments Section persisted mode) — PERSISTED MODE NORMALISED; EDITOR WORKAROUND REMOVED (staging `04f3bc8`)
+
+Homepage post 17 now stores `"mode":"edit"` for `acf/segments-section` (one scoped `wp_update_post()`, dry-run proven, only that attribute changed, backup `/home/dreampoint.b2b/dp-backups/segments-mode-persist-20261019/`); the temporary `blocks.getBlockAttributes` script was removed and the editor shows the compact card without it. No other live content carried the legacy attribute (only old revisions). Frontend and ADR-009 unchanged. Record: `docs/decisions.md` ADR-029 addendum (final).
+
 ## Update 2026-10-19 (Segments Section editor) — SEGMENTS SECTION EDITOR CONSISTENCY FIXED AND VERIFIED ON STAGING (`9ee2871`)
 
 Cause: Segments Section was the only ACF block in `preview` mode (registration and saved content), so the editor canvas showed the unstyled tile list instead of the compact "Edit Block" card. Registration now `edit`; an editor-only `blocks.getBlockAttributes` filter opens the already-saved `preview` instance in `edit` without any database write. The page was not saved; the "autosave more recent" notice is benign (autosave 23509 is identical to the live post). ACF group unchanged, frontend and ADR-009 behaviour unchanged. Record: `docs/decisions.md` ADR-029 addendum (last).

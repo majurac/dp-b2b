@@ -432,6 +432,19 @@
     .wc-tabs-section {
         .woocommerce-tabs {
             @include custom-tabs;
+            // Figma PDP Tab (11148:32816): 14/600, 0.28px tracking, sentence case, 2px active line
+            ul {
+                gap: 24px;
+                margin-bottom: 28px;
+                li a {
+                    padding: 8px 4px 9px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    letter-spacing: 0.28px;
+                    text-transform: none;
+                    border-bottom-width: 2px;
+                }
+            }
         }
         .woocommerce-Tabs-panel {
             h2 {

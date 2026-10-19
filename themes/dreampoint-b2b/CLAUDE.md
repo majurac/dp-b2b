@@ -195,6 +195,12 @@ PHP:
 - keep changes minimal
 - avoid broad refactors
 
+SCSS (reuse before duplication):
+- before writing a repeated group of declarations, check `sass/theme/_mixins.scss` (e.g. `heading-1..6`, `paragraph-*`, `caption-m`, `card*`, `button-*`) and the `$dp-*` tokens in `_vars.scss`; reuse what exists
+- add a shared mixin only for a meaningful declaration group with 2+ real consumers; never a mixin for one consumer or a trivial single declaration
+- identical-looking is not identical: confirm the full effective style (all breakpoints, inherited rules) before merging; intentional Figma-driven differences stay local (e.g. `.brands h2` is Petrona 600/40 sentence case, while `.section-heading h2` uses `heading-3`)
+- keep selectors scoped to their component, add no specificity, and do not change visual output while deduplicating
+
 JavaScript:
 - use IIFE pattern
 - use `'use strict';`

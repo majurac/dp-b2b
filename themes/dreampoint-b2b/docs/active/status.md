@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-19 (final ACF admin cleanup + audit) — SIX GROUPS ALIGNED AND MIRRORED (staging `df5328c`); TESTIMONIALS AND SHARED SURFACE RETAINED
+
+Brands, Contact Info, Featured Brand, Latest, Discounted and Featured Products now follow the open-accordion pattern and appear in the ACF Field Groups list (DB posts 23522, 23526, 23529, 23535, 23539, 23543; backup `/home/dreampoint.b2b/dp-backups/acf-six-groups-20261019/`). Audit verdicts: Testimonials group RETAINED (required infrastructure of the registered but unused `acf/testimonials-section` block, 0 usages, no data; retiring the whole block is an open owner decision); Shared Surface Context RETAINED (ADR-009 Phase B configuration, live values on the homepage and the three segment pages; ADR-009 unchanged). Frontend unchanged. Record: `docs/decisions.md` ADR-029 addendum.
+
 ## Update 2026-10-19 (ACF homepage admin cleanup) — DONE ON STAGING (code `4465f09`, DB operations documented in ADR-029)
 
 Owner's accordion-open edits (Hero/About/Contact Form/Testimonials) committed; Featured Section and Company Features aligned with the accordion pattern and mirrored into the ACF admin list (DB posts 23510/23516); note-only "Block / Segments Section" group added (23519, the block never had a group); legacy `block == all` groups "About Global" (78) and "Blogs" (81) removed after evidence and backup (`/home/dreampoint.b2b/dp-backups/acf-homepage-admin-20261019/`). Frontend unchanged. Open: Brands, Contact Info, Featured Brand, Latest / Discounted / Featured Products and other groups are still JSON-only. Record: `docs/decisions.md` ADR-029.

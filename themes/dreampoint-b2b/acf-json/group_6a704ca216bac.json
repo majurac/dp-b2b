@@ -3,8 +3,26 @@
     "title": "Block \/ Company Features",
     "fields": [
         {
-            "key": "field_6a704ca216bae",
+            "key": "field_d0bc2bd703040",
             "label": "Company Features Block",
+            "name": "",
+            "aria-label": "",
+            "type": "accordion",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "open": 1,
+            "multi_expand": 0,
+            "endpoint": 0
+        },
+        {
+            "key": "field_6a704ca216bae",
+            "label": "Note",
             "name": "",
             "aria-label": "",
             "type": "message",
@@ -42,5 +60,5 @@
     "display_title": "",
     "allow_ai_access": false,
     "ai_description": "",
-    "modified": 1785744914
+    "modified": 1792405596
 }

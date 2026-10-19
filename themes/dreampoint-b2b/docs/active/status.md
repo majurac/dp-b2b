@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-19 (Segments Section editor) — SEGMENTS SECTION EDITOR CONSISTENCY FIXED AND VERIFIED ON STAGING (`9ee2871`)
+
+Cause: Segments Section was the only ACF block in `preview` mode (registration and saved content), so the editor canvas showed the unstyled tile list instead of the compact "Edit Block" card. Registration now `edit`; an editor-only `blocks.getBlockAttributes` filter opens the already-saved `preview` instance in `edit` without any database write. The page was not saved; the "autosave more recent" notice is benign (autosave 23509 is identical to the live post). ACF group unchanged, frontend and ADR-009 behaviour unchanged. Record: `docs/decisions.md` ADR-029 addendum (last).
+
 ## Update 2026-10-19 (final ACF admin cleanup + audit) — SIX GROUPS ALIGNED AND MIRRORED (staging `df5328c`); TESTIMONIALS AND SHARED SURFACE RETAINED
 
 Brands, Contact Info, Featured Brand, Latest, Discounted and Featured Products now follow the open-accordion pattern and appear in the ACF Field Groups list (DB posts 23522, 23526, 23529, 23535, 23539, 23543; backup `/home/dreampoint.b2b/dp-backups/acf-six-groups-20261019/`). Audit verdicts: Testimonials group RETAINED (required infrastructure of the registered but unused `acf/testimonials-section` block, 0 usages, no data; retiring the whole block is an open owner decision); Shared Surface Context RETAINED (ADR-009 Phase B configuration, live values on the homepage and the three segment pages; ADR-009 unchanged). Frontend unchanged. Record: `docs/decisions.md` ADR-029 addendum.

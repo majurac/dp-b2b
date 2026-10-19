@@ -443,6 +443,12 @@
                     letter-spacing: 0.28px;
                     text-transform: none;
                     border-bottom-width: 2px;
+                    // The global "a:focus { outline: none !important }" swallows an outline, so use a two-tone ring.
+                    &:focus-visible {
+                        outline: 0;
+                        border-radius: 2px;
+                        box-shadow: 0 0 0 2px $dp-color-text-inverse, 0 0 0 4px $dp-color-text-primary;
+                    }
                 }
             }
         }

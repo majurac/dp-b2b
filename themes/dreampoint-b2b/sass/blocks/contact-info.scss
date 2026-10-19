@@ -24,7 +24,9 @@
     .contact-content {
         display: grid;
         grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 1fr);
-        grid-template-rows: auto auto auto auto;
+        // Row 4 (button) is the flexible track: the photo spans rows 2-4 and its extra height lands there
+        // instead of spreading the intro title / text apart.
+        grid-template-rows: auto auto auto 1fr auto;
         column-gap: 34px;
         align-items: start;
         max-width: none;
@@ -119,7 +121,9 @@
         > .button {
             grid-row: 4;
             justify-self: start;
+            align-self: start;
             margin-top: 14px;
+            white-space: nowrap;
         }
     }
 

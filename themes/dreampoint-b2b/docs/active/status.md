@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-19 (T2 homepage lower sections) — T2 IMPLEMENTED AND VERIFIED ON STAGING (`e837c96`), contact-card photo BLOCKED
+
+Brands/Quick Order headings (Figma 40px / 64px), Quick Order panel (478px, ACF photo right 50%), four-column USP row and contact card are aligned and QA-verified at 1280/390/360. Not done (content dependencies, no invented assets): the sales-representative photograph and caption (`komercijalist` has no photo field) and the USP icon order in the `features_items` option. Record, deviations and Figma nodes: `docs/active/figma-alignment.md` section 42, "T2 implemented". Next backlog item: T3.
+
 ## Update 2026-10-19 (T1 checkout visual fix) — T1 CHECKOUT VISUAL FIX IMPLEMENTED AND VERIFIED ON STAGING (`1a98eab`)
 
 Theme-only CSS (`sass/pages/checkout.scss`, compiled `css/pages/checkout.css`): injected company/billing headings aligned to Figma (Montserrat 14/600), floated labels no longer cover filled inputs and selects. QA at 1280/390/360 without typing or submitting; invalid/autofill/disabled states unverified; checkout PHP/JS, payment, shipping and validation untouched. Details, before/after and new out-of-scope observations (pre-existing "(optional)" checkbox-row overlap at 390, radio-dot offset): `docs/active/figma-alignment.md` section 42, "T1 implemented". Next backlog item: T2.

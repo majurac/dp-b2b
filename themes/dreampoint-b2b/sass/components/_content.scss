@@ -176,6 +176,15 @@ body.admin-bar {
             &:focus-visible {
                 box-shadow: 0 0 0 2px $dp-color-bg-primary, 0 0 0 4px $dp-color-text-primary;
             }
+            // The vendor `:hover` fill (dark) is meant for enabled arrows; a disabled arrow keeps its
+            // 30% glyph colour, which vanishes on that fill. Keep the resting background (same values
+            // as the base `.slick-prev` rule in vendors/slick.scss) so the arrow stays visible.
+            &.slick-disabled:hover {
+                background-color: transparent;
+                @include bp(lg) {
+                    background-color: $dp-color-btn-primary-bg;
+                }
+            }
         }
     }
 }

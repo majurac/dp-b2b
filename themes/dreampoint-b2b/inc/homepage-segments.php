@@ -258,22 +258,3 @@ function dreampoint_b2b_enqueue_segment_image_hint(): void {
         'before'
     );
 }
-
-/**
- * Block editor: Segments Section was registered and saved in `preview` mode (the only ACF block that was), so the
- * editor canvas rendered the whole unstyled tile list while every other ACF block shows the compact "Edit Block"
- * card. The registration now uses `edit` like the others; this script maps already-saved `"mode":"preview"`
- * attributes of `acf/segments-section` to `edit` when the editor parses the content (official
- * `blocks.getBlockAttributes` filter). Nothing is written to the database until the page is saved, and the
- * frontend output is mode-independent.
- */
-add_action( 'enqueue_block_editor_assets', 'dreampoint_b2b_enqueue_segments_block_mode' );
-function dreampoint_b2b_enqueue_segments_block_mode(): void {
-    wp_enqueue_script(
-        'dreampoint-b2b-segments-block-mode',
-        get_template_directory_uri() . '/js/admin-segments-block-mode.js',
-        [ 'wp-hooks' ],
-        dreampoint_b2b_asset_ver( 'js/admin-segments-block-mode.js' ),
-        true
-    );
-}

@@ -206,9 +206,12 @@ $permalink = get_permalink($product_id);
                                 </span>
                             <?php endif; ?>
 
-                            <div class="short-description" itemprop="description">
-                               <?php the_excerpt(); ?>
-                            </div>
+                            <?php // Only a real short description (post_excerpt); an empty one would auto-generate a duplicate of the long description shown in the Opis tab. ?>
+                            <?php if ( has_excerpt() ) : ?>
+                                <div class="short-description" itemprop="description">
+                                   <?php the_excerpt(); ?>
+                                </div>
+                            <?php endif; ?>
                             
                             <div class="stock-status-wrapper"></div>
 

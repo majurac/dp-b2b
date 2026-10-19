@@ -77,6 +77,22 @@
         }
     }
 
+    // Floating labels are absolutely positioned at the top of the control: once
+    // a field holds a value (is-active, selects always) reserve room for the
+    // shrunken label so it never covers the value.
+    .wc-block-components-text-input.is-active input,
+    .wc-blocks-components-select__select {
+        padding-top: 22px !important;
+        padding-bottom: 0 !important;
+    }
+
+    // Select labels are not scaled by WooCommerce; match the text-input floated
+    // label (transform only: the font-size is owned by the `.custom-form label` rules).
+    .wc-blocks-components-select__label {
+        transform: scale(0.82);
+        transform-origin: top left;
+    }
+
     .has-error {
         input,
         .wc-blocks-components-select__select {
@@ -260,6 +276,18 @@
 
     h2.wc-block-components-checkout-step__title {
         @include heading-5;
+    }
+
+    // Read-only company / billing blocks injected by js/checkout-b2b-info.js
+    // (Figma CH-01 section title: Montserrat 14 / 600 / 0.28px uppercase)
+    .dp-b2b-billing-info .ma-header h2 {
+        font-family: 'Montserrat';
+        font-size: 14px;
+        font-weight: 600;
+        line-height: normal;
+        letter-spacing: 0.28px;
+        text-transform: uppercase;
+        color: $dp-color-text-primary;
     }
 }
 

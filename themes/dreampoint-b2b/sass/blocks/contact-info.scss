@@ -27,7 +27,7 @@
         color: $dp-color-text-secondary;
         @include bp(md-down) {
             grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-            row-gap: 24px;
+            row-gap: 0;
         }
         @include bp(sm-down) {
             grid-template-columns: minmax(0, 1fr);
@@ -134,6 +134,7 @@
         .contact-details {
             grid-column: 1 / -1;
             grid-row: 4;
+            margin-top: 24px;
             flex-direction: row;
             gap: 32px;
         }
@@ -144,6 +145,10 @@
         .contact-details {
             grid-column: 1;
             grid-row: auto;
+        }
+        .commercialist-contact,
+        .contact-details {
+            margin-top: 24px;
         }
         .contact-details {
             flex-direction: column;

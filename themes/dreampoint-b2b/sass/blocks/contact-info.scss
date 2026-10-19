@@ -1,17 +1,30 @@
 @import '../theme/mixins';
 
 // Homepage contact card. Figma HOME (11148:31575): #f3f4f6 card, 8px radius, card/xs shadow, 16px padding,
-// three columns with 34px gap: intro (title 16/700, text 12/500 max 191px, outline M button), sales
-// representative (name 12/700, role + phone + e-mail 12/500) and company details (labels 12/700, values 12/500),
-// text colour text-secondary, tracking -0.132px. The card's representative photograph and its "Vaš prodajni
-// predstavnik" caption are NOT rendered: the Komercijalist post type has no photo field or featured image
-// (content dependency, see figma-alignment.md section 42). This stylesheet is only loaded where the
-// `acf/contact-info-section` block is on the page; the Contact page template does not load it.
+// caption "Vaš prodajni predstavnik" (Montserrat 600 14, 0.28px), then a row of: representative photo (184px
+// square, optional), intro (title 16/700, text 12/500 max 191px, outline M button), sales representative
+// (name 12/700, role + phone + e-mail 12/500) and company details (labels 12/700, values 12/500), 34px column
+// gap, text colour text-secondary, tracking -0.132px. The photo comes from the ACF image field
+// `photo_commercialist` of the assigned komercijalist; without a photo the card has three columns.
+// This stylesheet is only loaded where the `acf/contact-info-section` block is on the page; the Contact page
+// template does not load it (and the shortcode renders neither caption nor photo there).
+
+// Grid placement of the three text columns; $col is the first column index (2 when the photo column exists).
+@mixin contact-card-columns($col) {
+    .commercialist {
+        h2 { grid-column: $col; }
+        > p { grid-column: $col; }
+        > .button { grid-column: $col; }
+    }
+    .commercialist-contact { grid-column: $col + 1; }
+    .contact-details { grid-column: $col + 2; }
+}
+
 .contact-info {
     .contact-content {
         display: grid;
         grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 1fr);
-        grid-template-rows: auto auto auto;
+        grid-template-rows: auto auto auto auto;
         column-gap: 34px;
         align-items: start;
         max-width: none;
@@ -32,6 +45,48 @@
         @include bp(sm-down) {
             grid-template-columns: minmax(0, 1fr);
         }
+
+        &--has-photo {
+            grid-template-columns: 184px minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 1fr);
+            @include bp(md-down) {
+                grid-template-columns: 184px minmax(0, 1fr) minmax(0, 1fr);
+            }
+            @include bp(sm-down) {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+    }
+
+    .contact-card-label {
+        grid-column: 1 / -1;
+        grid-row: 1;
+        margin: 0 0 24px;
+        padding: 4px;
+        font-family: 'Montserrat';
+        font-weight: 600;
+        font-size: 14px;
+        line-height: normal;
+        letter-spacing: 0.28px;
+        color: $dp-color-text-primary;
+    }
+
+    .commercialist-photo {
+        grid-column: 1;
+        grid-row: 2 / span 3;
+        width: 184px;
+        height: 184px;
+        line-height: 0;
+        @include bp(sm-down) {
+            grid-row: 2;
+            margin-bottom: 24px;
+        }
+
+        .commercialist-photo-img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
     }
 
     // The intro (title, text, button) and the representative contact are siblings inside `.commercialist`;
@@ -40,8 +95,7 @@
         display: contents;
 
         h2 {
-            grid-column: 1;
-            grid-row: 1;
+            grid-row: 2;
             font-family: 'Montserrat';
             font-weight: 700;
             font-size: 16px;
@@ -52,8 +106,7 @@
         }
 
         > p {
-            grid-column: 1;
-            grid-row: 2;
+            grid-row: 3;
             max-width: 191px;
             margin: 0;
             font-weight: 500;
@@ -64,16 +117,14 @@
         }
 
         > .button {
-            grid-column: 1;
-            grid-row: 3;
+            grid-row: 4;
             justify-self: start;
             margin-top: 14px;
         }
     }
 
     .commercialist-contact {
-        grid-column: 2;
-        grid-row: 1 / span 3;
+        grid-row: 2 / span 3;
 
         p {
             margin: 0;
@@ -100,8 +151,7 @@
     }
 
     .contact-details {
-        grid-column: 3;
-        grid-row: 1 / span 3;
+        grid-row: 2 / span 3;
         display: flex;
         flex-direction: column;
         gap: 8px;
@@ -126,38 +176,44 @@
         }
     }
 
+    // Desktop: without / with the photo column.
+    .contact-content { @include contact-card-columns(1); }
+    .contact-content--has-photo { @include contact-card-columns(2); }
+
+    // Tablet (inferred, the design is desktop only): intro and representative side by side, details below
+    // (the column placement above already fits the two/three-column tablet grid).
     @include bp(md-down) {
-        .commercialist-contact {
-            grid-column: 2;
-            grid-row: 1 / span 3;
-        }
-        .contact-details {
+        .contact-content .contact-details,
+        .contact-content--has-photo .contact-details {
             grid-column: 1 / -1;
-            grid-row: 4;
+            grid-row: 5;
             margin-top: 24px;
             flex-direction: row;
             gap: 32px;
         }
     }
 
+    // Phone: one column.
     @include bp(sm-down) {
-        .commercialist-contact,
-        .contact-details {
-            grid-column: 1;
-            grid-row: auto;
-        }
-        .commercialist-contact,
-        .contact-details {
-            margin-top: 24px;
-        }
-        .contact-details {
-            flex-direction: column;
-            gap: 8px;
-        }
-        .commercialist h2,
-        .commercialist > p,
-        .commercialist > .button {
-            grid-row: auto;
+        .contact-content,
+        .contact-content--has-photo {
+            .commercialist h2,
+            .commercialist > p,
+            .commercialist > .button,
+            .commercialist-contact,
+            .contact-details {
+                grid-column: 1;
+            }
+            .commercialist h2 { grid-row: 3; }
+            .commercialist > p { grid-row: 4; }
+            .commercialist > .button { grid-row: 5; }
+            .commercialist-contact { grid-row: 6; margin-top: 24px; }
+            .contact-details {
+                grid-row: 7;
+                margin-top: 24px;
+                flex-direction: column;
+                gap: 8px;
+            }
         }
     }
 }

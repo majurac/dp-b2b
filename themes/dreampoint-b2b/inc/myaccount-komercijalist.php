@@ -33,6 +33,38 @@ function display_commercialist_contact_info($user_id) {
 }
 
 
+/**
+ * Photo of the commercialist assigned to a user, as ready-to-print <img> markup (empty string when the user has no
+ * assigned commercialist, the commercialist has no photo, or the attachment no longer exists).
+ * Same selection as display_commercialist_contact_info(): `assigned_komercijalist` user meta -> komercijalist post,
+ * photo = ACF image field `photo_commercialist` (return format: attachment ID).
+ */
+function dreampoint_b2b_get_commercialist_photo_html( int $user_id ): string {
+    $commercialist_id = (int) get_user_meta( $user_id, 'assigned_komercijalist', true );
+    if ( ! $commercialist_id ) {
+        return '';
+    }
+
+    $photo_id = (int) get_field( 'photo_commercialist', $commercialist_id );
+    if ( ! $photo_id ) {
+        return '';
+    }
+
+    // Rendered at the Figma size (184 px square); `medium` + srcset covers 2x screens.
+    return wp_get_attachment_image(
+        $photo_id,
+        'medium',
+        false,
+        [
+            'class'    => 'commercialist-photo-img',
+            'alt'      => get_the_title( $commercialist_id ),
+            'sizes'    => '184px',
+            'loading'  => 'lazy',
+            'decoding' => 'async',
+        ]
+    );
+}
+
 // Menu tab label/položaj se definiše u inc/my-account.php (dreampoint_b2b_modify_account_menu) —
 // jedinstveni izvor istine za redoslijed/nazive My Account menija.
 

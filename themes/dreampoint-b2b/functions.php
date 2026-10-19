@@ -1064,11 +1064,28 @@ function dreampoint_b2b_contact_info_shortcode(): string {
     $contact_text    = get_field( 'contact_info_text', 'option' );
     $contact_button  = get_field( 'contact_info_button', 'option' );
 
+    // Representative of the logged-in partner (existing selection logic, unchanged).
+    $current_user_id = get_current_user_id();
+    ob_start();
+    display_commercialist_contact_info( $current_user_id );
+    $commercialist_output = ob_get_clean();
+
+    // The card caption and photo belong to the homepage card; the Contact page template renders the same
+    // shortcode without the card styles.
+    $is_card    = ! is_page_template( 'contact.php' );
+    $photo_html = ( $is_card && trim( $commercialist_output ) ) ? dreampoint_b2b_get_commercialist_photo_html( $current_user_id ) : '';
+
     ob_start();
     ?>
     <div class="contact-info block">
         <div class="container">
-            <div class="contact-content">
+            <div class="contact-content<?php echo '' !== $photo_html ? ' contact-content--has-photo' : ''; ?>">
+                <?php if ( $is_card ) : ?>
+                    <p class="contact-card-label"><?php esc_html_e( 'Vaš prodajni predstavnik', 'dreampoint-b2b' ); ?></p>
+                <?php endif; ?>
+                <?php if ( '' !== $photo_html ) : ?>
+                    <div class="commercialist-photo"><?php echo $photo_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_get_attachment_image() output ?></div>
+                <?php endif; ?>
                 <div class="commercialist">
                     <?php if ( $contact_title ) : ?>
                         <h2><?php echo esc_html( $contact_title ); ?></h2>
@@ -1086,13 +1103,7 @@ function dreampoint_b2b_contact_info_shortcode(): string {
                     <?php endif; ?>
                     <div class="commercialist-contact">
                     <?php
-                        $current_user_id = get_current_user_id();
-
                         // Provjeri da li je prikazan kontakt komercijaliste.
-                        ob_start();
-                        display_commercialist_contact_info( $current_user_id );
-                        $commercialist_output = ob_get_clean();
-
                         if ( trim( $commercialist_output ) ) {
                             // Prikaži kontakt komercijaliste.
                             echo $commercialist_output;

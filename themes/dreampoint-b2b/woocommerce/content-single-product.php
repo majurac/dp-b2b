@@ -356,6 +356,7 @@ $permalink = get_permalink($product_id);
         <div class="container">
             <div class="section-heading">
                 <h2><?php esc_html_e('Predloženo za vas', 'dreampoint-b2b'); ?></h2>
+                <?php get_template_part( 'template-parts/slider-nav' ); ?>
             </div>
             
             <div id="recomended-products-list">

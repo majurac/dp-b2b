@@ -78,10 +78,7 @@
 			            <div class="container">
 			            	<div class="section-heading">
 			            		<h3><?php esc_html_e( 'Moglo bi vas zanimati', 'dreampoint-b2b' ); ?></h3>
-			            		<div class="nav-btns">
-					                <a href="#" class="slick-prev btn-prev" aria-label="<?php esc_attr_e('prethodni', 'dreampoint-b2b'); ?>"></a>
-					                <a href="#" class="slick-next btn-next" aria-label="<?php esc_attr_e('sljedeći', 'dreampoint-b2b'); ?>"></a>
-					            </div>
+			            		<?php get_template_part( 'template-parts/slider-nav' ); ?>
 			            	</div>
 			            	<!-- /.section-heading -->
 			            	<div class="related-posts-slider">

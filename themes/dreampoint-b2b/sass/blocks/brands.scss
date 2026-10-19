@@ -4,19 +4,10 @@
     position: relative;
     z-index: 2;
 
-    // Figma "Naša zastupništva" (11148:31573): Heading 2 / Medium, Petrona 600 40px, sentence case.
-    // Below 768px a smaller size is an inferred responsive step (the design is desktop only).
+    // Figma "Naša zastupništva" (11148:31573): Heading 2 / Medium (shared with `.section-heading h2`).
     h2 {
-        font-family: 'Petrona';
-        font-weight: 600;
-        font-size: 40px;
-        line-height: normal;
-        letter-spacing: 0;
-        text-transform: none;
+        @include heading-2-medium;
         color: $dp-color-text-primary;
-        @include bp(sm-down) {
-            font-size: 32px;
-        }
     }
     .slick-slide {
         margin: 0 36px;

@@ -41,6 +41,7 @@ if (! $products_query->have_posts()) {
             <?php if ($title) : ?>
                 <h2><?php echo esc_html($title); ?></h2>
             <?php endif; ?>
+            <?php get_template_part( 'template-parts/slider-nav' ); ?>
         </div>
         <?php
         echo '<div class="featured-products-slider">';

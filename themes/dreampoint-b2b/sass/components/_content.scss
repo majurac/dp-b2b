@@ -155,7 +155,7 @@ body.admin-bar {
         margin-bottom: 24px;
     }
     h2 {
-        @include heading-3;
+        @include heading-2-medium;
         flex-grow: 1;
     }
     .button.button--outline {

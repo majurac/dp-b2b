@@ -32,6 +32,9 @@ $discounted_products = new WP_Query($args);
             <?php if ($title) : ?>
                 <h2><?php echo esc_html($title); ?></h2>
             <?php endif; ?>
+            <?php if ($discounted_products->have_posts()) : ?>
+                <?php get_template_part( 'template-parts/slider-nav' ); ?>
+            <?php endif; ?>
             <!--<a href="<?php echo esc_url( get_permalink( wc_get_page_id('shop') ) ); ?>" class="link">
                 <?php esc_html_e( 'Pogledaj sve', 'dreampoint-b2b' ); ?>
             </a>-->

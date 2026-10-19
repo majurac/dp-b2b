@@ -254,6 +254,22 @@
     }
 }
 
+// Figma "Heading/Heading 2/Medium": Petrona 600 40px, sentence case, tracking 0 (HOME-01 section titles
+// Noviteti / Akcija / Istaknuti proizvodi, "Povezani proizvodi", "Naša zastupništva"). The design is desktop only;
+// the 32px step below 768px is an inferred responsive step. Typography only: colour stays with the consumer.
+@mixin heading-2-medium {
+    font-family: 'Petrona';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 40px;
+    line-height: normal;
+    letter-spacing: 0;
+    text-transform: none;
+    @include bp(sm-down) {
+        font-size: 32px;
+    }
+}
+
 @mixin heading-3 {
     font-family: 'Petrona';
     font-style: normal;

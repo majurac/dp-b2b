@@ -32,13 +32,15 @@ $bestsellers = new WP_Query($args);
 
 <div class="bestseller slider-grid block">
     <div class="container">
-        <?php if ($title) : ?>
-            <div class="section-heading">
+        <div class="section-heading">
+            <?php if ($title) : ?>
                 <h2><?php echo esc_html($title); ?></h2>
-                <!-- <a href="<?php echo $bestseller_page_url; ?>" class="link"><?php esc_html_e( 'Pogledaj sve', 'dreampoint-b2b' ); ?></a>-->
-            </div>
-        <?php endif; ?>
-           
+            <?php endif; ?>
+            <?php if ($bestsellers->have_posts()) : ?>
+                <?php get_template_part( 'template-parts/slider-nav' ); ?>
+            <?php endif; ?>
+            <!-- <a href="<?php echo $bestseller_page_url; ?>" class="link"><?php esc_html_e( 'Pogledaj sve', 'dreampoint-b2b' ); ?></a>-->
+        </div>
         <div class="bestseller-content">
             <?php if ($bestsellers->have_posts()) : ?>
                 <div class="bestseller-slider">

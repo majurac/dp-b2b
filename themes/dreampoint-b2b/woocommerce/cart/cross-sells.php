@@ -27,6 +27,7 @@ if ( $cross_sells ) : ?>
 			?>
 			 <div class="section-heading">
                 <h2><?php esc_html_e('Predloženo za vas', 'dreampoint-b2b'); ?></h2>
+                <?php get_template_part( 'template-parts/slider-nav' ); ?>
             </div>
 		<?php endif; ?>
 

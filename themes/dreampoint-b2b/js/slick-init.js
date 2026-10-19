@@ -116,41 +116,81 @@ jQuery( function ( $ ) {
         }
     }
 
+    // Zajednička navigacija product/content slajdera: .nav-btns u .section-heading
+    // (markup: template-parts/slider-nav.php). Slick-ove vlastite strelice su isključene.
+    const sliderNavScope = '.slider-grid, .cross-sells, .related-posts';
+
+    const productSliderOptions = {
+        dots:           false,
+        arrows:         false,
+        infinite:       false,
+        speed:          300,
+        slidesToShow:   4,
+        slidesToScroll: 1,
+        lazyLoad:       'ondemand',
+        responsive: [
+            { breakpoint: 991, settings: { slidesToShow: 3, slidesToScroll: 1 } },
+            { breakpoint: 767, settings: { slidesToShow: 1, slidesToScroll: 1 } },
+        ],
+    };
+
     /**
-     * Inicijalizuje Slick slajder sa prilagođenim navigacionim dugmadima.
-     * Vezuje prev/next dugmad i prikazuje/skriva navigaciju zavisno od broja slajdova.
+     * Veže prev/next dugmad iz .section-heading na jedan slajder (po instanci bloka).
+     * Navigacija se krije kad nema više slajdova nego što je trenutno vidljivo
+     * (čita aktivni slidesToShow, pa prati responsive breakpointe), a krajnja
+     * dugmad dobijaju .slick-disabled + aria-disabled.
      *
-     * @param {string} sliderSelector      - jQuery selektor slajdera
-     * @param {string} navBtnsParentSelector - jQuery selektor roditeljskog elementa koji sadrži .nav-btns
-     * @param {object} slickOptions        - Slick konfiguracija
+     * @param {jQuery} $slider - inicijalizovani Slick slajder
+     * @param {jQuery} $nav    - .nav-btns element
      */
-    function initializeSlickSlider( sliderSelector, navBtnsParentSelector, slickOptions ) {
-        const $slider      = $( sliderSelector );
-        const slidesToShow = slickOptions.slidesToShow || 1;
+    function bindSliderNav( $slider, $nav ) {
+        const $prev = $nav.find( '.btn-prev' );
+        const $next = $nav.find( '.btn-next' );
 
-        if ( ! $slider.length ) return;
-
-        $slider.slick( slickOptions );
-
-        function toggleNavButtons() {
-            const totalSlides = $slider.slick( 'getSlick' ).slideCount;
-            $( navBtnsParentSelector + ' .nav-btns' ).toggle( totalSlides > slidesToShow );
+        function setState( $btn, disabled ) {
+            $btn.toggleClass( 'slick-disabled', disabled ).attr( 'aria-disabled', disabled ? 'true' : 'false' );
         }
 
-        toggleNavButtons();
+        function sync() {
+            const slick = $slider.slick( 'getSlick' );
+            const show  = slick.options.slidesToShow;
 
-        $( navBtnsParentSelector + ' .nav-btns .btn-prev' ).off( 'click' ).on( 'click', function ( e ) {
+            $nav.css( 'display', slick.slideCount > show ? '' : 'none' );
+            setState( $prev, slick.currentSlide <= 0 );
+            setState( $next, slick.currentSlide >= slick.slideCount - show );
+        }
+
+        $prev.on( 'click', function ( e ) {
             e.preventDefault();
-            $slider.slick( 'slickPrev' );
+            if ( ! $prev.hasClass( 'slick-disabled' ) ) $slider.slick( 'slickPrev' );
         } );
 
-        $( navBtnsParentSelector + ' .nav-btns .btn-next' ).off( 'click' ).on( 'click', function ( e ) {
+        $next.on( 'click', function ( e ) {
             e.preventDefault();
-            $slider.slick( 'slickNext' );
+            if ( ! $next.hasClass( 'slick-disabled' ) ) $slider.slick( 'slickNext' );
         } );
 
-        $slider.on( 'slickAdd slickRemove', function () {
-            toggleNavButtons();
+        // 'breakpoint' se okida nakon što Slick ažurira opcije (slidesToShow je već nov).
+        $slider.on( 'reInit afterChange breakpoint', sync );
+        sync();
+    }
+
+    /**
+     * Inicijalizuje slajder sa navigacijom iz svog .section-heading (po instanci,
+     * jer više blokova istog tipa može biti na istoj stranici).
+     *
+     * @param {jQuery} $slider  - slajder(i)
+     * @param {object} options  - Slick konfiguracija
+     */
+    function initNavSlider( $slider, options ) {
+        $slider.each( function () {
+            const $one = $( this );
+            if ( $one.hasClass( 'slick-initialized' ) ) return;
+
+            const $nav = $one.closest( sliderNavScope ).find( '.section-heading .nav-btns' ).first();
+
+            $one.slick( options );
+            if ( $nav.length ) bindSliderNav( $one, $nav );
         } );
     }
 
@@ -161,17 +201,19 @@ jQuery( function ( $ ) {
 
     setTimeout( function () {
 
-        // --- Product slajderi sa ugrađenom navigacijom ---
+        // --- Product slajderi: navigacija u .section-heading (template-parts/slider-nav.php) ---
         [
             '.latest-products-slider',
             '.bestseller-slider',
             '.recommended-slider',
             '.featured-products-slider',
             '.cross-sells-slider',
-            '.gallery-slider',
         ].forEach( function ( selector ) {
-            initSlider( $( selector ), slickDefaults );
+            initNavSlider( $( selector ), productSliderOptions );
         } );
+
+        // --- Gallery slider: bez naslova, zadržava Slick-ove strelice ---
+        initSlider( $( '.gallery-slider' ), slickDefaults );
 
         // --- Segments Slider (acf/segments-section) ---
         // Tile je pravi link, pa mu ostaje fokus; uklanjamo samo dodatni tabindex sa slajd wrappera
@@ -209,32 +251,26 @@ jQuery( function ( $ ) {
             stripSlideTabindex();
         }
 
-        // --- Related Posts Slider — jedini sa prilagođenom navigacijom ---
-        if ( $( '.related-posts-slider' ).length ) {
-            initializeSlickSlider(
-                '.related-posts-slider',
-                '.related-posts',
+        // --- Related Posts Slider (blog) — ista navigacija u .section-heading ---
+        initNavSlider( $( '.related-posts-slider' ), {
+            dots:           false,
+            arrows:         false,
+            infinite:       false,
+            speed:          300,
+            slidesToShow:   3,
+            slidesToScroll: 1,
+            lazyLoad:       'ondemand',
+            responsive: [
                 {
-                    dots:           false,
-                    arrows:         false,
-                    infinite:       false,
-                    speed:          300,
-                    slidesToShow:   3,
-                    slidesToScroll: 1,
-                    lazyLoad:       'ondemand',
-                    responsive: [
-                        {
-                            breakpoint: 991,
-                            settings: { slidesToShow: 2, slidesToScroll: 1, dots: true },
-                        },
-                        {
-                            breakpoint: 767,
-                            settings: { slidesToShow: 1, slidesToScroll: 1, dots: true },
-                        },
-                    ],
-                }
-            );
-        }
+                    breakpoint: 991,
+                    settings: { slidesToShow: 2, slidesToScroll: 1, dots: true },
+                },
+                {
+                    breakpoint: 767,
+                    settings: { slidesToShow: 1, slidesToScroll: 1, dots: true },
+                },
+            ],
+        } );
 
         // --- Brands Slider — beskonačna animacija ---
         initSlider( $( '.brands-slider' ), {

@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-19 (ACF homepage admin cleanup) — DONE ON STAGING (code `4465f09`, DB operations documented in ADR-029)
+
+Owner's accordion-open edits (Hero/About/Contact Form/Testimonials) committed; Featured Section and Company Features aligned with the accordion pattern and mirrored into the ACF admin list (DB posts 23510/23516); note-only "Block / Segments Section" group added (23519, the block never had a group); legacy `block == all` groups "About Global" (78) and "Blogs" (81) removed after evidence and backup (`/home/dreampoint.b2b/dp-backups/acf-homepage-admin-20261019/`). Frontend unchanged. Open: Brands, Contact Info, Featured Brand, Latest / Discounted / Featured Products and other groups are still JSON-only. Record: `docs/decisions.md` ADR-029.
+
 ## Update 2026-10-19 (T2 photo content) — T2 COMMERCIALIST PHOTO COMPLETE / VERIFIED ON STAGING (temporary dummy portrait, attachment 23506)
 
 Staging content only (no code change, staging HEAD `f68b0f9`): the dummy commercialist `1745` has a temporary original placeholder portrait in `photo_commercialist`; the homepage contact card shows it with the caption "Vaš prodajni predstavnik" at 1280/768/390/360 (persisted state, no injection). Replace it with a real photograph if the representative becomes real. Open T2 item: USP icon order (content). Details: `docs/active/figma-alignment.md` section 42, "T2 photo content assigned".

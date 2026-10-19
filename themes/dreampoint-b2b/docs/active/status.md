@@ -5,13 +5,22 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-19 (product reviews) — REVIEW-TAB FOLLOW-UP RECLASSIFIED: B (NOT SPECIFIED IN FIGMA / NO ACTION REQUIRED)
+
+Read-only investigation (Figma MCP + theme code + existing docs; no code, staging or settings changed; Phase 4 closeout above is unchanged).
+
+- **Figma:** PDP-01/PDP-02 (`11148:32726`, `11148:32859`, file `Te4kr3o8kXDgBLzHewKSYU`) have a tab bar with `Opis / Specifikacije / Sadržaj paketa / Dokumenti` (plus an empty fifth slot). No Recenzije/Reviews tab, rating stars, review count or review form on the PDP; the Product card (`11148:32832`) has no stars either. Absent from the approved design, not explicitly prohibited anywhere in the docs.
+- **Implementation:** `woocommerce/content-single-product.php:332` wraps `woocommerce_output_product_data_tabs()` in `<div class="wc-tabs-section block" style="display: none;">` (present since the monorepo migration `e90017a`; already recorded as a pre-existing known item in `docs/decisions.md` ADR-014, "mobile tabs dropdown"). So the ENTIRE tabs section (Description, Additional information, Reviews) is hidden on every PDP; the zero-size bounds seen during Phase 4 QA are this inline style, not a review-specific fault. WooCommerce review markup is still emitted (the real `.woocommerce-noreviews` notice was observed). No theme code removes reviews; no document requires them.
+- **Conclusion:** hidden review UI is not a regression and not an actionable Figma mismatch. The historical QA observation (zero-size panel, stars not visible) stays valid as a record. If product tabs are later implemented per Figma (Opis/Specifikacije/Sadržaj paketa/Dokumenti), that is a separate PDP task and the owner must decide then whether reviews are wanted at all (WooCommerce setting, not decided here).
+- Review-star colours in Phase 4 remain "no Figma star evidence; existing-token fallback" (§41); that is unchanged.
+
 ## Update 2026-10-19 (closeout) — FINAL FIGMA COLOUR ALIGNMENT: IMPLEMENTATION COMPLETE / VERIFIED WITH DOCUMENTED QA LIMITATIONS (staging `14ed363`; docs HEAD `9352aaa`; staging only)
 
 Phases 1-3 complete and verified (`0329887`, `48af45d`). Phase 4 implemented (`14ed363`, `docs/active/figma-alignment.md` §41): Sass build and compiled-CSS diff passed, WCAG AA passed for the modified notice pairs, deployed to staging, authenticated (admin session, read-only) QA found no regression in the tested scope. This supersedes the "NEXT TASK - Phase 4 (NOT STARTED)" paragraph of the 2026-10-18 entry below (kept as history). THEME colour alignment is finished; Quick Order and WBW plugin palettes are separate future scopes.
 
 **Verified on real rendered elements:** `.woocommerce-noreviews` (PDP), `.woocommerce-info` (My Account orders), `.required`, password strength `short`/`bad`/`strong`, focus ring, unchanged stock colour, cart and checkout (view only), 9-page overflow sweep at 390 and 360, 0 console errors.
 **NOT verified on real rendered elements (compiled CSS and/or synthetic DOM only):** success and error notices, checkout valid/invalid field states, CF7 invalid state, review stars, password strength `good`.
-**Separate follow-ups (not Phase 4, not fixed):** (A) staging PDP `/product/cleansing-cloth/` review tabs/panel render with zero-size bounds, so review stars are invisible - root cause unknown, separate display/functional investigation; (B) `/my-account/orders/` order-number link is UA-default `rgb(0,0,238)` (no theme colour rule), low-priority design alignment; (C) pre-existing checkout issues (oversized "Podaci tvrtke / Adresa naplate" headings, e-mail label overlapping its value) - already recorded in §39; (D) Quick Order and WBW plugin palettes.
+**Separate follow-ups (not Phase 4, not fixed):** (A) ~~staging PDP review tabs/panel zero-size~~ - CLOSED 2026-10-19 as not an actionable defect (classification B, see the 2026-10-19 product-reviews entry above; the whole `.wc-tabs-section` is hidden by a long-standing inline `display:none`, and reviews are not in Figma); (B) `/my-account/orders/` order-number link is UA-default `rgb(0,0,238)` (no theme colour rule), low-priority design alignment; (C) pre-existing checkout issues (oversized "Podaci tvrtke / Adresa naplate" headings, e-mail label overlapping its value) - already recorded in §39; (D) Quick Order and WBW plugin palettes.
 
 ## Update 2026-10-18 (end of day) — FINAL FIGMA COLOUR ALIGNMENT: PHASES 1–3 COMPLETE AND VERIFIED (staging `a1fba35`; staging only, no production environment exists)
 

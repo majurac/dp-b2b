@@ -168,6 +168,13 @@ body.admin-bar {
         justify-content: flex-end;
         align-items: center;
         gap: 24px;
+        // Global `button:focus { outline: none !important }` removes the default ring; the shared
+        // slider nav (template-parts/slider-nav.php) needs its own keyboard focus indicator.
+        .slick-prev, .slick-next {
+            &:focus-visible {
+                box-shadow: 0 0 0 3px $dp-color-focus-ring-primary;
+            }
+        }
     }
 }
 

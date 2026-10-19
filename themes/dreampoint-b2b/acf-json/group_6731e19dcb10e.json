@@ -1,6 +1,6 @@
 {
     "key": "group_6731e19dcb10e",
-    "title": "Block / Hero",
+    "title": "Block \/ Hero",
     "fields": [
         {
             "key": "field_6731e19e34772",
@@ -16,7 +16,7 @@
                 "class": "",
                 "id": ""
             },
-            "open": 0,
+            "open": 1,
             "multi_expand": 0,
             "endpoint": 0
         },
@@ -147,7 +147,7 @@
             {
                 "param": "block",
                 "operator": "==",
-                "value": "acf/hero-section"
+                "value": "acf\/hero-section"
             }
         ]
     ],
@@ -162,5 +162,6 @@
     "show_in_rest": 0,
     "display_title": "",
     "allow_ai_access": false,
-    "ai_description": ""
+    "ai_description": "",
+    "modified": 1792404595
 }

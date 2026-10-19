@@ -1,13 +1,20 @@
 @import '../theme/mixins';
 
+// Figma HOME USP row (11148:31603): four 276px columns, 32px gap, 64px icon, 8px icon/text gap,
+// title Montserrat 700 12/20 and text Montserrat 500 12/20, both -0.132px, colour text-secondary,
+// centred. Below 992px two columns (inferred responsive behaviour, the design is desktop only).
 .features {
     padding: 0;
     &-content {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 32px;
         padding-top: 64px;
         padding-bottom: 64px;
+        @include bp(md-down) {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 32px 24px;
+        }
         @include bp(sm-down) {
             padding-top: 60px;
             margin-bottom: 0px;
@@ -15,44 +22,49 @@
         }
         .item {
             display: flex;
-            padding: 0px 24px;
-            column-gap: 24px;
             flex-direction: column;
+            align-items: center;
+            row-gap: 8px;
             text-align: center;
-            max-width: 300px;
-            margin-left: auto;
-            margin-right: auto;
-            @include bp(lg-down) {
-                padding: 0 10px;
-            }
             .features-icon {
-                min-width: 32px;
-                width: 46px;
-                margin-left: auto;
-                margin-right: auto;
-                margin-bottom: 16px;
+                width: 64px;
+                height: 64px;
+                img {
+                    display: block;
+                    width: 100%;
+                    height: 100%;
+                }
             }
             .features-text {
                 flex-grow: 1;
+                font-family: 'Montserrat';
+                font-size: 12px;
+                line-height: 20px;
+                letter-spacing: -0.132px;
+                color: $dp-color-text-secondary;
+                text-align: center;
                 h3, .features-title {
-                    font-family: 'Petrona';
-                    font-style: normal;
-                    font-weight: 400;
-                    font-size: 20px;
-                    line-height: 25px;
+                    font-family: 'Montserrat';
+                    font-weight: 700;
+                    font-size: 12px;
+                    line-height: 20px;
+                    letter-spacing: -0.132px;
                     text-align: center;
-                    letter-spacing: 0.04em;
-                    text-transform: capitalize;
-                    @include bp(lg-down) {
-                        font-size: 18px;
-                        line-height: 23px;
-                    }
+                    text-transform: none;
+                    color: $dp-color-text-secondary;
                     +p {
-                        margin-top: 5px;
+                        margin-top: 0;
                     }
                 }
                 p {
-                    @include paragraph-normal;
+                    font-family: 'Montserrat';
+                    font-weight: 500;
+                    font-size: 12px;
+                    line-height: 20px;
+                    letter-spacing: -0.132px;
+                    color: $dp-color-text-secondary;
+                    padding: 0;
+                    margin: 0;
                 }
             }
         }

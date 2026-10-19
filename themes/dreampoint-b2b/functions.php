@@ -1084,6 +1084,7 @@ function dreampoint_b2b_contact_info_shortcode(): string {
                         ?>
                         <a class="button button--outline button--sm" href="<?php echo esc_url( $contact_url ); ?>"><?php echo esc_html( $contact_label ); ?></a>
                     <?php endif; ?>
+                    <div class="commercialist-contact">
                     <?php
                         $current_user_id = get_current_user_id();
 
@@ -1102,6 +1103,8 @@ function dreampoint_b2b_contact_info_shortcode(): string {
                             <?php
                         }
                     ?>
+                    </div>
+                    <!-- /.commercialist-contact -->
                 </div>
                 <!-- /.commercialist -->
                 <div class="contact-details">

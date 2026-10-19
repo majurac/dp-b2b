@@ -701,3 +701,36 @@ Colour-only; 14 files (7 SCSS + 7 compiled CSS), 40 declarations. No PHP/geometr
 **Addendum (2026-10-19, product reviews scope review):** the "review tabs zero-size on PDP" follow-up is CLOSED as classification B (not specified in Figma / no action required). Cause: `.wc-tabs-section` has an inline `display:none` in `woocommerce/content-single-product.php` (whole tabs section hidden on every PDP, pre-existing, ADR-014 known item 1); Figma PDP-01/02 show tabs Opis/Specifikacije/Sadrzaj paketa/Dokumenti and no reviews/stars. Phase 4 classification above is unchanged. Record: `docs/active/status.md` (2026-10-19 product-reviews entry).
 
 **Update 2026-10-19 (PDP Description tab, ADR-028):** the PDP tab section is now active and shows only the native "Opis" tab (Figma Tab 14/600 treatment); this supersedes the "hidden by display:none" state in the product-reviews addendum above. Staging `a2750fb`.
+
+## 42. Remaining Figma alignment audit (2026-10-19, READ-ONLY, staging `7b5ea10` = code HEAD `a2750fb`; local/origin docs HEAD `1e33d26`)
+
+Scope: desktop 1280 + mobile 390/360 on staging (admin session for authenticated pages, a fresh guest context for login/registration; no forms submitted, no data changed) against Figma frames CH-01, CART-01/02, MPR-01/02/03, HOME (`11148:31523`), CAT-02, PDP-01, QO-02, AUTH-01. This is the single prioritized backlog for the remaining visual work; it does not reopen sections 38-41, ADR-028, product reviews or the ERP documents audit. Estimates are whole hours; nothing here is approved or implemented.
+
+**Verified, reproducible, theme-only (Figma target clear):**
+- **Checkout (`/checkout/`):** "Podaci tvrtke" / "Adresa naplate" headings are Petrona 48px uppercase (sibling section headings are small letter-spaced sans); floating labels (`position:absolute`) overlap the value because the input has `padding-top:0` (e-mail, Drzava/Regija, Zupanija; also at 390); the radio dots of the shipping/payment options sit off the option text. Figma CH-01 shows a card layout (Kontakt podaci / Adresa / Placanje) that the WC Blocks form does not have: structural, NOT part of the visual fix (needs a separate decision, ADR-020 presentation-only rule).
+- **Homepage lower blocks (`brands`, `featured-section`, `features`, `contact-info`)** were never part of a Figma step: block H2s are Petrona 48px uppercase (Figma: title case ~32px); the Quick Order block is a full-bleed photo (`.featured-section-photo` 990px of 1280, leaving a gap) above the heading instead of the Figma grey text panel + photo; the four USP items wrap 3+1 at 1280 (Figma: one row of four, sans headings); the contact block is a plain stack (Figma: representative card with photo + three columns). Note: the "company-features renders nothing" remark in section 20 is outdated, `features_items` now has content.
+- **PDP / product card typography:** card and related-product titles are Petrona uppercase (Figma: sans 14/600, normal case), PDP title is Petrona uppercase ~20px (Figma: sans bold ~24px), label "Sifra artikla" (Figma "Kataloski broj / EAN"), section heading "PREDLOZENO ZA VAS" (Figma "Povezani proizvodi", title case), black square gallery arrows and a "Podijeli" share row that are not in Figma; Figma's USP strip between tabs and related products is absent. Stock line on in-stock cards is not shown while Figma shows "Na stanju": check against ADR-016 before touching.
+- **Cart (`/cart/`):** per-item card list vs Figma table (Proizvod / SKU / Jedinicna / Kolicina / Ukupno). The reservation banner (ADR-007), "Oznaci sve / Ukloni oznacene" and the empty-cart state are functional/behavioural: not part of a visual task; the empty state was not verified (would require emptying the admin cart, which must never be done).
+- **My Account:** sidebar is black-tab uppercase letter-spaced blocks (Figma: icon list, active item bold); company data block is plain text (Figma: grey card); order-number link `#147` on `/my-account/orders/` is UA `rgb(0,0,238)`; Figma has no orders-table frame (only Addresses/empty state), so this is "nearest existing token", not a Figma target.
+- **Login / registration:** staging is a white single column; Figma AUTH-01 is a grey `#f3f4f6` panel + right photo, black "dp DREAM POINT" logo, title-case "Prijavi se". The photo is DATA: ACF option `lr_image` is empty on staging (the template renders `.lr-image` only when set, `sass/pages/myaccount.scss` `.lr-image` is 50% width, hidden below md). Registration still shows English "First Name / Last Name".
+- **Responsive:** 10 pages at 390 and 360 (`/`, shop, PDP, cart, checkout, my-account, orders, quick-order, brendovi, kontakt): no horizontal overflow; only off-canvas elements (admin bar, hidden mini-cart) lie outside the viewport. Not covered: guest mobile screenshots beyond login/registration, touch-target adequacy beyond the earlier section 29/30 findings.
+
+**Plugin-dependent (not changed without approval):** WBW filter sidebar on `/shop/` (square default checkboxes, Petrona uppercase headings, English "Search categories", "In Stock", "CLEAR", "Sort By", "451 products"; Figma: grey filter card, sans headings, active filter chips) and Quick Order (own plugin `dp-b2b-quick-order`: no page title/intro, own uppercase "QUICK ORDER" header, Arial-like chips, English "Sort By"/"Search brands"): consistent with the already recorded "QO / WBW palettes" and Step 3b-2c/2d scopes. English page titles ("My account", "Cart", "Shop", "Quick Order") and WC strings ("Tax", dashboard intro) remain the known i18n follow-up (DB content + translations).
+
+**Not actionable / out of scope:** header "CRO" language selector (future multilingual, ADR-019), reviews, Specifikacije / Sadrzaj paketa / Dokumenti tabs, search placeholder copy ("Naziv, kataloski broj ili EAN" vs "Pretrazite naziv, SKU ili EAN": copy only, P3), cart reservation, bulk cart actions.
+
+**Backlog (priority | area | task | scope | estimate):**
+| P | Task | Scope | h |
+|---|---|---|---|
+| P2 | T1 Checkout visual repair (headings, label overlap, radio dots) | theme CSS only, no checkout logic | 4 |
+| P2 | T2 Homepage lower blocks (brands/featured/features/contact) | theme block templates + SCSS | 6 |
+| P2 | T3 Auth split layout (grey panel, logo, title case) + owner uploads `lr_image` | theme SCSS/template + owner data | 3 |
+| P2 | T4 PDP + product-card typography and PDP details | theme SCSS/templates | 4 |
+| P2 | T5 Cart layout restyle (table-like, existing data only) | theme `woocommerce/cart` override | 4 |
+| P2 | T6 i18n: English page titles, WC strings, registration labels | DB content + translations, owner input | 3 |
+| P3 | T7 My Account sidebar (icon list), info card, order-number link | theme SCSS | 3 |
+| P3 | T8 USP strip on PDP, search placeholder copy | theme | 2 |
+| plugin | T9 WBW filter sidebar skin (theme-level override) | needs explicit approval | 5 |
+| plugin | T10 Quick Order page header/typography/chips (own plugin) | needs explicit approval | 4 |
+
+**Recommended first task: T1** (reproducible, root cause identified at CSS level, theme-only, on the critical order flow; Playwright checkout verification required after, no order submission).

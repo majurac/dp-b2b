@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-19 (remaining Figma audit) — REMAINING FIGMA ALIGNMENT AUDIT COMPLETE (read-only; staging `7b5ea10`, docs HEAD `1e33d26`)
+
+Single prioritized backlog (T1-T10, whole-hour estimates) in `docs/active/figma-alignment.md` section 42. Confirmed: checkout oversized headings and label overlap (CSS root cause: `padding-top:0` on inputs with absolute labels), UA-blue order-number link (no Figma target), unaligned homepage lower blocks, login/registration split layout (photo is empty ACF `lr_image` data), no horizontal overflow at 390/360 on 10 pages. Recommended first task: T1 checkout visual repair (theme CSS only). No code, build, deploy or staging change.
+
 ## Update 2026-10-19 (PDP Description tab) — PDP DESCRIPTION TAB IMPLEMENTED AND VERIFIED ON STAGING (`a2750fb`); ERP FUTURE-TABS AUDIT COMPLETE
 
 Record: `docs/decisions.md` ADR-028 (supersedes ADR-014 known item 1). Commits `76e4162` (tab section activated, single Description tab, mobile rules removed, single-tab JS guard), `657508c` (short-description block only with a real excerpt: it auto-duplicated the description), `4ecd403` (Figma tab typography), `a2750fb` (keyboard focus ring). Staging QA (read-only, Playwright, admin session, 0 console errors): `lepeza-feel-free-maxi` (simple) and `termos-boca-clima-titanium` (variable) show exactly one tab "Opis" with the native description, one occurrence of the text, no review UI, no hidden focusables, no horizontal overflow at 1280/390/360; `nuuna-biljeznica-sweet-joe-graphic-format-s` (simple) and `boca-urban-mini` (variable) have no long description: no wrapper/tab/panel. Add-to-cart, variations and related products present; no pricing, stock, checkout or importer change.

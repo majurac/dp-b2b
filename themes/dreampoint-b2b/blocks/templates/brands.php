@@ -70,10 +70,12 @@ if ($initial_count > 0 && $initial_count < 8) {
     $brands_to_display = array_slice($brands_to_display, 0, 8);
 }
 ?>
-<div class="brands block">
+<div class="brands slider-grid block">
     <div class="container">
         <?php if ($title) : ?>
-            <h2><?php echo esc_html($title); ?></h2>
+            <div class="section-heading">
+                <h2><?php echo esc_html($title); ?></h2>
+            </div>
         <?php endif; ?>
     </div>
     <!-- /.container -->

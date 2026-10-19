@@ -27,9 +27,9 @@ $latest_products = new WP_Query($args);
             <?php if ($title) : ?>
                 <h2><?php echo esc_html($title); ?></h2>
             <?php endif; ?>
-            <a href="<?php echo esc_url( get_permalink( wc_get_page_id('shop') ) ); ?>" class="link">
+            <!--<a href="<?php echo esc_url( get_permalink( wc_get_page_id('shop') ) ); ?>" class="link">
                 <?php esc_html_e( 'Pogledaj sve', 'dreampoint-b2b' ); ?>
-            </a>
+            </a>-->
         </div>
         <div class="latest-products-content">
             <?php if ($latest_products->have_posts()) : ?>
@@ -45,12 +45,11 @@ $latest_products = new WP_Query($args);
             <?php endif; ?>
         </div>
         <!-- /.latest-products-content -->
-        <div class="view-all-sm">
+        <!--<div class="view-all-sm">
             <a href="<?php echo esc_url( get_permalink( wc_get_page_id('shop') ) ); ?>" class="button button--outline button--sm button--icon-after">
                 <?php esc_html_e( 'Pogledaj sve', 'dreampoint-b2b' ); ?>
             </a>
-        </div>
-        <!-- /.view-all sm -->
+        </div>-->
     </div>
     <!-- /.container -->
 </div>

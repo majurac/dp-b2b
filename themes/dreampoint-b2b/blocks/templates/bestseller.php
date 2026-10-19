@@ -32,12 +32,13 @@ $bestsellers = new WP_Query($args);
 
 <div class="bestseller slider-grid block">
     <div class="container">
-        <div class="section-heading">
-            <?php if ($title) : ?>
+        <?php if ($title) : ?>
+            <div class="section-heading">
                 <h2><?php echo esc_html($title); ?></h2>
-            <?php endif; ?>
-            <a href="<?php echo $bestseller_page_url; ?>" class="link"><?php esc_html_e( 'Pogledaj sve', 'dreampoint-b2b' ); ?></a>
-        </div>
+                <!-- <a href="<?php echo $bestseller_page_url; ?>" class="link"><?php esc_html_e( 'Pogledaj sve', 'dreampoint-b2b' ); ?></a>-->
+            </div>
+        <?php endif; ?>
+           
         <div class="bestseller-content">
             <?php if ($bestsellers->have_posts()) : ?>
                 <div class="bestseller-slider">
@@ -52,10 +53,9 @@ $bestsellers = new WP_Query($args);
             <?php endif; ?>
         </div>
         <!-- /.bestseller-content -->
-        <div class="view-all-sm">
+        <!--<div class="view-all-sm">
             <a href="<?php echo $bestseller_page_url; ?>" class="button button--outline button--sm button--icon-after"><?php esc_html_e( 'Pogledaj sve', 'dreampoint-b2b' ); ?></a>
-        </div>
-        <!-- /.view-all sm -->
+        </div>-->
     </div>
     <!-- /.container -->
 </div>

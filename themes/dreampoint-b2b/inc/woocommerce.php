@@ -405,3 +405,22 @@ add_action( 'init', function (): void {
 		load_textdomain( 'silkypress-input-field-block', $mofile );
 	}
 }, 20 );
+
+/**
+ * PDP shows only the native WooCommerce Description tab (long description,
+ * `post_content`). WooCommerce registers it only when the product has a long
+ * description, so an empty description leaves no tabs and the template renders
+ * no wrapper. Additional information, Reviews and tabs added by plugins are
+ * removed from the PDP tab UI only; reviews/attribute data and settings are
+ * untouched. Future tabs (Specifikacije, Sadržaj paketa, Dokumenti) must be
+ * added here deliberately (ADR-027).
+ *
+ * @param array<string, array<string, mixed>> $tabs Registered product tabs.
+ * @return array<string, array<string, mixed>>
+ */
+function dreampoint_b2b_product_tabs( array $tabs ): array {
+	$allowed = [ 'description' ];
+
+	return array_intersect_key( $tabs, array_flip( $allowed ) );
+}
+add_filter( 'woocommerce_product_tabs', 'dreampoint_b2b_product_tabs', 99 );

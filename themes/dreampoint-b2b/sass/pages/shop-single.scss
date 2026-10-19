@@ -429,12 +429,6 @@
         }
     
     }
-    .woocommerce-tabs.wc-tabs-wrapper ul.tabs.wc-tabs,
-    .woocommerce-tabs.wc-tabs-wrapper .woocommerce-Tabs-panel {
-        @include bp(sm-down) {
-            display: none;
-        }
-    }
     .wc-tabs-section {
         .woocommerce-tabs {
             @include custom-tabs;

@@ -328,10 +328,17 @@ $permalink = get_permalink($product_id);
                 </div>
                 <!-- /.row -->
                 
-                <!-- Product Tabs -->
-                <div class="wc-tabs-section block" style="display: none;">
-                    <?php woocommerce_output_product_data_tabs(); ?>
-                </div>
+                <!-- Product Tabs (Description only, see dreampoint_b2b_product_tabs()) -->
+                <?php
+                ob_start();
+                woocommerce_output_product_data_tabs();
+                $dp_tabs_html = trim( (string) ob_get_clean() );
+                ?>
+                <?php if ( '' !== $dp_tabs_html ) : ?>
+                    <div class="wc-tabs-section block">
+                        <?php echo $dp_tabs_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- native WooCommerce tabs template output. ?>
+                    </div>
+                <?php endif; ?>
             </div>
             <!-- /.product-main-info -->
         </div>

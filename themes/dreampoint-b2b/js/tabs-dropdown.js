@@ -16,6 +16,11 @@ jQuery(function($) {
     }
     
     const $tabs = $wrapper.find('ul.tabs.wc-tabs li');
+
+    // A single tab (PDP shows only Description) needs no dropdown
+    if ($tabs.length < 2) {
+        return;
+    }
     const $panels = $wrapper.find('.woocommerce-Tabs-panel');
     let $select;
     

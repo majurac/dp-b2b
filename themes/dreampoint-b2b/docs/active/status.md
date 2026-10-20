@@ -21,6 +21,10 @@ Brands, Contact Info, Featured Brand, Latest, Discounted and Featured Products n
 
 Owner's accordion-open edits (Hero/About/Contact Form/Testimonials) committed; Featured Section and Company Features aligned with the accordion pattern and mirrored into the ACF admin list (DB posts 23510/23516); note-only "Block / Segments Section" group added (23519, the block never had a group); legacy `block == all` groups "About Global" (78) and "Blogs" (81) removed after evidence and backup (`/home/dreampoint.b2b/dp-backups/acf-homepage-admin-20261019/`). Frontend unchanged. Open: Brands, Contact Info, Featured Brand, Latest / Discounted / Featured Products and other groups are still JSON-only. Record: `docs/decisions.md` ADR-029.
 
+## Update 2026-10-20 (T3 login / registration) — LAYOUT AND TYPOGRAPHY VERIFIED ON STAGING (`612efec`), PARTIAL: photo and logo asset pending
+
+Theme SCSS only (`sass/pages/myaccount.scss` + compiled CSS): grey `#f3f4f6` page, 584px column top-aligned, Heading 1 Medium title, 48px logo gap, 14px link/footer styles. `lr_image` is empty and the Figma wordmark logo differs from the ACF `logo` mark: owner data, nothing uploaded. Details: `docs/active/figma-alignment.md` section 43. Next backlog item: T4.
+
 ## Update 2026-10-19 (T2 photo content) — T2 COMMERCIALIST PHOTO COMPLETE / VERIFIED ON STAGING (temporary dummy portrait, attachment 23506)
 
 Staging content only (no code change, staging HEAD `f68b0f9`): the dummy commercialist `1745` has a temporary original placeholder portrait in `photo_commercialist`; the homepage contact card shows it with the caption "Vaš prodajni predstavnik" at 1280/768/390/360 (persisted state, no injection). Replace it with a real photograph if the representative becomes real. Open T2 item: USP icon order (content). Details: `docs/active/figma-alignment.md` section 42, "T2 photo content assigned".

@@ -26,14 +26,13 @@ $lr_image = get_field('lr_image', 'option');
 <div class="login-register">
     <div class="container">
         <div class="lr-content">
-            <?php if (!empty($company_logo) && !empty($company_logo['url'])) : ?>
+            <?php // Horizontal wordmark (Figma AUTH screens); the ACF `logo` option is used for the alt text only ?>
             <div id="lr-logo">
                 <a href="<?php echo esc_url(home_url('/')); ?>">
-                    <img src="<?php echo esc_url($company_logo['url']); ?>" alt="<?php echo esc_attr($company_logo['alt'] ?? __('Dreampoint Logo', 'dreampoint-b2b')); ?>">
+                    <img src="<?php echo esc_url(get_template_directory_uri() . '/img/logos/dreampoint-wordmark.svg'); ?>" width="147" height="56" alt="<?php echo esc_attr($company_logo['alt'] ?? __('Dreampoint Logo', 'dreampoint-b2b')); ?>">
                 </a>
             </div>
             <!-- /#lr-logo -->
-            <?php endif; ?>
             <div class="lr-intro">
                 <h1><?php esc_html_e( 'Lost your password?', 'woocommerce' ); ?></h1>
                 <p><?php esc_html_e( 'Molimo unesite svoje korisničko ime ili adresu e-pošte. E-poštom ćete dobiti poveznicu za izradu nove lozinke.', 'dreampoint-b2b' ); ?></p>

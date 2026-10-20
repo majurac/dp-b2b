@@ -208,7 +208,25 @@
                 .button { margin-top: 0; width: auto; }
             }
         }
+    }
 
+    // Figma AUTH-04 "Provjerite svoju e-mail adresu" (woocommerce/myaccount/lost-password-confirmation.php): the login
+    // column (top aligned, left aligned) with the AUTH-03 photo, a primary-colour paragraph and a two-button row.
+    &.login-register--sent {
+        .container .lr-content {
+            .lr-intro p { color: $dp-color-text-primary; }
+            .lr-actions {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 24px;
+            }
+        }
+    }
+
+    // Photo gradient shared by the two screens that use the AUTH-03/04 photograph (transparent from 64.4% to
+    // rgba(0,0,0,.6) at 91.2%).
+    &.login-register--pending,
+    &.login-register--sent {
         .lr-image::after {
             content: '';
             position: absolute;

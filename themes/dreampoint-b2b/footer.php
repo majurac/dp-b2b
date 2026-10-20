@@ -41,7 +41,7 @@ $footer_img_uri  = get_template_directory_uri() . '/img/footer/';
 /**
  * Don't show footer on account login page
  */
-if ((is_account_page() && !is_user_logged_in()) || dreampoint_b2b_is_approval_pending_page()) {
+if ((is_account_page() && !is_user_logged_in()) || dreampoint_b2b_is_standalone_auth_page()) {
     ?>
     </div><!-- #page -->
     <?php wp_footer(); ?>

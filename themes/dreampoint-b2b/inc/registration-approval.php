@@ -66,6 +66,22 @@ function dreampoint_b2b_is_approval_pending_page(): bool {
 }
 
 /**
+ * Password recovery screens: the `lost-password` endpoint (request form, "e-mail sent" confirmation and the
+ * reset form reached from the e-mail link all live on it). Rendered as standalone AUTH screens for guests and
+ * logged-in users alike; the normal My Account dashboard/endpoints are not affected.
+ */
+function dreampoint_b2b_is_password_recovery_page(): bool {
+    return function_exists( 'is_account_page' ) && is_account_page() && is_wc_endpoint_url( 'lost-password' );
+}
+
+/**
+ * Standalone AUTH screens render without the site header/footer (Figma AUTH-03 / AUTH-04).
+ */
+function dreampoint_b2b_is_standalone_auth_page(): bool {
+    return dreampoint_b2b_is_approval_pending_page() || dreampoint_b2b_is_password_recovery_page();
+}
+
+/**
  * Preusmjeri logirane ali neodobrene korisnike na /approval-pending.
  */
 function dreampoint_b2b_restrict_unapproved_access(): void {

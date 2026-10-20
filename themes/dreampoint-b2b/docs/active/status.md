@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-20 (T4 PDP and product-card typography) - IMPLEMENTED ON STAGING (`41590fc`), PARTIALLY VERIFIED
+
+Theme SCSS only: PDP title / catalog number / price / stock label / MPC / description and the shared product-card title (two-line clamp) and price aligned to Figma PDP-01 and the Product card; shared mixins untouched. Measured on staging (admin session, read-only) at 1440/768/390 for PDPs and 390/1440 for cards; variation select/clear and ADR-034 verified. Not verified: MPC rows, sale prices, homepage/cart cross-sell/category card contexts (none available or not opened). Corrects the PDP title value in `figma-alignment.md` section 42. Details: `docs/active/figma-alignment.md` section 47. Next backlog item: T5 (not started).
+
 ## Update 2026-10-19 (Segments Section persisted mode) — PERSISTED MODE NORMALISED; EDITOR WORKAROUND REMOVED (staging `04f3bc8`)
 
 Homepage post 17 now stores `"mode":"edit"` for `acf/segments-section` (one scoped `wp_update_post()`, dry-run proven, only that attribute changed, backup `/home/dreampoint.b2b/dp-backups/segments-mode-persist-20261019/`); the temporary `blocks.getBlockAttributes` script was removed and the editor shows the compact card without it. No other live content carried the legacy attribute (only old revisions). Frontend and ADR-009 unchanged. Record: `docs/decisions.md` ADR-029 addendum (final).

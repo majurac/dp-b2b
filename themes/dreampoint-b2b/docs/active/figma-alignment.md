@@ -812,3 +812,39 @@ Section 43 recorded the layout/typography and listed the photo and the wordmark 
 **QA (staging `4c2d193`, admin session with the admin bar hidden for measuring, no forms submitted):** 1440/1280/768/390/360: no site header/inner heading, exactly one H1, grey `#f3f4f6`, no 4xx/5xx, no console errors, no horizontal overflow, icon/logo/photo loaded. 1440: wordmark x=339 y=128 (Figma 339.6/128), icon 144px, heading 40/600 `#0d121c`, paragraph 18px, buttons 203x48 / 232x48 gap 24 with Figma colours (`#0d121c`/`#f9fafb` text, `#f9fafb` + `#e5e7eb` border + `#384250`), radius 24, photo x=737 w=703 with the gradient overlay (vertical position matches the Figma 969px column scaled to the 900px test viewport). Regression: Login/Registration 1440 and 390 identical to the section 43/44 measurements (logo y=80, h1 64/36px, photo 737x703), no `--pending` class leakage. NOT verified: the page as a real pending user (no such account; staging `DP_BYPASS_APPROVAL=true`), clicking the logout link, the mailto hand-off.
 
 **Staging:** pre-change files in `/home/dreampoint.b2b/backup-t3c/` (site-user owned), pulled as the site user, HEAD `4c2d193`, no root-owned files.
+
+## 46. Password recovery flow: RCA + Figma AUTH-04 (2026-10-20, code `ed30b83` + `93896d0`, STAGING VISUALLY VERIFIED; real reset NOT E2E tested)
+
+**Report (owner, logged-in admin on `/my-account/lost-password/`):** global header + "My account" breadcrumb/H1 + dashboard intro text + AUTH form + footer.
+
+**Root cause (code + measured evidence on staging before the fix):**
+- `header.php` renders the full header, `.inner-heading` (H1 from `get_the_title()`) and the `.my-acccount-intro` block ("Hello ..., from your account dashboard ...", `is_account_page() && is_user_logged_in()`) for EVERY account endpoint when the user is logged in. The only chrome suppression was `is_account_page() && !is_user_logged_in()` (`header.php` / `footer.php`). WooCommerce itself renders the `lost-password` endpoint for logged-in users too (`WC_Shortcode_My_Account::output()` -> `lost_password()`), so the AUTH form (`form-lost-password.php`) was wrapped by the logged-in page chrome. Probe: logged-in `lost-password` = header, `.inner-heading`, dashboard intro and footer present, two H1 ("My account" + "Izgubili ste lozinku?"); anonymous = AUTH only. Template hierarchy, multiple templates and caching were NOT the cause (one template renders; the AUTH photo is `lr_image` from T3).
+- Separately, the post-submit page (`?reset-link-sent=1`) is WooCommerce's core `lost-password-confirmation.php`, which the theme never overrode: for guests it rendered with no AUTH shell, no H1 and unstyled core text (measured: no `.login-register`, no `<h1>`, no `.lr-image`).
+
+**Figma:** AUTH-04 `11148:31335` (1440x1049) = "Provjerite svoju e-mail adresu" = the reset-link-SENT confirmation (state B): wordmark, H1 Petrona 600 64/72 ("Provjerite svoju / e-mail adresu"), paragraph Montserrat 18 "Poslali smo vam e-mail sa linkom za reset lozinke. Ukoliko ga ne pronađete u narednih nekoliko minuta, provjerite Spam ili Junk folder.", buttons "Ponovo pošalji mail" (primary XL) and "Nazad na prijavu" (secondary `#f9fafb` / `#e5e7eb` / `#384250`), gap 24, the same woman photograph as AUTH-03 with the bottom gradient (`img/bg/approval-pending.jpg` reused, no new asset). No Figma frames exist for the request form (A) and the new-password form (C).
+
+**State matrix**
+
+| State | WooCommerce behaviour | Theme before | Theme now | Figma |
+|---|---|---|---|---|
+| A guest opens `/lost-password/` | `form-lost-password.php` | AUTH shell, round logo | AUTH shell + wordmark (T3 convention) | none (T3 conventions, not Figma-verified) |
+| B request submitted | redirect to `?reset-link-sent=1`, core confirmation | unstyled core text, no shell | AUTH-04 screen, no header/footer, no WC notice | AUTH-04 |
+| C reset link (`?show-reset-form=1`) | `form-reset-password.php` | AUTH shell, round logo | AUTH shell + wordmark | none (T3 conventions) |
+| D new password saved | WC redirect to the my-account login with a notice | unchanged | unchanged (login AUTH, T3) | none |
+| E logged-in user opens the endpoint | WC renders the endpoint | AUTH form inside header/H1/dashboard text/footer | standalone AUTH screens (no chrome) | n/a |
+
+**Fix:**
+- `dreampoint_b2b_is_password_recovery_page()` (`is_account_page() && is_wc_endpoint_url('lost-password')`) and `dreampoint_b2b_is_standalone_auth_page()` (recovery OR approval-pending) in `inc/registration-approval.php`. `header.php` / `footer.php` use the latter, so header, footer, inner heading and dashboard intro are suppressed only there; the normal My Account dashboard and the other endpoints keep them (re-verified).
+- New override `woocommerce/myaccount/lost-password-confirmation.php` (AUTH-04, `.login-register--sent`): keeps the core `woocommerce_before/after_lost_password_confirmation_message` hooks and the message filter, drops the native notice banner, wraps "e-mail" in a nowrap span so the heading wraps like Figma.
+- `sass/pages/myaccount.scss`: `--sent` modifier; the AUTH-03 gradient rule is now shared with `--pending`.
+- `form-lost-password.php` / `form-reset-password.php` now use the wordmark (same flow as AUTH-04).
+
+**Unchanged (checked in the diff):** reset processing, nonces and keys, token bridge, e-mail sending, `retrieve_password`, roles, approval/redirect logic.
+
+**Copy/behaviour conflict (owner decision):** "Ponovo pošalji mail" cannot resend in one click: the confirmation URL deliberately carries no user data, so the button links to the request form (`wc_lostpassword_url()`) where the address is entered again. "Nazad na prijavu" links to the My Account page (login for guests, dashboard for a logged-in user). The core text about waiting 10 minutes before another reset is replaced by the Figma text.
+
+**QA (staging `93896d0`):** anonymous and admin sessions, 1440/1280/768/390/360, read-only GET (including `?reset-link-sent=1`, which sends nothing). Confirmation and form screens: no header, inner heading, dashboard intro or footer, exactly one H1, grey `#f3f4f6`, no overflow, no console errors, no 4xx/5xx. 1440 confirmation: wordmark 120x80, H1 y=184 h=144 (two lines like Figma), paragraph y=336, buttons y=434, 228x48 and 203x48 (Figma 228/204), gap 24, photo x=737 w=703 with the gradient. Regression: anonymous Login and Registration identical to sections 43/44; Approval Pending unchanged (section 45); logged-in My Account dashboard still has header, inner heading, dashboard intro and footer.
+
+**NOT verified (needs a real e-mail/token, nothing was sent):** the real submit-to-confirmation redirect, the e-mail itself, the new-password form (C) and the success redirect (D).
+
+**Deploy notes:** OPcache revalidates within 60 s after a deploy (the first check after the last push still served the old template). Backups in `/home/dreampoint.b2b/backup-recovery/`; the second deploy overwrote the `myaccount.*` backups with the `ed30b83` versions, the pre-change versions are in git `44c02da`.

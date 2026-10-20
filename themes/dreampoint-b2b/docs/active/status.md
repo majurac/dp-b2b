@@ -21,6 +21,10 @@ Brands, Contact Info, Featured Brand, Latest, Discounted and Featured Products n
 
 Owner's accordion-open edits (Hero/About/Contact Form/Testimonials) committed; Featured Section and Company Features aligned with the accordion pattern and mirrored into the ACF admin list (DB posts 23510/23516); note-only "Block / Segments Section" group added (23519, the block never had a group); legacy `block == all` groups "About Global" (78) and "Blogs" (81) removed after evidence and backup (`/home/dreampoint.b2b/dp-backups/acf-homepage-admin-20261019/`). Frontend unchanged. Open: Brands, Contact Info, Featured Brand, Latest / Discounted / Featured Products and other groups are still JSON-only. Record: `docs/decisions.md` ADR-029.
 
+## Update 2026-10-20 (password recovery RCA + AUTH-04) — IMPLEMENTED / VISUALLY VERIFIED ON STAGING (`93896d0`); real reset NOT E2E tested
+
+Root cause of the header/dashboard text around the lost-password form: logged-in users got the full page chrome on every account endpoint (only guests were exempt), and the post-submit confirmation was WooCommerce's unstyled core template. Fixed with a lost-password-endpoint-only standalone AUTH gate and a Figma AUTH-04 confirmation override; reset processing and e-mail untouched. "Ponovo pošalji mail" links to the request form (it cannot resend in one click): owner decision. Details, state matrix and unverified states: `docs/active/figma-alignment.md` section 46.
+
 ## Update 2026-10-20 (T3b approval pending / AUTH-03) — IMPLEMENTED AND VERIFIED ON STAGING (`4c2d193`), as admin (no real pending user)
 
 Standalone split page per Figma AUTH-03 (`approval-pending.php` on the shared `.login-register--pending` shell, no site header/footer, new icon + photo assets, Figma copy, logout and mailto actions). Separate from T3 (unchanged). Details and the unverified items: `docs/active/figma-alignment.md` section 45. Next backlog item: T4.

@@ -122,6 +122,14 @@ function dreampoint_b2b_restrict_unapproved_access(): void {
         return;
     }
 
+    // Password recovery: a pending customer is logged in right after registration and must be able to use the
+    // set-password link from the e-mail (and request a new one). Only the `lost-password` endpoint is exempt;
+    // it renders just the recovery screens (no dashboard content) and WooCommerce still validates the reset
+    // key, nonces and expiry itself. Every other My Account endpoint, shop, cart and checkout stay gated.
+    if ( dreampoint_b2b_is_password_recovery_page() ) {
+        return;
+    }
+
     if ( ! is_user_logged_in() ) {
         return;
     }
@@ -333,6 +341,7 @@ function dreampoint_b2b_send_approval_email( int $user_id ): void {
         <p>' . __( 'Poštovani,', 'dreampoint-b2b' ) . '</p>
         <p>' . sprintf( __( 'Vaša registracija za %s je potvrđena. Od sada možete pristupiti svim sadržajima i funkcionalnostima.', 'dreampoint-b2b' ), $shop_name ) . '</p>
         <p>' . sprintf( __( 'Svojem računu možete pristupiti na: %s', 'dreampoint-b2b' ), '<a href="' . esc_url( $my_account_url ) . '">' . esc_url( $my_account_url ) . '</a>' ) . '</p>
+        <p>' . sprintf( __( 'Ako još niste postavili lozinku, zatražite poveznicu za njezino postavljanje: %s. Ako ste lozinku već postavili, jednostavno se prijavite.', 'dreampoint-b2b' ), '<a href="' . esc_url( wc_lostpassword_url() ) . '">' . esc_html__( 'Zatraži poveznicu za lozinku', 'dreampoint-b2b' ) . '</a>' ) . '</p>
         <p>' . __( 'Hvala što ste odabrali nas!', 'dreampoint-b2b' ) . '</p>
     ';
 

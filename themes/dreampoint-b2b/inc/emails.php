@@ -18,6 +18,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 add_filter( 'wp_send_new_user_notification_to_admin', '__return_false' );
 
 /**
+ * Human-readable validity of a password setup/reset link ("24 sata"), read from the same WordPress filter
+ * that check_password_reset_key() uses, so the e-mail text follows the real expiry (default DAY_IN_SECONDS).
+ */
+function dreampoint_b2b_password_link_validity_label(): string {
+    $hours = max( 1, (int) round( (int) apply_filters( 'password_reset_expiration', DAY_IN_SECONDS ) / HOUR_IN_SECONDS ) );
+    $last  = $hours % 10;
+    $last2 = $hours % 100;
+
+    // Croatian plural: 1 sat, 2-4 sata, 5+ sati (11-14 are "sati").
+    if ( 1 === $last && 11 !== $last2 ) {
+        $unit = 'sat';
+    } elseif ( $last >= 2 && $last <= 4 && ( $last2 < 12 || $last2 > 14 ) ) {
+        $unit = 'sata';
+    } else {
+        $unit = 'sati';
+    }
+
+    return $hours . ' ' . $unit;
+}
+
+/**
  * Je li postavka WC emaila neprilagođena (prazna ili jednaka WC zadanoj vrijednosti)?
  * Samo tada se primjenjuje hrvatski zadani tekst; administratorova vlastita
  * vrijednost iz WooCommerce → Postavke → Emailovi uvijek ima prednost.

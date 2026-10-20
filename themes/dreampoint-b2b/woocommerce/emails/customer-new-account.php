@@ -48,6 +48,16 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 <?php if ( $password_generated && $set_password_url ) : ?>
 	<?php // Lozinka nije postavljena pri registraciji — native WooCommerce link za postavljanje lozinke. ?>
 	<p><a href="<?php echo esc_url( $set_password_url ); ?>"><?php esc_html_e( 'Kliknite ovdje za postavljanje lozinke.', 'dreampoint-b2b' ); ?></a></p>
+	<p>
+		<?php
+		printf(
+			/* translators: 1: link validity (e.g. "24 sata"), 2: link to the WooCommerce lost-password page */
+			esc_html__( 'Poveznica vrijedi %1$s i može se upotrijebiti samo jednom. Ako istekne, novu možete zatražiti na stranici %2$s.', 'dreampoint-b2b' ),
+			esc_html( dreampoint_b2b_password_link_validity_label() ),
+			'<a href="' . esc_url( wc_lostpassword_url() ) . '">' . esc_html__( 'Lost your password?', 'woocommerce' ) . '</a>' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above.
+		);
+		?>
+	</p>
 <?php endif; ?>
 
 <?php echo $email_improvements_enabled ? '</div>' : ''; ?>

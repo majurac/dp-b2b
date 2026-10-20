@@ -82,6 +82,34 @@ function dreampoint_b2b_is_standalone_auth_page(): bool {
 }
 
 /**
+ * One-time confirmation for a pending customer who has just set a password.
+ *
+ * `woocommerce_customer_reset_password` fires only after WooCommerce has validated the nonce, the reset key
+ * and the new password, so it is a trustworthy success signal (unlike the forgeable `?password-reset=true`).
+ * WooCommerce then redirects to My Account, where the approval gate redirects to /approval-pending before any
+ * notice is printed; the success notice queued here stays in the WooCommerce session and is consumed by
+ * approval-pending.php. Queued only for the logged-in user who owns the reset and is not activated (guests and
+ * approved customers keep the native flow).
+ *
+ * @param WP_User $user User whose password was reset.
+ */
+function dreampoint_b2b_pending_password_set_notice( $user ): void {
+    if ( ! $user instanceof WP_User || get_current_user_id() !== $user->ID ) {
+        return;
+    }
+
+    if ( dreampoint_b2b_user_is_activated( $user->ID ) ) {
+        return;
+    }
+
+    $message = __( 'Lozinka je uspješno postavljena. Vaš račun i dalje čeka odobrenje administratora.', 'dreampoint-b2b' );
+    if ( ! wc_has_notice( $message, 'success' ) ) {
+        wc_add_notice( $message, 'success' );
+    }
+}
+add_action( 'woocommerce_customer_reset_password', 'dreampoint_b2b_pending_password_set_notice' );
+
+/**
  * Preusmjeri logirane ali neodobrene korisnike na /approval-pending.
  */
 function dreampoint_b2b_restrict_unapproved_access(): void {

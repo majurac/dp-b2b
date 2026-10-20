@@ -185,6 +185,13 @@
                 @include bp(md-up) { flex: 1; justify-content: center; }
             }
 
+            // One-time "password set" confirmation (approval-pending.php), the success colour of the notices
+            .lr-pending__notice {
+                margin: 0;
+                font-weight: 600;
+                color: $dp-color-success-strong;
+            }
+
             .lr-pending__icon {
                 width: 144px;
                 height: 144px;

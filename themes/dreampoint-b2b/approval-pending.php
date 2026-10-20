@@ -14,6 +14,15 @@
 $company_logo  = get_field( 'logo', 'option' );
 $support_email = get_field( 'company_email', 'option' );
 
+// One-time "password set" confirmation queued by dreampoint_b2b_pending_password_set_notice(); only the success
+// notices are consumed here (anything else in the WooCommerce session is left untouched).
+$dp_success_notices = function_exists( 'wc_get_notices' ) ? wc_get_notices( 'success' ) : [];
+if ( $dp_success_notices ) {
+    $dp_all_notices = wc_get_notices();
+    unset( $dp_all_notices['success'] );
+    wc_set_notices( $dp_all_notices );
+}
+
 get_header();
 ?>
 
@@ -25,6 +34,9 @@ get_header();
             </div>
             <!-- /#lr-logo -->
             <div class="lr-pending">
+                <?php foreach ( $dp_success_notices as $dp_notice ) : ?>
+                    <p class="lr-pending__notice" role="status"><?php echo wc_kses_notice( $dp_notice['notice'] ?? '' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wc_kses_notice() sanitizes. ?></p>
+                <?php endforeach; ?>
                 <img class="lr-pending__icon" src="<?php echo esc_url( get_template_directory_uri() . '/img/ico/emoji-normal.svg' ); ?>" width="144" height="144" alt="">
                 <div class="lr-intro">
                     <h1><?php esc_html_e( 'Vaš račun trenutno čeka odobrenje administratora', 'dreampoint-b2b' ); ?></h1>

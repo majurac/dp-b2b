@@ -21,6 +21,10 @@ Brands, Contact Info, Featured Brand, Latest, Discounted and Featured Products n
 
 Owner's accordion-open edits (Hero/About/Contact Form/Testimonials) committed; Featured Section and Company Features aligned with the accordion pattern and mirrored into the ACF admin list (DB posts 23510/23516); note-only "Block / Segments Section" group added (23519, the block never had a group); legacy `block == all` groups "About Global" (78) and "Blogs" (81) removed after evidence and backup (`/home/dreampoint.b2b/dp-backups/acf-homepage-admin-20261019/`). Frontend unchanged. Open: Brands, Contact Info, Featured Brand, Latest / Discounted / Featured Products and other groups are still JSON-only. Record: `docs/decisions.md` ADR-029.
 
+## Update 2026-10-20 (password-set confirmation on approval-pending, ADR-032 addendum) — IMPLEMENTED ON STAGING (`01620b6`), logic-level verified only
+
+A pending customer who sets a password now sees a one-time "Lozinka je uspješno postavljena. Vaš račun i dalje čeka odobrenje administratora." on `/approval-pending/` (trigger: `woocommerce_customer_reset_password`, carried by the WooCommerce session, consumed on display, not forgeable by URL). NOT E2E verified (staging bypass on, no pending account, no real reset). Details: `docs/decisions.md` ADR-032 addendum.
+
 ## Update 2026-10-20 (registration / password lifecycle corrections, ADR-032) — IMPLEMENTED ON STAGING (`fd15dd6`), logic-level verified only
 
 Pending customers can now use the `lost-password` endpoint (set-password link, request form, confirmation) through the approval gate; the registration e-mail states the 24 h / single-use validity with a Lost Password link; the approval e-mail explains how to set a password. No reset key is generated at approval. NOT E2E verified (staging `DP_BYPASS_APPROVAL=true`, no real pending account, no e-mail sent). Details, security review and open items: `docs/decisions.md` ADR-032.

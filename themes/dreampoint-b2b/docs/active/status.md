@@ -21,6 +21,10 @@ Brands, Contact Info, Featured Brand, Latest, Discounted and Featured Products n
 
 Owner's accordion-open edits (Hero/About/Contact Form/Testimonials) committed; Featured Section and Company Features aligned with the accordion pattern and mirrored into the ACF admin list (DB posts 23510/23516); note-only "Block / Segments Section" group added (23519, the block never had a group); legacy `block == all` groups "About Global" (78) and "Blogs" (81) removed after evidence and backup (`/home/dreampoint.b2b/dp-backups/acf-homepage-admin-20261019/`). Frontend unchanged. Open: Brands, Contact Info, Featured Brand, Latest / Discounted / Featured Products and other groups are still JSON-only. Record: `docs/decisions.md` ADR-029.
 
+## Update 2026-10-20 (T3 assets) — T3 LOGIN / REGISTRATION COMPLETE / VERIFIED ON STAGING (`1374d10`)
+
+Figma photo (attachment 23547, ACF option `lr_image`, previously empty) and the horizontal wordmark (`img/logos/dreampoint-wordmark.svg`, login + register templates only) integrated and verified at 1440/1280/768/390/360; photo made viewport-high/sticky on tall pages. Details: `docs/active/figma-alignment.md` section 44. Next backlog item: T4.
+
 ## Update 2026-10-20 (T3 login / registration) — LAYOUT AND TYPOGRAPHY VERIFIED ON STAGING (`612efec`), PARTIAL: photo and logo asset pending
 
 Theme SCSS only (`sass/pages/myaccount.scss` + compiled CSS): grey `#f3f4f6` page, 584px column top-aligned, Heading 1 Medium title, 48px logo gap, 14px link/footer styles. `lr_image` is empty and the Figma wordmark logo differs from the ACF `logo` mark: owner data, nothing uploaded. Details: `docs/active/figma-alignment.md` section 43. Next backlog item: T4.

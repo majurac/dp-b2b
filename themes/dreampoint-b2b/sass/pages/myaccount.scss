@@ -1,17 +1,22 @@
 @import '../theme/mixins';
 
+// Figma AUTH-01/02 (1440 wide): page `#f3f4f6`, content column 584px (half of the 1200px container minus 16px) starting
+// 80px below the top, photo column from 50% + 17px to the right edge. The photo is the ACF option `lr_image`
+// (still empty on staging; the template renders `.lr-image` only when set). Tablet/mobile steps are inferred (no frames).
 .login-register {
     position: relative;
+    background: $dp-color-bg-tertiary;
 
     .container {
         display: flex;
         min-height: 100vh;
         align-items: center;
+        @include bp(md-up) { align-items: flex-start; }
 
         .lr-content {
-            @include bp(md-up) { width: calc(50% - 77px); }
+            @include bp(md-up) { width: calc(50% - 16px); }
             height: 100%;
-            padding-top: 70px;
+            padding-top: 80px;
             padding-bottom: 70px;
             @include bp(sm-down) {
                 padding-top: 32px;
@@ -22,9 +27,18 @@
 
             .lr-intro {
                 margin-bottom: 24px;
+                // Figma "Heading/Heading 1/Medium": Petrona 600 64/72, sentence case, tracking 0 (single consumer, so no mixin)
                 h1 {
-                    @include heading-3;
+                    font-family: 'Petrona';
+                    font-style: normal;
+                    font-weight: 600;
+                    font-size: 64px;
+                    line-height: 1.125;
+                    letter-spacing: 0;
+                    text-transform: none;
                     margin-bottom: 8px;
+                    @include bp(lg-down) { font-size: 48px; }
+                    @include bp(sm-down) { font-size: 36px; }
                 }
                 p {
                     @include paragraph-normal;
@@ -54,18 +68,40 @@
             align-items: center;
             justify-content: space-between;
             p { @include paragraph-normal; }
+            // Figma Paragraph S (14/18) checkbox label; "Zaboravili ste lozinku?" = Button text italic (500 italic 14/18, underlined)
+            label span {
+                font-size: 14px;
+                line-height: 18px;
+            }
+            .lost_password {
+                font-size: 14px;
+                line-height: 18px;
+                a {
+                    font-size: 14px;
+                    line-height: 18px;
+                    font-weight: 500;
+                    font-style: italic;
+                    color: $dp-color-text-primary;
+                    text-decoration: underline;
+                }
+            }
         }
 
         .lr-footer {
             text-align: center;
             margin-top: 14px;
 
+            // Figma: 14/18 text, link 700 italic underlined in the primary text colour
             p {
                 @include paragraph-normal;
+                font-size: 14px;
+                line-height: 18px;
                 color: $dp-color-text-primary;
                 a {
-                    color: $dp-color-text-tertiary;
-                    font-weight: 500;
+                    color: $dp-color-text-primary;
+                    font-weight: 700;
+                    font-style: italic;
+                    text-decoration: underline;
                 }
             }
 
@@ -102,7 +138,7 @@
         position: absolute;
         right: 0;
         top: 0;
-        width: 50%;
+        width: calc(50% - 17px);
         height: 100%;
         @include bp(md-down) { display: none; }
         img {

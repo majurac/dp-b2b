@@ -58,6 +58,14 @@ function dreampoint_b2b_current_user_is_staff(): bool {
 }
 
 /**
+ * Is the current request the "Approval Pending" page (template or slug)?
+ * Shares the `.login-register` shell (sass/pages/myaccount.scss) and renders without the site header/footer.
+ */
+function dreampoint_b2b_is_approval_pending_page(): bool {
+    return is_page_template( 'approval-pending.php' ) || is_page( 'approval-pending' );
+}
+
+/**
  * Preusmjeri logirane ali neodobrene korisnike na /approval-pending.
  */
 function dreampoint_b2b_restrict_unapproved_access(): void {

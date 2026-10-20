@@ -376,7 +376,7 @@ function dreampoint_b2b_scripts(): void {
     if ( is_checkout() ) {
         wp_enqueue_style( 'dp-page-checkout', get_template_directory_uri() . '/css/pages/checkout.css', [ 'dp-style' ], dreampoint_b2b_asset_ver( 'css/pages/checkout.css' ) );
     }
-    if ( is_account_page() ) {
+    if ( is_account_page() || dreampoint_b2b_is_approval_pending_page() ) {
         wp_enqueue_style( 'dp-page-myaccount', get_template_directory_uri() . '/css/pages/myaccount.css', [ 'dp-style' ], dreampoint_b2b_asset_ver( 'css/pages/myaccount.css' ) );
     }
     if ( is_wc_endpoint_url( 'order-received' ) || is_wc_endpoint_url( 'view-order' ) ) {

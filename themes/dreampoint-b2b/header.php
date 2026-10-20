@@ -34,6 +34,8 @@ $company_phone = get_field('company_phone', 'option') ?: '';
 
     <?php
         $is_quick_order = dreampoint_b2b_is_quick_order_page();
+        // Figma AUTH-03 is a standalone screen without the site header (like the guest login).
+        $is_approval_pending = dreampoint_b2b_is_approval_pending_page();
     ?>
     <?php if ( $is_quick_order ) : ?>
         <header id="header" class="dp-qo-header" role="banner">
@@ -75,7 +77,7 @@ $company_phone = get_field('company_phone', 'option') ?: '';
             ?>
         </div>
         <div class="inner-page inner-page--quick-order" id="primary-content">
-    <?php elseif ( ! is_account_page() || is_user_logged_in() ) : ?>
+    <?php elseif ( ! $is_approval_pending && ( ! is_account_page() || is_user_logged_in() ) ) : ?>
         <style>@media (max-width: 767px) {body {padding-bottom: 72px;}}</style>
         <div class="menu-overlay" aria-hidden="true"></div>
 

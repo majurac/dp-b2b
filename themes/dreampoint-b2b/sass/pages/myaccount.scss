@@ -156,6 +156,68 @@
         }
     }
 
+    // Figma AUTH-03 "Approval Pending" (approval-pending.php): same split shell, content centred in a full-height
+    // column (logo 128px from the top, icon + message + buttons centred in the remaining space), photo with a bottom
+    // gradient (transparent from 64.4% to rgba(0,0,0,.6) at 91.2%). Below 992px the photo is hidden (existing rule);
+    // the 96px icon below 768px and the wrapping button row are responsive inferences (the design is desktop only).
+    &.login-register--pending {
+        .container .lr-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            @include bp(md-up) {
+                min-height: 100vh;
+                justify-content: space-between;
+                padding-top: 128px;
+                padding-bottom: 128px;
+            }
+
+            #lr-logo { margin-bottom: 32px; @include bp(md-up) { margin-bottom: 0; } }
+
+            .lr-pending {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 16px;
+                width: 100%;
+                max-width: 544px;
+                @include bp(md-up) { flex: 1; justify-content: center; }
+            }
+
+            .lr-pending__icon {
+                width: 144px;
+                height: 144px;
+                @include bp(sm-down) { width: 96px; height: 96px; }
+            }
+
+            .lr-intro {
+                margin-bottom: 8px;
+                h1 {
+                    @include heading-2-medium;
+                    margin-bottom: 8px;
+                }
+                p { color: $dp-color-text-primary; }
+            }
+
+            .lr-pending__actions {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 24px;
+                .button { margin-top: 0; width: auto; }
+            }
+        }
+
+        .lr-image::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 64.427%, rgba(0, 0, 0, 0.6) 91.198%);
+        }
+    }
+
     .register .show-password-input {
         display: flex;
         top: 22px;

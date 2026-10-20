@@ -26,7 +26,8 @@ $company_logo = get_field( 'logo', 'option' ); // alt text only; the horizontal 
             </div>
             <!-- /#lr-logo -->
             <div class="lr-intro">
-                <h1><?php esc_html_e( 'Provjerite svoju e-mail adresu', 'dreampoint-b2b' ); ?></h1>
+                <?php // "e-mail" must not break at the hyphen (Figma wraps after "svoju"). ?>
+                <h1><?php echo wp_kses( sprintf( __( 'Provjerite svoju %s adresu', 'dreampoint-b2b' ), '<span class="lr-nowrap">e-mail</span>' ), [ 'span' => [ 'class' => [] ] ] ); ?></h1>
                 <?php do_action( 'woocommerce_before_lost_password_confirmation_message' ); ?>
                 <p><?php echo esc_html( apply_filters( 'woocommerce_lost_password_confirmation_message', __( 'Poslali smo vam e-mail sa linkom za reset lozinke. Ukoliko ga ne pronađete u narednih nekoliko minuta, provjerite Spam ili Junk folder.', 'dreampoint-b2b' ) ) ); ?></p>
                 <?php do_action( 'woocommerce_after_lost_password_confirmation_message' ); ?>

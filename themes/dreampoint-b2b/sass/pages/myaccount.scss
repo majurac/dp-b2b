@@ -215,6 +215,7 @@
     &.login-register--sent {
         .container .lr-content {
             .lr-intro p { color: $dp-color-text-primary; }
+            .lr-intro h1 .lr-nowrap { white-space: nowrap; }
             .lr-actions {
                 display: flex;
                 flex-wrap: wrap;

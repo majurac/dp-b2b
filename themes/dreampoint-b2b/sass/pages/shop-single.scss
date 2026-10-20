@@ -168,19 +168,40 @@
             @include bp(sm-down) {
                 margin-top: 24px;
             }
+            // Figma PDP-01 (11148:32794): Montserrat 500 / 14/20, -0.154px
             span.product-sku {
                 display: block;
-                @include caption-m;
+                font-family: 'Montserrat';
+                font-style: normal;
+                font-weight: 500;
+                font-size: 14px;
+                line-height: 20px;
+                letter-spacing: -0.154px;
                 color: $dp-color-text-secondary;
                 margin-bottom: 8px;
             }
             .tag + .tag {
                 margin-left: 8px;
             }
+            // Figma PDP-01 (11148:32793): Montserrat 600 / 32/34, sentence case; 28 / 24px steps are inferred (desktop-only frame)
             h1 {
-                @include heading-4;
+                font-family: 'Montserrat';
+                font-style: normal;
+                font-weight: 600;
+                font-size: 32px;
+                line-height: 34px;
+                letter-spacing: 0;
+                text-transform: none;
                 flex-grow: 1;
                 margin-bottom: 20px;
+                @include bp(md-down) {
+                    font-size: 28px;
+                    line-height: 32px;
+                }
+                @include bp(sm-down) {
+                    font-size: 24px;
+                    line-height: 28px;
+                }
             }
 
             .short-description {
@@ -284,17 +305,37 @@
                 display: none;
             }
         }
+        // Figma PDP-01 (11148:32801): Montserrat 500 / 12/20, -0.132px
         .product-mpc {
-            @include caption-m;
+            font-family: 'Montserrat';
+            font-style: normal;
+            font-weight: 500;
+            font-size: 12px;
+            line-height: 20px;
+            letter-spacing: -0.132px;
             color: $text-primary;
             margin-bottom: 4px;
             &__value {
                 font-weight: 500;
             }
         }
+        // Figma PDP-01 (11148:32797): Montserrat 700 / 32/34, sentence case; 28 / 24px steps are inferred
         .price-container {
-            @include heading-4;
             font-family: 'Montserrat';
+            font-style: normal;
+            font-weight: 700;
+            font-size: 32px;
+            line-height: 34px;
+            letter-spacing: 0;
+            text-transform: none;
+            @include bp(md-down) {
+                font-size: 28px;
+                line-height: 30px;
+            }
+            @include bp(sm-down) {
+                font-size: 24px;
+                line-height: 28px;
+            }
             display: flex;
             align-items: center;;
             flex-wrap: wrap;
@@ -323,7 +364,13 @@
         }
         .stock-status {
             margin-bottom: 24px;
-            @include caption-m;
+            // Figma Badge (11148:40627): Montserrat 500 / 10px
+            font-family: 'Montserrat';
+            font-style: normal;
+            font-weight: 500;
+            font-size: 10px;
+            line-height: normal;
+            letter-spacing: 0;
             position: relative;
             padding-left: 11px;
             &:before {
@@ -455,6 +502,17 @@
         .woocommerce-Tabs-panel {
             h2 {
                 display: none;
+            }
+            // Figma PDP-01 description (11148:32814): Montserrat 400 / 14/18; mobile keeps the 16px reading size
+            p {
+                font-weight: 400;
+                font-size: 14px;
+                line-height: 18px;
+                letter-spacing: 0;
+                @include bp(sm-down) {
+                    font-size: 16px;
+                    line-height: 22px;
+                }
             }
         }
     }

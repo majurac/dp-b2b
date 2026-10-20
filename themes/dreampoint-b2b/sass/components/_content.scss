@@ -1133,12 +1133,19 @@ body.woocommerce-account .select2-dropdown {
             display: flex;
             flex-direction: column;
         }
+        // Figma Product card (11148:32832): Montserrat 600 / 14px, sentence case, two visible lines
         .product-title {
-            display: block;
-            @include card;
-            @include bp(lg-down) {
-                font-size: 18px;
-            }
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            overflow: hidden;
+            font-family: 'Montserrat';
+            font-style: normal;
+            font-weight: 600;
+            font-size: 14px;
+            line-height: 21px;
+            letter-spacing: 0;
+            text-transform: none;
             a {
                 color: inherit;
             }
@@ -1170,9 +1177,22 @@ body.woocommerce-account .select2-dropdown {
 
         .price-container {
             display: block;
-            @include card-price;
+            // Figma Product card price: Montserrat 400 / 20/30, no case or tracking effects
+            font-family: 'Montserrat';
+            font-style: normal;
+            font-weight: 400;
+            font-size: 20px;
+            line-height: 30px;
+            letter-spacing: 0;
+            text-transform: none;
+            @include bp(sm-down) {
+                font-size: 16px;
+                line-height: 24px;
+            }
             color: $dp-color-text-primary;
             del {
+                font-size: 12px;
+                line-height: normal;
                 color: $dp-color-text-tertiary;
             }
             ins {
@@ -1186,6 +1206,7 @@ body.woocommerce-account .select2-dropdown {
         // Visible availability message in the card's price slot (the action itself is the icon-only navigation button)
         .out-of-stock-price {
             font-size: 14px;
+            line-height: 26px;
             text-transform: none;
             letter-spacing: 0;
             color: $dp-color-text-secondary;

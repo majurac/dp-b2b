@@ -7,7 +7,7 @@ COMPLETE — see Milestone note below)
 
 ## Update 2026-10-20 (MPC / MOQ / Multipack requirements) - INVESTIGATION CLOSED, NO CODE CHANGE
 
-MPC = confirmed and already implemented (manual ACF, ADR-011). MOQ enforcement = explicitly excluded by the client (DP-B01: no minimums, maximums or steps); the Figma "Minimalna količina narudžbe 1 kom" row has no data source and is an open owner question. Multipack = Figma-only, no client evidence, no Apros field (ADR-028). Matrix, open questions and evidence: `docs/decisions.md` ADR-035. T4 classification unchanged (IMPLEMENTED - PARTIALLY VERIFIED). Next backlog item: T5 (not started).
+MPC = confirmed and already implemented (manual ACF, ADR-011). MOQ enforcement = explicitly excluded by the client (DP-B01: no minimums, maximums or steps); the Figma "Minimalna količina narudžbe 1 kom" row has no data source and is an open owner question. Multipack = Figma-only, no client evidence, no Apros field (ADR-028). [Corrected 2026-10-20 after reconciliation: the client DID request a conditional MOQ/multipack upsell (§5.4, "Ovu opciju bi uključili"), blocked by missing ERP data and a plugin decision; no quantity enforcement is implied. See the ADR-035 addendum.] Matrix, open questions and evidence: `docs/decisions.md` ADR-035. T4 classification unchanged (IMPLEMENTED - PARTIALLY VERIFIED). Next backlog item: T5 (not started).
 
 ## Update 2026-10-20 (T4 PDP and product-card typography) - IMPLEMENTED ON STAGING (`41590fc`), PARTIALLY VERIFIED
 

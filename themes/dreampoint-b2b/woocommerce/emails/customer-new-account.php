@@ -52,7 +52,7 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 		<?php
 		printf(
 			/* translators: 1: link validity (e.g. "24 sata"), 2: link to the WooCommerce lost-password page */
-			esc_html__( 'Poveznica vrijedi %1$s i može se upotrijebiti samo jednom. Ako istekne, novu možete zatražiti na stranici %2$s.', 'dreampoint-b2b' ),
+			esc_html__( 'Poveznica vrijedi %1$s i može se upotrijebiti samo jednom. Ako istekne, novu možete zatražiti ovdje: %2$s', 'dreampoint-b2b' ),
 			esc_html( dreampoint_b2b_password_link_validity_label() ),
 			'<a href="' . esc_url( wc_lostpassword_url() ) . '">' . esc_html__( 'Lost your password?', 'woocommerce' ) . '</a>' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above.
 		);

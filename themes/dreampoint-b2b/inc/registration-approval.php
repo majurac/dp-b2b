@@ -189,21 +189,26 @@ function dreampoint_b2b_restrict_unapproved_access(): void {
 add_action( 'template_redirect', 'dreampoint_b2b_restrict_unapproved_access' );
 
 /**
- * Dodaj kolone "Tvrtka" i "Odobreno" u tablicu korisnika u WP adminu.
+ * Dodaj kolone "Odobreno" i "Bucket" u tablicu korisnika u WP adminu.
+ *
+ * Kolonu "Tvrtka" (b2b_company, sortabilna + filter) registrira b2b-partner-importer;
+ * ovdje se ne dupla. Njegova legacy kolona "Task ID" (b2b_task_id, meta task_id, nije
+ * Apros ID i nitko je ne čita) se samo skriva iz liste — meta i plugin ostaju netaknuti.
  *
  * @param array<string, string> $columns
  * @return array<string, string>
  */
 function dreampoint_b2b_approval_column( array $columns ): array {
-    $columns['billing_company'] = __( 'Tvrtka', 'dreampoint-b2b' );
-    $columns['user_approval']   = __( 'Odobreno', 'dreampoint-b2b' );
-    $columns['dp_bucket']       = __( 'Bucket', 'dreampoint-b2b' );
+    unset( $columns['b2b_task_id'] );
+    $columns['user_approval'] = __( 'Odobreno', 'dreampoint-b2b' );
+    $columns['dp_bucket']     = __( 'Bucket', 'dreampoint-b2b' );
     return $columns;
 }
-add_filter( 'manage_users_columns', 'dreampoint_b2b_approval_column' );
+// Priority 99: mora se izvršiti nakon filtera pluginova koji registriraju b2b_task_id.
+add_filter( 'manage_users_columns', 'dreampoint_b2b_approval_column', 99 );
 
 /**
- * Prikaži sadržaj kolona Tvrtka i Odobreno.
+ * Prikaži sadržaj kolona Odobreno i Bucket.
  *
  * @param string $value
  * @param string $column_name
@@ -212,8 +217,6 @@ add_filter( 'manage_users_columns', 'dreampoint_b2b_approval_column' );
  */
 function dreampoint_b2b_approval_column_content( string $value, string $column_name, int $user_id ): string {
     switch ( $column_name ) {
-        case 'billing_company':
-            return esc_html( get_user_meta( $user_id, 'billing_company', true ) ?: '—' );
         case 'user_approval':
             $approved = get_user_meta( $user_id, 'approved', true );
             return $approved

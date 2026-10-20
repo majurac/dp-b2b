@@ -30,14 +30,13 @@ do_action( 'woocommerce_before_customer_login_form' ); ?>
 <div class="login-register">
     <div class="container">
         <div class="lr-content">
-            <?php if (!empty($company_logo) && !empty($company_logo['url'])) : ?>
+            <?php // Figma AUTH-01/02 horizontal wordmark (theme asset); the ACF `logo` option keeps the round mark elsewhere ?>
             <div id="lr-logo">
                 <a href="<?php echo esc_url(home_url('/')); ?>">
-                    <img src="<?php echo esc_url($company_logo['url']); ?>" alt="<?php echo esc_attr($company_logo['alt'] ?? __('Dreampoint Logo', 'dreampoint-b2b')); ?>">
+                    <img src="<?php echo esc_url(get_template_directory_uri() . '/img/logos/dreampoint-wordmark.svg'); ?>" width="147" height="56" alt="<?php echo esc_attr($company_logo['alt'] ?? __('Dreampoint Logo', 'dreampoint-b2b')); ?>">
                 </a>
             </div>
             <!-- /#llr-logo -->
-            <?php endif; ?>
             <div class="lr-intro">
                 <h1><?php esc_html_e( 'Login', 'woocommerce' ); ?></h1>
                 <p><?php esc_html_e( 'Dobrodošli natrag. Molimo Vas popunite polja da biste se prijavili na Dreampoint B2B.', 'dreampoint-b2b' ); ?></p>

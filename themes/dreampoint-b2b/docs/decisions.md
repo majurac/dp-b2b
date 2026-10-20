@@ -1992,3 +1992,30 @@ The matrix above was written without re-reading §5.4 of the client's response d
 - **What stays correct:** DP-B01 (`project-status-matrix.md`, `erp-discovery-findings.md` "Količine", May-June 2026) records that today there are no minimums, maximums or quantity steps, and that no PDP Figma value ("1 kom") has a data source. §5.4 does not contradict it: it is a conditional upsell that applies only to products that will carry MOQ / multipack data once the ERP provides it. It does not ask for quantity enforcement, and none must be introduced from it. Whether obligatory multiples will ever be enforced (which would change DP-B01) is NOT stated by the client and remains an open question.
 - **Status of §5.4: CONFIRMED CLIENT REQUIREMENT, BLOCKED BY MISSING DATA AND A PLUGIN DECISION (category C).** No implementation, audit or deferral record of §5.4 exists elsewhere in the project (searched `docs/` and Git history); the PDP "Predloženo za vas" row only renders native WooCommerce upsell ids (`$product->get_upsell_ids()`), which is unrelated to MOQ / multipack. Missing: the Apros field(s) for minimum quantity / pack multiple (none in the payload, ADR-028 audit), an importer extension (protected plugin), and the plugin / mechanism for the upsell. Nothing was implemented or invented.
 - **Revised open questions:** (1) which Apros field will carry MOQ / multipack and when; (2) are the multiples display-only or enforced; (3) which plugin or native mechanism the client expects for the upsell (cost is the client's); (4) the two Figma questions on the constant "1 kom" rows and the MPC placement / label stay as listed above.
+
+### Addendum 2026-10-20 (owner decision on the minimal §5.4 approach) — documentation only, nothing implemented
+
+**Status of §5.4: CLIENT-CONFIRMED — MINIMAL TECHNICAL APPROACH SELECTED — IMPLEMENTATION PENDING DATA-SOURCE AND BUSINESS-RULE CONFIRMATION.** The client confirmed the requirement ("Ovu opciju bi uključili", see the previous addendum); the technical approach below is the project owner's direction, NOT a client approval, and is not an authorization to implement now. Evidence base: the read-only discovery of 2026-10-20 (APROS API documentation v1.0 `articleList/get` and variation / attribute endpoints, importer code, `woocommerce/content-single-product.php` upsell block, staging catalog: 0 products with `_upsell_ids`).
+
+**MOQ / Multipack data**
+- APROS is the preferred authoritative source. The documented API payload does not expose MOQ, order multiple, pack size, unit of measure or substitute-article relations (NOT FOUND in the API documentation; ADR-028 audit).
+- Open: whether the client maintains these values in APROS (or intends to introduce them) and whether they can be exposed through the integration.
+- WooCommerce-managed optional informational fields are an acceptable FALLBACK PROPOSAL only if the client explicitly approves that data-ownership model. No field was created and the importer was not touched.
+
+**Conditional upsell (selected simplest approach, not implemented)**
+- Reuse native WooCommerce Linked Products → Upsells (`_upsell_ids`, `$product->get_upsell_ids()`).
+- Reuse the existing PDP block "Predloženo za vas" in `woocommerce/content-single-product.php` and its `content-product` cards; the existing category fallback and current PDP behaviour stay unless a narrowly defined change is explicitly approved.
+- No additional upsell plugin is planned for the basic implementation. No automatic alternative-product matching, no new recommendation engine, no new PDP section unless later justified and approved.
+- The conditional display behaviour is to be defined only after the data source and the exact business rule are confirmed.
+
+**Quantity enforcement:** MOQ and Multipack values are informational in this approach. No minimum-quantity validation, quantity increments, maximum limits or cart/checkout restrictions are introduced; DP-B01 remains in force. Any future enforcement needs a separate explicit business decision.
+
+**Separate requirement:** Reserved Stock Pro (ADR-007) belongs exclusively to cart stock reservation. Its pending purchase is NOT a dependency of §5.4, and the two requirements must not be merged. The unspecified "odgovarajući plugin" in the original §5.4 estimate is not identified in any source.
+
+**Remaining confirmations (not resolved):**
+1. Whether MOQ / Multipack values exist in APROS and can be exposed through the integration.
+2. If not, whether the client approves optional WooCommerce-managed informational fields.
+3. The exact conditional behaviour of the existing "Predloženo za vas" block.
+4. Which upsell products the administrator should link manually.
+
+T5 (Cart Visual Alignment) is independent of this item and not blocked by it.

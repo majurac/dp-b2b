@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-20 (§5.4 minimal approach recorded) - DOCUMENTATION ONLY, NOTHING IMPLEMENTED
+
+§5.4 (MOQ/multipack conditional upsell): client-confirmed; owner selected the minimal technical approach (native Linked Products → Upsells in the existing "Predloženo za vas" block, no plugin, no matching engine, informational values only, DP-B01 unchanged). Implementation pending data-source and business-rule confirmation (APROS availability of MOQ/Multipack, optional WooCommerce fallback fields only with client approval, exact block behaviour, which upsells to link). Independent of the Reserved Stock Pro cart-reservation item and of T5. Record: `docs/decisions.md` ADR-035 addendum (owner decision).
+
 ## Update 2026-10-20 (MPC / MOQ / Multipack requirements) - INVESTIGATION CLOSED, NO CODE CHANGE
 
 MPC = confirmed and already implemented (manual ACF, ADR-011). MOQ enforcement = explicitly excluded by the client (DP-B01: no minimums, maximums or steps); the Figma "Minimalna količina narudžbe 1 kom" row has no data source and is an open owner question. Multipack = Figma-only, no client evidence, no Apros field (ADR-028). [Corrected 2026-10-20 after reconciliation: the client DID request a conditional MOQ/multipack upsell (§5.4, "Ovu opciju bi uključili"), blocked by missing ERP data and a plugin decision; no quantity enforcement is implied. See the ADR-035 addendum.] Matrix, open questions and evidence: `docs/decisions.md` ADR-035. T4 classification unchanged (IMPLEMENTED - PARTIALLY VERIFIED). Next backlog item: T5 (not started).

@@ -29,6 +29,7 @@ if (post_password_required()) {
 $product_id = $product->get_id();
 $product_name = $product->get_name();
 $sku = $product->get_sku();
+$catalog_number = dreampoint_b2b_get_catalog_number($product);
 $is_variable = $product->is_type('variable');
 $is_in_stock = $product->is_in_stock();
 $permalink = get_permalink($product_id);
@@ -181,10 +182,10 @@ $permalink = get_permalink($product_id);
                     <div class="col-md-6">
                         <div class="product-summary <?php echo !$is_in_stock ? 'out-of-stock' : ''; ?>">
                             
-                            <?php if ($sku) : ?>
+                            <?php if ('' !== $catalog_number) : ?>
                                 <span class="product-sku">
-                                    <?php esc_html_e('Šifra artikla', 'dreampoint-b2b'); ?>: 
-                                    <span itemprop="sku"><?php echo esc_html($sku); ?></span>
+                                    <?php esc_html_e('Kataloški broj', 'dreampoint-b2b'); ?>:
+                                    <span class="product-sku__value" data-default="<?php echo esc_attr($catalog_number); ?>"><?php echo esc_html($catalog_number); ?></span>
                                 </span>
                             <?php endif; ?>
                             

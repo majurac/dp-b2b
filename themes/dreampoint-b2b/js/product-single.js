@@ -193,6 +193,11 @@ jQuery(function ($) {
         }
         
         // Note: Image switching is handled by sliders.js (lines 478-494)
+
+        // Catalog number of the selected variation (PHP: dreampoint_b2b_variation_catalog_number)
+        if (variation.dp_catalog_number) {
+            $('.product-sku__value').text(variation.dp_catalog_number);
+        }
     });
     
     /**
@@ -230,6 +235,11 @@ jQuery(function ($) {
         if (window.originalPriceHtml) {
             $('.product-summary .price-container').html(window.originalPriceHtml);
         }
+
+        // Restore the parent's catalog number
+        $('.product-sku__value').each(function() {
+            $(this).text($(this).attr('data-default'));
+        });
     });
     
     // ========================================================================

@@ -122,6 +122,38 @@ function dreampoint_b2b_search_identifier_matches( string $term ): array {
 }
 
 /**
+ * Catalog number ("Kataloški broj") shown to customers: the ERP article code (`_ARTICLE_CODE`) with
+ * priority over the internal WC SKU, which is the fallback only when the article code is empty.
+ * Single rule shared by the PDP, the header live search (inc/ajax-handlers.php) and mirrored by Quick Order.
+ * Client requirement: docs/erp-discovery-findings.md:31; record: docs/decisions.md ADR-034.
+ */
+function dreampoint_b2b_get_catalog_number( WC_Product $product ): string {
+	$code = trim( (string) get_post_meta( $product->get_id(), '_ARTICLE_CODE', true ) );
+
+	return '' !== $code ? $code : (string) $product->get_sku();
+}
+
+/**
+ * Expose the selected variation's own catalog number to the PDP JS (`found_variation` payload).
+ * Variations carry their own ERP `_ARTICLE_CODE`; a variation without one keeps the parent's catalog
+ * number (never the variation SKU, which is the internal variation id).
+ *
+ * @param array                $data      Variation data for the add-to-cart form.
+ * @param WC_Product_Variable  $parent    Parent product.
+ * @param WC_Product_Variation $variation Variation.
+ * @return array
+ */
+function dreampoint_b2b_variation_catalog_number( array $data, $parent, $variation ): array {
+	$code = trim( (string) get_post_meta( $variation->get_id(), '_ARTICLE_CODE', true ) );
+
+	$data['dp_catalog_number'] = '' !== $code ? $code : dreampoint_b2b_get_catalog_number( $parent );
+
+	return $data;
+}
+
+add_filter( 'woocommerce_available_variation', 'dreampoint_b2b_variation_catalog_number', 10, 3 );
+
+/**
  * Popular searches — the configured search terms shown as chips in the header search panel and in
  * Quick Order. Single source: ACF option repeater `search_popular_terms` (sub-field `term`) on the
  * `theme-settings` options page. No hard-coded terms; returns [] when ACF or the option is unavailable.

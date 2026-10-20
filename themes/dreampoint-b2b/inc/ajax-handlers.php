@@ -76,10 +76,7 @@ function dreampoint_b2b_ajax_search_products(): void {
             echo '<div class="product-content">';
             echo '<span class="product-title"><a href="' . esc_url( $permalink ) . '">' . esc_html( $title ) . '</a></span>';
             // Kataloški broj (ERP _ARTICLE_CODE) ima prioritet nad SKU-om u prikazu (docs/erp-discovery-findings.md).
-            $catalog_no = (string) get_post_meta( $product->get_id(), '_ARTICLE_CODE', true );
-            if ( '' === $catalog_no ) {
-                $catalog_no = $product->get_sku();
-            }
+            $catalog_no = dreampoint_b2b_get_catalog_number( $product );
             if ( '' !== $catalog_no ) {
                 echo '<span class="product-sku">' . esc_html__( 'Kataloški broj:', 'dreampoint-b2b' ) . ' ' . esc_html( $catalog_no ) . '</span>';
             }

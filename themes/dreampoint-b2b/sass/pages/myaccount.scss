@@ -242,6 +242,10 @@
         top: 22px;
     }
 
+    // Registration: the "link to set a new password will be sent" notice is a bare <p> (not a .form-row, margin 0)
+    // and touched the next field; give it the same 16px rhythm as the form rows.
+    .register > p:not(.form-row) { margin-bottom: $dp-space-16; }
+
     // Registration country <select>: look (Figma Input field) comes from the shared `div.custom-form` rule in _content.scss
     .register select.dp-reg-country {
         display: block;

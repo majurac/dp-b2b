@@ -23,7 +23,11 @@
                 padding-bottom: 32px;
             }
 
-            #lr-logo { margin-bottom: 24px; }
+            // Figma: 48px between the logo and the headline (24px on mobile, inferred)
+            #lr-logo {
+                margin-bottom: 48px;
+                @include bp(sm-down) { margin-bottom: 24px; }
+            }
 
             .lr-intro {
                 margin-bottom: 24px;

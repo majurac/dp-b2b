@@ -220,66 +220,35 @@ function dreampoint_b2b_save_phone_field($user_id) {
 }
 
 // ============================================================================
-// ADMIN USER PROFILE - Phone Field
+// ADMIN USER PROFILE - Legacy importer fields (oib, task_id)
 // ============================================================================
+// billing_phone u adminu isporučuje samo WooCommerce (Customer billing address).
+// b2b-partner-importer (zaštićen) renderira i sprema legacy "oib" i "task_id" uz
+// polje Zaduženi komercijalist; ta dva retka se samo skrivaju, meta i importer
+// ostaju netaknuti. Aktivni OIB je billing_oib (WooCommerce polje).
 
 /**
- * Add phone field to admin user profile
- * 
- * @param WP_User $user User object being edited
+ * Sakrij retke legacy polja oib i task_id na ekranu uređivanja korisnika.
  */
-add_action('show_user_profile', 'dreampoint_b2b_admin_phone_field');
-add_action('edit_user_profile', 'dreampoint_b2b_admin_phone_field');
-function dreampoint_b2b_admin_phone_field($user) {
-    if (!current_user_can('edit_user', $user->ID)) {
+function dreampoint_b2b_hide_legacy_importer_profile_fields(): void {
+    $screen = get_current_screen();
+    if ( ! $screen || ! in_array( $screen->id, [ 'user-edit', 'profile' ], true ) ) {
         return;
     }
-    
-    $phone = get_user_meta($user->ID, 'billing_phone', true);
-    ?>
-    <h3><?php esc_html_e('Dodatne Informacije', 'dreampoint-b2b'); ?></h3>
-    <table class="form-table">
-        <tr>
-            <th>
-                <label for="billing_phone">
-                    <?php esc_html_e('Telefon', 'dreampoint-b2b'); ?>
-                </label>
-            </th>
-            <td>
-                <input 
-                    type="tel" 
-                    name="billing_phone" 
-                    id="billing_phone" 
-                    value="<?php echo esc_attr($phone); ?>" 
-                    class="regular-text" 
-                    placeholder="<?php esc_attr_e( 'Broj telefona', 'dreampoint-b2b' ); ?>"
-                />
-                <p class="description">
-                    <?php esc_html_e('Broj telefona korisnika za WooCommerce narudžbe.', 'dreampoint-b2b'); ?>
-                </p>
-            </td>
-        </tr>
-    </table>
-    <?php
+    echo '<style>#your-profile tr:has(input#oib),#your-profile tr:has(input#task_id){display:none}</style>';
 }
+add_action( 'admin_head', 'dreampoint_b2b_hide_legacy_importer_profile_fields' );
 
 /**
- * Save phone field from admin user profile
- * 
- * @param int $user_id User ID being updated
+ * Skriveni inputi se ne smiju spremiti: importerov save poziva update_user_meta
+ * kad je ključ u $_POST, što bi kreiralo prazne oib/task_id redove. Prioritet 1
+ * se izvršava prije importerovog callbacka (10); komercijalist ostaje nedirnut.
  */
-add_action('personal_options_update', 'dreampoint_b2b_save_admin_phone_field');
-add_action('edit_user_profile_update', 'dreampoint_b2b_save_admin_phone_field');
-function dreampoint_b2b_save_admin_phone_field($user_id) {
-    if (!current_user_can('edit_user', $user_id)) {
-        return;
-    }
-    
-    if (isset($_POST['billing_phone'])) {
-        $phone = sanitize_text_field($_POST['billing_phone']);
-        update_user_meta($user_id, 'billing_phone', $phone);
-    }
+function dreampoint_b2b_drop_legacy_importer_post_keys(): void {
+    unset( $_POST['oib'], $_POST['task_id'] );
 }
+add_action( 'personal_options_update', 'dreampoint_b2b_drop_legacy_importer_post_keys', 1 );
+add_action( 'edit_user_profile_update', 'dreampoint_b2b_drop_legacy_importer_post_keys', 1 );
 
 // ============================================================================
 // THANK YOU PAGE - Hide Customer Details

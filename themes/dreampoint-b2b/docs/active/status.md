@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-20 (MPC / MOQ / Multipack requirements) - INVESTIGATION CLOSED, NO CODE CHANGE
+
+MPC = confirmed and already implemented (manual ACF, ADR-011). MOQ enforcement = explicitly excluded by the client (DP-B01: no minimums, maximums or steps); the Figma "Minimalna količina narudžbe 1 kom" row has no data source and is an open owner question. Multipack = Figma-only, no client evidence, no Apros field (ADR-028). Matrix, open questions and evidence: `docs/decisions.md` ADR-035. T4 classification unchanged (IMPLEMENTED - PARTIALLY VERIFIED). Next backlog item: T5 (not started).
+
 ## Update 2026-10-20 (T4 PDP and product-card typography) - IMPLEMENTED ON STAGING (`41590fc`), PARTIALLY VERIFIED
 
 Theme SCSS only: PDP title / catalog number / price / stock label / MPC / description and the shared product-card title (two-line clamp) and price aligned to Figma PDP-01 and the Product card; shared mixins untouched. Measured on staging (admin session, read-only) at 1440/768/390 for PDPs and 390/1440 for cards; variation select/clear and ADR-034 verified. Not verified: MPC rows, sale prices, homepage/cart cross-sell/category card contexts (none available or not opened). Corrects the PDP title value in `figma-alignment.md` section 42. Details: `docs/active/figma-alignment.md` section 47. Next backlog item: T5 (not started).

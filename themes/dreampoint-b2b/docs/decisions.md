@@ -1959,3 +1959,27 @@ Status: implemented, staging verified (code `1e35eee` + `bb540a1`). Reference ar
   - **Confirmed:** one HTTP 500 at 12:47:46 CEST on `GET /product/dugacka-vezica-za-bocu/`, with the matching PHP fatal `Call to undefined function dreampoint_b2b_get_catalog_number()` in `woocommerce/content-single-product.php:32` (OLS `error.log`, single occurrence; the only 500 on the vhost that day). The next request at 12:48:57 returned 200 without intervention; later PDP (#19033, #7639) and homepage checks returned 200 with the expected markup; no recurrence or other related errors were found.
   - **Suspected:** mixed code versions during the deploy window (the new template executed while the helper in `inc/product-search.php` was not yet available to that request).
   - **Unconfirmed:** the underlying mechanism. A stale OPcache entry for `product-search.php` is consistent with the evidence (git writes `inc/` before `woocommerce/`, so a partial pull alone would not explain it) but is a hypothesis only; no OPcache log evidence exists. No fix was applied. Practical note: allow ~60 s after a pull before the first verification request.
+
+## ADR-035 — PDP MPC / MOQ / Multipack: requirements reconstruction, no code change (2026-10-20)
+
+**Status:** Investigation closed, no code change. Staging only (no production environment exists). Follow-up to the T4 verification (`docs/active/figma-alignment.md` §47), which found no staging data for these rows.
+
+### Evidence reviewed
+`docs/project-status-matrix.md` DP-B01, `docs/erp-discovery-findings.md` ("Količine"), `docs/stakeholder-question-matrix.md` B-01, `docs/b2b-erp-migration-plan.md`, ADR-011, ADR-028 (ERP data audit), Figma PDP-01 `11148:32726` and PDP-02 `11148:32859`, theme code, and a read-only staging inspection (451 published products, 1,291 variations; the importer plugin was not modified). No meeting notes or client correspondence beyond these documents were found in the project.
+
+### Requirements matrix
+
+| Feature | Client evidence | Data source | Current implementation | Decision | Action |
+|---|---|---|---|---|---|
+| MPC ("Neobvezujuća MPC") | ADR-011: "the business wants a non-binding recommended retail price shown above the B2B price on the PDP only" (2026-09-30; no dated meeting source recorded) | Manually entered ACF `dp_non_binding_mpc` (number, optional). Apros `articleList/get` has no MPC-like field (checked 2026-09-30, 10,186 articles) | Rendered from `dreampoint_b2b_get_non_binding_mpc()`, informational only, never part of price calculation; 0 staging products have a value | **B: confirmed, already implemented** | None. No data entered by Claude; the owner populates the field |
+| MOQ (minimum order quantity) | DP-B01 (confirmed, workshop June 2026) and ERP discovery (May 2026): no minimum, no maximum, no quantity steps; native WooCommerce quantities | None: no `_wc_min_qty`-style meta, no min-quantity mapping in the importer, no plugin enforcing it | Native WooCommerce (`get_min_purchase_quantity()` = 1); no PDP "Minimalna količina narudžbe" row | **E for enforcement (explicitly excluded by the client). D for the display row** | Do not add any minimum or step logic. The Figma row reads "1 kom" in both frames, consistent with "no MOQ", so it is treated as a placeholder |
+| Multipack | None found: appears only in Figma ("Multipack 1 kom"); DP-B01 says no packaging or steps | None: ADR-028 audit found no package/unit/multipack field in the Apros payload and none imported; no staging attribute (`pa_*` = model, boja, dob, dioptrija, volumen) | Not rendered | **D: unresolved; if required, C (needs an Apros field + importer extension, protected plugin)** | None; no mapping invented |
+
+### Findings that remain open (owner decisions, not implemented)
+1. Should the PDP show a constant "Minimalna količina narudžbe: 1 kom" row at all? There is no data behind it and the client said there is no MOQ.
+2. Is "Multipack" a real requirement? If yes, which Apros field carries it, and is it display-only or an order multiple (the latter contradicts DP-B01)?
+3. MPC placement and label: Figma puts the MPC / MOQ / Multipack block below the stock line and above the quantity/add-to-cart controls, labelled "Neobavezujuća preporučena MPC"; ADR-011 placed MPC directly above the price with the label "Neobvezujuća MPC". Left unchanged (layout/copy decision, not part of this investigation).
+4. If MPC should eventually come from Apros, that is the separate investigation already stated in ADR-011.
+
+### Consequences
+No theme, ACF, importer or data change. T4 stays IMPLEMENTED — PARTIALLY VERIFIED: the MPC row and the sale-price scenarios are still not observable on staging because no such data exists.

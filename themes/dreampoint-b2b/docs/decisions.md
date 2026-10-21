@@ -1755,6 +1755,12 @@ The homepage Segment tiles (Lifestyle / Toys / Outdoor, ADR-009 implementation) 
 - DreamPoint: `pa_boja` is a plain `select` (no swatches plugin, no slider/swatch coupling), so the Jekaa technical reason does not apply. Current behaviour: single-colour products (6 on staging: 17718, 17713, 17697, 15883, 15877, 15871) hide the colour row; the colour then appears only in the product description text (e.g. "Latte"), not as a dedicated indicator. No functional problem (variation resolves, add-to-cart works).
 - Recommendation: OWNER DECISION. Keep as is, or keep colour visible. Smallest implementation if wanted: in `dreampoint_b2b_single_option_attribute_args()` return early when `$args['attribute'] === 'pa_boja'` (one line; PHP-only, CSS/JS untouched). Not applied.
 
+### ADR-026 addendum 3 — Quick Order: single-value attributes hidden from the option cell (2026-10-21)
+
+- Quick Order has no attribute selectors: every variation is its own purchasable line (fixed `variation_id`, cart payload is `product_id` + `variation_id` only, attributes are resolved by WooCommerce server-side). The PDP rule therefore maps to display: an attribute with exactly ONE value across all variations of the product (and present on every variation) is omitted from the OPCIJA text of its lines; multi-value attributes stay visible. `pa_boja` stays visible (addendum 2). No selection state, no cart write, no extra REST request.
+- Implementation (plugin `dp-b2b-quick-order` v1.0.35): `assets/src/single-option.js` (`singleValueAttributeKeys`), used by `ProductList.#optionHTML`; `get_variation_details()` adds an additive `key` (taxonomy, e.g. `pa_boja`) to each attribute pair. The line's accessible name keeps all attributes; selected-variation chips are unchanged. Narrowing by filters is not recalculated (same as PDP). Tests: `tests/variations/run-single-option-tests.mjs`.
+- Limitation: a product whose only attributes are all single (one variation) shows just the catalog number in OPCIJA (unless it has `pa_boja`).
+
 ## ADR-027 — Binary stock display on the PDP: owner rule `p.stock { display: none; }` (2026-10-18)
 
 - Business requirement (client, via owner): B2B partners see availability, never the exact quantity.

@@ -358,6 +358,9 @@ class DP_Quick_Order_Product_Query {
 				$term        = get_term_by( 'slug', $value, $taxonomy );
 				$value_label = $term instanceof WP_Term ? $term->name : $value;
 				$attributes[] = [
+					// `key` (e.g. pa_boja) lets the client apply attribute-specific display rules
+					// (single-option hiding, ADR-026 colour exception); additive to the contract.
+					'key'   => $taxonomy,
 					'label' => $attr_label,
 					'value' => $value_label,
 				];

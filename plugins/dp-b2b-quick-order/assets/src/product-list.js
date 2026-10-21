@@ -1,5 +1,7 @@
 'use strict';
 
+import { singleValueAttributeKeys } from './single-option.js';
+
 /**
  * Product list renderer.
  *
@@ -258,14 +260,17 @@ export class ProductList {
      * nothing is hard-coded), joined deterministically in the server's order, then the variation's
      * own catalog number (muted). Falls back to the server label if no attribute pairs exist.
      */
-    #optionHTML(v) {
-        const attrs = (v.attributes ?? []).map(a =>
+    #optionHTML(v, hiddenKeys = new Set()) {
+        // Single-value attributes (ADR-026) are omitted from the visible text only; the line's
+        // variation_id already carries the full attribute identity, and #variationName keeps them.
+        const attrs = (v.attributes ?? []).filter(a => !hiddenKeys.has(a.key)).map(a =>
             `<span class="dp-qo-option__attr"><span class="dp-qo-option__label">${escHtml(a.label)}</span> <strong class="dp-qo-option__value">${escHtml(a.value)}</strong></span>`
         ).join(' <span class="dp-qo-option__sep" aria-hidden="true">·</span> ');
         const skuLabel = this.#config.i18n?.skuLabel ?? 'Kataloški broj:';
         // The variation's own catalog number stays visible (muted, compact); its "Kataloški broj"
         // label is kept for tooltip and assistive technology so the narrow OPCIJA column stays tidy.
-        return `${attrs || `<span class="dp-qo-option__attr">${escHtml(v.label)}</span>`}<small class="dp-qo-sku dp-qo-option__code" title="${escAttr(`${skuLabel} ${v.catalog_number}`)}"><span class="dp-qo-sr">${escHtml(skuLabel)} </span>${escHtml(v.catalog_number)}</small>`;
+        const fallback = (v.attributes ?? []).length ? '' : `<span class="dp-qo-option__attr">${escHtml(v.label)}</span>`;
+        return `${attrs || fallback}<small class="dp-qo-sku dp-qo-option__code" title="${escAttr(`${skuLabel} ${v.catalog_number}`)}"><span class="dp-qo-sr">${escHtml(skuLabel)} </span>${escHtml(v.catalog_number)}</small>`;
     }
 
     /** Accessible name of one variation line: parent name + its attribute pairs. */
@@ -308,6 +313,7 @@ export class ProductList {
             return;
         }
 
+        const hiddenKeys = singleValueAttributeKeys(variations);
         const variationAttributes = [];
         const lines = variations.map(v => {
             const rowKey     = `${productId}_${v.id}`;
@@ -323,7 +329,7 @@ export class ProductList {
          data-row-key="${rowKey}"
          data-price="${escAttr(v.price)}"
          data-variation-label="${escAttr(v.label)}">${this.#lineCellsHTML({
-        optionHtml: this.#optionHTML(v),
+        optionHtml: this.#optionHTML(v, hiddenKeys),
         stockHtml:  this.#stockHTML(v.stock_status),
         priceHtml:  v.price_html ?? '',
         qtyHtml:    this.#qtyControlsHTML(rowKey, disableQty, this.#variationName(parentName, v)),

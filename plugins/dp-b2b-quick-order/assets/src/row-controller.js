@@ -91,8 +91,11 @@ export class RowController {
             if (e.target.matches('.dp-qo-qty')) this.#onQtyInput(e.target);
         });
         this.#tbody.addEventListener('click', e => {
-            if (e.target.matches('.dp-qo-qty-minus')) this.#onQtyButton(e.target, -1);
-            else if (e.target.matches('.dp-qo-qty-plus'))  this.#onQtyButton(e.target, +1);
+            // closest(), not matches(): the buttons contain an <svg>, so a real click's target is the
+            // nested <svg>/<path>, never the button itself. Scoped to the table body.
+            const btn = e.target.closest?.('.dp-qo-qty-minus, .dp-qo-qty-plus');
+            if (!btn || !this.#tbody.contains(btn)) return;
+            this.#onQtyButton(btn, btn.classList.contains('dp-qo-qty-plus') ? +1 : -1);
         });
     }
 

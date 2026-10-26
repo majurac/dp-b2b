@@ -430,11 +430,10 @@ $cart-shadow-md: 0 1px 3px rgba(10, 14, 21, 0.1), 0 5px 12px rgba(10, 14, 21, 0.
                     // Coupon: functionality unchanged, only aligned with the theme controls (.custom-form tokens).
                     .woocommerce-coupon-form {
                         .form-group  {
+                            // Stacked: the summary column is only 292px wide at 1440.
                             display: flex;
+                            flex-direction: column;
                             gap: 8px;
-                            @include bp(sm-down) {
-                                flex-direction: column;
-                            }
                             input[type="text"] {
                                 flex-grow: 1;
                                 min-width: 0;
@@ -451,9 +450,8 @@ $cart-shadow-md: 0 1px 3px rgba(10, 14, 21, 0.1), 0 5px 12px rgba(10, 14, 21, 0.
                             }
                             button[type="submit"] {
                                 @include button-outline('m');
-                                width: auto;
+                                width: 100%;
                                 min-width: 0;
-                                flex-shrink: 0;
                             }
                         }
                     }

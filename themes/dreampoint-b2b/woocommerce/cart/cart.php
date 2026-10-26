@@ -31,6 +31,14 @@ do_action( 'woocommerce_before_cart' ); ?>
 					    <div>
 					        <?php do_action( 'woocommerce_before_cart_contents' ); ?>
 
+					        <div class="cart-table-header">
+					            <span class="col-product"><?php esc_html_e( 'Proizvod', 'dreampoint-b2b' ); ?></span>
+					            <span><?php esc_html_e( 'SKU', 'dreampoint-b2b' ); ?></span>
+					            <span><?php esc_html_e( 'Jedinična', 'dreampoint-b2b' ); ?></span>
+					            <span><?php esc_html_e( 'Količina', 'dreampoint-b2b' ); ?></span>
+					            <span><?php esc_html_e( 'Ukupno', 'dreampoint-b2b' ); ?></span>
+					        </div>
+
 					        <?php
 					        foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
 					            $_product   = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
@@ -117,6 +125,15 @@ do_action( 'woocommerce_before_cart' ); ?>
 					                    	}
 					                    	?>
 					                    	</div>
+						                    	<?php
+						                    	// SKU column = APROS ERP article code (`_ARTICLE_CODE`) of the cart unit itself: the variation for
+						                    	// variable products, the product for simple ones. No parent or WC SKU fallback (T5, ADR-034 data model).
+						                    	$article_code = trim( (string) get_post_meta( $_product->get_id(), '_ARTICLE_CODE', true ) );
+						                    	?>
+						                    	<div class="product-sku" data-title="<?php esc_attr_e( 'SKU', 'dreampoint-b2b' ); ?>">
+						                    		<span class="label"><?php esc_html_e( 'SKU', 'dreampoint-b2b' ); ?></span>
+						                    		<?php echo '' !== $article_code ? esc_html( $article_code ) : '&mdash;'; ?>
+						                    	</div>
 					                    	<div class="product-footer">
 					                    		<div class="product-quantity" data-title="<?php esc_attr_e( 'Quantity', 'woocommerce' ); ?>">
 					                    		    <div class="qty-number">
@@ -225,11 +242,11 @@ do_action( 'woocommerce_before_cart' ); ?>
 	
 				<div class="cart-collaterals">
 					<div class="cart_totals">
-						<h3><?php esc_html_e( 'Ukupna vrijednost košarice', 'dreampoint-b2b' ); ?></h3>
+						<h3><?php esc_html_e( 'Sažetak narudžbe', 'dreampoint-b2b' ); ?></h3>
 	                    <table class="shop_table shop_table_responsive">
 
 						    <tr>
-						        <td><?php esc_html_e( 'Ukupno', 'woocommerce' ); ?></td>
+						        <td><?php esc_html_e( 'Međuzbroj', 'dreampoint-b2b' ); ?></td>
 						        <td>
 						            <div class="price-container">
 						                <?php echo WC()->cart->get_cart_subtotal(); // Already formatted ?>
@@ -291,11 +308,12 @@ do_action( 'woocommerce_before_cart' ); ?>
 						</table>
 
 	                    <div class="total-area">
-	                        <span class="total-label"><?php esc_html_e( 'Za platiti', 'dreampoint-b2b' ); ?></span>
+	                        <span class="total-label"><?php esc_html_e( 'Ukupno', 'dreampoint-b2b' ); ?></span>
 	                        <span class="total-value"><?php wc_cart_totals_order_total_html(); ?></span>
 	                    </div>
 	                    <!-- /.total-area -->
-	                    <a href="<?php echo esc_url( wc_get_checkout_url() ); ?>" class="button button--xl proceed-to-checkout"><?php esc_html_e( 'Idi na naplatu', 'woocommerce' ); ?></a>
+	                    <a href="<?php echo esc_url( wc_get_checkout_url() ); ?>" class="button button--xl proceed-to-checkout"><?php esc_html_e( 'Kreni na narudžbu', 'dreampoint-b2b' ); ?></a>
+	                    <p class="cart-shipping-note"><?php esc_html_e( 'Dostava se obračunava prema vašoj zadanoj adresi. Adresu možete promijeniti u checkoutu.', 'dreampoint-b2b' ); ?></p>
 	                    <!-- /.button button--xl -->
 					</div>
 					<!-- /.cart_totals -->

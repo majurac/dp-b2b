@@ -726,7 +726,7 @@ Scope: desktop 1280 + mobile 390/360 on staging (admin session for authenticated
 | P2 | T2 Homepage lower blocks (brands/featured/features/contact) - IMPLEMENTED 2026-10-19, STAGING VERIFIED (`e837c96`, completed by `f68b0f9`): headings, Quick Order panel, USP row, contact card, caption and optional commercialist photo implemented; populated-photo state now VERIFIED on the persisted staging record (temporary dummy portrait, see addendum below); USP icon order is a content dependency | theme block templates + SCSS | 6 |
 | P2 | T3 Auth split layout (grey panel, logo, title case) + owner uploads `lr_image` - LAYOUT/TYPOGRAPHY DONE 2026-10-20, STAGING VERIFIED (`612efec`, section 43); `lr_image` and wordmark integrated 2026-10-20 (section 44): COMPLETE | theme SCSS/template + owner data | 3 |
 | P2 | T4 PDP + product-card typography - IMPLEMENTED 2026-10-20, STAGING PARTIALLY VERIFIED (`41590fc`, section 47); PDP details beyond typography (gallery arrows, share row, USP strip) not part of T4 | theme SCSS only | 4 |
-| P2 | T5 Cart layout restyle (table-like, existing data only) | theme `woocommerce/cart` override | 4 |
+| P2 | T5 Cart layout restyle (table-like, existing data only) - IMPLEMENTED 2026-10-26, DEPLOYED TO STAGING (`8d49539`), BROWSER VERIFICATION NOT PERFORMED (section 48) | theme `woocommerce/cart` override + `cart.scss` | 5 |
 | P2 | T6 i18n: English page titles, WC strings, registration labels | DB content + translations, owner input | 3 |
 | P3 | T7 My Account sidebar (icon list), info card, order-number link | theme SCSS | 3 |
 | P3 | T8 USP strip on PDP, search placeholder copy | theme | 2 |
@@ -877,3 +877,28 @@ Colours kept on the existing tokens (`#0d121c`, `#384250`); Figma's card title f
 - Cart page view: line-item title (`cart.scss`) unchanged; no cross-sells on it.
 
 **NOT verified / limitations:** MPC row (no product with a Neobvezujuća MPC value found among the pages scanned); sale (`del`/`ins`) cards and PDP sale price (none found on staging pages 1-12 of the shop); homepage product sections (the homepage currently renders no `.product-item`); cart cross-sells (cart has none); category archive listing (same `content-product.php`, not opened separately); a variable product PDP with a long description at 768; real tablet widths for cards (768 measured only on the PDP); the in-stock label on the variable PDP is only injected after a variation is chosen (pre-existing). The 28/24px PDP steps and 16px card price on mobile are implementation decisions. Out of T4 (unchanged): "Predloženo za vas" heading text, USP strip typography (T8), gallery arrows, share row, "Na stanju" on cards (ADR-016), WBW/Quick Order. Observation, not changed: on `carape-blooming-tulip` the quantity box showed no visible number in the screenshot (T4 changes no quantity rule).
+
+
+## 48. T5 Cart visual alignment (2026-10-26, code `8d49539`, DEPLOYED TO STAGING; NOT BROWSER-VERIFIED)
+
+**Figma:** CART-02 `11148:38411` (Cart card `11200:39751`, table `11206:40339`, summary `11148:38564`), CART-01 `11148:37269` (empty cart, metadata only), 1440 px only. CART-03..05 and the reservation banner/timer, "Oznaci sve"/"Ukloni oznacene" checkboxes and the item counter are out of scope (ADR-007, bulk actions, new data).
+
+**Owner decisions (2026-10-26):** G1 cart column label stays "SKU" and its value is the APROS ERP article code; the PDP "Kataloški broj" is unchanged. G2 coupon kept, restyled only. G3 empty cart aligned to Figma plus a Quick Order action.
+
+**Files:** `woocommerce/cart/cart.php`, `woocommerce/cart/cart-empty.php`, `sass/pages/cart.scss`, generated `css/pages/cart.css` (the only generated file that changed; `npm run build:pages`). No JS, plugin, PDP or data change.
+- **Rows (>=768px):** CSS grid on `.cart_item` (thumbnail 64 | product | SKU 88 | unit price | quantity | line total | remove 24; gap 16); `.product-rest/.product-footer/.product-total` are `display: contents`, so the existing markup, the duplicate desktop/mobile name blocks, remove link and hooks stay. New header row `.cart-table-header` (10/600 uppercase, `#fcfcfd`, radius 4) and new `.product-sku` cell. Below 768px the previous stacked card layout is kept; the SKU cell shows an inline "SKU" label there.
+- **SKU resolution:** `get_post_meta( $_product->get_id(), '_ARTICLE_CODE', true )` on the cart unit (the variation product for variable items, the product itself for simple ones), trimmed, escaped; empty value renders an em dash. Deliberately NO parent fallback and NO WC SKU fallback (owner rule). This is stricter than `dreampoint_b2b_get_catalog_number()` / the PDP variation rule of ADR-034 (parent number when a variation has none); staging data had 0 variations without a code at ADR-034 time.
+- **Quantity:** same `.number/.minus/.plus/input.qty` contract (`js/cart-quantity.js` untouched), restyled to Figma (24px high, radius 8, 1px `#d2d6db`, 24px arrow cells, 28px value, spinners hidden).
+- **Summary:** card `#f3f4f6`, radius 8, padding 16, shadow card/md (`0 1px 3px .1 + 0 5px 12px .12`, local `$cart-shadow-md`); heading "Sažetak narudžbe" (uppercase 12/600), rows 12/500 + 12/700, "Međuzbroj"/"Ukupno" labels, button "Kreni na narudžbu" (XL, margin-top 64), Figma shipping note (10px italic). Totals, shipping and tax rows remain the native dynamic WooCommerce output.
+- **Coupon:** same form, input name, hooks; input 40px, radius 8, `#fcfcfd`; button now `button-outline('m')`.
+- **Empty cart:** Figma text (when the Quick Order page resolves via `dreampoint_b2b_get_quick_order_url()`, otherwise the old text), "Posjeti trgovinu" kept, new `button--xl button--outline` "Quick Order" (only rendered if the helper returns a URL), `.nf-actions` flex gap 24. The Figma 144px emoji icon was not reproduced; the existing `face-sad.svg` is kept.
+- **Layout:** the summary sits beside the table only at >=1200px (308px column); below that it stacks under the table (previously side-by-side from 992px). Old `max-width: 688px` of the form removed.
+- **Accepted deviations:** Figma SKU colour `#1e1e1e` / Inter replaced by the theme text colour and Montserrat; quantity value 15.4px kept literally; line-item variation text 12px tertiary (not in Figma); cross-sells untouched (not in Figma).
+
+**Local checks:** `php -l` on both templates OK (PHP 8.3); `npm run build:pages` produced a diff only in `css/pages/cart.css`; no local browser run.
+
+**Staging:** backup of the four files in `/home/dreampoint.b2b/dp-backups/t5-cart-20261026/`; `git pull` as `dream9399` fast-forwarded `5e61a33` -> `8d49539`; server HEAD equals local; no root-owned files; the served `cart.css` is byte-identical to the local file (HTTP 200).
+
+**Browser verification: NOT TESTED.** Both Playwright sessions (isolated and extension) were unauthenticated: `/cart/` redirected to `/my-account/`; no login was attempted (rule). Not tested: simple/variation rows, ERP code under "SKU", quantity control, summary, coupon, empty cart, Quick Order link, console and overflow at 1440/1024/768/390. No cart or checkout mutation was performed.
+
+**Risks to check first:** (1) the grid with `display: contents` on rows with long names/variation data at 768-1199; (2) mobile stacked rows with the new SKU cell; (3) coupon button as outline M; (4) `.cart_totals` inside `<table>` rows after the td padding reset.

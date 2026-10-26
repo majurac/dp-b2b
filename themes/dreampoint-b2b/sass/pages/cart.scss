@@ -4,7 +4,7 @@
 // Columns: thumbnail | product | SKU | unit price | quantity | line total | remove.
 // The row wrappers (.product-rest/.product-footer/.product-total) become `display: contents`
 // so the existing markup stays intact and every cell is a grid item of .cart_item.
-$cart-columns: 64px minmax(0, 1fr) 112px 80px 80px 80px 24px;
+$cart-columns: 64px minmax(0, 1fr) 128px 80px 80px 80px 24px;
 $cart-column-gap: 16px;
 // Figma effect card/md (CART-02 summary card).
 $cart-shadow-md: 0 1px 3px rgba(10, 14, 21, 0.1), 0 5px 12px rgba(10, 14, 21, 0.12);

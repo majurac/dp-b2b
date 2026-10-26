@@ -297,9 +297,10 @@ $cart-shadow-md: 0 1px 3px rgba(10, 14, 21, 0.1), 0 5px 12px rgba(10, 14, 21, 0.
                     column-gap: $cart-column-gap;
                     align-items: center;
                     padding: 8px;
+                    // `.product-footer .product-total` matches the specificity of the flex rule above.
                     .product-rest,
                     .product-footer,
-                    .product-total {
+                    .product-footer .product-total {
                         display: contents;
                     }
                     .product-thumbnail {

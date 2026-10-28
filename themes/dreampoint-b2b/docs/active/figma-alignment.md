@@ -727,7 +727,7 @@ Scope: desktop 1280 + mobile 390/360 on staging (admin session for authenticated
 | P2 | T3 Auth split layout (grey panel, logo, title case) + owner uploads `lr_image` - LAYOUT/TYPOGRAPHY DONE 2026-10-20, STAGING VERIFIED (`612efec`, section 43); `lr_image` and wordmark integrated 2026-10-20 (section 44): COMPLETE | theme SCSS/template + owner data | 3 |
 | P2 | T4 PDP + product-card typography - IMPLEMENTED 2026-10-20, STAGING PARTIALLY VERIFIED (`41590fc`, section 47); PDP details beyond typography (gallery arrows, share row, USP strip) not part of T4 | theme SCSS only | 4 |
 | P2 | T5 Cart layout restyle (table-like, existing data only) - CLOSED / VERIFIED ON STAGING 2026-10-26 (`8d49539`, fixes up to `0a150e8`); NOT deployed to production (none exists); non-blocking verification gaps listed in section 48 | theme `woocommerce/cart` override + `cart.scss` | 5 |
-| P2 | T6 i18n: English page titles, WC strings, registration labels | DB content + translations, owner input | 3 |
+| P2 | T6 i18n: English page titles, WC strings, registration labels - PREFLIGHT COMPLETE 2026-10-28, OWNER INPUT REQUIRED, not implemented (section 49) | DB content + translations, owner input | 3 (preliminary 4, see section 49) |
 | P3 | T7 My Account sidebar (icon list), info card, order-number link | theme SCSS | 3 |
 | P3 | T8 USP strip on PDP, search placeholder copy | theme | 2 |
 | plugin | T9 WBW filter sidebar skin (theme-level override) | needs explicit approval | 5 |
@@ -923,3 +923,46 @@ Colours kept on the existing tokens (`#0d121c`, `#384250`); Figma's card title f
 **Final SKU spacing adjustment (2026-10-26, `0a150e8`, staging only):** `$cart-columns` in `sass/pages/cart.scss` changed the SKU track from `112px` to `128px` (`64px minmax(0, 1fr) 128px 80px 80px 80px 24px`); the name column absorbs the 16px. The SKU-value-to-unit-price gap grew from about 17px to 33px. Measured on staging at 1440, 1300, 1024 (header cells and row cells x-aligned: SKU 541/413/506, unit 685/557/650) and 390 (stacked card layout unchanged); no horizontal overflow. Only `sass/pages/cart.scss` and the generated `css/pages/cart.css` changed: no PHP markup, JavaScript or WooCommerce business-logic change. Backup `/home/dreampoint.b2b/dp-backups/t5-cart-20261026-sku/`; server HEAD equalled local (`0a150e8`), no root-owned files.
 
 **T5 status: CLOSED / VERIFIED on staging.** The NOT TESTED items above (coupon application, sale price, long names, real-pointer clicks, remove-link focus ring, pixel diff, full 1200-1399 range) and the stale header cart badge observation are non-blocking and remain open as documented. Staging is the only remote environment; nothing was or will be deployed to production for this task.
+
+
+## 49. T6 Croatian localization preflight (2026-10-28, READ-ONLY, PREFLIGHT COMPLETE - OWNER INPUT REQUIRED; no implementation, nothing changed)
+
+Baseline: `master`, `39eb03e`, clean. Scope was code-level only: no staging or server access, no database inspection, no browser run, no file other than this documentation changed. The local environment has no `wp-content/languages` directory (locale `en_US`), so the staging Croatian packages (ADR-019: `hr` core + WooCommerce) could not be inspected. Evidence types below are kept separate.
+
+**Confirmed from code (read-only):**
+- The theme has no `hr` `.po/.mo`; `languages/` holds only `dreampoint-b2b.pot` and `plugins/silkypress-input-field-block-hr.{po,mo}`. Theme strings in the `dreampoint-b2b` domain already use Croatian msgids, so they render Croatian regardless of locale.
+- About 91 string calls in 19 templates use the `woocommerce` text domain (e.g. `form-register.php` "First Name" / "Last Name" lines 51/57, "Register" / "Login" H1 lines 39/41, "Lost your password?"). They are Croatian only if the exact msgid exists in the WooCommerce `hr` pack.
+- Page H1, breadcrumb and `<title>` text come from `get_the_title()` / `woocommerce_page_title()` (`header.php` around lines 399-407): WordPress page titles are DB content, not gettext translations. Menus are `wp_nav_menu` DB content.
+- The header and empty-cart "Quick Order" button text is a theme string (`header.php:258`, `cart-empty.php:42`). Quick Order plugin msgids are Croatian; its WBW sidebar strings and the WBW filter plugins (no `hr` language file found in `woo-product-filter` / `woofilter-pro`) are plugin output.
+- "Tax" does not occur in the theme; its source is not confirmed.
+
+**Previously reported, NOT newly verified (audit section 42/43):** English page titles "My account", "Cart", "Shop", "Quick Order"; guest login/registration "First Name / Last Name" (the only guest-context observation, hence the only reliably untranslated item); WC strings such as "Tax"; WBW "Sort By / In Stock / Search categories / CLEAR".
+
+**Hypotheses (unverified):**
+- The staging admin user (ID 1) intentionally has locale `en_US` (ADR-019) and the section 42 audit used an admin session for authenticated pages; WordPress honours the user locale on the frontend, so part of the reported English WooCommerce strings may be caused by the admin locale rather than missing packs.
+- "First Name" (capital N) is probably absent from the WooCommerce `hr` pack (WooCommerce uses "First name").
+
+**Constraints:** keep slugs `/cart/`, `/shop/`, `/my-account/`, `/quick-order/` unchanged; translating a title does not authorise a slug change. Do not change the admin user's locale; do not add WPML or another translation plugin; WBW plugin translations are outside T6 (belong to T9 and need explicit approval); Quick Order branding stays unchanged unless separately approved; email localization stays tracked in ADR-019 (production transactional email task).
+
+**Proposed Croatian terminology - NOT APPROVED, recommendations only:**
+
+| Current | Proposed |
+|---|---|
+| First Name | Ime |
+| Last Name | Prezime |
+| Login (H1) | Prijavi se (Figma AUTH-01) |
+| Register (H1) | Kreiraj račun (Figma AUTH-02) |
+| My account | Moj račun |
+| Cart | Košarica |
+| Shop | Trgovina |
+| Quick Order | keep unchanged |
+
+**Minimal plan (not started):** (1) verify the `hr` packs as a guest; (2) move unpackaged `woocommerce`-domain strings (registration labels, auth H1) to the `dreampoint-b2b` domain with Croatian msgids in `form-register.php` / `form-login-single-page.php`; (3) page titles / menu labels edited in wp-admin with unchanged slugs; (4) plugin strings only as separate approved work. Regression: login, registration, my-account, cart, checkout and thank-you as guest and as a regular customer; URLs and routing unchanged.
+
+**Estimate:** existing 3 h; preliminary 4 h (extra hour for guest/customer verification), subject to staging verification and final scope approval.
+
+**Unresolved (nothing here is approved):**
+1. Owner confirmation of the terminology above.
+2. Authorisation to modify WordPress page titles and, if needed, menu labels without changing slugs.
+3. Authorisation for a focused read-only staging verification of guest-visible strings and the Croatian language packages.
+4. Confirmation of the real source of "Tax" and other WooCommerce strings before any translation-behaviour change.

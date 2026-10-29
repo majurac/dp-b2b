@@ -407,6 +407,32 @@ add_action( 'init', function (): void {
 }, 20 );
 
 /**
+ * JS (block checkout) translations for the same plugin. Its scripts call
+ * wp_set_script_translations() but the plugin ships no `hr` JSON, so strings
+ * rendered in JS (e.g. " (optional)") stay English. Point only that text domain
+ * at our own per-locale JSON in languages/plugins/; a missing file is a no-op.
+ *
+ * @param string|false $file   Translation JSON path WordPress resolved.
+ * @param string       $handle Script handle.
+ * @param string       $domain Text domain.
+ * @return string|false
+ */
+add_filter(
+	'load_script_translation_file',
+	static function ( $file, string $handle, string $domain ) {
+		if ( 'silkypress-input-field-block' !== $domain ) {
+			return $file;
+		}
+
+		$json = get_template_directory() . '/languages/plugins/silkypress-input-field-block-' . determine_locale() . '.json';
+
+		return is_readable( $json ) ? $json : $file;
+	},
+	10,
+	3
+);
+
+/**
  * PDP shows only the native WooCommerce Description tab (long description,
  * `post_content`). WooCommerce registers it only when the product has a long
  * description, so an empty description leaves no tabs and the template renders

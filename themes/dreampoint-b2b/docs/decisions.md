@@ -2048,6 +2048,56 @@ Open questions: (a) Does the live shop run WooCommerce and can it export users? 
 
 Estimate after the source format is confirmed: 6 h (dry-run reconciliation report 2 h, idempotent import with rollback list 3 h, staging sample test 1 h). Excludes client/APROS waiting time.
 
-Draft client request (Croatian, NOT sent):
+### ADR-036 addendum (2026-10-29, follow-up read-only verification and documentation handoff)
 
-> Poštovani, za prebacivanje postojećih korisnika s trenutne B2B web trgovine na novi DreamPoint B2B sustav trebamo: 1) izvoz korisničkih računa iz trenutne trgovine (CSV ili Excel) sa stupcima: e-mail, ime, prezime, tvrtka, OIB, šifra partnera u Aprosu (ako postoji), telefon, adresa računa, adrese dostave, država, datum registracije i status (aktivan/neaktivan); lozinke nam nisu potrebne, korisnici će lozinku postaviti sami putem poveznice za obnovu lozinke; 2) popis koje račune treba prenijeti (npr. samo aktivne); 3) za svakog kupca, ako je poznato, koji dio kataloga smije vidjeti; 4) potvrdu da je u Aprosu za sve kupce koji se prenose postavljeno `B2B KUPAC = DA` i je li polje e-mail partnera ujedno B2B e-mail; 5) odgovor ZGData-a na dva pitanja o `partnerList/get` (vraća li samo partnere s `B2B KUPAC = DA` i nestaje li partner kada se postavi na NE; je li vraćeni e-mail B2B e-mail); 6) datum od kojeg smijemo korisnicima poslati e-mail za postavljanje lozinke. Hvala.
+**Status labels:** N1 COMPLETE / VERIFIED ON STAGING. N2 DIAGNOSIS COMPLETE / EXTERNAL DATA DEPENDENCY OPEN. N3 MIGRATION PLAN READY / AWAITING CLIENT AND ZGDATA INPUT (nothing implemented). N4 COMPLETE / VISUALLY VERIFIED ON STAGING. N5 COMPLETE / VERIFIED ON STAGING. T5 and T6 stay CLOSED.
+
+**N2 refinement (supersedes the net-versus-VAT speculation above).** The documented B2B `articleList/get` response (ADR-011 record, Apros sandbox, 2026-09-30, 10,186 articles) lists exactly `articleId, code, title, barcode, wholesalePrice, vatRate, stock, classification, virtualArticle, visible, brandId, isNew, isSpecialOffer, description`. It does not contain `salePriceWithVat`, which `uncle-dev-importer` reads (`$raw['salePriceWithVat'] ?? null`, `AprosProvider.php`), so on that sample the importer's sale price is always null. `isNew` and `isSpecialOffer` are present but no importer, `apros-pricing` or theme code consumes them. Qualifications: the sample is historical (September 2026) and no new APROS request was made (a bounded lookup is not documented for `articleList/get`, so the safety gate for a live call was not met); it is NOT established that APROS never supplies promotional prices; `isSpecialOffer` is NOT sufficient to derive a WooCommerce sale price (its meaning, and whether an amount exists anywhere, are unknown); the importer is NOT declared defective without a confirmed API contract (the field may be a legacy B2C assumption). Dependency: ZGData must say where the B2B promotional price amount is exposed and what `isSpecialOffer` means (Draft A below). Partner Rabat 1 stays distinct from native WooCommerce sale pricing and is never listed on `/akcija/`.
+
+**HTTP 500 on `/cart/` (operational finding, 2026-10-29).**
+- Confirmed: `GET /cart/` returned HTTP 500 at 12:28:16 +0100. The LSWS `error.log` recorded `PHP Fatal error: Uncaught Error: Call to undefined function dreampoint_b2b_cart_item_data_html()` in `woocommerce/cart/cart.php:92`. The vhost `error_log` files are empty (the entry exists only in the server-wide LSWS log). Timeline: 12:27:27 commit `2c64ccf`; 12:27:51 staging `git pull --ff-only`; 12:28:16 the 500; from 12:28:52 `/cart/` requests succeeded. It is the only such fatal for this vhost in the current log.
+- Plausible, NOT proven: a temporary OPcache inconsistency, the updated `cart.php` being served while the helper-defining `inc/woocommerce.php` was still cached. The documented `revalidate_freq=60` (`production.md` section 4) is consistent with this but does not prove it; OPcache state was not inspected.
+- Not reproduced afterwards (later requests 200). Later successes do not make this resolved; there was no code fix for it and the code is unchanged.
+- Residual risk and follow-up: a change that adds a function in one PHP file and calls it from another can fail for a short window after `git pull`. Future action: design and verify a safe deployment procedure for changes that span dependent PHP files (for example keeping definition and caller in one file, or an owner-approved controlled activation step). Waiting about 60 seconds is NOT a guaranteed preventive fix. No OPcache reset, restart or deployment change was made.
+
+**Cart price discrepancy (19,20 EUR versus 28,99 EUR): EXPLAINED, no pricing regression established.** Product 8982 (simple; ERP article code `_ARTICLE_CODE` = `10101002MBSNOW`, as recorded in `figma-alignment.md` section 48; the WooCommerce SKU of this product was not read and, by the ADR-034 convention `P-<articleId>`, is a different identifier, so its value is unverified; the shorter `10101002` appears in no local record and is not used), `_regular_price` = `_price` = 19.20, no sale price, prices entered excluding tax, cart shows prices excluding tax. VAT 25 % gives 24.00; flat-rate shipping 4.99 (the PDV rate has the shipping-tax flag 0) gives 28.99. The earlier 28,99 was the cart TOTAL recorded in `figma-alignment.md` section 48, 19,20 is the unit net price. The two-item T5 totals (52,99 and 40,99) follow the same arithmetic. Qualification: supported by matching arithmetic and the historical records, not by a captured before/after price snapshot of the cart.
+
+**N4 visual verification (staging, admin session, existing single-item cart, UI open/close only).** 1440 px: panel 504 px, item 440x96, 80x80 thumbnail, name Montserrat 14/600 on two lines, "Cijena:" label, "1 x" and price 12/700, remove icon aligned, no overflow. 390 px: same layout, no overlap or overflow. Nonblocking observation: the quantity/price area is narrow (56 px), so "1 x" and the price break onto two lines. Not covered: several items, long names, variation items. No dedicated mini-cart Figma design exists (no pixel claim).
+
+#### Draft A - questions for ZGData / APROS (Croatian, NOT SENT, owner review pending)
+
+> Poštovani,
+>
+> za završetak integracije DreamPoint B2B webshopa s Aprosom trebamo pojašnjenja o tri stvari.
+>
+> **1. `partnerList/get` i atribut `B2B KUPAC`.** Vraća li `partnerList/get` isključivo partnere kod kojih je `B2B KUPAC = DA`? Ako se postojećem partneru vrijednost promijeni iz `DA` u `NE`, prestaje li se on pojavljivati u odgovoru `partnerList/get`?
+>
+> **2. `partnerList/get` i e-mail.** Sadrži li polje `email` u odgovoru `partnerList/get` vrijednost atributa `B2B E-MAIL` (koji koristimo za povezivanje s računom u webshopu) ili opću e-mail adresu partnera?
+>
+> **3. Promotivne cijene u B2B API-ju.** U dostavljenoj dokumentaciji odgovor `articleList/get` sadrži polja `wholesalePrice`, `vatRate`, `isNew` i `isSpecialOffer`, ali ne sadrži polje s promotivnom cijenom (polje `salePriceWithVat`, poznato iz B2C integracije, nema u tom odgovoru). Webshopu je za stranicu "Akcija" potreban pouzdan izvor promotivne cijene. Molimo da nam odgovorite:
+> - Gdje se u B2B API-ju nalazi iznos promotivne cijene (koji endpoint i koje polje)?
+> - Označava li `isSpecialOffer` aktivnu promociju, i vrijedi li vremenski (datum od/do)?
+> - Je li promotivna cijena neto ili s PDV-om?
+> - Kako se promotivna cijena odnosi prema partnerovom Rabatu 1 (zamjenjuje li ga, ili se rabat primjenjuje na nju)?
+>
+> Ako je moguće, priložite kratak primjer API odgovora za jedan artikl s aktivnom promocijom, bez osjetljivih podataka. Unaprijed hvala.
+
+#### Draft B - client request, existing webshop customer migration (Croatian, NOT SENT, owner review pending; replaces the earlier ADR-036 draft)
+
+Review of the earlier draft: it mixed client tasks with questions that only ZGData can answer, promised that users would set passwords themselves although the reset flow is verified only at logic level (ADR-032) and activation is still blocked (ADR-018), asked for a registration date without need, and did not ask for a secure transfer channel. The revision keeps the client message free of ZGData questions, requests no passwords or hashes, promises no automatic activation and does not assume that every account is migrated.
+
+> Poštovani,
+>
+> za prijenos postojećih korisnika s vaše trenutne B2B web trgovine na novi DreamPoint B2B sustav trebamo od vas sljedeće:
+>
+> 1. **Izvoz korisničkih računa iz trenutne web trgovine** (CSV ili Excel). Riječ je o popisu korisnika koji se prijavljuju u trgovinu, a ne o popisu partnera iz Aprosa. Potrebni stupci: e-mail (prijava), ime, prezime, tvrtka, OIB, šifra partnera u Aprosu (ako je poznata), telefon, adresa računa, adrese dostave, država i status računa (aktivan/neaktivan).
+> 2. **Koje račune treba prenijeti.** Ne pretpostavljamo da treba prenijeti sve; recite nam npr. samo aktivne kupce.
+> 3. **Za svakog kupca, ako je poznato, koji dio kataloga smije vidjeti** (grupa/vidljivost), te komercijalista koji ga vodi.
+> 4. **Potvrdu da su kupci koji se prenose u Aprosu označeni kao B2B kupci (`B2B KUPAC = DA`).** Odobrenje i aktivacija računa ostaju u Aprosu; uvoz nikoga ne odobrava niti aktivira automatski.
+> 5. **Željeni termin aktivacije korisnika.** Molimo navedite okvirni datum kada bi postojeći korisnici trebali početi koristiti novu B2B trgovinu. Postavljanje novih lozinki organizirat ćemo u sklopu postupka aktivacije, nakon završne tehničke provjere.
+>
+> Lozinke i njihove šifrirane zapise ne trebamo i molimo da ih ne šaljete. Zbog osobnih podataka molimo da datoteku pošaljete sigurnim kanalom (npr. zaštićeni prijenos datoteka ili šifrirana arhiva uz lozinku poslanu zasebnim kanalom), a ne običnom e-poštom. Prije stvarnog prijenosa napravit ćemo probnu provjeru bez ikakvih izmjena i poslati vam izvještaj o rezultatima spajanja.
+>
+> Hvala.
+
+Open questions for ZGData stay exactly as recorded in ADR-018 (the two `partnerList/get` questions above) plus the new promotional-price question; they are deliberately NOT part of Draft B. Neither draft has been sent.

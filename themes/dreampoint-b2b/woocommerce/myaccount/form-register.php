@@ -48,13 +48,13 @@ $lr_image = get_field('lr_image', 'option');
                     <div class="row">
                         <div class="col-lg-6">
                             <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
-                                <label for="reg_billing_first_name"><?php esc_html_e( 'First Name', 'woocommerce' ); ?>&nbsp;<span class="required" aria-hidden="true">*</span></label>
+                                <label for="reg_billing_first_name"><?php esc_html_e( 'Ime', 'dreampoint-b2b' ); ?>&nbsp;<span class="required" aria-hidden="true">*</span></label>
                                 <input type="text" class="woocommerce-Input woocommerce-Input--text input-text" name="billing_first_name" id="reg_billing_first_name" autocomplete="given-name" value="<?php echo ( ! empty( $_POST['billing_first_name'] ) ) ? esc_attr( wp_unslash( $_POST['billing_first_name'] ) ) : ''; ?>" required />
                             </p>
                         </div>
                         <div class="col-lg-6">
                             <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
-                                <label for="reg_billing_last_name"><?php esc_html_e( 'Last Name', 'woocommerce' ); ?>&nbsp;<span class="required" aria-hidden="true">*</span></label>
+                                <label for="reg_billing_last_name"><?php esc_html_e( 'Prezime', 'dreampoint-b2b' ); ?>&nbsp;<span class="required" aria-hidden="true">*</span></label>
                                 <input type="text" class="woocommerce-Input woocommerce-Input--text input-text" name="billing_last_name" id="reg_billing_last_name" autocomplete="family-name" value="<?php echo ( ! empty( $_POST['billing_last_name'] ) ) ? esc_attr( wp_unslash( $_POST['billing_last_name'] ) ) : ''; ?>" required />
                             </p>
                         </div>

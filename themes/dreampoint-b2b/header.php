@@ -450,8 +450,8 @@ $company_phone = get_field('company_phone', 'option') ?: '';
                                 );
 
                                 $dashboard_desc = __(
-                                    ' From your account dashboard you can view and manage your <a href="%3$s"> account details</a>, <a href="%2$s">shipping and billing addresses</a> and view <a href="%1$s">recent orders</a>.',
-                                    'woocommerce'
+                                    ' Iz nadzorne ploče računa možete pregledati i uređivati <a href="%3$s">podatke o računu</a>, <a href="%2$s">adrese za dostavu i naplatu</a> te pregledati <a href="%1$s">nedavne narudžbe</a>.',
+                                    'dreampoint-b2b'
                                 );
                                 
                                 printf(

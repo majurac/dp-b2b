@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-29 (post-T6 backlog N1-N5) - N1 / N4 / N5 IMPLEMENTED AND VERIFIED ON STAGING (`2c64ccf`); N2 DIAGNOSED; N3 PLAN READY
+
+N1: Brandovi dropdown shows the first 12 visible brands (name ASC). N4: mini-cart name/price/quantity typography aligned with the T5 cart item (SCSS only). N5: main cart shows only Boja and Dioptrija on one line ("DIOPTRIJA +1" displayed as "+1", presentation only, main cart only). N2: `/akcija/` is empty because staging has 0 WooCommerce sale prices (no technical defect found); whether APROS sends sale prices is unverified, partner brand discounts are never listed there. N3: migration plan, field list, open questions and a draft Croatian client request recorded, nothing implemented. T5 and T6 stay CLOSED. Records: `docs/active/figma-alignment.md` section 52, `docs/decisions.md` ADR-036.
+
 ## Update 2026-10-29 (T6 closeout) - CLOSED / VERIFIED ON STAGING (commit `da0b726`)
 
 Tax rate ID 1 renamed "PDV" (25 % unchanged), Checkout page ID 12 titled "Blagajna" (slug `checkout` unchanged), Silkypress "(optional)" -> "(neobavezno)" through a theme-owned JS translation JSON plus a text-domain-scoped `load_script_translation_file` filter, COD gateway title "Plaćanje pouzećem" (all other settings unchanged). Verified as guest and as test customer; test cart restored to empty; no order, no ERP action. WBW strings, "Best seller" and colour names remain outside T6. Record: `docs/active/figma-alignment.md` section 51.

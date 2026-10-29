@@ -450,3 +450,55 @@ function dreampoint_b2b_product_tabs( array $tabs ): array {
 	return array_intersect_key( $tabs, array_flip( $allowed ) );
 }
 add_filter( 'woocommerce_product_tabs', 'dreampoint_b2b_product_tabs', 99 );
+
+/**
+ * Main cart only: variation lines limited to Boja and Dioptrija (display only).
+ *
+ * The filter is attached just around the call below, so mini-cart, checkout, emails and order
+ * data keep the untouched WooCommerce item data. Cart item data, variation ID and stored attribute
+ * values are not changed; entries that do not come from a variation attribute (other plugins) are kept.
+ * "DIOPTRIJA +1,5" is shown as "+1,5".
+ *
+ * @param array $cart_item Cart item.
+ * @return string Formatted item data HTML.
+ */
+function dreampoint_b2b_cart_item_data_html( array $cart_item ): string {
+	$allowed = [ 'pa_boja', 'pa_dioptrija' ];
+
+	$filter = static function ( array $item_data, array $item ) use ( $allowed ): array {
+		if ( empty( $item['variation'] ) || empty( $item['data'] ) ) {
+			return $item_data;
+		}
+
+		// Same label WooCommerce used for the variation rows (key => taxonomy).
+		$labels = [];
+		foreach ( array_keys( $item['variation'] ) as $name ) {
+			$taxonomy            = str_replace( 'attribute_', '', $name );
+			$labels[ wc_attribute_label( $taxonomy, $item['data'] ) ] = $taxonomy;
+		}
+
+		$result = [];
+		foreach ( $item_data as $entry ) {
+			$taxonomy = $labels[ $entry['key'] ?? '' ] ?? '';
+			if ( '' === $taxonomy ) {
+				$result[] = $entry; // Not a variation attribute: leave as is.
+				continue;
+			}
+			if ( ! in_array( $taxonomy, $allowed, true ) ) {
+				continue;
+			}
+			if ( 'pa_dioptrija' === $taxonomy ) {
+				$entry['display'] = preg_replace( '/^\s*DIOPTRIJA\s*/i', '', wp_strip_all_tags( (string) ( $entry['display'] ?? $entry['value'] ?? '' ) ) );
+			}
+			$result[] = $entry;
+		}
+
+		return $result;
+	};
+
+	add_filter( 'woocommerce_get_item_data', $filter, 99, 2 );
+	$html = wc_get_formatted_cart_item_data( $cart_item );
+	remove_filter( 'woocommerce_get_item_data', $filter, 99 );
+
+	return $html;
+}

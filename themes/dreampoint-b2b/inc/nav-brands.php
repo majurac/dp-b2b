@@ -36,6 +36,10 @@ function dreampoint_b2b_brands_menu_items(): array {
 		return [];
 	}
 
+	// Dropdown shows the first 12 visible brands (name ASC, visibility filter already applied by
+	// get_terms()); the full list stays on the brand directory page.
+	$terms = array_slice( $terms, 0, 12 );
+
 	// get_terms() primes term meta, so thumbnail_id costs no extra query per brand. Prime the
 	// attachment posts and their meta in one go so wp_get_attachment_image() does not run N+1.
 	$logo_ids = [];

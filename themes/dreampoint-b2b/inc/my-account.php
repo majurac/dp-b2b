@@ -85,7 +85,7 @@ function dreampoint_b2b_save_registration_names($customer_id) {
 add_filter('woocommerce_account_menu_items', 'dreampoint_b2b_modify_account_menu', 999);
 function dreampoint_b2b_modify_account_menu($items) {
     $new_items = array(
-        'dashboard'       => __('Lični podaci', 'dreampoint-b2b'),
+        'dashboard'       => __('Moj profil', 'dreampoint-b2b'),
         'orders'          => __('Moje narudžbe', 'dreampoint-b2b'),
         'edit-address'    => __('Adrese', 'dreampoint-b2b'),
         'komercijalist'   => __( 'Prodajni predstavnik', 'dreampoint-b2b' ),
@@ -95,6 +95,35 @@ function dreampoint_b2b_modify_account_menu($items) {
     return $new_items;
 }
 
+
+/**
+ * Orders table column order and labels (Figma MPR-05): number, status, date, total, actions.
+ * Presentation only: the orders query and the action buttons are untouched, and any column added
+ * by another plugin is kept after the known ones.
+ *
+ * @param array $columns Column id => label
+ * @return array
+ */
+add_filter( 'woocommerce_account_orders_columns', 'dreampoint_b2b_account_orders_columns' );
+function dreampoint_b2b_account_orders_columns( $columns ) {
+    $labels = array(
+        'order-number'  => __( 'Broj narudžbe', 'dreampoint-b2b' ),
+        'order-status'  => __( 'Status', 'dreampoint-b2b' ),
+        'order-date'    => __( 'Datum', 'dreampoint-b2b' ),
+        'order-total'   => __( 'Ukupno', 'dreampoint-b2b' ),
+        'order-actions' => __( 'Akcija', 'dreampoint-b2b' ),
+    );
+
+    $ordered = array();
+    foreach ( $labels as $id => $label ) {
+        if ( isset( $columns[ $id ] ) ) {
+            $ordered[ $id ] = $label;
+            unset( $columns[ $id ] );
+        }
+    }
+
+    return $ordered + $columns;
+}
 
 /**
  * Add 'is-active' class to Dashboard when on Edit Account page

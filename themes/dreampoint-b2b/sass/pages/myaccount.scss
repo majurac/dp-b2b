@@ -1,5 +1,17 @@
 @import '../theme/mixins';
 
+// Figma card / section title: Montserrat 600 14px, 0.02em tracking, uppercase
+@mixin account-card-title {
+    margin: 0;
+    font-family: $dp-font-body;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: normal;
+    letter-spacing: 0.28px;
+    text-transform: uppercase;
+    color: $dp-color-text-primary;
+}
+
 // Figma AUTH-01/02 (1440 wide): page `#f3f4f6`, content column 584px (half of the 1200px container minus 16px) starting
 // 80px below the top, photo column from 50% + 17px to the right edge. The photo is the ACF option `lr_image`
 // (still empty on staging; the template renders `.lr-image` only when set). Tablet/mobile steps are inferred (no frames).
@@ -326,37 +338,56 @@
     .inner-content {
         padding-top: 32px;
 
+        // Figma MPR-01..05 sidebar: icon list, 32px rows, 16px gap, active item bold. The same <ul> is the
+        // mobile dropdown below md; the icons come from the endpoint classes WooCommerce puts on each <li>.
         .woocommerce-MyAccount-navigation {
-            @include bp(lg-up) { padding: 32px 45px 32px 40px; }
-            @include bp(md-up) {
-                max-width: 367px;
-                background-color: $background-secondary;
-            }
+            @include bp(md-up) { max-width: 367px; }
             @include bp(md-down) { margin-bottom: 32px; }
 
+            ul {
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+                margin: 0;
+                padding: 0;
+                list-style: none;
+            }
+
             ul li {
-                &:first-of-type { padding-bottom: 4px; }
                 a {
-                    @include button-text;
-                    font-weight: 500;
                     display: flex;
                     align-items: center;
-                    padding: 16px;
-                    color: $black;
-                    background-color: $white;
+                    gap: 8px;
+                    min-height: 32px;
+                    padding: 4px;
+                    font-family: $dp-font-body;
+                    font-size: 16px;
+                    font-weight: 400;
+                    line-height: 18px;
                     text-align: left;
-                }
-                + li {
-                    padding-top: 4px;
-                    margin-bottom: 4px;
-                    border-top: 1px solid $dp-color-border-primary;
-                }
-                &.is-active, &:hover {
-                    a {
-                        color: $white;
-                        background-color: $background-brand;
+                    color: $dp-color-text-primary;
+                    background: transparent;
+                    &:before {
+                        content: "";
+                        flex: 0 0 24px;
+                        width: 24px;
+                        height: 24px;
+                        background: center / contain no-repeat;
+                    }
+                    &:hover { text-decoration: underline; }
+                    &:focus-visible {
+                        outline: 0;
+                        border-radius: $dp-radius-xs;
+                        box-shadow: 0 0 0 2px $dp-color-bg-primary, 0 0 0 4px $dp-color-text-primary;
                     }
                 }
+                &.is-active a { font-weight: 700; }
+
+                &.woocommerce-MyAccount-navigation-link--dashboard a:before { background-image: url('../../img/ico/account-user-square.svg'); }
+                &.woocommerce-MyAccount-navigation-link--orders a:before { background-image: url('../../img/ico/account-shopping-bag.svg'); }
+                &.woocommerce-MyAccount-navigation-link--edit-address a:before { background-image: url('../../img/ico/account-location-tick.svg'); }
+                &.woocommerce-MyAccount-navigation-link--komercijalist a:before { background-image: url('../../img/ico/account-user-tag.svg'); }
+                &.woocommerce-MyAccount-navigation-link--customer-logout a:before { background-image: url('../../img/ico/account-logout.svg'); }
             }
         }
 
@@ -402,7 +433,7 @@
                     list-style: none;
                     opacity: 0;
                     pointer-events: none;
-                    text-align: center;
+                    text-align: left;
                     border-radius: 6px;
                     border: 1px solid $dp-color-border-primary;
                     background: $white;
@@ -419,6 +450,7 @@
                         &.is-active a {
                             color: $white;
                             background-color: $background-brand;
+                            &:before { filter: invert(1); }
                         }
                     }
                 }
@@ -434,13 +466,55 @@
         }
     }
 
-    .custom-form {
-        h2 {
-            @include heading-5;
-            display: flex;
-            align-items: center;
-            color: $dp-color-text-primary;
+    // Figma grey info card (company data, addresses). Scoped to #account-page: the checkout injects its
+    // own .ma-holder markup (js/checkout-b2b-info.js) that must keep its checkout rules.
+    .ma-holder {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 24px;
+        margin-bottom: 24px;
+        padding: 16px;
+        background: $dp-color-bg-tertiary;
+        border-radius: $dp-radius-md;
+        box-shadow: $dp-shadow-card-xs;
+
+        .ma-header .wod-title-holder {
+            margin: 0;
+            padding: 4px;
+            &:after { display: none; }
         }
+        h2 { @include account-card-title; }
+
+        .ma-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            max-width: 320px;
+            p {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 16px;
+                margin: 0;
+                font-family: $dp-font-body;
+                font-size: 12px;
+                line-height: 20px;
+                color: $dp-color-text-secondary;
+                span { font-weight: 500; }
+                strong {
+                    font-weight: 700;
+                    text-align: right;
+                    overflow-wrap: anywhere;
+                }
+            }
+        }
+    }
+
+    .custom-form {
+        // Section titles outside a card (password block): same Figma title, keep the existing divider rule
+        h2 { @include account-card-title; }
         .wod-title-holder {
             display: flex;
             align-items: center;
@@ -455,11 +529,50 @@
                 background: $dp-color-border-primary;
             }
         }
+        // Figma: bold field labels above the inputs
+        label { font-weight: 600; }
         .button { margin-left: 0; }
         span em {
             @include paragraph-normal;
             color: $dp-color-text-tertiary;
         }
+    }
+
+    // Figma left-icon buttons: original Figma glyphs (stroke only, so they are used as a mask and follow the
+    // button text colour). Save 24px, Edit / Add 20px.
+    .button--save, .button--edit, .button--add {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        &:before {
+            content: "";
+            flex: 0 0 auto;
+            width: 20px;
+            height: 20px;
+            background-color: currentColor;
+            -webkit-mask: center / contain no-repeat;
+            mask: center / contain no-repeat;
+        }
+    }
+    .button--save:before {
+        width: 24px;
+        height: 24px;
+        -webkit-mask-image: url('../../img/ico/account-save.svg');
+        mask-image: url('../../img/ico/account-save.svg');
+    }
+    .button--edit:before {
+        -webkit-mask-image: url('../../img/ico/account-edit.svg');
+        mask-image: url('../../img/ico/account-edit.svg');
+    }
+    .button--add:before {
+        -webkit-mask-image: url('../../img/ico/account-add.svg');
+        mask-image: url('../../img/ico/account-add.svg');
+    }
+
+    // Empty states (addresses, orders) sit centred in the content column
+    .not-found-holder {
+        margin: 0 auto;
+        padding: 32px 0;
     }
 
     .form-block-holder + .form-block-holder {
@@ -470,7 +583,7 @@
 
 .my-acccount-intro {
     max-width: 740px;
-    margin: 0 auto;
+    margin: 0;
     p {
         @include paragraph-normal;
         strong { font-weight: bold; }
@@ -481,21 +594,9 @@
     }
 }
 
+// Address cards reuse the shared .ma-holder card above; the Izmijeni button keeps the existing .button.
 .woocommerce-Addresses {
-    .address-holder address {
-        @include paragraph-normal;
-        color: $dp-color-text-secondary;
-        display: block;
-        margin: 8px 0 24px;
-        padding: 12px 16px;
-        background: $white;
-        border: 1px solid $text-primary;
-    }
-    .custom-form + .custom-form {
-        margin-top: 64px;
-        @include bp(sm-down) { margin-top: 32px; }
-    }
-    .custom-form .button { display: inline-flex; }
+    .ma-holder + .ma-holder { margin-top: 24px; }
 }
 
 .action-btns-row {
@@ -530,12 +631,14 @@
     }
 }
 
+// Figma MPR-05 orders table: 10px uppercase header, 40px rows, outlined status pill, Secondary M action buttons.
 .woocommerce-orders-table {
+    width: 100%;
+
     th, td {
-        padding: 12px 5px;
-        min-width: 141px;
+        padding: 8px 5px;
+        min-width: 0;
         color: $text-primary;
-        @include bp(lg-down) { min-width: 125px; }
         &:first-of-type { padding-left: 0; }
         &:last-of-type { padding-right: 0; }
         @include bp(sm-down) {
@@ -556,62 +659,50 @@
     }
 
     thead th {
-        @include paragraph-normal;
-        padding: 12px 5px;
-        border-bottom: 1px solid $dp-color-border-secondary;
+        padding-top: 8px;
+        padding-bottom: 8px;
+        font-family: $dp-font-body;
+        font-size: 10px;
+        font-weight: 500;
+        line-height: 18px;
+        text-align: left;
+        text-transform: uppercase;
+        border-bottom: 1px solid $dp-color-bg-tertiary;
     }
 
-    &__row {
-        &__cell-order-actions {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+    &__header-order-actions { text-align: center; }
 
-            .view, .refund {
-                width: 32px;
-                height: 32px;
-                font-size: 0;
-                position: relative;
-                padding: 0;
-                &:after {
-                    position: absolute;
-                    font-family: icomoon;
-                    font-size: 16px;
-                    color: $white;
-                    display: block;
-                }
-            }
-            .view:after { content: "\e915"; }
-            .refund:after { content: "\e91e"; }
-        }
-
-        &__cell-order-number {
-            font-weight: 500;
-            a { color: inherit; }
-        }
-
-        .order-status.tag { color: $text-primary; }
-
-        &__cell-order-total {
-            @include bp(sm-up) { font-size: 0; }
-            span { font-size: 16px; }
-        }
-
-        &:not(.woocommerce-orders-table__row--status-completed) {
-            .woocommerce-orders-table__cell-order-actions .order-again {
-                background: $white;
-                border: 1px solid $background-brand;
-                color: $background-brand;
-                cursor: not-allowed;
-                pointer-events: none;
-            }
+    &__cell-order-number {
+        font-weight: 600;
+        a {
+            color: inherit;
+            text-decoration: none;
+            &:hover { text-decoration: underline; }
         }
     }
 
-    &__header-order-actions,
+    &__cell-order-status .order-status {
+        display: inline-flex;
+        align-items: center;
+        padding: 2px 8px;
+        font-family: $dp-font-body;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: normal;
+        text-transform: uppercase;
+        color: $dp-color-text-primary;
+        background: $dp-color-bg-primary;
+        border: 1px solid $dp-color-border-primary;
+        border-radius: $dp-radius-md;
+    }
+
     &__cell-order-actions {
-        @include bp(sm-up) { max-width: 200px; }
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        @include bp(sm-down) { justify-content: flex-end; }
         &:before {
             @include bp(sm-down) {
                 text-align: left;
@@ -620,28 +711,30 @@
         }
     }
 
-    &__header-order-actions,
-    &__header-order-status {
-        text-align: center !important;
-    }
-
-    &__cell-order-status {
-        text-align: center !important;
-        span, strong {
-            @include caption-m;
-            padding: 4px 12px;
-            border: 1px solid $dp-color-border-primary;
-            text-transform: uppercase;
-            font-weight: 500;
-            display: flex !important;
-            font-size: 12px !important;
-            align-items: center;
-            justify-content: center;
-            width: max-content;
-            margin: 0 auto;
-            @include bp(sm-down) { margin-right: 0; }
+    // Existing rule, unchanged in effect: "order again" stays visibly disabled for non-completed orders
+    &__row:not(.woocommerce-orders-table__row--status-completed) {
+        .woocommerce-orders-table__cell-order-actions .order-again {
+            background: $white;
+            border: 1px solid $background-brand;
+            color: $background-brand;
+            cursor: not-allowed;
+            pointer-events: none;
         }
     }
+}
+
+// Pagination: the global .woocommerce-pagination ul.page-numbers styles (_content.scss) are reused;
+// only the prev/next arrows are aligned here.
+.woocommerce-orders-pagination ul.page-numbers {
+    a.prev, a.next {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        font-weight: 400;
+        color: $dp-color-text-primary;
+    }
+    li { list-style: none; }
 }
 
 .woocommerce-order-overview__status {

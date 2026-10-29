@@ -36,7 +36,6 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 			<?php
 			foreach ( $customer_orders->orders as $customer_order ) {
 				$order      = wc_get_order( $customer_order ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-				$item_count = $order->get_item_count() - $order->get_item_count_refunded();
 				?>
 				<tr class="woocommerce-orders-table__row woocommerce-orders-table__row--status-<?php echo esc_attr( $order->get_status() ); ?> order">
 					<?php foreach ( wc_get_account_orders_columns() as $column_id => $column_name ) :
@@ -67,10 +66,7 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 							
 
 							<?php elseif ( 'order-total' === $column_id ) : ?>
-								<?php
-								/* translators: 1: formatted order total 2: total order items */
-								echo wp_kses_post( sprintf( _n( '%1$s for %2$s item', '%1$s for %2$s items', $item_count, 'woocommerce' ), $order->get_formatted_order_total(), $item_count ) );
-								?>
+								<?php echo wp_kses_post( $order->get_formatted_order_total() ); ?>
 
 							<?php elseif ( 'order-actions' === $column_id ) : ?>
 								<?php
@@ -85,7 +81,9 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 										} else {
 											$action_aria_label = $action['aria-label'];
 										}
-										echo '<a href="' . esc_url( $action['url'] ) . '" class="woocommerce-button' . esc_attr( $wp_button_class ) . ' button ' . sanitize_html_class( $key ) . '" aria-label="' . esc_attr( $action_aria_label ) . '" title="' . esc_attr( $action['name'] ) . '">' . esc_html( $action['name'] ) . '</a>';
+										// Figma Secondary M; only "view" carries the arrow.
+										$action_classes = 'button button--sm button--outline' . ( 'view' === $key ? ' button--icon-after' : '' );
+										echo '<a href="' . esc_url( $action['url'] ) . '" class="woocommerce-button' . esc_attr( $wp_button_class ) . ' ' . esc_attr( $action_classes ) . ' ' . sanitize_html_class( $key ) . '" aria-label="' . esc_attr( $action_aria_label ) . '" title="' . esc_attr( $action['name'] ) . '">' . esc_html( $action['name'] ) . '</a>';
 										unset( $action_aria_label );
 									}
 								}
@@ -108,23 +106,37 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 	<?php do_action( 'woocommerce_before_account_orders_pagination' ); ?>
 
 	<?php if ( 1 < $customer_orders->max_num_pages ) : ?>
-		<div class="woocommerce-pagination woocommerce-pagination--without-numbers woocommerce-Pagination">
-			<?php if ( 1 !== $current_page ) : ?>
-				<a class="woocommerce-button woocommerce-button--previous woocommerce-Button woocommerce-Button--previous button<?php echo esc_attr( $wp_button_class ); ?>" href="<?php echo esc_url( wc_get_endpoint_url( 'orders', $current_page - 1 ) ); ?>"><?php esc_html_e( 'Previous', 'woocommerce' ); ?></a>
-			<?php endif; ?>
-
-			<?php if ( intval( $customer_orders->max_num_pages ) !== $current_page ) : ?>
-				<a class="woocommerce-button woocommerce-button--next woocommerce-Button woocommerce-Button--next button<?php echo esc_attr( $wp_button_class ); ?>" href="<?php echo esc_url( wc_get_endpoint_url( 'orders', $current_page + 1 ) ); ?>"><?php esc_html_e( 'Next', 'woocommerce' ); ?></a>
-			<?php endif; ?>
-		</div>
+		<?php
+		// Numbered pagination built from the existing WooCommerce orders query (page count and current
+		// page); the page URLs come from the same account endpoint helper WooCommerce uses for prev/next.
+		$orders_page_base = str_replace( '999999999', '%#%', wc_get_endpoint_url( 'orders', 999999999 ) );
+		?>
+		<nav class="woocommerce-pagination woocommerce-orders-pagination" aria-label="<?php esc_attr_e( 'Paginacija narudžbi', 'dreampoint-b2b' ); ?>">
+			<?php
+			echo paginate_links( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core escapes the links.
+				array(
+					'base'      => $orders_page_base,
+					'format'    => '',
+					'total'     => (int) $customer_orders->max_num_pages,
+					'current'   => (int) $current_page,
+					'type'      => 'list',
+					'mid_size'  => 1,
+					'end_size'  => 1,
+					'add_args'  => false,
+					'prev_text' => '<i class="icon-chevron-left" aria-hidden="true"></i> <span>' . esc_html__( 'Nazad', 'dreampoint-b2b' ) . '</span>',
+					'next_text' => '<span>' . esc_html__( 'Naprijed', 'dreampoint-b2b' ) . '</span> <i class="icon-chevron-right" aria-hidden="true"></i>',
+				)
+			);
+			?>
+		</nav>
 	<?php endif; ?>
 
 <?php else : ?>
 	<div class="not-found-holder">
 		<div class="nf-icon"><img src="<?php bloginfo('template_directory'); ?>/img/ico/face-sad.svg" alt=""></div>
-		<h2><?php esc_html_e( 'Nema istorije narudžbi', 'dreampoint-b2b' ); ?></h2>
-		<p><?php esc_html_e( 'Trenutno nemate kreiranih narudžbi. Kako biste krirali narudžbu, posjetite trgovinu, dodajte proizvode u svoju košaricu i napravite narudžbu.', 'dreampoint-b2b' ); ?></p>
-		<a href="<?php echo esc_url(home_url('/')); ?>" class="button button--xl"><?php esc_html_e( 'Početna', 'dreampoint-b2b' ); ?> </a>
+		<h2><?php esc_html_e( 'Nema povijesti narudžbi', 'dreampoint-b2b' ); ?></h2>
+		<p><?php esc_html_e( 'Trenutno nemate kreiranih narudžbi. Kako biste kreirali narudžbu, posjetite trgovinu, dodajte proizvode u svoju košaricu i napravite narudžbu.', 'dreampoint-b2b' ); ?></p>
+		<a href="<?php echo esc_url( wc_get_page_permalink( 'shop' ) ); ?>" class="button button--xl"><?php esc_html_e( 'Posjeti trgovinu', 'dreampoint-b2b' ); ?></a>
 		<!-- /.button button--xl -->
 	</div>
 	<!-- /.not-found-holder -->	

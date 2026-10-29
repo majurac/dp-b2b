@@ -13,15 +13,15 @@ $company_oib = get_user_meta($user_id, 'billing_oib', true); // Fetch 'billing_o
 			<div class="ma-holder">
 	            <div class="ma-header">
 		            <div class="wod-title-holder">
-						<h2><img src="<?php echo get_template_directory_uri(); ?>/img/ico/lock.svg" alt=""><?php esc_html_e( 'Podaci Tvrtke', 'dreampoint-b2b' ); ?></h2>
+						<h2><?php esc_html_e( 'Podaci o tvrtci', 'dreampoint-b2b' ); ?></h2>
 					</div>
 					<!-- /.wod-title-holder -->
 	            </div>
             	<!-- /.ma-header -->
 	            <div class="ma-info">
-	                <p><strong><?php esc_html_e('Naziv tvrtke', 'dreampoint-b2b'); ?></strong>: <?php echo esc_html($billing_company); ?></p>
-	                <p><strong><?php esc_html_e('Oib', 'dreampoint-b2b'); ?></strong>: <?php echo esc_html($company_oib); ?></p>
-	                <p><strong><?php esc_html_e('Phone', 'woocommerce'); ?></strong>: <?php echo esc_html($phone); ?></p>
+	                <p><span><?php esc_html_e('Naziv firme', 'dreampoint-b2b'); ?>:</span> <strong><?php echo esc_html($billing_company); ?></strong></p>
+	                <p><span><?php esc_html_e('OIB', 'dreampoint-b2b'); ?>:</span> <strong><?php echo esc_html($company_oib); ?></strong></p>
+	                <p><span><?php esc_html_e('Phone', 'woocommerce'); ?>:</span> <strong><?php echo esc_html($phone); ?></strong></p>
 	            </div>
 	            <!-- /.ma-info -->
 	        </div>
@@ -57,8 +57,6 @@ $company_oib = get_user_meta($user_id, 'billing_oib', true); // Fetch 'billing_o
 				 */
 				do_action( 'woocommerce_edit_account_form_fields' );
 			?>
-			<button class="save-account-details button"><?php esc_html_e( 'Spremi izmjenu', 'dreampoint-b2b' ); ?></button>
-			<!-- /.save-account-details button -->
 		</div>
 		<!-- /.form-block-holder -->
 	
@@ -97,7 +95,7 @@ $company_oib = get_user_meta($user_id, 'billing_oib', true); // Fetch 'billing_o
 
 		<p>
 			<?php wp_nonce_field( 'save_account_details', 'save-account-details-nonce' ); ?>
-			<button type="submit" class="button woocommerce-Button button<?php echo esc_attr( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' ); ?>" name="save_account_details" value="<?php esc_attr_e( 'Save changes', 'woocommerce' ); ?>"><?php esc_html_e( 'Save changes', 'woocommerce' ); ?></button>
+			<button type="submit" class="button button--save woocommerce-Button button<?php echo esc_attr( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' ); ?>" name="save_account_details" value="<?php esc_attr_e( 'Save changes', 'woocommerce' ); ?>"><?php esc_html_e( 'Spremi izmjenu', 'dreampoint-b2b' ); ?></button>
 			<input type="hidden" name="action" value="save_account_details" />
 		</p>
 

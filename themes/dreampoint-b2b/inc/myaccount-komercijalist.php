@@ -89,7 +89,7 @@ function komercijalist_endpoint_content() {
         // Display the commercialist info inside the new HTML structure
         echo '<div class="commercialists-wrapper">';
         echo '    <div class="commercialist-header">';
-        echo '        <h3><img src="' . get_template_directory_uri() . '/img/ico/UserGear.svg" alt=""> ' . esc_html__('Vaš komercijalist', 'dreampoint-b2b') . '</h3>';
+        echo '        <h3><img src="' . get_template_directory_uri() . '/img/ico/account-user-tag.svg" alt=""> ' . esc_html__('Vaš komercijalist', 'dreampoint-b2b') . '</h3>';
         echo '    </div>';
         echo '    <div class="commercialist-info">';
         echo '        <p><strong>' . esc_html__('Ime i prezime', 'dreampoint-b2b') . '</strong>: ' . esc_html($komercijalist->post_title) . '</p>';

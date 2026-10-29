@@ -966,3 +966,21 @@ Baseline: `master`, `39eb03e`, clean. Scope was code-level only: no staging or s
 2. Authorisation to modify WordPress page titles and, if needed, menu labels without changing slugs.
 3. Authorisation for a focused read-only staging verification of guest-visible strings and the Croatian language packages.
 4. Confirmation of the real source of "Tax" and other WooCommerce strings before any translation-behaviour change.
+
+## 50. T6 Croatian localization - implementation and staging verification (2026-10-29, PARTIALLY VERIFIED)
+
+Baseline `b2cac29`; code commit `615ea8d` (staging pulled as the site user, local and server hashes equal). Guest and authenticated (existing test customer `vis_full` via User Switching, admin restored afterwards) audits preceded the change; the guest audit alone was insufficient because all shop pages redirect guests to `/my-account/`.
+
+**Root causes (confirmed):**
+- Dashboard intro: `header.php` (my-account intro block) used an English msgid in the `woocommerce` domain that does not exist in the WooCommerce `hr` pack; the hypothesis that the admin `en_US` locale caused it was rejected (the customer locale is `hr`).
+- "First Name" / "Last Name": English `woocommerce`-domain msgids in `form-register.php`.
+- Page titles "My account" / "Cart" / "Shop" (and `<title>`, H1, breadcrumb): DB page titles.
+- Cart "Tax": `woocommerce/cart/cart.php` prints `$tax->label`, i.e. the tax-rate name in WooCommerce > Settings > Tax (single rate HR 25 %, name "Tax"). It is DB data, not gettext. The checkout block shows "Porezi" for the same amount.
+
+**Implemented:** `Ime` / `Prezime` (`dreampoint-b2b` domain, markup/IDs/names/validation unchanged); dashboard intro with a Croatian msgid in the `dreampoint-b2b` domain (same three links); staging page titles by Quick Edit: ID 13 `my-account` "Moj račun", ID 11 `cart` "Košarica", ID 10 `shop` "Trgovina" (status, template, content and slugs unchanged; Checkout ID 12 and Quick Order ID 145 untouched). H1 stay "Prijava" / "Registracija".
+
+**Cart test:** baseline cart of the test customer was empty (no coupons); one variation (11081, qty 1) was added, cart and checkout inspected, then removed; the cart is empty again. No checkout submitted, no order. Cart-page labels were Croatian except "Tax"; checkout labels Croatian except page title/H1 "Checkout", "(optional)" (silkypress field) and gateway title "Cash on delivery". Sandbox-ERP linkage of the test customer could not be confirmed from docs; no ERP-relevant action (no order) was performed.
+
+**Verified on staging:** guest register shows Ime/Prezime, H1 unchanged, input names/IDs unchanged; customer `/my-account/`, `/cart/`, `/shop/` show the new titles in `<title>`, H1 and breadcrumb; Quick Order unchanged; redirects and slugs unchanged; dashboard intro Croatian.
+
+**Open (not changed, owner decision needed):** "Tax" rate name (e.g. "PDV" - WooCommerce settings DB edit, also affects order tax labels); Checkout page title; "(optional)"; "Cash on delivery" gateway title. Outside T6: WBW strings, "Best seller", product colour names. Not tested: real registration submission, `.pot` regeneration.

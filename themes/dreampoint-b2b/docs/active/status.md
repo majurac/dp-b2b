@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-29 (T6 Croatian localization) - PARTIALLY VERIFIED ON STAGING (commit `615ea8d`)
+
+Implemented and verified on staging: guest "First Name"/"Last Name" -> "Ime"/"Prezime" (`form-register.php`), My Account dashboard intro moved to a Croatian `dreampoint-b2b` msgid (`header.php`), and page titles in the staging DB (IDs 13 / 11 / 10: "Moj račun" / "Košarica" / "Trgovina"; slugs unchanged). Cart baseline for the test customer was empty and was restored to empty. Open (owner decisions, not changed): cart "Tax" label is the tax-rate name stored in WooCommerce settings (HR 25 %, name "Tax"), the Checkout page title/H1 remains "Checkout", and "(optional)" and "Cash on delivery" remain English; WBW strings and "Best seller" are outside T6. Full record: `docs/active/figma-alignment.md` section 50.
+
 ## Update 2026-10-28 (T6 Croatian localization preflight) - PREFLIGHT COMPLETE, OWNER INPUT REQUIRED; NOTHING IMPLEMENTED
 
 Read-only, code-level preflight only (no staging or database access, no changes). Page titles are DB content; unpackaged `woocommerce`-domain strings (e.g. guest "First Name" / "Last Name") are the only reliably untranslated item; other reported English WooCommerce strings may stem from the admin user's intentional `en_US` locale (hypothesis). Proposed terminology is NOT approved; slugs stay unchanged; WBW plugin strings are outside T6. Preliminary estimate 4 h (was 3 h). Four unresolved owner decisions and the full record: `docs/active/figma-alignment.md` section 49. T1-T3b CLOSED, T4 PARTIALLY VERIFIED, T5 CLOSED, Quick Order v1.0.36 CLOSED (unchanged); ERP/APROS, MOQ/Multipack (ADR-035) and Reserved Stock Pro dependencies unchanged; no production environment.

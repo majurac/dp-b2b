@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## Update 2026-10-29 (T6 closeout) - CLOSED / VERIFIED ON STAGING (commit `da0b726`)
+
+Tax rate ID 1 renamed "PDV" (25 % unchanged), Checkout page ID 12 titled "Blagajna" (slug `checkout` unchanged), Silkypress "(optional)" -> "(neobavezno)" through a theme-owned JS translation JSON plus a text-domain-scoped `load_script_translation_file` filter, COD gateway title "Plaćanje pouzećem" (all other settings unchanged). Verified as guest and as test customer; test cart restored to empty; no order, no ERP action. WBW strings, "Best seller" and colour names remain outside T6. Record: `docs/active/figma-alignment.md` section 51.
+
 ## Update 2026-10-29 (T6 Croatian localization) - PARTIALLY VERIFIED ON STAGING (commit `615ea8d`)
 
 Implemented and verified on staging: guest "First Name"/"Last Name" -> "Ime"/"Prezime" (`form-register.php`), My Account dashboard intro moved to a Croatian `dreampoint-b2b` msgid (`header.php`), and page titles in the staging DB (IDs 13 / 11 / 10: "Moj račun" / "Košarica" / "Trgovina"; slugs unchanged). Cart baseline for the test customer was empty and was restored to empty. Open (owner decisions, not changed): cart "Tax" label is the tax-rate name stored in WooCommerce settings (HR 25 %, name "Tax"), the Checkout page title/H1 remains "Checkout", and "(optional)" and "Cash on delivery" remain English; WBW strings and "Best seller" are outside T6. Full record: `docs/active/figma-alignment.md` section 50.

@@ -24,18 +24,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 <p class="woocommerce-result-count" role="alert" aria-relevant="all" <?php echo ( empty( $orderedby ) || 1 === intval( $total ) ) ? '' : 'data-is-sorted-by="true"'; ?>>
 	<?php
 	// phpcs:disable WordPress.Security
-	if ( 1 === intval( $total ) ) {
-		_e( '1 Product', 'woocommerce' );
-	} elseif ( $total <= $per_page || -1 === $per_page ) {
-		$orderedby_placeholder = empty( $orderedby ) ? '%2$s' : '<span class="screen-reader-text">%2$s</span>';
-		/* translators: 1: total results 2: sorted by */
-		printf( _n( 'All %1$d products', 'All %1$d products', $total, 'woocommerce' ) . $orderedby_placeholder, $total, esc_html( $orderedby ) );
-	} else {
-		$first                 = ( $per_page * $current ) - $per_page + 1;
-		$last                  = min( $total, $per_page * $current );
-		$orderedby_placeholder = empty( $orderedby ) ? '%4$s' : '<span class="screen-reader-text">%4$s</span>';
-		/* translators: 1: first result 2: last result 3: total results 4: sorted by */
-		printf( _nx( '%3$d products', '%3$d products', $total, 'with first and last result', 'woocommerce' ) . $orderedby_placeholder, $first, $last, $total, esc_html( $orderedby ) );
+	// Croatian count label with hr plural forms (1, 21, 31 ... "proizvod", otherwise "proizvoda").
+	// The former English msgids in the `woocommerce` domain did not exist in the hr pack; the Croatian msgids
+	// live in the theme domain. Output is the same for every branch: total count, plus the screen-reader sort note.
+	$total_int   = intval( $total );
+	$count_label = ( 1 === $total_int % 10 && 11 !== $total_int % 100 )
+		/* translators: %d: number of products (singular form) */
+		? sprintf( __( '%d proizvod', 'dreampoint-b2b' ), $total_int )
+		/* translators: %d: number of products (plural form) */
+		: sprintf( __( '%d proizvoda', 'dreampoint-b2b' ), $total_int );
+
+	echo esc_html( $count_label );
+
+	if ( 1 !== $total_int && ! empty( $orderedby ) ) {
+		echo '<span class="screen-reader-text">' . esc_html( $orderedby ) . '</span>';
 	}
 	// phpcs:enable WordPress.Security
 	?>

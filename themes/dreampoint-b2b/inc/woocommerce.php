@@ -407,6 +407,19 @@ add_action( 'init', function (): void {
 }, 20 );
 
 /**
+ * Croatian strings for the third-party woo-product-filter (WBW) plugin, same mechanism as above:
+ * the plugin ships no hr file, so load our own per-locale .mo from languages/plugins/. Covers only
+ * strings the plugin prints through gettext; labels saved in the WBW filter settings are DB data.
+ * A missing locale file is a no-op (the admin en_US session keeps the plugin's English strings).
+ */
+add_action( 'init', function (): void {
+	$mofile = get_template_directory() . '/languages/plugins/woo-product-filter-' . determine_locale() . '.mo';
+	if ( is_readable( $mofile ) ) {
+		load_textdomain( 'woo-product-filter', $mofile );
+	}
+}, 20 );
+
+/**
  * JS (block checkout) translations for the same plugin. Its scripts call
  * wp_set_script_translations() but the plugin ships no `hr` JSON, so strings
  * rendered in JS (e.g. " (optional)") stay English. Point only that text domain

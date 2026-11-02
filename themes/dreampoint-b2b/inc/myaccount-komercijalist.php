@@ -86,21 +86,35 @@ function komercijalist_endpoint_content() {
         $mobile_commercialist = get_field('mobile_commercialist', $selected_komercijalist_id);
         $email_commercialist = get_field('email_commercialist', $selected_komercijalist_id);
 
-        // Display the commercialist info inside the new HTML structure
-        echo '<div class="commercialists-wrapper">';
-        echo '    <div class="commercialist-header">';
-        echo '        <h3><img src="' . get_template_directory_uri() . '/img/ico/account-user-tag.svg" alt=""> ' . esc_html__('Vaš komercijalist', 'dreampoint-b2b') . '</h3>';
-        echo '    </div>';
-        echo '    <div class="commercialist-info">';
-        echo '        <p><strong>' . esc_html__('Ime i prezime', 'dreampoint-b2b') . '</strong>: ' . esc_html($komercijalist->post_title) . '</p>';
-        echo '        <p><strong>' . esc_html__('Broj telefona', 'dreampoint-b2b') . '</strong>: ' . esc_html($phone_commercialist) . '</p>';
-        echo '        <p><strong>' . esc_html__('Broj mobitela', 'dreampoint-b2b') . '</strong>: ' . esc_html($mobile_commercialist) . '</p>';
-        echo '        <p><strong>' . esc_html__('Email', 'dreampoint-b2b') . '</strong>: <a href="mailto:' . esc_attr($email_commercialist) . '">' . esc_html($email_commercialist) . '</a></p>';
+        // Rows shown only when a value exists (label => [value, optional mailto]).
+        $rows = [
+            [ __('Ime i prezime', 'dreampoint-b2b'), $komercijalist->post_title, false ],
+            [ __('Broj telefona', 'dreampoint-b2b'), $phone_commercialist, false ],
+            [ __('Broj mobitela', 'dreampoint-b2b'), $mobile_commercialist, false ],
+            [ __('Email', 'dreampoint-b2b'), $email_commercialist, true ],
+        ];
+
+        // Shared My Account grey card (.ma-holder), same markup as the profile company card.
+        echo '<div class="ma-holder ma-holder--commercialist">';
+        echo '    <div class="ma-header"><div class="wod-title-holder"><h2>' . esc_html__('Vaš komercijalist', 'dreampoint-b2b') . '</h2></div></div>';
+        echo '    <div class="ma-info">';
+        foreach ($rows as [$label, $value, $is_email]) {
+            if (!is_string($value) || '' === trim($value)) {
+                continue;
+            }
+            echo '        <p><span>' . esc_html($label) . ':</span> <strong>';
+            if ($is_email) {
+                echo '<a href="mailto:' . esc_attr($value) . '">' . esc_html($value) . '</a>';
+            } else {
+                echo esc_html($value);
+            }
+            echo '</strong></p>';
+        }
         echo '    </div>';
         echo '</div>';
     } else {
-        // Fallback message if no Komercijalist is assigned
-        echo '<p>' . esc_html__('No Komercijalist assigned.', 'dreampoint-b2b') . '</p>';
+        // Fallback message if no Komercijalist assigned
+        echo '<p>' . esc_html__('Vama još nije dodijeljen komercijalist.', 'dreampoint-b2b') . '</p>';
     }
 }
 add_action('woocommerce_account_komercijalist_endpoint', 'komercijalist_endpoint_content');

@@ -1071,36 +1071,37 @@ function dreampoint_b2b_contact_info_shortcode(): string {
     display_commercialist_contact_info( $current_user_id );
     $commercialist_output = ob_get_clean();
 
-    // The card caption and photo belong to the homepage card; the Contact page template renders the same
-    // shortcode without the card styles.
-    $is_card    = ! is_page_template( 'contact.php' );
-    $photo_html = ( $is_card && trim( $commercialist_output ) ) ? dreampoint_b2b_get_commercialist_photo_html( $current_user_id ) : '';
+    // Figma CON-01 (Contact page) uses a two-column variant without the intro (title + text); the homepage card
+    // keeps the three-column layout. Caption and photo are shared by both.
+    $is_page    = is_page_template( 'contact.php' );
+    $photo_html = trim( $commercialist_output ) ? dreampoint_b2b_get_commercialist_photo_html( $current_user_id ) : '';
+
+    // ACF Text field: the label only; the destination is resolved from context.
+    $contact_label = is_string( $contact_button ) ? trim( $contact_button ) : '';
+    $contact_url   = dreampoint_b2b_contact_form_url();
+    $button_html   = '';
+    if ( '' !== $contact_label && '' !== $contact_url ) {
+        $button_html = '<a class="button button--outline button--sm" href="' . esc_url( $contact_url ) . '">' . esc_html( $contact_label ) . '</a>';
+    }
 
     ob_start();
     ?>
     <div class="contact-info block">
         <div class="container">
-            <div class="contact-content<?php echo '' !== $photo_html ? ' contact-content--has-photo' : ''; ?>">
-                <?php if ( $is_card ) : ?>
-                    <p class="contact-card-label"><?php esc_html_e( 'Vaš prodajni predstavnik', 'dreampoint-b2b' ); ?></p>
-                <?php endif; ?>
+            <div class="contact-content<?php echo $is_page ? ' contact-content--page' : ''; ?><?php echo '' !== $photo_html ? ' contact-content--has-photo' : ''; ?>">
+                <p class="contact-card-label"><?php esc_html_e( 'Vaš prodajni predstavnik', 'dreampoint-b2b' ); ?></p>
                 <?php if ( '' !== $photo_html ) : ?>
                     <div class="commercialist-photo"><?php echo $photo_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_get_attachment_image() output ?></div>
                 <?php endif; ?>
                 <div class="commercialist">
-                    <?php if ( $contact_title ) : ?>
-                        <h2><?php echo esc_html( $contact_title ); ?></h2>
-                    <?php endif; ?>
-                    <?php if ( $contact_text ) : ?>
-                        <p><?php echo wp_kses_post( $contact_text ); ?></p>
-                    <?php endif; ?>
-                    <?php
-                    // ACF Text field: the label only; the destination is resolved from context.
-                    $contact_label = is_string( $contact_button ) ? trim( $contact_button ) : '';
-                    $contact_url   = dreampoint_b2b_contact_form_url();
-                    if ( '' !== $contact_label && '' !== $contact_url ) :
-                        ?>
-                        <a class="button button--outline button--sm" href="<?php echo esc_url( $contact_url ); ?>"><?php echo esc_html( $contact_label ); ?></a>
+                    <?php if ( ! $is_page ) : ?>
+                        <?php if ( $contact_title ) : ?>
+                            <h2><?php echo esc_html( $contact_title ); ?></h2>
+                        <?php endif; ?>
+                        <?php if ( $contact_text ) : ?>
+                            <p><?php echo wp_kses_post( $contact_text ); ?></p>
+                        <?php endif; ?>
+                        <?php echo $button_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above ?>
                     <?php endif; ?>
                     <div class="commercialist-contact">
                     <?php
@@ -1117,6 +1118,9 @@ function dreampoint_b2b_contact_info_shortcode(): string {
                     ?>
                     </div>
                     <!-- /.commercialist-contact -->
+                    <?php if ( $is_page ) : ?>
+                        <?php echo $button_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above ?>
+                    <?php endif; ?>
                 </div>
                 <!-- /.commercialist -->
                 <div class="contact-details">

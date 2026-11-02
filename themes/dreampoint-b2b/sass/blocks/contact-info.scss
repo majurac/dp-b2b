@@ -6,8 +6,10 @@
 // (name 12/700, role + phone + e-mail 12/500) and company details (labels 12/700, values 12/500), 34px column
 // gap, text colour text-secondary, tracking -0.132px. The photo comes from the ACF image field
 // `photo_commercialist` of the assigned komercijalist; without a photo the card has three columns.
-// This stylesheet is only loaded where the `acf/contact-info-section` block is on the page; the Contact page
-// template does not load it (and the shortcode renders neither caption nor photo there).
+// Loaded where the `acf/contact-info-section` block is on the page and, via
+// `dreampoint_b2b_enqueue_contact_template_styles()`, on the Contact page template.
+// Contact page variant `.contact-content--page` (Figma CON-01 11148:37535): same card, caption and photo, but two
+// columns (representative + button | company details) and no intro title/text.
 
 // Grid placement of the three text columns; $col is the first column index (2 when the photo column exists).
 @mixin contact-card-columns($col) {
@@ -209,6 +211,47 @@
                 flex-direction: column;
                 gap: 8px;
             }
+        }
+    }
+
+    // Contact page variant (CON-01): `.commercialist` holds only the representative contact and the button, so it
+    // becomes a plain block in the grid instead of `display: contents`. Desktop first, tablet/phone below.
+    .contact-content--page {
+        .commercialist {
+            display: block;
+            grid-column: 1;
+            grid-row: 2 / span 3;
+            .commercialist-contact { margin-top: 0; }
+            > .button { margin-top: 14px; }
+        }
+        .contact-details { grid-column: 2; }
+        @include bp(lg-up) {
+            grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+        }
+    }
+    .contact-content--page.contact-content--has-photo {
+        .commercialist { grid-column: 2; }
+        .contact-details { grid-column: 3; }
+        @include bp(lg-up) {
+            grid-template-columns: 184px minmax(0, 320px) minmax(0, 1fr);
+        }
+        @include bp(md-down) {
+            grid-template-columns: 184px minmax(0, 1fr);
+            .contact-details { grid-column: 1 / -1; }
+        }
+    }
+    .contact-content--page:not(.contact-content--has-photo) {
+        @include bp(md-down) {
+            grid-template-columns: minmax(0, 1fr);
+            .contact-details { grid-column: 1; }
+        }
+    }
+    // Tablet details row sits below the representative (row 5, set above); phone stacks everything.
+    @include bp(sm-down) {
+        .contact-content--page {
+            grid-template-columns: minmax(0, 1fr);
+            .commercialist { grid-column: 1; grid-row: 3; }
+            .contact-details { grid-column: 1; grid-row: 4; }
         }
     }
 }

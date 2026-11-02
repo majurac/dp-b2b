@@ -2101,3 +2101,41 @@ Review of the earlier draft: it mixed client tasks with questions that only ZGDa
 > Hvala.
 
 Open questions for ZGData stay exactly as recorded in ADR-018 (the two `partnerList/get` questions above) plus the new promotional-price question; they are deliberately NOT part of Draft B. Neither draft has been sent.
+
+## ADR-037 — Payment model BACS-only consolidated; interim shipping-method configuration (2026-11-02)
+
+**Status:** Payment = CONFIRMED (consolidation, no new decision). Shipping = **INTERIM — OWNER-AUTHORIZED — CLIENT APPROVAL PENDING**. Staging configuration only; no code, exporter or APROS mapping change.
+
+### Payment (consolidated, not re-decided)
+- Source decisions: DP-A03 (`docs/project-status-matrix.md`), `docs/erp-discovery-findings.md` (Plaćanje), ADR-019 closeout (2026-10-08). Business model: `bacs` is the only WooCommerce gateway and only an internal default; no payment is collected in the B2B shop; orders go to APROS and are invoiced later; deferred payment terms are managed outside WooCommerce; no bank details or transfer instructions are shown.
+- Staging change 2026-11-02: COD disabled (`woocommerce_cod_settings.enabled` yes -> no) because it is outside the confirmed model. Cheque already disabled. BACS settings and description untouched. Historical COD order data (#23407) untouched. Earlier A3/status wording "payment model open/unconfirmed" was outdated.
+
+### Shipping (interim, NOT a client-approved decision)
+- Source: owner-provided HTML of the existing webshop (2026-11-02): three options — Kupac sam preuzima robu 0,00 EUR; GLS 4,99 EUR; Osobna dostava – područje Zagreba 4,99 EUR.
+- Owner observation: the Zagreb-labelled method also appears on the existing webshop for a test customer with a Bosnia and Herzegovina postal code. Therefore "područje Zagreba" is a display name only; NO Zagreb-only or postal-code restriction is authorized, and shipping-zone coverage (zone Croatia = HR) was left unchanged.
+- Staging configuration: instance 2 `flat_rate` retitled "GLS" (4.99); NEW instance 3 `flat_rate` "Osobna dostava – područje Zagreba" (4.99, zone Croatia); Blocks `pickup_location` retitled "Kupac sam preuzima robu" (cost empty = 0, location "Dreamoint poslovnica"; WooCommerce appends the location name in the rate label); `free_shipping` instance 1 disabled (not deleted; it required a coupon and was never offered without one). Taxable status kept as before; shipping VAT unresolved (see X20).
+- APROS delivery locations (ADR-010) are a separate concept and were not touched; `inc/checkout-delivery-location.php` has no dependency on shipping methods.
+- Open: client approval of the methods; free-shipping thresholds; shipping VAT; pickup default selection (Blocks pickup is a Dostava/Preuzimanje toggle, default stays Dostava — not changed); APROS shipping identifiers and shipping article/product ID.
+
+### A11 consequences (A11 stays open)
+- Payment mapping: only `bacs` needed; APROS `paymentTypeId` UNKNOWN (ZGData PDF does not document it).
+- Shipping mapping: the existing plugin keys by WooCommerce `method_id`, so GLS and Osobna dostava (both `flat_rate`) share one key and cannot map to different APROS shipping IDs; `pickup_location` is a third key. No ERP identifier was invented or populated; exporter unchanged (fallback 1 still applies).
+
+### Rollback
+Restore: `woocommerce_flat_rate_2_settings.title` = "Fiksna cijena dostave"; `woocommerce_pickup_location_settings.title` = "Kupac preuzima sam robu"; `woocommerce_cod_settings.enabled` = yes; set `is_enabled=1` for `instance_id=1` in `woocommerce_shipping_zone_methods`; remove shipping instance 3 (delete in WooCommerce > Settings > Shipping > Croatia) and its option `woocommerce_flat_rate_3_settings`. Purge the shipping transient version after changes.
+
+### Addendum 2026-11-02 — verified checkout findings, A11 limitation, deferred APROS inquiry (documentation only)
+
+**Payment (confirmed, not re-decided).** BACS is the only approved WooCommerce gateway and an internal default; COD is disabled on staging and cheque remains disabled; no payment is collected in the webshop; orders go to APROS and are invoiced afterwards; no bank account details or payment instructions are configured (BACS `account_details` empty, `instructions` empty). Evidence: DP-A03, `docs/erp-discovery-findings.md`, ADR-019.
+
+**Shipping (interim).** Staging: Kupac sam preuzima robu 0,00 EUR / GLS 4,99 EUR / Osobna dostava – područje Zagreba 4,99 EUR. Status **INTERIM — OWNER-AUTHORIZED — CLIENT APPROVAL PENDING**; source = existing-webshop checkout HTML supplied by the owner on 2026-11-02; the owner confirmed the Zagreb-labelled method also appears for a test customer with a Bosnia and Herzegovina postal code, so no Zagreb-specific restriction was introduced. The existing Figma checkout frames (CH-01 `11148:37320`, CH-02 `11148:38222`, CH-03 `11148:38357`) define neither shipping-method selection nor pickup presentation.
+
+**WooCommerce Blocks verification (read-only UI, admin session, no order submitted).** Native Dostava/Preuzimanje toggle retained; GLS (`flat_rate:2`) and personal delivery (`flat_rate:3`) are separate radio options; pickup is `pickup_location:0` at 0,00 EUR and is not the default (default is GLS; changing it is not natively supported safely); WooCommerce appends the pickup location name ("(Dreamoint poslovnica)") to the label; switching pickup/delivery recalculated totals (66,99 EUR with GLS, 62,00 EUR with pickup, back to 66,99 EUR) and left the cart unchanged; BACS stayed the only gateway. The native Blocks presentation is accepted as a functional interim implementation; address-style shipping cards are NOT implemented. One HTTP 409 on `GET /wc/store/v1/checkout?__experimental_calc_totals=true` was seen during rapid scripted toggling and was not investigated.
+
+**APROS delivery locations (ADR-010 logic unchanged).** 0 locations (admin, no partner): no selector, verified. 2+ locations (existing partner 2870, user 7, 8 locations, via User Switching, admin identity restored): selector empty by default, only that partner's locations, selection persisted through shipping/pickup switching and a page reload. **NOT VERIFIED:** exactly one location (no such account) and reset after a completed order (requires an order). A test selection ("Split - Mall of Split", option value 2) was left in that test user's checkout state; this is checkout/session state, not a new order.
+
+**A11 mapping limitation (documented, no change authorized).** GLS = `flat_rate:2`, Osobna dostava = `flat_rate:3`, pickup = `pickup_location:0`. `erp-payment-shipping-custom-meta` resolves shipping by WooCommerce `method_id` (central option `wc_erp_id_all`, still absent); the exporter (`uncle-dev-importer/order.php`) calls `wc_erp_id_get_shipping( method_id, null )` and does not pass `instance_id`, and the per-instance `erp_id` fields are never read. Both flat-rate instances therefore cannot currently receive distinct APROS shipping IDs. The fallback `1` for `paymentTypeId`/`shippingMethodId` is NOT a confirmed ERP identifier. This is not authorization to change the exporter or plugin; instance-aware mapping is not implemented and no mapping was created. The BACS `paymentTypeId` remains unknown.
+
+**APROS inquiry: DEFERRED BY OWNER — NOT A CURRENT ACTION.** Reasons: the BACS-only payment decision is already confirmed; the final shipping model is not yet client-approved; ERP mapping questions will be revisited after those business decisions are final.
+
+**Future UI direction (not implemented, not started).** Figma has no shipping-method frame. Owner direction: shipping-method selection immediately below delivery-address selection, visually similar to the selectable address cards (Tarik suggestion), preserving native WooCommerce Blocks and avoiding invasive checkout changes. This is a separate future task needing technical feasibility review and approval (roadmap F2).

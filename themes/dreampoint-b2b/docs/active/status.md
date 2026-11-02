@@ -5,6 +5,16 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## 2026-11-02 (final) — T7.1/T7.2 COMPLETE, STAGING VERIFIED, GIT SYNCHRONIZED
+
+Closes the T7.1/T7.2 chain (this entry supersedes the "nothing committed/pushed" wording of the entries below, which stay as history).
+
+- **Git:** commits `384b35e` (T7.1/T7.2 implementation) and `b192b374c7e58277da3d25dba47ea6f99b9a8c83` (docs + master roadmap) pushed; local `master`, `origin/master` and staging `master` all at `b192b37`.
+- **Staging:** working tree CLEAN; 24/24 paths of `320b46d..b192b37` verified against the target blobs (bytes and index).
+- **Three authorized runtime normalizations** (no PHP logic change): `header.php` CRLF -> LF, `inc/b2b-registration.php` CRLF -> LF, `inc/my-account.php` final comment correction. PHP syntax PASS; ownership `dream9399:dream9399` 664.
+- **Backup (verified):** `/home/dreampoint.b2b/backup-recovery/git-reconcile-20261102-111119/` (earlier backups `t71t72-20261102-102103`, `t7-20261029-142952` preserved).
+- No new orders or APROS calls during the reconciliation. Runtime QA 8/8 PASS and isolated tests 96/96 PASS are unchanged. Reconciliation is CLOSED.
+
 ## 2026-11-02 (follow-up) — T7.2 QA-7 and test-fixture cleanup
 
 No code change, deployment, new order, APROS export or Git action. Record: `figma-alignment.md` §53.9 addendum.

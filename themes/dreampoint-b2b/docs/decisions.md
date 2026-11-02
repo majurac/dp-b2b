@@ -2139,3 +2139,9 @@ Restore: `woocommerce_flat_rate_2_settings.title` = "Fiksna cijena dostave"; `wo
 **APROS inquiry: DEFERRED BY OWNER — NOT A CURRENT ACTION.** Reasons: the BACS-only payment decision is already confirmed; the final shipping model is not yet client-approved; ERP mapping questions will be revisited after those business decisions are final.
 
 **Future UI direction (not implemented, not started).** Figma has no shipping-method frame. Owner direction: shipping-method selection immediately below delivery-address selection, visually similar to the selectable address cards (Tarik suggestion), preserving native WooCommerce Blocks and avoiding invasive checkout changes. This is a separate future task needing technical feasibility review and approval (roadmap F2).
+
+### Addendum 2026-11-02 (F2 closure) — shipping-method card styling accepted
+
+**Decision (owner):** the native WooCommerce Shipping/Pickup toggle is the final approved approach; GLS and Osobna dostava remain CSS-styled cards (commits `a745336`, `4af5b60`, staging-deployed); the unified three-card React selector (registerCheckoutBlock + store dispatch) is rejected because of WooCommerce upgrade and maintenance risk. No further F2 visual change is required. The owner visually reviewed the staging checkout and confirmed it looks correct.
+
+**Evidence distinction.** Owner acceptance is a visual review. Automated QA on staging: computed styles, Store API smoke test, mobile 390 px screenshot and real keyboard Tab focus passed; desktop screenshot and real pointer hover were not verified automatically. This closes only the visual styling. The shipping-method business approval (client), the A11 APROS mapping and the unverified 1-location / post-order-reset delivery-location scenarios remain open.

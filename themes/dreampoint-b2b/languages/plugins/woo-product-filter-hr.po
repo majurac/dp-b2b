@@ -26,3 +26,9 @@ msgstr "Maksimalna cijena"
 
 msgid "Clear"
 msgstr "Očisti"
+
+msgid "Search ..."
+msgstr "Pretraži ..."
+
+msgid "Sort Products"
+msgstr "Poredaj proizvode"

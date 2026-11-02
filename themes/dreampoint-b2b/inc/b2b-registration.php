@@ -147,57 +147,13 @@ function dreampoint_b2b_oib_admin_field( array $fields ): array {
 add_action( 'woocommerce_customer_meta_fields', 'dreampoint_b2b_oib_admin_field' );
 
 /**
- * Dodaj polja tvrtke, OIB-a i telefona na stranicu uređivanja računa.
+ * Naziv tvrtke (billing_company) i OIB (billing_oib) se NE uređuju iz korisničkog My Account obrasca
+ * (zahtjev klijenta: kupac ne mijenja temeljne podatke tvrtke). Prikazuju se samo u sivoj kartici
+ * "Podaci o tvrtci" (woocommerce/myaccount/user-form.php). Ovdje više nema renderera ni savera za
+ * account_billing_company / account_company_oib, pa se ti POST parametri nigdje ne čitaju.
+ * Ostaje nepromijenjeno: prikupljanje pri registraciji (gore), WP admin (woocommerce_customer_meta_fields)
+ * i b2b-partner-importer.
  */
-function dreampoint_b2b_account_form_fields(): void {
-    $user_id         = get_current_user_id();
-    $phone           = get_user_meta( $user_id, 'billing_phone', true );
-    $billing_company = get_user_meta( $user_id, 'billing_company', true );
-    $company_oib     = get_user_meta( $user_id, 'billing_oib', true );
-    ?>
-
-    <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
-        <label for="account_billing_company"><?php esc_html_e( 'Company', 'woocommerce' ); ?></label>
-        <input type="text" class="woocommerce-Input woocommerce-Input--text input-text"
-               name="account_billing_company" id="account_billing_company"
-               value="<?php echo esc_attr( $billing_company ); ?>" required />
-    </p>
-
-    <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
-        <label for="account_company_oib"><?php esc_html_e( 'OIB', 'dreampoint-b2b' ); ?></label>
-        <input type="text" class="woocommerce-Input woocommerce-Input--text input-text"
-               name="account_company_oib" id="account_company_oib"
-               value="<?php echo esc_attr( $company_oib ); ?>" required />
-    </p>
-
-    <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
-        <label for="account_phone"><?php esc_html_e( 'Phone', 'woocommerce' ); ?></label>
-        <input type="tel" class="woocommerce-Input woocommerce-Input--text input-text"
-               name="account_phone" id="account_phone"
-               value="<?php echo esc_attr( $phone ); ?>" required />
-    </p>
-
-    <?php
-}
-add_action( 'woocommerce_edit_account_form_fields', 'dreampoint_b2b_account_form_fields' );
-
-/**
- * Spremi B2B polja iz stranice uređivanja računa.
- *
- * @param int $user_id
- */
-function dreampoint_b2b_save_account_fields( int $user_id ): void {
-    if ( isset( $_POST['account_billing_company'] ) ) {
-        update_user_meta( $user_id, 'billing_company', sanitize_text_field( $_POST['account_billing_company'] ) );
-    }
-    if ( isset( $_POST['account_company_oib'] ) ) {
-        update_user_meta( $user_id, 'billing_oib', sanitize_text_field( $_POST['account_company_oib'] ) );
-    }
-    if ( isset( $_POST['account_phone'] ) ) {
-        update_user_meta( $user_id, 'billing_phone', sanitize_text_field( $_POST['account_phone'] ) );
-    }
-}
-add_action( 'woocommerce_save_account_details', 'dreampoint_b2b_save_account_fields' );
 
 /**
  * Preusmjeri nelogirane korisnike na /my-account.

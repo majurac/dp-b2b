@@ -439,7 +439,7 @@ $company_phone = get_field('company_phone', 'option') ?: '';
                             'strong' => [],
                         ];
                     ?>
-                        <div class="my-acccount-intro">
+                        <div class="my-acccount-intro intro-text">
                             <p>
                                 <?php
                                 printf(

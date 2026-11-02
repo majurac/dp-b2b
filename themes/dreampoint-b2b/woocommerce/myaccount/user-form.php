@@ -9,8 +9,7 @@ $company_oib = get_user_meta($user_id, 'billing_oib', true); // Fetch 'billing_o
 	
 		<?php do_action( 'woocommerce_edit_account_form_start' ); ?>
 
-		<div class="form-block-holder">
-			<div class="ma-holder">
+		<div class="ma-holder">
 	            <div class="ma-header">
 		            <div class="wod-title-holder">
 						<h2><?php esc_html_e( 'Podaci o tvrtci', 'dreampoint-b2b' ); ?></h2>
@@ -26,6 +25,13 @@ $company_oib = get_user_meta($user_id, 'billing_oib', true); // Fetch 'billing_o
 	            <!-- /.ma-info -->
 	        </div>
 	        <!-- /.ma-holder -->
+
+		<div class="form-block-holder">
+			<div class="wod-title-holder">
+				<h2><?php esc_html_e( 'Podaci o računu', 'dreampoint-b2b' ); ?></h2>
+			</div>
+			<!-- /.wod-title-holder -->
+
 			<p class="woocommerce-form-row woocommerce-form-row--first form-row form-row-first">
 	            <label for="account_first_name"><?php esc_html_e( 'First name', 'woocommerce' ); ?>&nbsp;<span class="required">*</span></label>
 	            <input type="text" class="woocommerce-Input woocommerce-Input--text input-text" name="account_first_name" id="account_first_name" autocomplete="given-name" value="<?php echo esc_attr( get_user_meta( $user->ID, 'billing_first_name', true ) ); ?>" />
@@ -50,8 +56,14 @@ $company_oib = get_user_meta($user_id, 'billing_oib', true); // Fetch 'billing_o
 			</p>
 			
 			<?php
+				// The single phone field (storage: billing_phone); see inc/my-account.php.
+				if ( function_exists( 'dreampoint_b2b_add_phone_field_to_account' ) ) {
+					dreampoint_b2b_add_phone_field_to_account();
+				}
+
 				/**
 				 * Hook where additional fields should be rendered.
+				 * Company name and OIB are NOT editable here (client rule, shown in the read-only card above).
 				 *
 				 * @since 8.7.0
 				 */

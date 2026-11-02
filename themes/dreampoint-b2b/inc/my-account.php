@@ -197,35 +197,67 @@ function dreampoint_b2b_custom_privacy_checkbox() {
 // ============================================================================
 
 /**
- * Add phone field to My Account edit form
+ * The single phone field of the My Account edit form (name/id account_phone, storage billing_phone).
+ * Called directly from woocommerce/myaccount/user-form.php ("Podaci o računu" group); it is no longer
+ * hooked to woocommerce_edit_account_form, which used to output a second, conflicting copy.
  */
-add_action('woocommerce_edit_account_form', 'dreampoint_b2b_add_phone_field_to_account');
 function dreampoint_b2b_add_phone_field_to_account() {
     $user_id = get_current_user_id();
     $phone = get_user_meta($user_id, 'billing_phone', true);
     ?>
     <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
-        <label for="account_phone">
-            <?php esc_html_e('Telefon', 'dreampoint-b2b'); ?>
-            <span class="required">*</span>
-        </label>
-        <input 
-            type="tel" 
-            class="woocommerce-Input woocommerce-Input--phone input-text" 
-            name="account_phone" 
-            id="account_phone" 
-            value="<?php echo esc_attr($phone); ?>" 
+        <label for="account_phone"><?php esc_html_e('Telefon', 'dreampoint-b2b'); ?>&nbsp;<span class="required">*</span></label>
+        <input
+            type="tel"
+            class="woocommerce-Input woocommerce-Input--text input-text"
+            name="account_phone"
+            id="account_phone"
+            value="<?php echo esc_attr($phone); ?>"
             placeholder="<?php esc_attr_e('Broj telefona', 'dreampoint-b2b'); ?>"
             pattern="[0-9+\s\-\(\)]+"
             title="<?php esc_attr_e('Unesite važeći broj telefona', 'dreampoint-b2b'); ?>"
+            required
         />
     </p>
     <?php
 }
 
 /**
- * Save phone field from My Account form
- * 
+ * Validate the phone BEFORE anything is saved.
+ * WC_Form_Handler::save_account_details() runs woocommerce_save_account_details_errors before
+ * wp_update_user() and before woocommerce_save_account_details; any error aborts the whole save.
+ * Writes nothing. The phone is required server-side too (missing key, empty, whitespace-only and
+ * non-string/array values are rejected); the accepted format is unchanged.
+ *
+ * @param WP_Error $errors Account-save errors collected by WooCommerce
+ */
+add_action('woocommerce_save_account_details_errors', 'dreampoint_b2b_validate_account_phone', 10, 1);
+function dreampoint_b2b_validate_account_phone($errors) {
+    $raw = isset($_POST['account_phone']) ? wp_unslash($_POST['account_phone']) : null;
+
+    // Missing key or an unexpected type (e.g. account_phone[]=x): reject without touching the value.
+    if (!is_string($raw)) {
+        $errors->add('account_phone_required', __('Unesite broj telefona.', 'dreampoint-b2b'));
+        return;
+    }
+
+    // sanitize_text_field() trims, so whitespace-only becomes ''.
+    $phone = sanitize_text_field($raw);
+
+    if ('' === $phone) {
+        $errors->add('account_phone_required', __('Unesite broj telefona.', 'dreampoint-b2b'));
+        return;
+    }
+
+    if (!preg_match('/^[0-9+\s\-\(\)]+$/', $phone)) {
+        $errors->add('account_phone_invalid', __('Neispravan format telefona.', 'dreampoint-b2b'));
+    }
+}
+
+/**
+ * The only writer of billing_phone from the My Account form. Runs only after the validation above
+ * passed (WooCommerce skips this hook when any error exists).
+ *
  * @param int $user_id User ID being updated
  */
 add_action('woocommerce_save_account_details', 'dreampoint_b2b_save_phone_field', 10, 1);
@@ -234,18 +266,144 @@ function dreampoint_b2b_save_phone_field($user_id) {
     if (!isset($_POST['save-account-details-nonce'])) {
         return;
     }
-    
+
     if (isset($_POST['account_phone'])) {
-        $phone = sanitize_text_field($_POST['account_phone']);
-        
-        // Basic phone validation
-        if (!empty($phone) && !preg_match('/^[0-9+\s\-\(\)]+$/', $phone)) {
-            wc_add_notice(__('Neispravan format telefona.', 'dreampoint-b2b'), 'error');
-            return;
-        }
-        
-        update_user_meta($user_id, 'billing_phone', $phone);
+        update_user_meta($user_id, 'billing_phone', sanitize_text_field(wp_unslash($_POST['account_phone'])));
     }
+}
+
+// ============================================================================
+// BILLING MASTER DATA - read-only for the customer (client rule)
+// ============================================================================
+// Customers cannot change company name, OIB or the billing address; they can change shipping data and
+// the contact phone. Company/OIB are not in the profile form any more (see above); this block protects
+// the billing master fields on the customer paths that can still reach them. Authorised writers
+// (registration, wp-admin, importer, APROS) are separate code paths and are not touched: nothing here
+// filters update_user_meta or WC_Customer::save() globally.
+//
+// Hook points (WooCommerce 11.2.1, verified in source):
+// - My Account billing endpoint: WC_Form_Handler::save_address() (template_redirect) passes every submitted
+//   value through woocommerce_process_myaccount_field_{key} before set_*() and save() -> return the stored value.
+// - Classic checkout: woocommerce_checkout_update_customer (inc/checkout-logic.php), fired on the unsaved
+//   WC_Customer right before $customer->save().
+// - Store API cart/update-customer and Blocks checkout: implemented in inc/checkout-logic.php (not here); the
+//   existing-order route and customer-save protections are documented in docs/active/figma-alignment.md
+//   sections 53.7-53.8.
+
+/**
+ * The protected billing master fields. Not protected on purpose: billing_phone, billing_email, shipping_*.
+ * billing_oib is not an address field and has no customer write path any more.
+ *
+ * @return string[]
+ */
+function dreampoint_b2b_billing_master_fields(): array {
+    return array(
+        'billing_company',
+        'billing_address_1',
+        'billing_address_2',
+        'billing_city',
+        'billing_postcode',
+        'billing_state',
+        'billing_country',
+    );
+}
+
+/**
+ * Whether the protection applies to this user in the current request: the logged-in customer editing
+ * their own data, on an account that existed before this request (an account created during the same
+ * request, e.g. at checkout, is still being initialised).
+ */
+function dreampoint_b2b_billing_master_applies( int $user_id ): bool {
+    if ( $user_id <= 0 || get_current_user_id() !== $user_id ) {
+        return false;
+    }
+
+    $user = get_userdata( $user_id );
+    if ( ! $user ) {
+        return false;
+    }
+
+    $registered = strtotime( $user->user_registered . ' UTC' );
+    $request    = (int) ( $_SERVER['REQUEST_TIME'] ?? time() );
+
+    return false !== $registered && $registered < $request;
+}
+
+/**
+ * Persisted master value (user meta). Read before the current request saves anything, so it cannot
+ * already contain the submitted value. A mutated WC_Customer getter must not be used for this.
+ */
+function dreampoint_b2b_stored_billing_master_value( int $user_id, string $key ): string {
+    return (string) get_user_meta( $user_id, $key, true );
+}
+
+/**
+ * Reset the protected billing props of an UNSAVED WC_Customer to the persisted master values (empty
+ * stored values stay empty). Must be called before $customer->save(); restoring after the save would
+ * only re-read what the same request has just written.
+ *
+ * @param mixed $customer Expected WC_Customer.
+ */
+function dreampoint_b2b_restore_billing_master( $customer ): void {
+    if ( ! $customer instanceof WC_Customer ) {
+        return;
+    }
+
+    $user_id = (int) $customer->get_id();
+    if ( ! dreampoint_b2b_billing_master_applies( $user_id ) ) {
+        return;
+    }
+
+    foreach ( dreampoint_b2b_billing_master_fields() as $key ) {
+        $setter = 'set_' . $key;
+        if ( is_callable( array( $customer, $setter ) ) ) {
+            $customer->$setter( dreampoint_b2b_stored_billing_master_value( $user_id, $key ) );
+        }
+    }
+}
+
+// My Account billing endpoint: a submitted value never replaces the master value, and an omitted
+// field cannot clear it (the stored value is returned in both cases).
+array_map(
+    static function ( string $key ): void {
+        add_filter(
+            'woocommerce_process_myaccount_field_' . $key,
+            static function ( $value ) use ( $key ) {
+                $user_id = get_current_user_id();
+                return dreampoint_b2b_billing_master_applies( $user_id )
+                    ? dreampoint_b2b_stored_billing_master_value( $user_id, $key )
+                    : $value;
+            }
+        );
+    },
+    dreampoint_b2b_billing_master_fields()
+);
+
+// UI only (the filters above are the enforcement). Selects cannot be `readonly` and must not be
+// `disabled`: save_address() returns without saving when billing_country is not posted, which would also
+// drop phone / e-mail changes. They are made inert with a class instead (myaccount.scss).
+add_filter( 'woocommerce_address_to_edit', 'dreampoint_b2b_lock_billing_master_fields_ui', 10, 2 );
+function dreampoint_b2b_lock_billing_master_fields_ui( $address, $load_address ) {
+    if ( 'billing' !== $load_address || ! is_array( $address ) ) {
+        return $address;
+    }
+
+    foreach ( dreampoint_b2b_billing_master_fields() as $key ) {
+        if ( ! isset( $address[ $key ] ) || ! is_array( $address[ $key ] ) ) {
+            continue;
+        }
+
+        $type = $address[ $key ]['type'] ?? 'text';
+
+        $address[ $key ]['class']   = array_merge( (array) ( $address[ $key ]['class'] ?? array() ), array( 'dp-locked-field' ) );
+        $address[ $key ]['custom_attributes']['aria-readonly'] = 'true';
+
+        if ( ! in_array( $type, array( 'country', 'state', 'select' ), true ) ) {
+            $address[ $key ]['custom_attributes']['readonly'] = 'readonly';
+        }
+    }
+
+    return $address;
 }
 
 // ============================================================================

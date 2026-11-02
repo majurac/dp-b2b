@@ -532,8 +532,10 @@
         // Figma: bold field labels above the inputs
         label { font-weight: 600; }
         .button { margin-left: 0; }
+        // Figma small text (Montserrat 500 12/20): display-name helper under the input
         span em {
-            @include paragraph-normal;
+            @include text-sm-medium;
+            font-style: normal;
             color: $dp-color-text-tertiary;
         }
     }
@@ -567,6 +569,15 @@
     .button--add:before {
         -webkit-mask-image: url('../../img/ico/account-add.svg');
         mask-image: url('../../img/ico/account-add.svg');
+    }
+
+    // Billing master fields on the billing edit-address endpoint: shown, not editable (the server side
+    // is enforced in inc/my-account.php; selects cannot be readonly/disabled there).
+    .form-row.dp-locked-field {
+        pointer-events: none;
+        input, select, .select2-selection {
+            background-color: $dp-color-bg-tertiary;
+        }
     }
 
     // Empty states (addresses, orders) sit centred in the content column

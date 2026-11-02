@@ -5,6 +5,14 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## 2026-11-02 (D5 closure + end-of-day handoff) — Contact page COMPLETE, VISUAL/UI VERIFIED ON STAGING
+
+Figma CON-01 `11148:37535`. D5 audit found the page structure, form (fields, labels, placeholders, 44/96/40 px controls, Primary L submit with icon), Croatian validation and a11y already compliant. Two approved changes: (1) staging ACF only, `intro_text_contact` on the Contact page (ID 1756) was empty and now holds the Figma intro text, saved through the WordPress editor (no template change; renders under H1 at 1440 and 390, no overflow, 0 console errors); (2) code `e1bf521`: "Partner nema dodeljenog komercijalistu" → "dodijeljenog" in `functions.php`. Intentionally unchanged: helper text about forwarding to the sales representative stays hidden, native select arrow kept, CF7 configuration/routing/recipients untouched.
+
+**NOT VERIFIED (retained):** real CF7 submission and e-mail delivery, fallback mailbox, SPF/DKIM of the sender domain (no real message may be sent without separate approval). The corrected fallback string is verified in deployed code only (no staging user without an assigned representative; assignments deliberately not changed). Owner decisions still open: helper text under "Pošaljite poruku" (only once delivery is confirmed), native vs custom select chevron (site-wide `.custom-form`).
+
+**Handoff (end of day 2026-11-02):** D4 and D5 closed (code `4493b48`, `b9d9994`, `d058d61`, `e1bf521`; docs follow). Next roadmap task: the read-only audits E3/E4/E5 (404 / no-results / empty-address), then E2 (FAQ vs Figma `79:22758`), then B1 scope. Staging was synchronized `--ff-only` after every push; no production exists.
+
 ## 2026-11-02 (D4 closure) — shared contact-information component COMPLETE, VERIFIED ON STAGING
 
 Figma reference corrected: CON-01 `11148:37535` (Contact page), homepage card `11148:31575`, button `11148:37591`; the URL node `11148:38315` is a checkout payment panel, not D4. Code commits `4493b48`, `b9d9994`, `d058d61` (theme files: `functions.php` `[contact_info]`, `inc/enqueue-block-styles.php`, `inc/myaccount-komercijalist.php`, `sass/blocks/contact-info.scss` + compiled CSS). `/kontakt/` renders the card with caption, photo and a two-column variant (`.contact-content--page`: representative + button | company details, no intro) using the same shortcode, ACF fields and assignment logic; the homepage three-column card is unchanged. `/my-account/komercijalist/` reuses `.ma-holder`, hides empty rows and has a Croatian fallback string. Staging QA at 1440/1024/768/390 with no horizontal overflow and no console errors; the no-assignment fallback was not exercised (no unassigned user, assignments not changed). No ERP/pricing/checkout/DB/ACF content change.

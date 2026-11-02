@@ -1112,7 +1112,7 @@ function dreampoint_b2b_contact_info_shortcode(): string {
                         } else {
                             // Fallback na opće kontakt podatke ako komercijalist nije dodijeljen.
                             ?>
-                            <p><?php esc_html_e( 'Partner nema dodeljenog komercijalistu', 'dreampoint-b2b' ); ?></p>
+                            <p><?php esc_html_e( 'Partner nema dodijeljenog komercijalistu', 'dreampoint-b2b' ); ?></p>
                             <?php
                         }
                     ?>

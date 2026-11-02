@@ -222,7 +222,7 @@
             grid-column: 1;
             grid-row: 2 / span 3;
             .commercialist-contact { margin-top: 0; }
-            > .button { margin-top: 14px; }
+            > .button { margin-top: 32px; } // Figma CON-01: ~34px below the e-mail line
         }
         .contact-details { grid-column: 2; }
         @include bp(lg-up) {

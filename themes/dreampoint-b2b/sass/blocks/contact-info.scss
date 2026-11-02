@@ -225,14 +225,14 @@
             > .button { margin-top: 32px; } // Figma CON-01: ~34px below the e-mail line
         }
         .contact-details { grid-column: 2; }
-        @include bp(lg-up) {
+        @include bp(md-up) {
             grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
         }
     }
     .contact-content--page.contact-content--has-photo {
         .commercialist { grid-column: 2; }
         .contact-details { grid-column: 3; }
-        @include bp(lg-up) {
+        @include bp(md-up) {
             grid-template-columns: 184px minmax(0, 320px) minmax(0, 1fr);
         }
         @include bp(md-down) {
@@ -248,7 +248,8 @@
     }
     // Tablet details row sits below the representative (row 5, set above); phone stacks everything.
     @include bp(sm-down) {
-        .contact-content--page {
+        .contact-content--page,
+        .contact-content--page.contact-content--has-photo {
             grid-template-columns: minmax(0, 1fr);
             .commercialist { grid-column: 1; grid-row: 3; }
             .contact-details { grid-column: 1; grid-row: 4; }

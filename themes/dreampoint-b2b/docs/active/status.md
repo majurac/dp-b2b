@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## 2026-11-02 (D3 closure) — My Account orders "Pogledaj" button COMPLETE, VERIFIED ON STAGING
+
+Correction commit `527d29c` (staging-deployed, fast-forward): `woocommerce/myaccount/orders.php` shows "Pogledaj" for the `view` action (theme text domain; URL and accessible name unchanged), `sass/pages/myaccount.scss` + `css/pages/myaccount.css` give the button a white fill and `#0d121c` 1px border at rest only (Figma MPR-05 `11148:38076`). QA on staging: desktop screenshot (label + colours), computed styles (`#fff` / `1px solid rgb(13,18,28)`), URL `/my-account/view-order/147/`, `aria-label` "Pogledajte narudžbu 147", genuine keyboard Tab focus ring, 390 px no clipping/overflow, 0 console errors. Not verified: pointer hover. Width 122 px vs Figma 105 px (shared Secondary M padding) accepted. No orders were created or changed.
+
 ## 2026-11-02 (F2 closure) — checkout shipping-method card styling COMPLETE, OWNER ACCEPTED ON STAGING
 
 CSS-only, native WooCommerce Blocks preserved. Commits `a745336` (GLS / Osobna dostava delivery cards) and `4af5b60` (removes the Blocks group frame `.wc-block-components-radio-control--highlight-checked::after`), both deployed to staging. Final owner decision: keep the native Shipping/Pickup toggle; no unified three-card React selector. **Acceptance = owner visual review on staging.** Automated evidence is narrower: computed styles + Store API smoke (GLS/Osobna/pickup, totals, BACS only, 0 console errors), a mobile 390 px screenshot and genuine keyboard Tab focus (`:focus-visible` ring) PASSED; a desktop screenshot and real pointer hover were NOT verified automatically (screenshot timeouts, hover tool could not stabilise). A4 shipping-method client approval, A11 mapping and the 1-location / post-order-reset APROS scenarios remain open (ADR-037).

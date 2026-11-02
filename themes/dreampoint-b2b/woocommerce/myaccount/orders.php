@@ -83,7 +83,9 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 										}
 										// Figma Secondary M; only "view" carries the arrow.
 										$action_classes = 'button button--sm button--outline' . ( 'view' === $key ? ' button--icon-after' : '' );
-										echo '<a href="' . esc_url( $action['url'] ) . '" class="woocommerce-button' . esc_attr( $wp_button_class ) . ' ' . esc_attr( $action_classes ) . ' ' . sanitize_html_class( $key ) . '" aria-label="' . esc_attr( $action_aria_label ) . '" title="' . esc_attr( $action['name'] ) . '">' . esc_html( $action['name'] ) . '</a>';
+										// Figma MPR-05 label for the "view" action; the accessible name (aria-label) is untouched.
+										$action_label = 'view' === $key ? __( 'Pogledaj', 'dreampoint-b2b' ) : $action['name'];
+										echo '<a href="' . esc_url( $action['url'] ) . '" class="woocommerce-button' . esc_attr( $wp_button_class ) . ' ' . esc_attr( $action_classes ) . ' ' . sanitize_html_class( $key ) . '" aria-label="' . esc_attr( $action_aria_label ) . '" title="' . esc_attr( $action_label ) . '">' . esc_html( $action_label ) . '</a>';
 										unset( $action_aria_label );
 									}
 								}

@@ -720,6 +720,13 @@
                 flex-grow: 1;
             }
         }
+
+        // Figma MPR-05 "Pogledaj" button (11148:38076): white fill, dark 1px border. Rest state only;
+        // hover / pressed keep the shared Secondary M states from button-figma-secondary-colors.
+        .button--outline.view:not(:hover):not(:active) {
+            background: $white;
+            border-color: $dp-color-bg-brand;
+        }
     }
 
     // Existing rule, unchanged in effect: "order again" stays visibly disabled for non-completed orders

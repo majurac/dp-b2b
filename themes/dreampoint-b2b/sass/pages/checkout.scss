@@ -253,6 +253,12 @@
                 grid-template-columns: 1fr;
                 gap: 16px;
             }
+
+            // Blocks (packages-style.css) frames a checked group with `.wc-block-components-radio-control--highlight-checked::after`
+            // (absolute, inset 0, 1px border). Cards carry their own border, so drop the group frame.
+            &:after {
+                display: none;
+            }
         }
 
         .wc-block-components-radio-control__option {

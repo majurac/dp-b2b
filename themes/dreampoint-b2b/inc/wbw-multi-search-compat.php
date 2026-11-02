@@ -128,13 +128,13 @@ function dreampoint_b2b_wbw_multi_search_compat( string $html, $settings, $filte
         'product_cat'   => array(
             'blockId'          => 'wpfCategory',
             'inputClass'       => 'wpfSearchFieldsFilter passiveFilter',
-            'defaultLabel'     => __( 'Search categories', 'dreampoint-b2b' ),
+            'defaultLabel'     => __( 'Pretraži kategorije', 'dreampoint-b2b' ),
             'supportsUnfolding' => true,
         ),
         'product_brand' => array(
             'blockId'          => 'wpfBrand',
             'inputClass'       => 'wpfSearchFieldsFilter',
-            'defaultLabel'     => __( 'Search brands', 'dreampoint-b2b' ),
+            'defaultLabel'     => __( 'Pretraži brendove', 'dreampoint-b2b' ),
             // Brands are not hierarchical — WBW itself does not offer
             // unfolding/collapse-by-search options for this block type.
             'supportsUnfolding' => false,

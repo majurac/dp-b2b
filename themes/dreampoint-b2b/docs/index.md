@@ -42,6 +42,7 @@ Active engineering guidance lives in:
 | Doc | Covers |
 |-----|--------|
 | `docs/active/current-phase.md` | Current phase status (Quick Order: COMPLETE, maintenance mode as of 2026-07-21; redesign slices 1–3 accepted 2026-10-05), frozen system boundaries, current philosophy |
+| `docs/active/master-roadmap.md` | **Authoritative master roadmap and task tracker (2026-10-31)** — workstreams WS-A..G, owner observations U01–U16 mapped to task IDs, dependency map, carried-over open items, Next Ready Tasks; detail stays in `status.md`, `figma-alignment.md`, `decisions.md` |
 | `docs/active/status.md` | Implementation status matrix per system — Quick Order milestone marked COMPLETE 2026-07-21 |
 | `docs/active/quick-order-catalog-filters-spec.md` | Catalog Filters (New/Best Seller/Already Ordered) design rationale — **implementation COMPLETE**, retained as historical design record; current behavior documented in the plugin's `readme.md` |
 | `docs/active/homepage-segment-landing-architecture.md` | Homepage + Segment Landing (Lifestyle/Toys/Outdoor) structure and shared-visibility rule — **IMPLEMENTED & DEPLOYED 2026-09-23** (staging, commit `c4dc61d`). ADR-009 Phase B wiring complete; real `brand_segment` content population and pixel-level Figma visual polish remain open. |

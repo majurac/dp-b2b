@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## 2026-11-02 (B3/B4) — catalog result count Croatian (COMPLETE), WBW strings PARTIAL
+
+Code commit `5445d8d` (staging-deployed, fast-forward). **B4:** `woocommerce/loop/result-count.php` now prints `N proizvod` / `N proizvoda` (hr plural rule, Croatian msgids in the `dreampoint-b2b` domain); verified as customer `vis_full` on the category archive (`25 proizvoda`, `24 proizvoda` after the "Na stanju" filter). Root cause: English msgids in the `woocommerce` domain missing from the hr pack (not the admin `en_US` locale). **B3 PARTIAL:** theme-loaded `languages/plugins/woo-product-filter-hr.{po,mo}` translates "In Stock" / "Out of Stock" / "Minimum Price" / "Maximum Price" (Na stanju / Nema na stanju / Minimalna cijena / Maksimalna cijena); the WBW button "Clear" and the hidden "Search categories" placeholder are saved filter settings (DB) and remain English pending owner approval of a WBW admin edit. Quick Order sidebar and brand archives were not rescanned. No orders, DB or WooCommerce settings changed.
+
 ## 2026-11-02 (D3 closure) — My Account orders "Pogledaj" button COMPLETE, VERIFIED ON STAGING
 
 Correction commit `527d29c` (staging-deployed, fast-forward): `woocommerce/myaccount/orders.php` shows "Pogledaj" for the `view` action (theme text domain; URL and accessible name unchanged), `sass/pages/myaccount.scss` + `css/pages/myaccount.css` give the button a white fill and `#0d121c` 1px border at rest only (Figma MPR-05 `11148:38076`). QA on staging: desktop screenshot (label + colours), computed styles (`#fff` / `1px solid rgb(13,18,28)`), URL `/my-account/view-order/147/`, `aria-label` "Pogledajte narudžbu 147", genuine keyboard Tab focus ring, 390 px no clipping/overflow, 0 console errors. Not verified: pointer hover. Width 122 px vs Figma 105 px (shared Secondary M padding) accepted. No orders were created or changed.

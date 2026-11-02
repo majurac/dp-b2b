@@ -234,6 +234,103 @@
 
 
     // -------------------------
+    // SHIPPING METHOD CARDS (F2, CSS only)
+    // -------------------------
+    // Native Blocks delivery rates (#shipping-option) presented as selectable cards, inspired by the
+    // Figma CH-02 address cards (11148:38290). Figma has no shipping-method frame: this is a visual
+    // approximation, not a pixel match. The native radio stays in the DOM (opacity 0, still focusable);
+    // the Store API remains the only source of truth. Pickup (#pickup-options) and the payment
+    // controls are not matched by this scope. The two !important declarations only beat the legacy
+    // `.wc-block-components-radio-control__option` rules above (padding / checked border), which are !important.
+    #shipping-option .wc-block-components-shipping-rates-control__package {
+
+        .wc-block-components-radio-control {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 240px));
+            gap: 24px;
+
+            @include bp(sm-down) {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+        }
+
+        .wc-block-components-radio-control__option {
+            @include animate-fade;
+            padding: 12px !important;
+            border: 1px solid $dp-color-border-primary;
+            border-radius: 8px;
+            background: $dp-color-bg-secondary;
+            cursor: pointer;
+
+            // Blocks draws a 1px divider between options; cards do not need it.
+            &:after {
+                display: none;
+            }
+
+            &:hover {
+                border-color: $dp-color-border-control;
+            }
+        }
+
+        // Selected: same 1px border width (no layout shift), emphasis via colour, inset ring and shadow.
+        .wc-block-components-radio-control__option-checked,
+        .wc-block-components-radio-control__option--checked-option-highlighted {
+            border: 1px solid $dp-color-bg-brand !important;
+            background: $dp-color-bg-primary;
+            box-shadow: inset 0 0 0 1px $dp-color-bg-brand, 0 4px 12px rgba($dp-color-bg-brand, 0.12);
+        }
+
+        // Native radio: visually hidden but kept focusable and exposed to assistive technology.
+        .wc-block-components-radio-control__input {
+            opacity: 0;
+        }
+
+        // Keyboard focus: ring drawn on the card (the input itself is transparent).
+        .wc-block-components-radio-control__input:focus-visible ~ .wc-block-components-radio-control__option-layout:after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 8px;
+            box-shadow: 0 0 0 2px $dp-color-bg-primary, 0 0 0 4px $dp-color-text-primary;
+            pointer-events: none;
+        }
+
+        .wc-block-components-radio-control__option-layout {
+            display: block;
+        }
+
+        .wc-block-components-radio-control__label-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+        }
+
+        .wc-block-components-radio-control__label,
+        .wc-block-components-radio-control__secondary-label {
+            flex: 0 0 auto;
+            width: auto;
+            font-family: 'Montserrat';
+            font-size: 14px;
+            line-height: 20px;
+            letter-spacing: 0;
+            text-align: left;
+        }
+
+        .wc-block-components-radio-control__label {
+            font-weight: 600;
+            color: $dp-color-text-primary;
+        }
+
+        .wc-block-components-radio-control__secondary-label {
+            font-weight: 400;
+            color: $dp-color-text-secondary;
+        }
+    }
+
+
+    // -------------------------
     // BUTTONS
     // -------------------------
     .wc-block-checkout__actions_row {

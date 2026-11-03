@@ -459,7 +459,8 @@
                     overflow-x: hidden; // was `scroll`: always-visible scrollbars on a list that is never taller than its box
                     overflow-y: auto;
                     height: auto;
-                    transition: all 0.3s ease-out;
+                    // closing: stay visible until the fade ends; opening (.active below): visible at once
+                    transition: opacity 0.3s ease-out, visibility 0s linear 0.3s;
                     list-style: none;
                     opacity: 0;
                     visibility: hidden; // closed links must not be focusable
@@ -495,6 +496,7 @@
                     .dropd {
                         opacity: 1;
                         visibility: visible;
+                        transition: opacity 0.3s ease-out, visibility 0s;
                         pointer-events: auto;
                     }
                 }

@@ -781,7 +781,7 @@ body.page-template-contact-php #page div.custom-form .wpcf7-not-valid + .select2
 }
 
 // Panel sits above the sticky header / mobile bottom bar (z-index 9999); Select2's default 1051 would open behind them.
-body.page-template-contact-php .select2-dropdown {
+body.page-template-contact-php .select2-container .select2-dropdown {
     z-index: 10000;
     background: $white;
     // Select2 sets aria-selected="true" on the highlighted (hovered / keyboard) row; only the really selected row
@@ -791,8 +791,9 @@ body.page-template-contact-php .select2-dropdown {
     }
     // Normal: white + dark text. Highlighted (hover / keyboard): #f3f4f6 + dark text (shared rule, restated for the
     // selected-row exception below). Selected: #171717 + white text; when it is also highlighted it keeps the dark
-    // fill and gains an inset gray ring, so the two states stay distinguishable. Specificity (0,5,1) beats the shared
-    // `:is(...) .select2-dropdown .select2-results__option[aria-selected]` !important rules (0,4,1).
+    // fill and gains an inset gray ring, so the two states stay distinguishable. Specificity (0,6,1) beats the shared
+    // `:is(...) .select2-dropdown .select2-results__option[aria-selected]` !important rules (0,4,1); the panel rule
+    // (0,3,1) also outranks the shared panel background (0,2,1).
     .select2-results__option.select2-results__option--selected[aria-selected] {
         background-color: $contact-select2-selected-bg !important;
         color: $white !important;

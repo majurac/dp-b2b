@@ -391,9 +391,15 @@
             }
         }
 
+        // Mobile dropdown typography = the desktop sidebar link style above (sentence case, body font);
+        // heading-6 would force uppercase + 0.14em tracking.
         .tab-placeholder {
-            @include heading-6;
+            font-family: $dp-font-body;
+            font-size: 16px;
             font-weight: 400;
+            line-height: 18px;
+            letter-spacing: 0;
+            text-transform: none;
             display: flex;
             align-items: center;
             padding: 8px 16px;
@@ -440,8 +446,12 @@
 
                     li {
                         a {
-                            @include heading-6;
+                            font-family: $dp-font-body;
+                            font-size: 16px;
                             font-weight: 400;
+                            line-height: 18px;
+                            letter-spacing: 0;
+                            text-transform: none;
                             display: flex;
                             align-items: center;
                             padding: 8px 16px;
@@ -607,6 +617,14 @@
         p {
             margin-bottom: 24px;
             font-weight: 400;
+        }
+        // Orders empty CTA (Figma MPR-05 11148:38155): 160x48, 12px padding, 16px / 0.32px label, 24px radius.
+        // Only the plain XL button; the address CTA has its own icon variant below.
+        .button.button--xl:not(.button--add) {
+            padding: 11px;
+            font-size: 16px;
+            line-height: 16px;
+            letter-spacing: 0.32px;
         }
         // Figma left-icon XL button is 48px (14px vertical padding), the plain XL padding gives 52px
         .button--add {

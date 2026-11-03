@@ -13,6 +13,16 @@ Figma CON-01 `11148:37535`. D5 audit found the page structure, form (fields, lab
 
 **Handoff (end of day 2026-11-02):** D4 and D5 closed (code `4493b48`, `b9d9994`, `d058d61`, `e1bf521`; docs follow). Next roadmap task: the read-only audits E3/E4/E5 (404 / no-results / empty-address), then E2 (FAQ vs Figma `79:22758`), then B1 scope. Staging was synchronized `--ff-only` after every push; no production exists.
 
+## 2026-11-03 (E3 / E4 / E5) — 404, no-results and empty-address Figma alignment COMPLETE, VERIFIED ON STAGING
+
+Code `9370d67`, `2e0d98e`, `6d3422c` (staging fast-forwarded after each push; QO plugin 1.0.38). The first read-only audit wrongly passed E3 on functional grounds; the corrected audit compared actual Figma renders (SYS-01 `11148:37607`, QO-03 `11148:39132`, MPR-02 `11148:37742`) with staging.
+
+- **E3:** `404.php`, `#not-found` SCSS (reuses `img/bg/dp-pattern.png`), `header.php` hides the breadcrumb banner on 404, new `img/ico/arrow-left.svg`. HTTP 404 preserved.
+- **E5:** `my-address.php` + `.not-found-holder--address` modifier; Figma SVG `img/ico/emoji-sad.svg`. Orders empty state (MPR-05) deliberately untouched.
+- **E4:** QO empty state restyled to QO-03 (plugin CSS/JS inline SVG); generic search templates translated.
+- **Intentional deviations:** E5 button still opens shipping-address editing; storefront product no-results message and live-search dropdown keep existing designs (no Figma frames); 404 and E5 have no mobile frames, responsive behaviour is pragmatic; QO sticky cart bar can overlap the buttons at short viewports (pre-existing layout).
+- **Evidence:** screenshots compared at 1440 px (and 390 px for E3/E5); console clean apart from the expected 404 resource; address-button navigation verified without saving; admin session restored.
+
 ## 2026-11-02 (D4 closure) — shared contact-information component COMPLETE, VERIFIED ON STAGING
 
 Figma reference corrected: CON-01 `11148:37535` (Contact page), homepage card `11148:31575`, button `11148:37591`; the URL node `11148:38315` is a checkout payment panel, not D4. Code commits `4493b48`, `b9d9994`, `d058d61` (theme files: `functions.php` `[contact_info]`, `inc/enqueue-block-styles.php`, `inc/myaccount-komercijalist.php`, `sass/blocks/contact-info.scss` + compiled CSS). `/kontakt/` renders the card with caption, photo and a two-column variant (`.contact-content--page`: representative + button | company details, no intro) using the same shortcode, ACF fields and assignment logic; the homepage three-column card is unchanged. `/my-account/komercijalist/` reuses `.ma-holder`, hides empty rows and has a Croatian fallback string. Staging QA at 1440/1024/768/390 with no horizontal overflow and no console errors; the no-assignment fallback was not exercised (no unassigned user, assignments not changed). No ERP/pricing/checkout/DB/ACF content change.

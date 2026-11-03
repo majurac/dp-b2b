@@ -1163,3 +1163,11 @@ Closes the two paths found by the three-gate audit. Code: `inc/checkout-logic.ph
 ## 54. Master roadmap pointer (2026-10-31, documentation only)
 
 The Figma-related backlog of §42 (T1–T10), the T7 family (§53) and the owner's observations U01–U16 are now tracked in one place: `docs/active/master-roadmap.md` (task IDs B1 product cards, B2 = T9 WBW skin, C2 PDP, C3/C4 brands, D2–D5 My Account/Contact, E1 = T10 Quick Order, E2 FAQ, E3–E5 error/empty states, F1–F4 checkout CH-01/02/03). New Figma references: FAQ file `FcZ1ja4QTalgsMB1vKGOWH` node `79:22758` (not read yet). Figma frames were not re-read in this session; no new measurement is recorded here. This section changes no earlier section.
+
+## 55. E3 / E4 / E5 system states (2026-11-03, CLOSED / VERIFIED ON STAGING)
+
+Frames: SYS-01 `11148:37607` (404; SYS-02 `11148:37653` is a 500 page, not implemented), QO-03 `11148:39132` (Quick Order empty state `11276:25073`), MPR-02 `11148:37742` (empty address). No frames exist for the storefront product no-results message, the live-search "no results" state or generic `/?s=`; those keep the existing design (generic search only translated).
+
+Measured SYS-01 values: "404" Petrona 600 428 px / line 482, `#6c727e`, overlapped by the heading by 73 px; H1 Petrona 600 64/72; text Montserrat 18; button XL with left arrow (label 16 px, 0.32 px tracking, 14 px vertical padding), dp watermark 1440x960. MPR-02 / QO-03: 144 px icon, 16 px gap, Petrona 600 40 px sentence-case heading, 8 px gap, Montserrat 18 text.
+
+Implementation notes: `.not-found-holder` is shared with the empty cart and orders empty state, so all E3/E5 rules are scoped (`#not-found`, `.not-found-holder--address`). Figma SVGs are used unmodified (`img/ico/emoji-sad.svg`, `img/ico/arrow-left.svg`, QO inline SVG with the Figma paths). The Figma QO secondary button is white with a dark border, so the QO plugin CSS overrides the theme `.button--outline` default with higher specificity. Code `9370d67`, `2e0d98e`, `6d3422c`.

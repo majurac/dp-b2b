@@ -606,6 +606,12 @@
         }
         p {
             margin-bottom: 24px;
+            font-weight: 400;
+        }
+        // Figma left-icon XL button is 48px (14px vertical padding), the plain XL padding gives 52px
+        .button--add {
+            padding-top: 13px;
+            padding-bottom: 13px;
         }
     }
 

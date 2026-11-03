@@ -482,6 +482,8 @@
                             align-items: center;
                             padding: 8px 16px;
                             background: $white;
+                            // the global a { transition: all } would delay the inherited visibility by 0.3s
+                            transition-property: color, background-color;
                         }
                         &.is-active a {
                             color: $white;

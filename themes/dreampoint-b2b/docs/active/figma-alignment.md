@@ -34,7 +34,7 @@ Functional structure mostly matches Figma; visual layer does not. Single systemi
 | Quick Order | near match | near match; English WBW strings; Figma shows "Na stanju 46 kom" (conflicts with ADR-016) | MATCHED/PARTIAL |
 | Brands | 4 columns, tabs | 3 columns, many brand images missing (data) | PARTIAL |
 | Registration | Ime, Prezime, E-mail, Lozinka, Firma, OIB | 7 B2B fields, set-password mail | CONFLICT (decision) |
-| 404/500, Contact, FAQ, My Account | per frames | partially English, duplicate `/contact/` and `/kontakt/` pages | PARTIAL |
+| 404/500, Contact, FAQ, My Account | per frames | partially English, duplicate `/contact/` and `/kontakt/` pages | PARTIAL (FAQ done: §58) |
 
 Customer-facing English strings seen on staging (separate i18n follow-up): page titles "My account", "Cart", "Shop", "Quick Order", "Contact"; WC dashboard text (`header.php` ~457, `woocommerce` domain, no hr translation); "451 products", "In Stock", "Search categories", "CLEAR", "Add to Wishlist", "Sort By", "Tax", "Flat rate", "Cash on delivery", "First Name/Last Name".
 
@@ -1180,3 +1180,12 @@ Frame CAT-05 `11148:40433` (empty state `11148:40576`, 808 px results column): 1
 
 Supersedes the "ERP note: INTENTIONALLY OMITTED" decision of 53.1: owner supplied the wording and scope on 2026-11-03. Frames: MPR-01 notice `11148:37514` (lock icon `vuesax/linear/lock`, text `11148:37517`), MPR-03 notice `11148:37885`; the CH-01 variant uses an info-circle icon and is not used here. Implementation, ownership caveats (phone row in the company card, APROS sync blocked) and the dropdown button/ARIA changes: see status.md 2026-11-03 (My Account ERP notices + dropdown accessibility). Code `6303e31`, `d026337`, `f5ee790`.
 
+## 58. E2 FAQ page (2026-11-03, CLOSED / VERIFIED ON STAGING)
+
+Frame **CON-02 `79:22758` in Figma file `FcZ1ja4QTalgsMB1vKGOWH`** (the earlier reference to the Copy file `Te4kr3o8kXDgBLzHewKSYU` is wrong: that file does not contain the node). Desktop 1440 only; no tablet/mobile frame exists in the node.
+
+Measured Figma values used: banner height 319 (breadcrumb 12 px, H1 Petrona 600 64/72, subtitle Montserrat 500 16/24 at 380 px, tabs 14 px SemiBold 0.28 px tracking, 24 px gap, 1 px `#e5e7eb` rule, 2 px `#0d121c` active line), list 891 px at x=120 (left-aligned, 32 px below the banner), items 16 px apart; closed item `#fcfcfd`, 16 px padding, 56 px high; open item `#f3f4f6`, top border `#eddef0`, 32/16 padding, 16 px question-answer gap; question Petrona 600 16 (no uppercase, no tracking), answer Montserrat 400 14/18, 24 px plus/minus, pagination row with `#eaecf0` top rule, 40 px items (active 8 px radius `#0d121c`), 20 px arrows.
+
+Decisions: tabs are the three existing terms (`faq-category`, `term_id` order), server-side filter (`?faq_cat`), the subtitle is a translatable default (ACF `intro_text_contact` still wins), content untouched, title stays Croatian. Questions use the `text-primary` token instead of the Figma fallback `black` (visually identical). The global `heading-6` mixin and other accordions were not touched; all rules are scoped to `#faq-body` / `.inner-heading .faq-tabs` / `.faq-pagination`.
+
+Result and limits: see `docs/active/status.md` 2026-11-03 (E2 FAQ). Pagination with real data is NOT VERIFIED (3 posts per category, page size 10); the Figma pagination styling was checked on injected non-persistent markup only.

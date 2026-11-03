@@ -93,10 +93,14 @@
         transform-origin: top left;
     }
 
+    // Invalid fields stay red while focused (the monochrome focus ring above would otherwise mix with the red border).
     .has-error {
         input,
         .wc-blocks-components-select__select {
             border-color: $error !important;
+            &:focus {
+                box-shadow: 0 0 0 3px $dp-color-focus-ring-error;
+            }
         }
     }
 

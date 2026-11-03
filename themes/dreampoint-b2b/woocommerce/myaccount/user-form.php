@@ -23,6 +23,13 @@ $company_oib = get_user_meta($user_id, 'billing_oib', true); // Fetch 'billing_o
 	                <p><span><?php esc_html_e('Phone', 'woocommerce'); ?>:</span> <strong><?php echo esc_html($phone); ?></strong></p>
 	            </div>
 	            <!-- /.ma-info -->
+	            <?php
+	            get_template_part(
+				'template-parts/account-erp-notice',
+				null,
+				array( 'text' => __( 'Podaci o firmi preuzimaju se iz ERP sistema. Za izmjene kontaktirajte svog prodajnog predstavnika ili korisničku podršku.', 'dreampoint-b2b' ) )
+	            );
+	            ?>
 	        </div>
 	        <!-- /.ma-holder -->
 

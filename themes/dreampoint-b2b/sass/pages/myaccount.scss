@@ -402,11 +402,34 @@
             text-transform: none;
             display: flex;
             align-items: center;
+            position: relative;
+            width: 100%;
+            margin: 0;
             padding: 8px 16px;
+            padding-right: 40px; // room for the chevron drawn by .wrapper-dropdown:after
             background: $white;
             color: $dp-color-text-secondary;
             border: 1px solid $dp-color-border-primary;
+            border-radius: 0;
+            text-align: left;
+            cursor: pointer;
+            -webkit-appearance: none;
+            appearance: none;
             @include bp(md-up) { display: none; }
+            &:focus-visible {
+                outline: 0;
+                box-shadow: 0 0 0 2px $dp-color-bg-primary, 0 0 0 4px $dp-color-text-primary;
+            }
+            // Visually hidden purpose prefix for the accessible name ("Izbornik računa: <current>")
+            .dp-dd-prefix {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                margin: -1px;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+                white-space: nowrap;
+            }
         }
 
         @include bp(md-down) {
@@ -439,6 +462,7 @@
                     transition: all 0.3s ease-out;
                     list-style: none;
                     opacity: 0;
+                    visibility: hidden; // closed links must not be focusable
                     pointer-events: none;
                     text-align: left;
                     border-radius: 6px;
@@ -470,6 +494,7 @@
                     &:after { transform: translateY(-50%) rotate(180deg); }
                     .dropd {
                         opacity: 1;
+                        visibility: visible;
                         pointer-events: auto;
                     }
                 }
@@ -520,6 +545,27 @@
                     overflow-wrap: anywhere;
                 }
             }
+        }
+    }
+
+    // ERP informational note inside a grey card (Figma MPR-01 / MPR-03): 24px lock + 10px/14px Medium italic,
+    // 8px gap, text 408px wide. Montserrat ships no italic file, so the browser synthesises the slant.
+    .ma-erp-notice {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        max-width: 440px;
+        img { flex: 0 0 24px; width: 24px; height: 24px; }
+        p {
+            margin: 0;
+            font-family: $dp-font-body;
+            font-size: 10px;
+            font-style: italic;
+            font-weight: 500;
+            line-height: 14px;
+            letter-spacing: -0.11px;
+            color: $dp-color-text-secondary;
         }
     }
 

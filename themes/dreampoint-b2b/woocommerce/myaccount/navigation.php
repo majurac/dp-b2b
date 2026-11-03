@@ -24,8 +24,8 @@ do_action( 'woocommerce_before_account_navigation' );
 
 <nav class="woocommerce-MyAccount-navigation" aria-label="<?php esc_html_e( 'Account pages', 'woocommerce' ); ?>">
 	<div id="dd" class="wrapper-dropdown">
-        <div class="selected tab-placeholder"></div>
-        <ul class="dropd">
+        <button type="button" class="selected tab-placeholder" aria-expanded="false" aria-controls="dd-menu"><span class="dp-dd-prefix"><?php esc_html_e( 'Izbornik računa:', 'dreampoint-b2b' ); ?> </span><span class="dp-dd-current"></span></button>
+        <ul class="dropd" id="dd-menu">
             <?php foreach ( wc_get_account_menu_items() as $endpoint => $label ) : ?>
 			<li class="<?php echo wc_get_account_menu_item_classes( $endpoint ); ?>">
 				<a href="<?php echo esc_url( wc_get_account_endpoint_url( $endpoint ) ); ?>" <?php echo wc_is_current_account_menu_item( $endpoint ) ? 'aria-current="page"' : ''; ?>>

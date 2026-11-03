@@ -93,6 +93,15 @@ foreach ( array_keys( $get_addresses ) as $name ) {
 				<?php endforeach; ?>
 			</div>
 			<!-- /.ma-info -->
+			<?php if ( 'billing' === $name ) : ?>
+				<?php
+				get_template_part(
+					'template-parts/account-erp-notice',
+					null,
+					array( 'text' => __( 'Podaci o adresi preuzimaju se iz ERP sistema. Za izmjene kontaktirajte svog prodajnog predstavnika ili korisničku podršku.', 'dreampoint-b2b' ) )
+				);
+				?>
+			<?php endif; ?>
 			<?php if ( 'billing' !== $name ) : ?>
 				<a href="<?php echo esc_url( wc_get_endpoint_url( 'edit-address', $name ) ); ?>" class="edit button button--edit"><?php echo esc_html__( 'Izmijeni', 'woocommerce' ); ?></a>
 			<?php endif; ?>

@@ -518,8 +518,7 @@ body.admin-bar {
         &:focus {
             background: $white;
             border: 1px solid $dp-color-bg-brand;
-            box-shadow: 0px 0px 0px 3px $dp-color-focus-ring-primary;
-
+            @include dp-focus-ring;
         }
         @include input-placeholder {
             color: $dp-color-text-tertiary;
@@ -604,7 +603,7 @@ div.custom-form:not(.subscription-form) {
         &:focus {
             background: $dp-color-bg-mono;
             border-color: $dp-color-text-primary;
-            box-shadow: 0 0 0 3px $dp-color-focus-ring-primary;
+            @include dp-focus-ring;
         }
         // Server / CF7 / WooCommerce validation states
         &.wpcf7-not-valid,
@@ -731,7 +730,7 @@ div.custom-form:not(.subscription-form) {
     &.select2-container--focus,
     &.select2-container--open {
         border-color: $dp-color-text-primary;
-        box-shadow: 0 0 0 3px $dp-color-focus-ring-primary;
+        @include dp-focus-ring;
     }
     &.select2-container--disabled {
         background: $dp-color-bg-tertiary;
@@ -752,38 +751,30 @@ div.custom-form:not(.subscription-form) {
         color: $dp-color-text-primary;
     }
 }
-#page div.custom-form .woocommerce-invalid .select2-container {
-    border-color: $dp-color-error;
-    box-shadow: 0 0 0 3px $dp-color-focus-ring-error;
+// Invalid Select2 (WooCommerce `.woocommerce-invalid`, CF7 `.wpcf7-not-valid + .select2-container`) keeps the red state while
+// focused / open; the extra `:not()` makes it outrank the monochrome focus rule above.
+#page div.custom-form:not(.subscription-form) {
+    .woocommerce-invalid .select2-container,
+    .wpcf7-not-valid + .select2-container {
+        &,
+        &.select2-container--focus,
+        &.select2-container--open {
+            border-color: $dp-color-error;
+            box-shadow: 0 0 0 3px $dp-color-focus-ring-error;
+        }
+    }
+    // The container carries the focus indicator; without this the focused inner `.select2-selection` adds a
+    // second UA "auto" outline inside it on keyboard focus.
+    .select2-selection:focus-visible {
+        outline: 0;
+    }
 }
 
 // Contact page (CF7 select, E-select task 2026-11-03): same closed control (it sits inside `.custom-form`) and the same
 // dropdown panel. The panel is appended to <body>, so it is scoped by the page-template body class.
-// Contact Select2 is monochrome (owner, 2026-11-03): the shared `$dp-color-focus-ring-primary` is a blue tint, so the
-// focus / open ring is the project's two-tone keyboard ring (white gap + black, as on buttons / header / footer).
-// Selectors carry the body class + `#page` so they outrank the shared `#page div.custom-form:not(...) .select2-container`
-// rules above; the invalid rule comes last and is more specific, so the red error state also wins while focused.
+// Contact Select2 option states are monochrome too (owner, 2026-11-03); the closed-control focus ring, the red invalid
+// state and the inner-outline reset are the shared rules above.
 $contact-select2-selected-bg: #171717; // owner-specified selected-option background
-body.page-template-contact-php #page div.custom-form .select2-container {
-    &.select2-container--focus,
-    &.select2-container--open {
-        border-color: $dp-color-text-primary;
-        box-shadow: 0 0 0 2px $white, 0 0 0 4px $dp-color-text-primary;
-    }
-}
-// The container (`--focus` / `--open`) carries the focus indicator; without this the focused inner `.select2-selection`
-// adds a second UA "auto" outline inside it on keyboard focus.
-body.page-template-contact-php #page div.custom-form .select2-selection:focus-visible {
-    outline: 0;
-}
-body.page-template-contact-php #page div.custom-form .wpcf7-not-valid + .select2-container {
-    &,
-    &.select2-container--focus,
-    &.select2-container--open {
-        border-color: $dp-color-error;
-        box-shadow: 0 0 0 3px $dp-color-focus-ring-error;
-    }
-}
 
 // Panel sits above the sticky header / mobile bottom bar (z-index 9999); Select2's default 1051 would open behind them.
 body.page-template-contact-php .select2-container .select2-dropdown {
@@ -837,7 +828,7 @@ body.page-template-contact-php .select2-container .select2-dropdown {
         color: $dp-color-text-primary;
         &:focus {
             border-color: $dp-color-text-primary;
-            box-shadow: 0 0 0 3px $dp-color-focus-ring-primary;
+            @include dp-focus-ring;
         }
     }
     .select2-results__option {

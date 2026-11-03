@@ -69,7 +69,7 @@
 
         &:focus {
             border-color: $dp-color-bg-brand;
-            box-shadow: 0 0 0 3px $dp-color-focus-ring-primary;
+            @include dp-focus-ring;
         }
 
         @include input-placeholder {

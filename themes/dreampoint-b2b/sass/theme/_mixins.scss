@@ -9,6 +9,12 @@
     transform: scale(1.1);
 }
 
+// Monochrome focus ring shared by form controls, buttons, header/footer links (owner, 2026-11-03):
+// white 2px gap + black 4px outer ring. Replaces the former blue `$dp-color-focus-ring-primary` ring.
+@mixin dp-focus-ring {
+    box-shadow: 0 0 0 2px $dp-color-bg-primary, 0 0 0 4px $dp-color-text-primary;
+}
+
 //mixins
 @mixin bp($value) {
     @if $value=='xxs-down' {
@@ -555,7 +561,7 @@
         @include button-figma-size($size);
     }
     &:focus-visible {
-        box-shadow: 0 0 0 2px $dp-color-bg-primary, 0 0 0 4px $dp-color-text-primary;
+        @include dp-focus-ring;
     }
 }
 

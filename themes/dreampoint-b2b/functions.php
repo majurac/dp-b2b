@@ -586,6 +586,18 @@ function dreampoint_b2b_scripts(): void {
         ] );
     }
 
+    // --- JS: Storefront no-results (CAT-05) — filter state toggles; isti uslov kao WPF plugin ---
+    if ( is_shop() || is_product_taxonomy() || is_search() ) {
+        wp_enqueue_script(
+            'dreampoint-b2b-no-results',
+            get_template_directory_uri() . '/js/no-results.js',
+            [],
+            dreampoint_b2b_asset_ver( 'js/no-results.js' ),
+            true
+        );
+        wp_script_add_data( 'dreampoint-b2b-no-results', 'strategy', 'defer' );
+    }
+
     // --- JS: Mobilni filteri — isti uslov kao WPF plugin (shop, taksonomije, pretraga) ---
     if ( is_shop() || is_product_taxonomy() || is_search() ) {
         wp_enqueue_script(

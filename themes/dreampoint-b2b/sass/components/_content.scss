@@ -757,7 +757,18 @@ div.custom-form:not(.subscription-form) {
     box-shadow: 0 0 0 3px $dp-color-focus-ring-error;
 }
 
-body.woocommerce-account .select2-dropdown {
+// Contact page (CF7 select, E-select task 2026-11-03): same closed control (it sits inside `.custom-form`) and the same
+// dropdown panel. The panel is appended to <body>, so it is scoped by the page-template body class.
+#page div.custom-form .wpcf7-form-control.wpcf7-not-valid + .select2-container {
+    border-color: $dp-color-error;
+    box-shadow: 0 0 0 3px $dp-color-focus-ring-error;
+}
+// Above the sticky header / mobile bottom bar (z-index 9999); Select2's default 1051 would open behind them.
+body.page-template-contact-php .select2-dropdown {
+    z-index: 10000;
+}
+
+:is(body.woocommerce-account, body.page-template-contact-php) .select2-dropdown {
     background: $dp-color-bg-mono;
     border: 1px solid $dp-color-border-control;
     border-radius: $dp-radius-textarea;

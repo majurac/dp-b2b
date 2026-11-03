@@ -433,7 +433,8 @@
                     right: 0;
                     padding: 0;
                     z-index: 100;
-                    overflow: scroll;
+                    overflow-x: hidden; // was `scroll`: always-visible scrollbars on a list that is never taller than its box
+                    overflow-y: auto;
                     height: auto;
                     transition: all 0.3s ease-out;
                     list-style: none;

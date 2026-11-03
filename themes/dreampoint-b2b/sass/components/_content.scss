@@ -766,6 +766,11 @@ div.custom-form:not(.subscription-form) {
 // Above the sticky header / mobile bottom bar (z-index 9999); Select2's default 1051 would open behind them.
 body.page-template-contact-php .select2-dropdown {
     z-index: 10000;
+    // Select2 sets aria-selected="true" on the highlighted (hovered / keyboard) row; only the really selected row
+    // (`--selected`) keeps the bold weight, so a hover does not look like a selection.
+    .select2-results__option[aria-selected="true"]:not(.select2-results__option--selected) {
+        font-weight: 400;
+    }
 }
 
 :is(body.woocommerce-account, body.page-template-contact-php) .select2-dropdown {

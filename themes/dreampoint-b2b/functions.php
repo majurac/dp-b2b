@@ -769,7 +769,8 @@ function dreampoint_b2b_optimize_product_query( WP_Query $query ): void {
  */
 add_action( 'wp_head', 'dreampoint_b2b_select2_admin_bar_fix' );
 function dreampoint_b2b_select2_admin_bar_fix(): void {
-    if ( ! is_woocommerce() && ! is_cart() && ! is_checkout() && ! is_account_page() ) return;
+    // contact.php: CF7 select sa Select2 (isti ofset panela kao na WooCommerce stranicama)
+    if ( ! is_woocommerce() && ! is_cart() && ! is_checkout() && ! is_account_page() && ! is_page_template( 'contact.php' ) ) return;
     if ( ! is_admin_bar_showing() ) return;
 
     $type_attr = current_theme_supports( 'html5', 'style' ) ? '' : ' type="text/css"';

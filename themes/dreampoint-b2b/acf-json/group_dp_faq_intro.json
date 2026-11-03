@@ -1,0 +1,49 @@
+{
+    "key": "group_dp_faq_intro",
+    "title": "FAQ Intro Text",
+    "fields": [
+        {
+            "key": "field_dp_faq_intro_text",
+            "label": "Intro Text",
+            "name": "intro_text_faq",
+            "aria-label": "",
+            "type": "textarea",
+            "instructions": "Shown under the page title on the FAQ page. Leave empty to show no intro.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "allow_in_bindings": 0,
+            "rows": 2,
+            "placeholder": "",
+            "new_lines": ""
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "page_template",
+                "operator": "==",
+                "value": "faq.php"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "",
+    "show_in_rest": 0,
+    "display_title": "",
+    "allow_ai_access": false,
+    "ai_description": "",
+    "modified": 1793700000
+}

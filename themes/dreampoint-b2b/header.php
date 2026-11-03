@@ -414,12 +414,11 @@ $company_phone = get_field('company_phone', 'option') ?: '';
                      * Contact/FAQ page intro text and Brand archive intro text
                      */
                     if (is_page_template('contact.php') || is_page_template('faq.php')) {
-                        $intro_text = get_field('intro_text_contact');
-                        // FAQ: theme default subtitle (Figma CON-02) when the ACF intro is empty
-                        if (!$intro_text && is_page_template('faq.php')) {
-                            $intro_text = __('Kako vam možemo pomoći? Za pitanja o proizvodima, narudžbama, dostupnosti ili poslovnoj suradnji stojimo vam na raspolaganju.', 'dreampoint-b2b');
-                        }
-                        if ($intro_text) {
+                        // Independent, editor-managed fields: Contact -> intro_text_contact, FAQ -> intro_text_faq.
+                        // No fallback copy: an empty (or whitespace-only) field renders no intro at all.
+                        $intro_field = is_page_template('faq.php') ? 'intro_text_faq' : 'intro_text_contact';
+                        $intro_text  = trim((string) get_field($intro_field, get_queried_object_id()));
+                        if ($intro_text !== '') {
                             echo '<div class="intro-text"><p>' . esc_html($intro_text) . '</p></div>';
                         }
                         if (is_page_template('faq.php')) {

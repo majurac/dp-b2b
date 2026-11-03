@@ -317,8 +317,11 @@ body.admin-bar {
         display: flex !important;   
         justify-content: center;    
         align-items: center; 
-        > div { 
-            height: 100%; 
+        > div {
+            // Slick's content wrapper is a non-stretched flex item (justify-content: center): without an explicit
+            // width it shrink-wraps to the intrinsic width of its lazy, not yet loaded card image (132px vs 285px).
+            width: 100%;
+            height: 100%;
         }
         .product, .product-item {
             height: 100%;

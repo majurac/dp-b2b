@@ -732,6 +732,10 @@ add_filter( 'wp_get_attachment_image_attributes', function ( array $attr, WP_Pos
     if ( $count <= 4 ) {
         $attr['fetchpriority'] = 'high';
         $attr['loading']       = 'eager';
+        // `sizes="auto, ..."` is only valid for lazy images; for eager ones the browser would fall back to 100vw (B1.1 pilot).
+        if ( ! empty( $attr['sizes'] ) ) {
+            $attr['sizes'] = preg_replace( '/^auto,\s*/', '', $attr['sizes'] );
+        }
     }
 
     return $attr;

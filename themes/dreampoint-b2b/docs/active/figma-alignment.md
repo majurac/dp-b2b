@@ -1166,8 +1166,12 @@ The Figma-related backlog of §42 (T1–T10), the T7 family (§53) and the owner
 
 ## 55. E3 / E4 / E5 system states (2026-11-03, CLOSED / VERIFIED ON STAGING)
 
-Frames: SYS-01 `11148:37607` (404; SYS-02 `11148:37653` is a 500 page, not implemented), QO-03 `11148:39132` (Quick Order empty state `11276:25073`), MPR-02 `11148:37742` (empty address). No frames exist for the storefront product no-results message, the live-search "no results" state or generic `/?s=`; those keep the existing design (generic search only translated).
+Frames: SYS-01 `11148:37607` (404; SYS-02 `11148:37653` is a 500 page, not implemented), QO-03 `11148:39132` (Quick Order empty state `11276:25073`), MPR-02 `11148:37742` (empty address). CORRECTION (2026-11-03): storefront no-results IS designed, as **CAT-05 `11148:40433`** (see §56). Still no frame for the live-search dropdown "no results" state or generic `/?s=` (only translated).
 
 Measured SYS-01 values: "404" Petrona 600 428 px / line 482, `#6c727e`, overlapped by the heading by 73 px; H1 Petrona 600 64/72; text Montserrat 18; button XL with left arrow (label 16 px, 0.32 px tracking, 14 px vertical padding), dp watermark 1440x960. MPR-02 / QO-03: 144 px icon, 16 px gap, Petrona 600 40 px sentence-case heading, 8 px gap, Montserrat 18 text.
 
 Implementation notes: `.not-found-holder` is shared with the empty cart and orders empty state, so all E3/E5 rules are scoped (`#not-found`, `.not-found-holder--address`). Figma SVGs are used unmodified (`img/ico/emoji-sad.svg`, `img/ico/arrow-left.svg`, QO inline SVG with the Figma paths). The Figma QO secondary button is white with a dark border, so the QO plugin CSS overrides the theme `.button--outline` default with higher specificity. Code `9370d67`, `2e0d98e`, `6d3422c`.
+
+## 56. E4 storefront no-results — CAT-05 shared component (2026-11-03, CLOSED / VERIFIED ON STAGING)
+
+Frame CAT-05 `11148:40433` (empty state `11148:40576`, 808 px results column): 144 px search icon (same Figma asset as QO-03, `img/ico/search-empty.svg`), Petrona 600 40 px heading "Nismo pronašli proizvode", Montserrat 18 intro, 14/32 Medium tips, two 260 px L buttons 24 px apart (dark primary "Očisti sve filtre", white/dark-border "Pogledaj sve proizvode"). Reference for the storefront empty state; the sidebar/"Aktivni filteri" chrome shown in the frame is not part of this component. Implementation and WBW render-path notes: status.md 2026-11-03 (E4 CAT-05). Code `798e7f0`.

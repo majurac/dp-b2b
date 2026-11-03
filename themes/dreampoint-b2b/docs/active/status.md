@@ -13,6 +13,15 @@ Figma CON-01 `11148:37535`. D5 audit found the page structure, form (fields, lab
 
 **Handoff (end of day 2026-11-02):** D4 and D5 closed (code `4493b48`, `b9d9994`, `d058d61`, `e1bf521`; docs follow). Next roadmap task: the read-only audits E3/E4/E5 (404 / no-results / empty-address), then E2 (FAQ vs Figma `79:22758`), then B1 scope. Staging was synchronized `--ff-only` after every push; no production exists.
 
+## 2026-11-03 (E4 CAT-05) — storefront no-results shared component COMPLETE, VERIFIED ON STAGING
+
+Code `798e7f0` (staging fast-forwarded). Correction: the earlier E3/E4/E5 note that no Figma frame exists for the storefront no-results state was wrong; the frame is **CAT-05 `11148:40433`** (same component as QO-03, in the 808 px results column).
+
+- **Render path (verified):** search/archive zero results use WooCommerce `loop/no-products-found.php`; WBW AJAX POSTs, then GETs the same URL (`wpf_skip=1`) and swaps the server-rendered HTML, so the theme override covers all four states. Added `woocommerce/loop/no-products-found.php` -> `template-parts/no-results.php` (single markup), `js/no-results.js`, `sass/components/_no-results.scss`, `img/ico/search-empty.svg` (Figma asset).
+- **Behaviour:** filter-dependent elements (filter tip, "Očisti sve filtre", filtered intro) are `hidden` unless WBW's `.wpfSelectedParameter` / checked filter input exists (re-evaluated on `wpfAjaxSuccess`). "Očisti sve filtre" clicks WBW's native clear button (keeps `s`), href fallback = same search/archive without WBW params. "Pogledaj sve proizvode" = `/shop/`. No query, visibility or WBW configuration touched.
+- **Verified on staging:** search-only zero, filter-only zero (AJAX and direct URL), search+filter zero (AJAX), recovery to populated results, view-all navigation, 390 px (no overflow), console and vhost PHP error log clean.
+- **Known limits:** `wpf_fbv=1` stays in the URL after WBW clear (native WBW behaviour); filtered-state direct loads show the plain variant for a few ms until the deferred script runs; no mobile Figma frame; sidebar styling differences vs CAT-05 are outside this task.
+
 ## 2026-11-03 (E3 / E4 / E5) — 404, no-results and empty-address Figma alignment COMPLETE, VERIFIED ON STAGING
 
 Code `9370d67`, `2e0d98e`, `6d3422c` (staging fast-forwarded after each push; QO plugin 1.0.38). The first read-only audit wrongly passed E3 on functional grounds; the corrected audit compared actual Figma renders (SYS-01 `11148:37607`, QO-03 `11148:39132`, MPR-02 `11148:37742`) with staging.

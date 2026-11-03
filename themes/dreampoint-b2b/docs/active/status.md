@@ -13,6 +13,14 @@ Figma CON-01 `11148:37535`. D5 audit found the page structure, form (fields, lab
 
 **Handoff (end of day 2026-11-02):** D4 and D5 closed (code `4493b48`, `b9d9994`, `d058d61`, `e1bf521`; docs follow). Next roadmap task: the read-only audits E3/E4/E5 (404 / no-results / empty-address), then E2 (FAQ vs Figma `79:22758`), then B1 scope. Staging was synchronized `--ff-only` after every push; no production exists.
 
+## 2026-11-03 (My Account empty states) — Orders aligned with MPR-02 / MPR-05, address eligibility documented
+
+Code `236d665`. MPR-05 `11148:38145` (orders empty) uses the same composition as MPR-02 (emoji-sad 144 px, Petrona 600 40 px heading, centred 544 px column), so both templates now share the `.not-found-holder--account` modifier (`sass/pages/myaccount.scss`); the Orders template got the approved `img/ico/emoji-sad.svg`. Orders copy ("Nema povijesti narudžbi", description, "Posjeti trgovinu" -> shop) and Address copy/CTA (shipping editor) are unchanged. Populated orders/addresses untouched (admin check: 2 address cards, 1 order row).
+
+**Verified (staging, `vis_none` via User Switching, switched back to admin; nothing saved):** orders and addresses empty states at 1440 px (icon 144, heading 40 px/600 sentence case, 544 px column, 48 px button) and 390 px (no overflow), console clean. Open/minor: Figma MPR-05 orders button looks ~160 px wide (16 px label); staging keeps the XL 18 px label (195 px) - not changed. For `vis_none` WooCommerce renders its native "Potvrdite adresu e-pošte" notice above the Orders empty state, which pushes it down versus Figma (not theme code).
+
+**Address eligibility (read-only, counts only, 2026-11-03):** the empty-address component renders only when BOTH `billing_address_1` and `shipping_address_1` are empty (`my-address.php`). B2B registration requires billing address/city/postcode/country/phone/company and copies billing -> shipping (`inc/b2b-registration.php`); `b2b-partner-importer` writes both. No theme code populates addresses on APROS approval (`inc/registration-approval.php` has no address handling), so APROS does not guarantee addresses. Addressless accounts are therefore possible only for accounts created outside the registration/importer paths (admin-created/test users). Staging: 9 users, 5 with both, 1 billing-only, 0 shipping-only, 3 with neither (`vis_none`, `vis_offer`, `vis_rule_brand`, all test customers). Billing master fields are protected for existing accounts (`dreampoint_b2b_billing_master_applies()`; empty stored values stay empty), so an addressless customer can only fill shipping from My Account, which is why the CTA opens the shipping editor.
+
 ## 2026-11-03 (E4 CAT-05) — storefront no-results shared component COMPLETE, VERIFIED ON STAGING
 
 Code `798e7f0` (staging fast-forwarded). Correction: the earlier E3/E4/E5 note that no Figma frame exists for the storefront no-results state was wrong; the frame is **CAT-05 `11148:40433`** (same component as QO-03, in the 808 px results column).
@@ -27,7 +35,7 @@ Code `798e7f0` (staging fast-forwarded). Correction: the earlier E3/E4/E5 note t
 Code `9370d67`, `2e0d98e`, `6d3422c` (staging fast-forwarded after each push; QO plugin 1.0.38). The first read-only audit wrongly passed E3 on functional grounds; the corrected audit compared actual Figma renders (SYS-01 `11148:37607`, QO-03 `11148:39132`, MPR-02 `11148:37742`) with staging.
 
 - **E3:** `404.php`, `#not-found` SCSS (reuses `img/bg/dp-pattern.png`), `header.php` hides the breadcrumb banner on 404, new `img/ico/arrow-left.svg`. HTTP 404 preserved.
-- **E5:** `my-address.php` + `.not-found-holder--address` modifier; Figma SVG `img/ico/emoji-sad.svg`. Orders empty state (MPR-05) deliberately untouched.
+- **E5:** `my-address.php` + `.not-found-holder--account` modifier; Figma SVG `img/ico/emoji-sad.svg`. Orders empty state (MPR-05) deliberately untouched.
 - **E4:** QO empty state restyled to QO-03 (plugin CSS/JS inline SVG); generic search templates translated.
 - **Intentional deviations:** E5 button still opens shipping-address editing; storefront product no-results message and live-search dropdown keep existing designs (no Figma frames); 404 and E5 have no mobile frames, responsive behaviour is pragmatic; QO sticky cart bar can overlap the buttons at short viewports (pre-existing layout).
 - **Evidence:** screenshots compared at 1440 px (and 390 px for E3/E5); console clean apart from the expected 404 resource; address-button navigation verified without saving; admin session restored.

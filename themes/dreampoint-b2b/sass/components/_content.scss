@@ -517,8 +517,7 @@ body.admin-bar {
         border-radius: 0px;
         &:focus {
             background: $white;
-            border: 1px solid $dp-color-bg-brand;
-            @include dp-focus-ring;
+            @include dp-form-focus-ring;
         }
         @include input-placeholder {
             color: $dp-color-text-tertiary;
@@ -602,8 +601,7 @@ div.custom-form:not(.subscription-form) {
         }
         &:focus {
             background: $dp-color-bg-mono;
-            border-color: $dp-color-text-primary;
-            @include dp-focus-ring;
+            @include dp-form-focus-ring;
         }
         // Server / CF7 / WooCommerce validation states
         &.wpcf7-not-valid,
@@ -729,8 +727,7 @@ div.custom-form:not(.subscription-form) {
     }
     &.select2-container--focus,
     &.select2-container--open {
-        border-color: $dp-color-text-primary;
-        @include dp-focus-ring;
+        @include dp-form-focus-ring;
     }
     &.select2-container--disabled {
         background: $dp-color-bg-tertiary;
@@ -827,8 +824,7 @@ body.page-template-contact-php .select2-container .select2-dropdown {
         font-size: 14px;
         color: $dp-color-text-primary;
         &:focus {
-            border-color: $dp-color-text-primary;
-            @include dp-focus-ring;
+            @include dp-form-focus-ring;
         }
     }
     .select2-results__option {

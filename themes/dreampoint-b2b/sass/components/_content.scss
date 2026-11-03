@@ -1150,27 +1150,31 @@ body.page-template-contact-php .select2-container .select2-dropdown {
     .photo-holder {
         position: relative;
         overflow: hidden;
-        //box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        border: 1px solid rgba(17,17,17,0.1);
-        img.attachment-product-loop {
-            width: 100%;
-            object-fit: cover;
-            aspect-ratio: 340/462;
-            max-width: 340px;
-            margin-left: auto;
-            margin-right: auto;
+        // Figma Product card (11148:32832): image area 282 x 248, no border, no radius.
+        // The ratio lives on the wrapper (not the <img>, whose width/height attributes would override it).
+        aspect-ratio: 282 / 248;
+        // `contain` keeps the whole packshot visible (the 340x462 `product-loop` source is already hard-cropped);
+        // switch to `cover` for the literal Figma fill - it cuts 30%+ of tall products (bottles, lanyards).
+        img.attachment-product-loop,
+        img.placeholder-img {
             display: block;
+            width: 100%;
+            height: 100%;
+            max-width: none;
+            object-fit: contain;
+            object-position: center;
             @include animate-fade;
         }
     }
     .content-holder {
-        padding-top: 10px;
-        @include bp(lg-down) {
-            padding-left: 0;
-            padding-right: 0;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
+        // Figma Container: 16px 8px padding, 8px gap between title, price row and badge
+        padding: 16px 8px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        .product-title-link {
+            display: block;
         }
         // Figma Product card (11148:32832): Montserrat 600 / 14px, sentence case, two visible lines
         .product-title {
@@ -1185,6 +1189,8 @@ body.page-template-contact-php .select2-container .select2-dropdown {
             line-height: 21px;
             letter-spacing: 0;
             text-transform: none;
+            // reserve the two-line slot (Figma title box 42px) so price rows align across a grid row
+            min-height: 42px;
             a {
                 color: inherit;
             }
@@ -1230,6 +1236,8 @@ body.page-template-contact-php .select2-container .select2-dropdown {
             }
             color: $dp-color-text-primary;
             del {
+                // Figma: old price sits above the regular price
+                display: block;
                 font-size: 12px;
                 line-height: normal;
                 color: $dp-color-text-tertiary;
@@ -1251,9 +1259,47 @@ body.page-template-contact-php .select2-container .select2-dropdown {
             color: $dp-color-text-secondary;
         }
     }
+    // Figma price row: price left, 32px action right, one 48px row (old-price slot included)
+    .price-action {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        min-height: 48px;
+        .price-holder {
+            order: 1;
+            min-width: 0;
+        }
+        .action-holder {
+            order: 2;
+            flex-shrink: 0;
+        }
+    }
+    // Figma Badge.stanjeprozivoda: 8px dot + "Na stanju", Montserrat 500 10px, no background
+    .stock-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        align-self: flex-start;
+        padding: 2px 8px;
+        border-radius: 16px;
+        font-family: 'Montserrat';
+        font-style: normal;
+        font-weight: 500;
+        font-size: 10px;
+        line-height: normal;
+        color: $dp-color-success-strong;
+        &::before {
+            content: '';
+            flex-shrink: 0;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: $dp-color-success;
+        }
+    }
     .action-holder {
         width: max-content;
-        padding: 30px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -1261,8 +1307,7 @@ body.page-template-contact-php .select2-container .select2-dropdown {
         // z-index only applies to a positioned box: lift the actions above the .url-wrapper card overlay (z-index 1)
         position: relative;
         z-index: 2;
-        padding-bottom: 15px;
-        // the 30px padding is not a control: let clicks there fall through to the card link, only the actions are interactive
+        // the holder itself is not a control: let clicks fall through to the card link, only the actions are interactive
         pointer-events: none;
         a {
             pointer-events: auto;

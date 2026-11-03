@@ -182,7 +182,12 @@ if ( is_shop() || is_product_category() || is_tax('product_brand') ) :
                  <!-- /.price-holder --> 
             </div>
             <!-- /.price-action -->
-            
+
+            <?php if (!$out_of_stock) : ?>
+                <?php // Binary availability badge (Figma Badge.stanjeprozivoda): same is_in_stock() state as the card; never a quantity. ?>
+                <span class="stock-badge"><?php esc_html_e('Na stanju', 'dreampoint-b2b'); ?></span>
+            <?php endif; ?>
+
         </div>
         <!-- /.content-holder -->
 

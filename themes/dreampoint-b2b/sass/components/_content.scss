@@ -771,6 +771,11 @@ body.page-template-contact-php #page div.custom-form .select2-container {
         box-shadow: 0 0 0 2px $white, 0 0 0 4px $dp-color-text-primary;
     }
 }
+// The container (`--focus` / `--open`) carries the focus indicator; without this the focused inner `.select2-selection`
+// adds a second UA "auto" outline inside it on keyboard focus.
+body.page-template-contact-php #page div.custom-form .select2-selection:focus-visible {
+    outline: 0;
+}
 body.page-template-contact-php #page div.custom-form .wpcf7-not-valid + .select2-container {
     &,
     &.select2-container--focus,

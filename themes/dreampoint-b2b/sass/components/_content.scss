@@ -1158,9 +1158,7 @@ body.page-template-contact-php .select2-container .select2-dropdown {
         aspect-ratio: 282 / 248;
         // `contain` keeps the whole packshot visible (the 340x462 `product-loop` source is already hard-cropped);
         // switch to `cover` for the literal Figma fill - it cuts 30%+ of tall products (bottles, lanyards).
-        // B1.1 PILOT: img.attachment-medium_large (selected products) - remove with the pilot
         img.attachment-product-loop,
-        img.attachment-medium_large,
         img.placeholder-img {
             display: block;
             width: 100%;
@@ -1348,8 +1346,7 @@ body.page-template-contact-php .select2-container .select2-dropdown {
     }
     &:hover {
         .photo-holder {
-            img.attachment-product-loop,
-            img.attachment-medium_large {
+            img.attachment-product-loop {
                 @include animate-scale;
             }
         }

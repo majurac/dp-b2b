@@ -759,17 +759,47 @@ div.custom-form:not(.subscription-form) {
 
 // Contact page (CF7 select, E-select task 2026-11-03): same closed control (it sits inside `.custom-form`) and the same
 // dropdown panel. The panel is appended to <body>, so it is scoped by the page-template body class.
-#page div.custom-form .wpcf7-form-control.wpcf7-not-valid + .select2-container {
-    border-color: $dp-color-error;
-    box-shadow: 0 0 0 3px $dp-color-focus-ring-error;
+// Contact Select2 is monochrome (owner, 2026-11-03): the shared `$dp-color-focus-ring-primary` is a blue tint, so the
+// focus / open ring is the project's two-tone keyboard ring (white gap + black, as on buttons / header / footer).
+// Selectors carry the body class + `#page` so they outrank the shared `#page div.custom-form:not(...) .select2-container`
+// rules above; the invalid rule comes last and is more specific, so the red error state also wins while focused.
+$contact-select2-selected-bg: #171717; // owner-specified selected-option background
+body.page-template-contact-php #page div.custom-form .select2-container {
+    &.select2-container--focus,
+    &.select2-container--open {
+        border-color: $dp-color-text-primary;
+        box-shadow: 0 0 0 2px $white, 0 0 0 4px $dp-color-text-primary;
+    }
 }
-// Above the sticky header / mobile bottom bar (z-index 9999); Select2's default 1051 would open behind them.
+body.page-template-contact-php #page div.custom-form .wpcf7-not-valid + .select2-container {
+    &,
+    &.select2-container--focus,
+    &.select2-container--open {
+        border-color: $dp-color-error;
+        box-shadow: 0 0 0 3px $dp-color-focus-ring-error;
+    }
+}
+
+// Panel sits above the sticky header / mobile bottom bar (z-index 9999); Select2's default 1051 would open behind them.
 body.page-template-contact-php .select2-dropdown {
     z-index: 10000;
+    background: $white;
     // Select2 sets aria-selected="true" on the highlighted (hovered / keyboard) row; only the really selected row
     // (`--selected`) keeps the bold weight, so a hover does not look like a selection.
     .select2-results__option[aria-selected="true"]:not(.select2-results__option--selected) {
         font-weight: 400;
+    }
+    // Normal: white + dark text. Highlighted (hover / keyboard): #f3f4f6 + dark text (shared rule, restated for the
+    // selected-row exception below). Selected: #171717 + white text; when it is also highlighted it keeps the dark
+    // fill and gains an inset gray ring, so the two states stay distinguishable. Specificity (0,5,1) beats the shared
+    // `:is(...) .select2-dropdown .select2-results__option[aria-selected]` !important rules (0,4,1).
+    .select2-results__option.select2-results__option--selected[aria-selected] {
+        background-color: $contact-select2-selected-bg !important;
+        color: $white !important;
+        font-weight: 600;
+        &.select2-results__option--highlighted {
+            box-shadow: inset 0 0 0 2px $dp-color-border-control;
+        }
     }
 }
 

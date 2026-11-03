@@ -722,7 +722,8 @@ function dreampoint_b2b_scripts(): void {
  * imaju sopstvenu logiku prioriteta.
  */
 add_filter( 'wp_get_attachment_image_attributes', function ( array $attr, WP_Post $attachment, $size ): array {
-    if ( $size !== 'product-loop' ) return $attr;
+    // B1.1 PILOT: pilot cards request medium_large (only ever requested by product cards in these archive contexts); remove with the pilot.
+    if ( $size !== 'product-loop' && $size !== 'medium_large' ) return $attr;
     if ( ! is_shop() && ! is_product_category() && ! is_tax( 'product_brand' ) ) return $attr;
 
     static $count = 0;

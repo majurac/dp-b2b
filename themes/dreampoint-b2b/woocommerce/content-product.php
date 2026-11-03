@@ -26,6 +26,16 @@ $out_of_stock = !$product->is_in_stock();
 $is_variable = $product->is_type('variable');
 $permalink = get_permalink($product_id);
 $image_size = 'product-loop';
+$image_attr = [
+    'alt'     => esc_attr($product_name),
+    'loading' => 'lazy',
+];
+// B1.1 PILOT (temporary, revert after evaluation): selected products use the existing uncropped medium_large derivative
+// with an explicit `sizes` hint, so 1x screens pick the 300px candidate and only high-DPR screens pick 768px.
+if (in_array($product_id, [18902, 14730, 17595, 13397, 12915, 11080, 9113, 14684, 13201, 18204, 8955, 14124], true)) {
+    $image_size = 'medium_large';
+    $image_attr['sizes'] = '(max-width: 767px) 46vw, 290px';
+}
 ?>
 
 <?php
@@ -67,10 +77,7 @@ if ( is_shop() || is_product_category() || is_tax('product_brand') ) :
                    aria-label="<?php echo esc_attr($product_name); ?>"
                    title="<?php echo esc_attr($product_name); ?>">
 
-                    <?php the_post_thumbnail( $image_size, [
-                        'alt'     => esc_attr($product_name),
-                        'loading' => 'lazy',
-                    ] ); ?>
+                    <?php the_post_thumbnail( $image_size, $image_attr ); ?>
 
                 </a>
 

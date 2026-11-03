@@ -721,7 +721,7 @@ export class ProductList {
         return `
 <div class="dp-qo-no-results">
   <div class="dp-qo-no-results__inner">
-    <svg class="dp-qo-no-results__icon" width="96" height="96" viewBox="0 0 96 96" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" aria-hidden="true" focusable="false"><circle cx="42" cy="42" r="30"/><path d="M64 64l22 22"/></svg>
+    <svg class="dp-qo-no-results__icon" width="144" height="144" viewBox="0 0 144 144" fill="none" aria-hidden="true" focusable="false"><path d="M66 120C95.8234 120 120 95.8234 120 66C120 36.1766 95.8234 12 66 12C36.1766 12 12 36.1766 12 66C12 95.8234 36.1766 120 66 120Z" stroke="#6C727E" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><path d="M113.58 124.139C116.76 133.739 124.02 134.699 129.6 126.299C134.7 118.619 131.34 112.319 122.1 112.319C115.26 112.259 111.42 117.599 113.58 124.139Z" stroke="#6C727E" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>
     <h2 class="dp-qo-no-results__title">${escHtml(this.#t('noResultsTitle', 'Nismo pronašli proizvode'))}</h2>
     <p class="dp-qo-no-results__text">${escHtml(intro).replace('%s', () => escHtml(search))}</p>
     <ul class="dp-qo-no-results__tips">${tips.map(t => `<li>${escHtml(t)}</li>`).join('')}</ul>

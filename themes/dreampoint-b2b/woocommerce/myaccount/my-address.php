@@ -68,8 +68,8 @@ foreach ( array_keys( $get_addresses ) as $name ) {
 ?>
 
 <?php if ( ! $has_any_address ) : ?>
-	<div class="not-found-holder">
-		<div class="nf-icon"><img src="<?php echo esc_url( get_template_directory_uri() . '/img/ico/face-sad.svg' ); ?>" alt=""></div>
+	<div class="not-found-holder not-found-holder--address">
+		<div class="nf-icon"><img src="<?php echo esc_url( get_template_directory_uri() . '/img/ico/emoji-sad.svg' ); ?>" width="144" height="144" alt=""></div>
 		<h2><?php esc_html_e( 'Adresa nije uspostavljena', 'dreampoint-b2b' ); ?></h2>
 		<p><?php esc_html_e( 'Trenutno nemate postavljenu adresu za naplatu kao i adresu za dostavu.', 'dreampoint-b2b' ); ?></p>
 		<a href="<?php echo esc_url( wc_get_endpoint_url( 'edit-address', 'shipping' ) ); ?>" class="button button--xl button--add"><?php esc_html_e( 'Postavi adresu', 'dreampoint-b2b' ); ?></a>

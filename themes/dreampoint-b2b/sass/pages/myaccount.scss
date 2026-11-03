@@ -586,6 +586,29 @@
         padding: 32px 0;
     }
 
+    // Empty address (Figma MPR-02 11148:37742): 144px emoji-sad, sentence-case 40px heading, 544px column.
+    // Modifier-scoped so the orders empty state keeps its own look until MPR-05 is aligned.
+    .not-found-holder--address {
+        max-width: 544px;
+        .nf-icon {
+            margin-bottom: 16px;
+            img {
+                display: block;
+                width: 144px;
+                height: 144px;
+                margin: 0 auto;
+            }
+        }
+        h2 {
+            @include heading-2-medium;
+            margin-bottom: 8px;
+            color: $dp-color-text-primary;
+        }
+        p {
+            margin-bottom: 24px;
+        }
+    }
+
     .form-block-holder + .form-block-holder {
         margin-top: 64px;
         @include bp(sm-down) { margin-top: 32px; }

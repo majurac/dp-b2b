@@ -1487,24 +1487,93 @@ body.woocommerce-checkout .inner-page .inner-heading h1 {
 }
 
 
+// 404 page (Figma SYS-01 11148:37607): dp watermark, oversized serif "404" overlapped by the heading.
+// Scoped to #not-found: .not-found-holder is shared with the empty cart / My Account empty states.
 #not-found {
-    padding-top: 64px;
-    padding-bottom: 64px;
+    position: relative;
+    padding-top: 67px;
+    padding-bottom: 174px;
+    background-image: url("img/bg/dp-pattern.png");
+    background-repeat: no-repeat;
+    background-size: 1440px 960px;
+    background-position: center top;
     @include bp(lg) {
-        padding-top: 50px;
-        padding-bottom: 50px;
+        padding-bottom: 120px;
     }
     @include bp(md) {
-        padding-top: 50px;
-        padding-bottom: 50px;
+        padding-top: 48px;
+        padding-bottom: 96px;
     }
     @include bp(sm-down) {
         padding-top: 32px;
-        padding-bottom: 32px;
+        padding-bottom: 64px;
+        background-size: cover;
     }
     .not-found-holder {
+        max-width: none;
         margin-left: auto;
         margin-right: auto;
+        // Fluid: 428px at 1440, scales down on narrow screens (Figma has no mobile frame).
+        --dp-nf-code-size: min(428px, 30vw);
+    }
+    .nf-code {
+        margin: 0 0 calc(var(--dp-nf-code-size) * -0.17);
+        font-family: 'Petrona', serif;
+        font-weight: 600;
+        font-size: var(--dp-nf-code-size);
+        line-height: 1.126;
+        color: $dp-color-text-tertiary;
+        user-select: none;
+    }
+    h1 {
+        position: relative;
+        margin: 0 auto 8px;
+        max-width: 699px;
+        font-family: 'Petrona', serif;
+        font-weight: 600;
+        font-size: 64px;
+        line-height: 72px;
+        letter-spacing: 0;
+        text-transform: none;
+        color: $dp-color-text-primary;
+        @include bp(lg-down) {
+            font-size: 48px;
+            line-height: 56px;
+        }
+        @include bp(sm-down) {
+            font-size: 32px;
+            line-height: 40px;
+        }
+    }
+    .nf-text {
+        position: relative;
+        margin: 0 0 24px;
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 400;
+        font-size: 18px;
+        line-height: normal;
+        letter-spacing: 0;
+        color: $dp-color-text-primary;
+        @include bp(sm-down) {
+            font-size: 16px;
+        }
+    }
+    // Figma SYS-01 button: XL with a left arrow, 16px / 0.32px label, 14px vertical padding
+    .button--back {
+        position: relative;
+        gap: 8px;
+        padding: 13px 23px;
+        font-size: 16px;
+        letter-spacing: 0.32px;
+        &:before {
+            content: "";
+            flex: 0 0 auto;
+            width: 20px;
+            height: 20px;
+            background-color: currentColor;
+            -webkit-mask: url("img/ico/arrow-left.svg") center / contain no-repeat;
+            mask: url("img/ico/arrow-left.svg") center / contain no-repeat;
+        }
     }
 }
 

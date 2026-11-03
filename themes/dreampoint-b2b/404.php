@@ -20,11 +20,10 @@ nocache_headers();
 	<div id="not-found" class="block">
 		<div class="container">
 			<div class="not-found-holder">
-				<div class="nf-icon"><img src="<?php bloginfo('template_directory'); ?>/img/ico/face-sad.svg" alt=""></div>
-				<h1><?php esc_html_e( 'Ups! Stranica nije pronađena.', 'dreampoint-b2b' ); ?></h1>
-				<p><?php esc_html_e( 'Izgleda da na ovoj lokaciji ništa nije pronađeno.', 'dreampoint-b2b' ); ?></p>
-				<a href="<?php echo esc_url(home_url('/')); ?>" class="button button--xl"><?php esc_html_e( 'Početna', 'dreampoint-b2b' ); ?></a>
-				<!-- /.button button--xl -->
+				<p class="nf-code" aria-hidden="true">404</p>
+				<h1><?php esc_html_e( 'Stranica nije pronađena', 'dreampoint-b2b' ); ?></h1>
+				<p class="nf-text"><?php esc_html_e( 'Stranica koju tražite ne postoji ili je premještena.', 'dreampoint-b2b' ); ?></p>
+				<a href="<?php echo esc_url(home_url('/')); ?>" class="button button--xl button--back"><?php esc_html_e( 'Vrati se na početnu', 'dreampoint-b2b' ); ?></a>
 			</div>
 			<!-- /.not-found-holder -->
 		</div>

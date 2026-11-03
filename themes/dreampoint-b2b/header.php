@@ -366,8 +366,10 @@ $company_phone = get_field('company_phone', 'option') ?: '';
              * Shows breadcrumbs and page titles
              * Hidden on homepage and thank you page
              */
+            // 404 (Figma SYS-01) has its own composition, no breadcrumb/title banner.
             $hide_heading = is_front_page() ||
                             is_home() ||
+                            is_404() ||
                             (function_exists('is_wc_endpoint_url') && is_wc_endpoint_url('order-received'));
             
             if (!$hide_heading) :

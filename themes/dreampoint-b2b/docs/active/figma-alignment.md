@@ -1175,3 +1175,8 @@ Implementation notes: `.not-found-holder` is shared with the empty cart and orde
 ## 56. E4 storefront no-results — CAT-05 shared component (2026-11-03, CLOSED / VERIFIED ON STAGING)
 
 Frame CAT-05 `11148:40433` (empty state `11148:40576`, 808 px results column): 144 px search icon (same Figma asset as QO-03, `img/ico/search-empty.svg`), Petrona 600 40 px heading "Nismo pronašli proizvode", Montserrat 18 intro, 14/32 Medium tips, two 260 px L buttons 24 px apart (dark primary "Očisti sve filtre", white/dark-border "Pogledaj sve proizvode"). Reference for the storefront empty state; the sidebar/"Aktivni filteri" chrome shown in the frame is not part of this component. Implementation and WBW render-path notes: status.md 2026-11-03 (E4 CAT-05). Code `798e7f0`.
+
+## 57. My Account ERP notices (MPR-01 / MPR-03) and mobile dropdown accessibility (2026-11-03, VERIFIED ON STAGING)
+
+Supersedes the "ERP note: INTENTIONALLY OMITTED" decision of 53.1: owner supplied the wording and scope on 2026-11-03. Frames: MPR-01 notice `11148:37514` (lock icon `vuesax/linear/lock`, text `11148:37517`), MPR-03 notice `11148:37885`; the CH-01 variant uses an info-circle icon and is not used here. Implementation, ownership caveats (phone row in the company card, APROS sync blocked) and the dropdown button/ARIA changes: see status.md 2026-11-03 (My Account ERP notices + dropdown accessibility). Code `6303e31`, `d026337`, `f5ee790`.
+

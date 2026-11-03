@@ -13,6 +13,16 @@ Figma CON-01 `11148:37535`. D5 audit found the page structure, form (fields, lab
 
 **Handoff (end of day 2026-11-02):** D4 and D5 closed (code `4493b48`, `b9d9994`, `d058d61`, `e1bf521`; docs follow). Next roadmap task: the read-only audits E3/E4/E5 (404 / no-results / empty-address), then E2 (FAQ vs Figma `79:22758`), then B1 scope. Staging was synchronized `--ff-only` after every push; no production exists.
 
+## 2026-11-03 (My Account ERP notices + dropdown accessibility) - VERIFIED ON STAGING
+
+Code `6303e31`, `d026337`, `f5ee790`.
+
+- **ERP notices (D2 / U07):** did not exist before (string absent from every PHP file; 53.1 had omitted it because ownership was unverified). Owner now supplied the exact wording and scope. Added `template-parts/account-erp-notice.php` (24 px `img/ico/lock.svg` + 10/14 px Montserrat Medium italic, -0.11 px tracking, `#384250`, 8 px gap, text 408 px) rendered once in the company card (`user-form.php`, "Podaci o firmi...") and once in the billing card only (`my-address.php`, "Podaci o adresi..."); the editable shipping card has none. Verified at 1440 px: exactly one notice per card, 24 px below the data rows. Montserrat ships no italic file, so the slant is browser-synthesised (no new font added).
+- **Ownership check (no data/logic changed):** protected billing master = company, address 1/2, city, postcode, state, country (`dreampoint_b2b_billing_master_fields()`), OIB has no customer write path, shipping and phone stay editable. **Caveats to keep in mind:** (1) the company card also shows the customer-editable phone row ("Telefon", saved from the form below), so "Podaci o firmi..." is strictly true for company name and OIB only; (2) while the APROS activation sync is blocked (ADR-018) these values originate from registration/importer, not a live ERP sync. Owner explicitly approved the wording, so it is shown as supplied.
+- **Dropdown accessibility:** `navigation.php` trigger is now `<button type="button" class="selected tab-placeholder" aria-expanded aria-controls="dd-menu">` with a visually-hidden "Izbornik računa:" prefix (accessible name "Izbornik računa: <current>"); `js/account-navigation.js` toggles `aria-expanded`, Escape closes and returns focus, init is idempotent (also fixes tablets rotating into mobile width), cache-busted by mtime; SCSS adds `visibility: hidden` to the closed list (closing waits for the fade, opening is instant) and a `focus-visible` ring; links in `.dropd` exclude `visibility` from the global `a { transition: all }`. Desktop sidebar and typography unchanged.
+- **Verified (staging 375/390 px, real key presses):** Tab reaches the trigger (18 hops on the page), Enter and Space open/close, `aria-expanded` matches, Tab walks the five links only while open, closed Tab skips the list, Escape closes and refocuses the trigger, outside click closes, keyboard Enter on a link navigates (section label updates), visible focus ring, no overflow, console clean.
+- **Limits:** the headless browser delays CSS transitions, so closing took ~0.9 s there (real timing 0.3 s); touch events were exercised through click (no real touch device).
+
 ## 2026-11-03 (My Account mobile dropdown + Orders CTA) — VISUAL FIX VERIFIED ON STAGING
 
 Code `8237ff5`, `28936e2` (`sass/pages/myaccount.scss` + generated `css/pages/myaccount.css`; no PHP/JS change).

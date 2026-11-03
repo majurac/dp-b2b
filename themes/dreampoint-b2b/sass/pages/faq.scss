@@ -57,9 +57,10 @@ $faq-open-border: #eddef0;
             background: $dp-color-bg-mono;
             box-shadow: inset 0 -2px 0 $dp-color-text-primary;
         }
+        // The global "a:focus / button:focus { outline: none !important }" swallows an outline,
+        // so the ring is an inset box-shadow (stays inside the card / tab).
         &:focus-visible {
-            outline: 2px solid $dp-color-text-primary;
-            outline-offset: -2px;
+            box-shadow: inset 0 0 0 2px $dp-color-text-primary;
         }
     }
 }
@@ -117,9 +118,10 @@ $faq-open-border: #eddef0;
         letter-spacing: 0;
         text-transform: none;
         color: $dp-color-text-primary;
+        // The global "a:focus / button:focus { outline: none !important }" swallows an outline,
+        // so the ring is an inset box-shadow (stays inside the card / tab).
         &:focus-visible {
-            outline: 2px solid $dp-color-text-primary;
-            outline-offset: -2px;
+            box-shadow: inset 0 0 0 2px $dp-color-text-primary;
         }
     }
     .faq-toggle__text {
@@ -216,8 +218,7 @@ $faq-open-border: #eddef0;
             &.next { margin-left: 10px; }
         }
         &:focus-visible {
-            outline: 2px solid $dp-color-text-primary;
-            outline-offset: 2px;
+            box-shadow: 0 0 0 2px $white, 0 0 0 4px $dp-color-text-primary;
         }
     }
     .faq-pagination__icon {

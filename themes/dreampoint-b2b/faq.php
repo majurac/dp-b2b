@@ -60,11 +60,19 @@ if ($active_term) {
 
 $faq_query = new WP_Query($query_args);
 
-// Page number beyond the last page of this category -> show the last page
-if ($faq_query->max_num_pages > 0 && $current_page > $faq_query->max_num_pages) {
-    $current_page         = (int) $faq_query->max_num_pages;
-    $query_args['paged']  = $current_page;
-    $faq_query            = new WP_Query($query_args);
+// Page number beyond the last page of this category -> show the last page.
+// (WP_Query reports max_num_pages = 0 for an empty out-of-range page, so probe page 1 first.)
+if ($current_page > 1 && !$faq_query->have_posts()) {
+    $query_args['paged'] = 1;
+    $faq_probe           = new WP_Query($query_args);
+    $current_page        = max(1, (int) $faq_probe->max_num_pages);
+
+    if (1 === $current_page) {
+        $faq_query = $faq_probe;
+    } else {
+        $query_args['paged'] = $current_page;
+        $faq_query           = new WP_Query($query_args);
+    }
 }
 
 $schema_items = [];

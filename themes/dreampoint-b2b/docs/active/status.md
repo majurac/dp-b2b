@@ -13,6 +13,16 @@ Figma CON-01 `11148:37535`. D5 audit found the page structure, form (fields, lab
 
 **Handoff (end of day 2026-11-02):** D4 and D5 closed (code `4493b48`, `b9d9994`, `d058d61`, `e1bf521`; docs follow). Next roadmap task: the read-only audits E3/E4/E5 (404 / no-results / empty-address), then E2 (FAQ vs Figma `79:22758`), then B1 scope. Staging was synchronized `--ff-only` after every push; no production exists.
 
+## 2026-11-03 (My Account mobile dropdown + Orders CTA) — VISUAL FIX VERIFIED ON STAGING
+
+Code `8237ff5`, `28936e2` (`sass/pages/myaccount.scss` + generated `css/pages/myaccount.css`; no PHP/JS change).
+
+- **Cause of uppercase:** the mobile dropdown (`.selected.tab-placeholder` and `.dropd li a` inside `#account-page .woocommerce-MyAccount-navigation`, below `md`) used `@include heading-6` (Montserrat 500, `text-transform: uppercase`, `letter-spacing: 0.14em`). Computed before: 16 px / uppercase / 2.24 px tracking; at 375 px "PRODAJNI PREDSTAVNIK" wrapped to two lines (54 px row).
+- **Fix:** the dropdown now reuses the desktop sidebar link typography already in the same file (`$dp-font-body`, 16 px/400, line-height 18, no tracking, no transform). Active item keeps brand background + bold; 40 px rows (24 px icon + 8 px padding); `overflow: scroll` -> `overflow-x: hidden; overflow-y: auto` (the list never scrolls, scrollbars were always visible). Shared `_mixins.scss` `.wrapper-dropdown` (other pages) untouched. There is no dedicated mobile Figma frame (MPR-01..05 are 1440 only); the desktop sidebar spec is the reference.
+- **Orders CTA:** Figma MPR-05 button `11148:38155` verified as 160x48, 12 px padding, Montserrat 600 16 px, 0.32 px tracking, radius 24. Applied only to `.not-found-holder--account .button.button--xl:not(.button--add)` (staging: 160x48 at 1440 and 390 px; label and shop link unchanged; address CTA still 212x48).
+- **Verified (staging, 375/390 px):** closed/open states, all five sections navigate correctly and the placeholder updates, no overflow, desktop sidebar unchanged (16 px/400/no transform, placeholder hidden), console clean; Orders empty state tested as `vis_none` via User Switching (switched back to admin).
+- **Open (pre-existing, not changed):** the mobile dropdown is driven by `js/account-navigation.js` on a `div#dd` with no `tabindex`/`role`/`aria-expanded`, so it is not keyboard-operable. Fixing it needs a JS/markup behaviour change and was outside this visual scope; WooCommerce's native email-verification notice above Orders is untouched.
+
 ## 2026-11-03 (My Account empty states) — Orders aligned with MPR-02 / MPR-05, address eligibility documented
 
 Code `236d665`. MPR-05 `11148:38145` (orders empty) uses the same composition as MPR-02 (emoji-sad 144 px, Petrona 600 40 px heading, centred 544 px column), so both templates now share the `.not-found-holder--account` modifier (`sass/pages/myaccount.scss`); the Orders template got the approved `img/ico/emoji-sad.svg`. Orders copy ("Nema povijesti narudžbi", description, "Posjeti trgovinu" -> shop) and Address copy/CTA (shipping editor) are unchanged. Populated orders/addresses untouched (admin check: 2 address cards, 1 order row).

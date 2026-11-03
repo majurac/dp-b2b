@@ -415,8 +415,15 @@ $company_phone = get_field('company_phone', 'option') ?: '';
                      */
                     if (is_page_template('contact.php') || is_page_template('faq.php')) {
                         $intro_text = get_field('intro_text_contact');
+                        // FAQ: theme default subtitle (Figma CON-02) when the ACF intro is empty
+                        if (!$intro_text && is_page_template('faq.php')) {
+                            $intro_text = __('Kako vam možemo pomoći? Za pitanja o proizvodima, narudžbama, dostupnosti ili poslovnoj suradnji stojimo vam na raspolaganju.', 'dreampoint-b2b');
+                        }
                         if ($intro_text) {
                             echo '<div class="intro-text"><p>' . esc_html($intro_text) . '</p></div>';
+                        }
+                        if (is_page_template('faq.php')) {
+                            dreampoint_b2b_faq_render_tabs();
                         }
                     } elseif (is_tax('product_brand')) {
                         $intro_text_brands = get_field('intro_text_brands', 'option');

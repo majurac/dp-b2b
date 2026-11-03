@@ -147,6 +147,7 @@ remove_filter( 'wp_mail',          'wp_staticize_emoji_for_email'     );
 
 require     get_template_directory() . '/inc/template-tags.php';
 require     get_template_directory() . '/inc/custom-breadcrumb.php';
+require     get_template_directory() . '/inc/faq.php';
 require     get_template_directory() . '/inc/my-account.php';
 require_once get_template_directory() . '/blocks/products-tabs.php';
 require_once get_template_directory() . '/inc/product-inquiry.php';
@@ -652,12 +653,12 @@ function dreampoint_b2b_scripts(): void {
         wp_script_add_data( 'dreampoint-b2b-brands-navigation', 'strategy', 'defer' );
     }
 
-    // --- JS: FAQ accordion i tabovi — samo na faq.php template-u ---
+    // --- JS: FAQ accordion — samo na faq.php template-u (vanilla, bez jQuery) ---
     if ( is_page_template( 'faq.php' ) ) {
         wp_enqueue_script(
             'dreampoint-b2b-faq',
             get_template_directory_uri() . '/js/faq.js',
-            [ 'jquery' ],
+            [],
             _S_VERSION,
             true
         );

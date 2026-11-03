@@ -1,11 +1,13 @@
 <?php
 /**
  * Template name: FAQ
- * 
- * Displays FAQ posts with accordion functionality and pagination
- * 
+ *
+ * FAQ posts filtered by `faq-category` (tabs rendered in header.php via
+ * dreampoint_b2b_faq_render_tabs()), accessible accordion and pagination.
+ * The query, page count and pagination all use the same category-filtered result set.
+ *
  * @package Dreampoint_B2B
- * @version 1.1.0
+ * @version 2.0.0
  */
 
 // Exit if accessed directly
@@ -31,6 +33,10 @@ if (isset($_GET['faq_page'])) {
 // Ensure minimum page is 1
 $current_page = max(1, $current_page);
 
+// Selected category (first one by default); no categories -> all questions
+$faq_terms   = dreampoint_b2b_faq_get_terms();
+$active_term = dreampoint_b2b_faq_get_active_term($faq_terms);
+
 // WP_Query arguments
 $query_args = [
     'post_type'      => $post_type,
@@ -42,7 +48,27 @@ $query_args = [
     'no_found_rows'  => false, // Need this for pagination
 ];
 
+if ($active_term) {
+    $query_args['tax_query'] = [
+        [
+            'taxonomy' => 'faq-category',
+            'field'    => 'term_id',
+            'terms'    => [$active_term->term_id],
+        ],
+    ];
+}
+
 $faq_query = new WP_Query($query_args);
+
+// Page number beyond the last page of this category -> show the last page
+if ($faq_query->max_num_pages > 0 && $current_page > $faq_query->max_num_pages) {
+    $current_page         = (int) $faq_query->max_num_pages;
+    $query_args['paged']  = $current_page;
+    $faq_query            = new WP_Query($query_args);
+}
+
+$schema_items = [];
+$item_index   = 0;
 ?>
 
 <div id="faq" class="block">
@@ -50,60 +76,81 @@ $faq_query = new WP_Query($query_args);
         <div id="faq-body">
             <div class="accordion">
                 <?php if ($faq_query->have_posts()) : ?>
-                    
+
                     <?php while ($faq_query->have_posts()) : $faq_query->the_post(); ?>
-                        <div class="faq-wrap" id="faq-<?php echo absint(get_the_ID()); ?>">
-                            <h3>
-                                <?php the_title(); ?>
-                            </h3>
-                            <div class="content">
-                                <?php
-                                $answer = get_field('faq_answer');
-                                if ($answer) {
-                                    echo wp_kses_post($answer);
-                                } else {
-                                    // Fallback to post content if ACF field empty
-                                    the_content();
-                                }
-                                ?>
+                        <?php
+                        $faq_id   = absint(get_the_ID());
+                        $is_open  = (0 === $item_index); // first visible question is expanded
+                        $item_index++;
+
+                        $answer = get_field('faq_answer');
+                        if (!$answer) {
+                            // Fallback to post content if ACF field empty
+                            $answer = apply_filters('the_content', get_the_content());
+                        }
+
+                        $schema_items[] = [
+                            '@type'          => 'Question',
+                            'name'           => get_the_title(),
+                            'acceptedAnswer' => [
+                                '@type' => 'Answer',
+                                'text'  => wp_strip_all_tags($answer),
+                            ],
+                        ];
+                        ?>
+                        <div class="faq-wrap<?php echo $is_open ? ' active' : ''; ?>" id="faq-<?php echo $faq_id; ?>">
+                            <h2 class="faq-question">
+                                <button type="button" class="faq-toggle" id="faq-q-<?php echo $faq_id; ?>" aria-expanded="<?php echo $is_open ? 'true' : 'false'; ?>" aria-controls="faq-a-<?php echo $faq_id; ?>">
+                                    <span class="faq-toggle__text"><?php the_title(); ?></span>
+                                    <span class="faq-toggle__icon" aria-hidden="true"></span>
+                                </button>
+                            </h2>
+                            <div class="content" id="faq-a-<?php echo $faq_id; ?>"<?php echo $is_open ? '' : ' hidden'; ?>>
+                                <?php echo wp_kses_post($answer); ?>
                             </div>
                         </div>
                     <?php endwhile; ?>
-                    
+
                     <!-- Pagination -->
                     <?php if ($faq_query->max_num_pages > 1) : ?>
                         <div class="faq-pagination">
                             <?php
+                            // Keep the selected category in every page link
+                            $pagination_base = $active_term
+                                ? dreampoint_b2b_faq_term_url($active_term, $faq_terms)
+                                : get_permalink();
+
                             $pagination_args = [
+                                'base'       => add_query_arg('faq_page', '%#%', $pagination_base),
+                                'format'     => '',
                                 'total'      => $faq_query->max_num_pages,
                                 'current'    => $current_page,
-                                'format'     => '?faq_page=%#%',
-                                'prev_text'  => '<i class="icon-chevron-left" aria-hidden="true"></i> <span>' . esc_html__('Nazad', 'dreampoint-b2b') . '</span>',
-                                'next_text'  => '<span>' . esc_html__('Naprijed', 'dreampoint-b2b') . '</span> <i class="icon-chevron-right" aria-hidden="true"></i>',
+                                'prev_text'  => '<span class="faq-pagination__icon faq-pagination__icon--prev" aria-hidden="true"></span><span>' . esc_html__('Nazad', 'dreampoint-b2b') . '</span>',
+                                'next_text'  => '<span>' . esc_html__('Naprijed', 'dreampoint-b2b') . '</span><span class="faq-pagination__icon faq-pagination__icon--next" aria-hidden="true"></span>',
                                 'type'       => 'list',
                                 'mid_size'   => 2,
                                 'end_size'   => 1,
                                 'add_args'   => false,
                                 'aria_label' => esc_attr__('FAQ paginacija', 'dreampoint-b2b'),
                             ];
-                            
+
                             echo paginate_links($pagination_args);
                             ?>
                         </div>
                     <?php endif; ?>
-                    
+
                 <?php else : ?>
-                    
+
                     <div class="no-results">
                         <p><?php esc_html_e('Nema dostupnih pitanja.', 'dreampoint-b2b'); ?></p>
                     </div>
-                    
+
                 <?php endif; ?>
-                
+
                 <?php wp_reset_postdata(); ?>
             </div>
             <!-- /.accordion -->
-            
+
         </div>
         <!-- /#faq-body -->
     </div>
@@ -113,29 +160,9 @@ $faq_query = new WP_Query($query_args);
 
 <?php
 /**
- * Optional: Add Schema.org FAQ markup for SEO
+ * Schema.org FAQPage markup for the questions shown on this page
  */
-if ($faq_query->have_posts()) :
-    $schema_items = [];
-    
-    while ($faq_query->have_posts()) : $faq_query->the_post();
-        $answer = get_field('faq_answer');
-        if (!$answer) {
-            $answer = get_the_content();
-        }
-        
-        $schema_items[] = [
-            '@type'          => 'Question',
-            'name'           => get_the_title(),
-            'acceptedAnswer' => [
-                '@type' => 'Answer',
-                'text'  => wp_strip_all_tags($answer),
-            ],
-        ];
-    endwhile;
-    
-    wp_reset_postdata();
-    
+if ($schema_items) :
     $schema = [
         '@context'   => 'https://schema.org',
         '@type'      => 'FAQPage',

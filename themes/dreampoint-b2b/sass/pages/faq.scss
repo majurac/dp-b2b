@@ -1,8 +1,79 @@
 @import '../theme/mixins';
 
+// FAQ — Figma CON-02 (file FcZ1ja4QTalgsMB1vKGOWH, node 79:22758).
+// Scoped to the FAQ template; global heading mixins / accordions elsewhere are untouched.
+
+// Open-card top border: value taken from the Figma frame (border-secondary on the open item).
+$faq-open-border: #eddef0;
+
+// Plus / minus / arrow glyphs are the Figma SVG assets, recoloured via mask.
+@mixin faq-icon($file) {
+    -webkit-mask: url("../../img/ico/#{$file}") center / contain no-repeat;
+    mask: url("../../img/ico/#{$file}") center / contain no-repeat;
+    background-color: currentColor;
+}
+
+// ---------------------------------------------------------------------------
+// Category tabs (rendered inside the .inner-heading banner by header.php)
+// ---------------------------------------------------------------------------
+.inner-heading .faq-tabs {
+    margin-top: 24px;
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+        display: none;
+    }
+    ul {
+        display: inline-flex;
+        gap: 24px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        border-bottom: 1px solid $dp-color-border-secondary;
+        min-width: min-content;
+    }
+    li {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 36px;
+        padding: 0 4px;
+        font-family: $dp-font-body;
+        font-weight: 600;
+        font-size: 14px;
+        line-height: normal;
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+        color: $dp-color-text-primary;
+        text-decoration: none;
+        border-radius: 4px 4px 0 0;
+        &.is-active {
+            background: $dp-color-bg-mono;
+            box-shadow: inset 0 -2px 0 $dp-color-text-primary;
+        }
+        &:focus-visible {
+            outline: 2px solid $dp-color-text-primary;
+            outline-offset: -2px;
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// List
+// ---------------------------------------------------------------------------
+#faq.block {
+    padding-top: 32px;
+}
+
 #faq-body {
-    max-width: 792px;
-    margin-left: auto;
+    max-width: 891px;
+    margin-left: 0;
     margin-right: auto;
     .accordion {
         display: flex;
@@ -10,38 +81,76 @@
         gap: 16px;
     }
     .faq-wrap {
-        background: $white;
-        border-top: 1px solid $border-secondary;
+        background: $dp-color-bg-mono;
+        border-top: 1px solid $dp-color-border-secondary;
         &.active {
             background: $dp-color-bg-tertiary;
-        }
-        h3 {
-            @include heading-6;
-            font-weight: 500;
-            color: $dp-color-text-secondary;
-            padding: 16px;
-            padding-right: 50px;
-            position: relative;
-            cursor: pointer;
-            &:after {
-                font-family: icomoon;
-                content: "\e908";
-                @include centre(y);
-                right: 16px;
-                font-size: 18px;
-                color: $dp-color-icon-secondary;
-            }
-            &.active {
-                &:after {
-                    content: "\e907";
-                }
+            border-top-color: $faq-open-border;
+            .faq-toggle {
+                padding-top: 32px;
+                padding-bottom: 16px;
             }
         }
+    }
+    .faq-question {
+        margin: 0;
+        padding: 0;
+    }
+    .faq-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        width: 100%;
+        margin: 0;
+        padding: 16px;
+        background: none;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        text-align: left;
+        cursor: pointer;
+        font-family: $dp-font-heading;
+        font-weight: 600;
+        font-size: 16px;
+        line-height: normal;
+        letter-spacing: 0;
+        text-transform: none;
+        color: $dp-color-text-primary;
+        &:focus-visible {
+            outline: 2px solid $dp-color-text-primary;
+            outline-offset: -2px;
+        }
+    }
+    .faq-toggle__text {
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+    .faq-toggle__icon {
+        flex: 0 0 24px;
+        width: 24px;
+        height: 24px;
+        @include faq-icon('faq-plus.svg');
+    }
+    .faq-toggle[aria-expanded="true"] .faq-toggle__icon {
+        @include faq-icon('faq-minus.svg');
+    }
+    .content {
+        padding: 0 16px 32px;
+        font-family: $dp-font-body;
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 18px;
+        color: $dp-color-text-primary;
         p, li {
-            @include paragraph-normal;
-            color: $text-primary;
+            font: inherit;
+            color: inherit;
         }
-        p+p, ul+p, p + ul {
+        p {
+            margin: 0;
+        }
+        p + p, ul + p, p + ul, ol + p, p + ol {
             margin-top: 16px;
         }
         ul {
@@ -50,10 +159,72 @@
         ol {
             @include order-style;
         }
-        .content {
-            padding: 16px;
-            padding-top: 0;
-            display: none;
+        a {
+            color: inherit;
+            text-decoration: underline;
         }
+    }
+    .no-results p {
+        @include paragraph-normal;
+        color: $dp-color-text-primary;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Pagination (Figma: Nazad / numbers 40x40 / Naprijed)
+// ---------------------------------------------------------------------------
+.faq-pagination {
+    padding-top: 20px;
+    border-top: 1px solid #EAECF0;
+    ul.page-numbers {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    li {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    a.page-numbers, span.page-numbers {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 40px;
+        height: 40px;
+        border-radius: 20px;
+        font-family: $dp-font-body;
+        font-weight: 400;
+        font-size: 14px;
+        line-height: normal;
+        color: $dp-color-text-primary;
+        text-decoration: none;
+        &.current {
+            background: $dp-color-bg-brand;
+            color: $white;
+            border-radius: 8px;
+        }
+        &.prev, &.next {
+            gap: 8px;
+            padding: 0 4px;
+            &.prev { margin-right: 10px; }
+            &.next { margin-left: 10px; }
+        }
+        &:focus-visible {
+            outline: 2px solid $dp-color-text-primary;
+            outline-offset: 2px;
+        }
+    }
+    .faq-pagination__icon {
+        width: 20px;
+        height: 20px;
+        flex: 0 0 20px;
+        &--prev { @include faq-icon('faq-arrow-left.svg'); }
+        &--next { @include faq-icon('faq-arrow-right.svg'); }
     }
 }

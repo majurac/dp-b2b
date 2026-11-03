@@ -397,7 +397,7 @@ button.dp-qo-filter-chip:hover { background: #e6e6e6; }
 .dp-qo-no-results__inner { max-width: 544px; margin: 0 auto; }
 .dp-qo-no-results__icon { display: block; width: 144px; height: 144px; margin: 0 auto 16px; }
 .dp-qo-no-results__title { margin: 0 0 8px; font-family: 'Petrona', serif; font-size: 40px; line-height: normal; font-weight: 600; letter-spacing: 0; text-transform: none; color: #0d121c; }
-.dp-qo-no-results__text { margin: 0 0 16px; font-size: 18px; line-height: normal; color: #0d121c; }
+.dp-qo-no-results__text { margin: 0 0 16px; font-size: 18px; font-weight: 400; line-height: normal; color: #0d121c; }
 .dp-qo-no-results__tips {
     margin: 0 0 24px;
     padding: 0;
@@ -409,10 +409,10 @@ button.dp-qo-filter-chip:hover { background: #e6e6e6; }
 }
 .dp-qo-no-results__tips > li { margin: 0; }
 .dp-qo-no-results__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; }
-.dp-qo-no-results__btn { cursor: pointer; flex: 0 1 260px; min-width: 0; justify-content: center; font-size: 16px; letter-spacing: 0.32px; }
+.dp-qo-no-results__actions .dp-qo-no-results__btn.button { cursor: pointer; flex: 0 1 260px; min-width: 0; justify-content: center; font-size: 16px; letter-spacing: 0.32px; }
 /* Secondary: white fill, dark 1px border (Figma), instead of the grey .button--outline default */
-.dp-qo-no-results__btn.button--outline { background: #fff; border-color: #0d121c; color: #0d121c; }
-.dp-qo-no-results__btn.button--outline:hover { background: #f3f4f6; border-color: #0d121c; color: #0d121c; }
+.dp-qo-no-results__actions .dp-qo-no-results__btn.button.button--outline { background: #fff; border-color: #0d121c; color: #0d121c; }
+.dp-qo-no-results__actions .dp-qo-no-results__btn.button.button--outline:hover { background: #f3f4f6; border-color: #0d121c; color: #0d121c; }
 
 /* ── WBW's own selected-filters node, relocated into the "Aktivni filteri" row ──
    WBW keeps rendering/removing these chips (and its delegated × handler still applies);

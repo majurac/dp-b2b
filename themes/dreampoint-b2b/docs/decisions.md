@@ -2173,3 +2173,14 @@ Restore: `woocommerce_flat_rate_2_settings.title` = "Fiksna cijena dostave"; `wo
 **Rollback.** (1) Revert `12998bc` (cards return to `product-loop`; `card-loop` files stay unused). (2) To remove the media effect: restore `_wp_attachment_metadata` from the backups in `/home/dreampoint.b2b/backup-recovery/b11-card-loop-20261103-135617/` (`metadata.json` for the 10 pilot attachments, `metadata-all.json` raw serialized values for the other 441) and delete the `*-500x500.*`, `*-413x500.*` and `*-390x500.*` derivatives of those attachments. Git rollback alone does not restore media metadata.
 
 **Future imports.** New product images get `card-loop` automatically from the registration (the importer calls `wp_generate_attachment_metadata`); no maintenance list. Images whose product fills more than ~74% of the canvas width will still be composed by the supplier; `card-loop` makes them display whole.
+
+
+### ADR-038 addendum - final read-only QA (2026-11-03, HEAD `d3fbb93`)
+
+- **Status stays PARTIALLY COMPLETE - NOT FULLY VERIFIED.** Implementation is complete on staging; local, GitHub and staging HEAD `d3fbb93`, working trees clean. No production deployment is authorized (none exists).
+- **DPR 1 verified:** `/shop/` page 1, visible tab, 5 loads x 12 images = 60 observations: every image selects the `-300x300` candidate, first 4 are eager + `fetchpriority=high` without `auto` sizes; the earlier single "1000 px original" observation was NOT reproduced (not proven impossible).
+- **DPR 2/3 NOT VERIFIED:** Chrome DevTools emulation is blocked in the browser tool (`Target.attachToBrowserTarget: Not allowed`). Next step: manual Chrome DevTools check (Network with cache disabled, device toolbar DPR 2 and 3 at 1440 and 390 px, read `currentSrc`/`transferSize` of the card images). Expected by srcset arithmetic, not observed: 1440 DPR2 -> 500x500, 1440 DPR3 -> 768x768, 390 DPR2 -> 300x300, 390 DPR3 -> 500x500; a 1000 px original must not appear.
+- **LCP observed (6 loads):** the LCP element is the `.inner-heading` background `dp-pattern.png` (400-464 ms), not a product image; no B1.1-specific regression identified (no baseline, so no improvement is claimed).
+- **Keyboard:** card action buttons show the two-tone focus ring; no layout shift or clipping, also in the PDP related slider. The product image link and the product title link have no visible focus indicator (global `a:focus { outline: none !important }`, pre-existing and unrelated to B1.1): tracked as roadmap X21, not fixed.
+- **Absent contexts:** homepage product cards (0), cart cross-sells, placeholder images and sale (`del`) cards are not present on staging.
+- **Supplier media limitation:** attachments 14024, 14127, 14144 (products 14006, 14124, 14137) are 300x300 originals and cannot produce a 500 px `card-loop`; they need higher-resolution sources.

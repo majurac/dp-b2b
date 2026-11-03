@@ -157,6 +157,7 @@ G1 end-to-end functional QA (A10 + D1 + QO) · G2 ERP/APROS integration QA · G3
 | X18 | Frozen-doc conflict: `docs/frozen/checkout-logic.md` priority-999 and "My Account only channel" statements superseded by §53.5 (file not edited) | recorded | §53.5 |
 | X20 | UNVERIFIED observation (2026-10-31 audit): staging tax rate HR 25 % shows `tax_rate_shipping=0` with `tax_based_on=shipping`, which may not match the `CLAUDE.md` statement that tax applies to shipping. Not investigated; not a confirmed defect | needs separate review | three-gate audit |
 | X19 | Residual deployment risk: HTTP 500 on `/cart/` right after N1/N5 deploy (undefined helper; OPcache window suspected, unproven) | recorded | §52 |
+| X21 | Product card keyboard focus: image link and title link (`.product-item`) show no visible focus indicator because of the global `a:focus { outline: none !important }` (pre-existing, found in B1.1 final QA; action button ring is fine). Add a shared ring (two-tone `dp-focus-ring` mixin) | NOT STARTED (follow-up, do not fix inside B1.1) | ADR-038 addendum, WCAG 2.4.7 |
 
 Closed and NOT reopened: T1–T3b, T4 (partially verified), T5, T6, N1/N4/N5, Segments Section, colour alignment phases 1–4, Quick Order v1.0.36, slider navigation (ADR-031), PDP Description tab (ADR-028).
 

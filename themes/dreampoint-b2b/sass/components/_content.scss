@@ -1156,10 +1156,10 @@ body.page-template-contact-php .select2-container .select2-dropdown {
         // Figma Product card (11148:32832): image area 282 x 248, no border, no radius.
         // The ratio lives on the wrapper (not the <img>, whose width/height attributes would override it).
         aspect-ratio: 282 / 248;
-        // `contain` keeps the whole packshot visible (the 340x462 `product-loop` source is already hard-cropped);
-        // switch to `cover` for the literal Figma fill - it cuts 30%+ of tall products (bottles, lanyards).
-        img.attachment-product-loop,
-        img.placeholder-img {
+        // `contain` keeps the whole packshot visible (the uncropped `card-loop` source, or the legacy hard-cropped
+        // `product-loop` fallback); switch to `cover` for the literal Figma fill - it cuts 30%+ of tall products.
+        // Not tied to a size class so the source size can change without touching the card CSS.
+        img {
             display: block;
             width: 100%;
             height: 100%;
@@ -1346,7 +1346,7 @@ body.page-template-contact-php .select2-container .select2-dropdown {
     }
     &:hover {
         .photo-holder {
-            img.attachment-product-loop {
+            img {
                 @include animate-scale;
             }
         }

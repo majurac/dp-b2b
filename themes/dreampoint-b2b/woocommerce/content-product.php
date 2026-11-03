@@ -25,7 +25,17 @@ $sku = $product->get_sku();
 $out_of_stock = !$product->is_in_stock();
 $is_variable = $product->is_type('variable');
 $permalink = get_permalink($product_id);
-$image_size = 'product-loop';
+$thumb_id = (int) get_post_thumbnail_id($product_id);
+$image_size = dreampoint_b2b_card_image_size($thumb_id);
+$image_attr = [
+    'alt'     => esc_attr($product_name),
+    'loading' => 'lazy',
+];
+if ($image_size === 'card-loop') {
+    // The square card-loop image is shown `contain`ed in a 282x248 box, so it renders at most ~250 css px wide
+    // (about 37vw of the 2-column mobile grid): lets 1x pick 300px and 2x pick 500px instead of 768px.
+    $image_attr['sizes'] = '(max-width: 767px) 37vw, 250px';
+}
 ?>
 
 <?php
@@ -67,10 +77,7 @@ if ( is_shop() || is_product_category() || is_tax('product_brand') ) :
                    aria-label="<?php echo esc_attr($product_name); ?>"
                    title="<?php echo esc_attr($product_name); ?>">
 
-                    <?php the_post_thumbnail( $image_size, [
-                        'alt'     => esc_attr($product_name),
-                        'loading' => 'lazy',
-                    ] ); ?>
+                    <?php the_post_thumbnail( $image_size, $image_attr ); ?>
 
                 </a>
 

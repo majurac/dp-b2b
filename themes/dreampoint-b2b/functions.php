@@ -106,6 +106,9 @@ function dreampoint_b2b_setup(): void {
     // Prilagođene veličine slika.
     // Nakon dodavanja nove veličine pokrenuti: wp media regenerate --yes (WP-CLI)
     add_image_size( 'product-loop',    340, 462, true );
+    // Product cards (B1.1 Option C): proportional resize, never cropped. Generate with
+    // `wp media regenerate <ids> --image_size=card-loop --only-missing` (see docs/decisions.md ADR-038).
+    add_image_size( 'card-loop',       500, 500, false );
     add_image_size( 'category-loop',   460, 495, true );
     add_image_size( 'about-photo',     700, 605, true );
     add_image_size( 'gallery_thumb',   400, 300, true );
@@ -711,6 +714,20 @@ function dreampoint_b2b_scripts(): void {
 }
 
 /**
+ * Image size for a product card: the uncropped `card-loop` derivative when it exists for the attachment,
+ * otherwise the legacy hard-cropped `product-loop` (not-yet-regenerated or too-small originals stay safe).
+ */
+function dreampoint_b2b_card_image_size( int $attachment_id ): string {
+    if ( $attachment_id > 0 ) {
+        $meta = wp_get_attachment_metadata( $attachment_id );
+        if ( ! empty( $meta['sizes']['card-loop'] ) ) {
+            return 'card-loop';
+        }
+    }
+    return 'product-loop';
+}
+
+/**
  * LCP optimizacija — fetchpriority="high" + loading="eager" za prvih 4 slike proizvoda
  * na shop/category/brand stranicama (iznad preloma stranice).
  *
@@ -722,7 +739,7 @@ function dreampoint_b2b_scripts(): void {
  * imaju sopstvenu logiku prioriteta.
  */
 add_filter( 'wp_get_attachment_image_attributes', function ( array $attr, WP_Post $attachment, $size ): array {
-    if ( $size !== 'product-loop' ) return $attr;
+    if ( $size !== 'product-loop' && $size !== 'card-loop' ) return $attr;
     if ( ! is_shop() && ! is_product_category() && ! is_tax( 'product_brand' ) ) return $attr;
 
     static $count = 0;
@@ -731,6 +748,11 @@ add_filter( 'wp_get_attachment_image_attributes', function ( array $attr, WP_Pos
     if ( $count <= 4 ) {
         $attr['fetchpriority'] = 'high';
         $attr['loading']       = 'eager';
+        // WordPress prefixes `sizes` with "auto," for lazy images; `auto` is invalid for eager ones and the browser
+        // would fall back to 100vw (picking the largest candidate). Scoped to the card image sizes handled here.
+        if ( ! empty( $attr['sizes'] ) ) {
+            $attr['sizes'] = preg_replace( '/^auto,\s*/', '', $attr['sizes'] );
+        }
     }
 
     return $attr;

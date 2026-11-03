@@ -586,9 +586,9 @@
         padding: 32px 0;
     }
 
-    // Empty address (Figma MPR-02 11148:37742): 144px emoji-sad, sentence-case 40px heading, 544px column.
-    // Modifier-scoped so the orders empty state keeps its own look until MPR-05 is aligned.
-    .not-found-holder--address {
+    // Shared My Account empty state (Figma MPR-02 11148:37742 addresses, MPR-05 11148:38145 orders):
+    // 144px emoji-sad, sentence-case 40px heading, 544px column. Copy and CTA stay per template.
+    .not-found-holder--account {
         max-width: 544px;
         .nf-icon {
             margin-bottom: 16px;

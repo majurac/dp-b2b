@@ -134,8 +134,8 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 	<?php endif; ?>
 
 <?php else : ?>
-	<div class="not-found-holder">
-		<div class="nf-icon"><img src="<?php bloginfo('template_directory'); ?>/img/ico/face-sad.svg" alt=""></div>
+	<div class="not-found-holder not-found-holder--account">
+		<div class="nf-icon"><img src="<?php echo esc_url( get_template_directory_uri() . '/img/ico/emoji-sad.svg' ); ?>" width="144" height="144" alt=""></div>
 		<h2><?php esc_html_e( 'Nema povijesti narudžbi', 'dreampoint-b2b' ); ?></h2>
 		<p><?php esc_html_e( 'Trenutno nemate kreiranih narudžbi. Kako biste kreirali narudžbu, posjetite trgovinu, dodajte proizvode u svoju košaricu i napravite narudžbu.', 'dreampoint-b2b' ); ?></p>
 		<a href="<?php echo esc_url( wc_get_page_permalink( 'shop' ) ); ?>" class="button button--xl"><?php esc_html_e( 'Posjeti trgovinu', 'dreampoint-b2b' ); ?></a>

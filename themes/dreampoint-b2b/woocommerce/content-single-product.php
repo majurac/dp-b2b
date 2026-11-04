@@ -182,14 +182,14 @@ $permalink = get_permalink($product_id);
                     <div class="col-md-6">
                         <div class="product-summary <?php echo !$is_in_stock ? 'out-of-stock' : ''; ?>">
                             
+                            <h1 itemprop="name"><?php echo esc_html($product_name); ?></h1>
+
                             <?php if ('' !== $catalog_number) : ?>
                                 <span class="product-sku">
                                     <?php esc_html_e('Kataloški broj', 'dreampoint-b2b'); ?>:
                                     <span class="product-sku__value" data-default="<?php echo esc_attr($catalog_number); ?>"><?php echo esc_html($catalog_number); ?></span>
                                 </span>
                             <?php endif; ?>
-                            
-                            <h1 itemprop="name"><?php echo esc_html($product_name); ?></h1>
                             
                             <?php $non_binding_mpc = dreampoint_b2b_get_non_binding_mpc($product); ?>
                             <?php if ($non_binding_mpc > 0) : ?>

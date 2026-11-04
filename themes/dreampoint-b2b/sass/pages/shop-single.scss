@@ -161,14 +161,20 @@
             }
         }
         .product-summary {
-            max-width: 550px;
+            // Figma PDP-01 info column (11148:32792): 481px, right-aligned (x838-1319); 550px kept at <= 1199px
+            max-width: 481px;
+            @include bp(lg-down) {
+                max-width: 550px;
+            }
             width: 100%;
             margin-left: auto;
             position: relative;
             @include bp(sm-down) {
                 margin-top: 24px;
             }
-            // Figma PDP-01 (11148:32794): Montserrat 500 / 14/20, -0.154px
+            // Figma PDP-01 (11148:32794): Montserrat 500 / 14/20, -0.154px; row sits below the title,
+            // 8px above and 64px below (owner-approved C2-1; 64px kept for the absent EAN row's space).
+            // The 64px step is desktop; the stacked (<768px) layout keeps the previous 20px gap.
             span.product-sku {
                 display: block;
                 font-family: 'Montserrat';
@@ -178,7 +184,11 @@
                 line-height: 20px;
                 letter-spacing: -0.154px;
                 color: $dp-color-text-secondary;
-                margin-bottom: 8px;
+                margin-top: 8px;
+                margin-bottom: 64px;
+                @include bp(sm-down) {
+                    margin-bottom: 20px;
+                }
             }
             .tag + .tag {
                 margin-left: 8px;
@@ -194,6 +204,10 @@
                 text-transform: none;
                 flex-grow: 1;
                 margin-bottom: 20px;
+                // The catalog-number row follows the title and carries its own 8px top spacing
+                &:has(+ .product-sku) {
+                    margin-bottom: 0;
+                }
                 @include bp(md-down) {
                     font-size: 28px;
                     line-height: 32px;
@@ -477,6 +491,14 @@
     
     }
     .wc-tabs-section {
+        // Figma PDP-01 tabs (11148:32815): 485px, right-aligned with the info column (x834-1319);
+        // description text inset to x838 / 456px wide. Full width again at <= 1199px.
+        max-width: 485px;
+        margin-left: auto;
+        @include bp(lg-down) {
+            max-width: none;
+            margin-left: 0;
+        }
         .woocommerce-tabs {
             @include custom-tabs;
             // Figma PDP Tab (11148:32816): 14/600, 0.28px tracking, sentence case, 2px active line
@@ -500,6 +522,12 @@
             }
         }
         .woocommerce-Tabs-panel {
+            padding-left: 4px;
+            padding-right: 25px;
+            @include bp(lg-down) {
+                padding-left: 0;
+                padding-right: 0;
+            }
             h2 {
                 display: none;
             }

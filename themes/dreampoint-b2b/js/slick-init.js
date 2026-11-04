@@ -273,22 +273,58 @@ jQuery( function ( $ ) {
         } );
 
         // --- Brands Slider — beskonačna animacija ---
-        initSlider( $( '.brands-slider' ), {
-            infinite:       true,
-            autoplay:       true,
-            autoplaySpeed:  0,
-            speed:          3000,
-            variableWidth:  true,
-            arrows:         false,
-            dots:           false,
-            cssEase:        'linear',
-            slidesToShow:   1,
-            slidesToScroll: 1,
-            pauseOnHover:   false,
-            pauseOnFocus:   false,
-            swipe:          false,
-            touchMove:      false,
-        } );
+        // Svaki prijelaz pomjera jedan slajd promjenljive širine, pa fiksni `speed` daje različitu brzinu.
+        // Zato se trajanje svakog prijelaza računa iz stvarne udaljenosti (konstantnih BRANDS_PX_PER_SEC).
+        // Slick čita options.speed tek NAKON 'beforeChange' (slideHandler -> animateSlide -> applyTransition
+        // i setTimeout), pa izmjena u ovom handleru važi za isti prijelaz.
+        const $brands = $( '.brands-slider' );
+        if ( $brands.length ) {
+            const BRANDS_PX_PER_SEC = 60;
+            const reduceMotion      = window.matchMedia( '(prefers-reduced-motion: reduce)' );
+
+            $brands.on( 'beforeChange', function ( event, slick, currentSlide ) {
+                // Autoplay uvijek ide naprijed; getLeft() je isti izračun koji Slick koristi za pomak.
+                const distance = Math.abs(
+                    slick.getLeft( currentSlide + slick.options.slidesToScroll ) - slick.getLeft( currentSlide )
+                );
+                if ( distance > 0 ) {
+                    slick.options.speed = Math.round( ( distance / BRANDS_PX_PER_SEC ) * 1000 );
+                }
+            } );
+
+            initSlider( $brands, {
+                infinite:       true,
+                autoplay:       true,
+                autoplaySpeed:  0,
+                speed:          3000,
+                variableWidth:  true,
+                arrows:         false,
+                dots:           false,
+                cssEase:        'linear',
+                slidesToShow:   1,
+                slidesToScroll: 1,
+                pauseOnHover:   false,
+                pauseOnFocus:   false,
+                swipe:          false,
+                touchMove:      false,
+            } );
+
+            // prefers-reduced-motion: bez kontinuiranog autoplaya (logotipi ostaju vidljivi, uz ručno
+            // povlačenje); vraćanje na normalan režim ponovo pokreće autoplay.
+            const applyMotionPreference = function () {
+                if ( reduceMotion.matches ) {
+                    $brands.slick( 'slickPause' );
+                    $brands.slick( 'slickSetOption', { swipe: true, touchMove: true }, false );
+                } else {
+                    $brands.slick( 'slickSetOption', { swipe: false, touchMove: false }, false );
+                    $brands.slick( 'slickPlay' );
+                }
+            };
+            if ( reduceMotion.matches ) {
+                applyMotionPreference();
+            }
+            reduceMotion.addEventListener( 'change', applyMotionPreference );
+        }
 
         // --- Testimonials Slider ---
         initSlider( $( '.testimonials-slider' ), {

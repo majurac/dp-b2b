@@ -6,6 +6,34 @@
 // the whole tile is the single link.
 .segments-section {
     .segments-slider {
+        // Pre-init layout: before Slick adds .slick-initialized the boxes would stack at full container
+        // width (huge tiles, then a layout jump). Mirror Slick's geometry instead: a 24px-wider row
+        // (the .slick-list -12px margins) of equal boxes with 12px side padding (the .slick-slide margins).
+        // Slick's responsive rule applies for window width < breakpoint (991 -> 2 slides, 767 -> 1 slide),
+        // hence the 990 / 766 max-widths. Stops applying as soon as Slick initialises.
+        &:not(.slick-initialized) {
+            display: flex;
+            overflow: hidden;
+            width: calc(100% + 24px);
+            margin: 0 -12px;
+            .segment-box {
+                flex: 0 0 calc(100% / 3);
+                min-width: 0;
+                box-sizing: border-box;
+                padding: 0 12px;
+            }
+            @media (max-width: 990px) {
+                padding-bottom: 50px; // room of the Slick dots (.slick-dotted) shown at this width
+                .segment-box {
+                    flex-basis: 50%;
+                }
+            }
+            @media (max-width: 766px) {
+                .segment-box {
+                    flex-basis: 100%;
+                }
+            }
+        }
         // Figma gap is 24px (global .slick-slide gutter is 20px).
         .slick-slide {
             margin: 0 12px;

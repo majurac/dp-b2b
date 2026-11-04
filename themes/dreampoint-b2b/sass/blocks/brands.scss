@@ -13,6 +13,25 @@
         margin: 0 36px;
     }
 
+    // Pre-init layout: before Slick adds .slick-initialized the brand items would stack vertically and
+    // then collapse into one row. Render the same single clipped row (36px side margins as .slick-slide,
+    // variable item widths, height reserved to the initialised row) until Slick takes over.
+    .brands-slider:not(.slick-initialized) {
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        overflow: hidden;
+        min-height: 51px;
+        .brand-item {
+            flex: 0 0 auto;
+            margin: 0 36px;
+            // Slick's first active slide sits flush at the left edge (its 36px margin is off-screen).
+            &:first-child {
+                margin-left: 0;
+            }
+        }
+    }
+
     // Slider is full-bleed (outside .container); a negative margin would overflow the page.
     .slick-list {
         margin: 0;

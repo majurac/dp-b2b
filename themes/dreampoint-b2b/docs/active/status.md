@@ -5,6 +5,17 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## 2026-11-04 (brands marquee) - Constant scrolling speed + reduced motion, DEPLOYED ON STAGING (symptom B open)
+
+Code `dd5df50` (`js/slick-init.js`, brands block only; the file is enqueued directly, not bundled, no build). Staging only.
+
+- **Cause of variable speed:** `autoplaySpeed: 0` makes Slick chain one-slide transitions back to back, each with the fixed `speed: 3000`, so px/s = (slide width + 72 px margins) / 3 s (about 42-71 px/s before).
+- **Fix:** a `beforeChange` handler sets `slick.options.speed = |getLeft(cur+slidesToScroll) - getLeft(cur)| / 60 * 1000` ms. Verified in `slick.min.js`: `slideHandler` triggers `beforeChange` BEFORE `animateSlide` -> `applyTransition` (and the `setTimeout`) read `options.speed`, so the value applies to the same transition. No vendor/global patching, no timers.
+- **Reduced motion:** `matchMedia('(prefers-reduced-motion: reduce)')`: `slickPause` + swipe/touchMove enabled; switching back calls `slickPlay` and disables swipe again; reacts to live preference changes. JS only.
+- **Measured on the deployed file (visible tab, 450-900 of 450-900 samples visible):** 1920, 1440, 768, 390 all 59.2-60.3 px/s for slide widths 53/57/77/105/140 px (durations 2.083-3.533 s); the infinite-loop reset (clone -> slide 0, `x -1848 -> -249`) is a single jump to an identical position; transition sample counts match durations (no pause above about 80 ms measurable); no horizontal overflow; segments + brands initialise; no console errors. Reduced motion (1440, emulated): paused at load (x constant 6 s), swipe on, logos loaded; no-preference resumes; reduce again pauses after the in-flight transition finishes.
+- **Symptom B reproduced by measurement (not visually) at 1920 x 1080, DPR 1:** the track runs out of slides at the right edge: gap up to 163 px at `currentSlide = 8` (last child = clone slick-index 17, the end of the track) and up to 376 px at `currentSlide = 0`; at 1440 the gap never exceeds the normal 72 px. All images were loaded (`complete`, `naturalWidth > 0`), so it is NOT a loading/decoding problem: 9 real logos total only 1601 px and Slick adds 1 + 9 clones (19 slides), too few for a 1905 px list. This predates the speed change (same slide set). NOT fixed; needs a separate approved task (e.g. enough clones/duplicate set for wide viewports; the template currently pads to 8 items only).
+- **NOT VERIFIED:** human visual observation (measurement only); DPR 2/3 at 1920; swipe gesture itself was not exercised.
+
 ## 2026-11-04 (homepage sliders) - Segments/Brands pre-Slick layout, DEPLOYED ON STAGING - PARTIALLY COMPLETE, NOT FULLY VERIFIED
 
 Code `12137ba` (CSS only: `sass/blocks/segments-section.scss`, `sass/blocks/brands.scss`, generated `css/blocks/segments-section.css`, `css/blocks/brands.css`). Staging only.

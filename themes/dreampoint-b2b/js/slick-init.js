@@ -280,6 +280,7 @@ jQuery( function ( $ ) {
         const $brands = $( '.brands-slider' );
         if ( $brands.length ) {
             const BRANDS_PX_PER_SEC = 60;
+            const BRANDS_MAX_COPIES = 5; // gornja granica rasta DOM-a (5 x niz pokriva i vrlo siroke ekrane)
             const reduceMotion      = window.matchMedia( '(prefers-reduced-motion: reduce)' );
 
             $brands.on( 'beforeChange', function ( event, slick, currentSlide ) {
@@ -291,6 +292,46 @@ jQuery( function ( $ ) {
                     slick.options.speed = Math.round( ( distance / BRANDS_PX_PER_SEC ) * 1000 );
                 }
             } );
+
+            // Pokrivenost desne ivice: Slick (infinite) iza stvarnih slajdova dodaje samo slideCount klonova
+            // (setupInfinite kloni indekse < slideCount), pa pri prelasku na klon traka iza trenutnog
+            // slajda ima ukupno jedan niz logotipa. Ako je taj niz uzi od vidljive liste (npr. 9 logotipa =
+            // ~1600 px naspram 1920/2560 px), desna strana ostaje prazna. Zato se PRIJE init-a postojeci niz
+            // ponavlja (isti linkovi, isti redoslijed, iste slike) dok sirina niza ne prekrije najsiri ekran.
+            // Kopije su aria-hidden i izvan tab-redoslijeda (vidi stripRepeatFocus).
+            if ( ! $brands.hasClass( 'slick-initialized' ) ) {
+                const $original = $brands.children();
+                // Prije init-a lazy slike nemaju ucitanu velicinu (sirina 0), pa se sirina logotipa racuna iz
+                // width/height atributa i CSS max-width/max-height (isti odnos kao u brands.scss); tekstualni
+                // brendovi (bez slike) se mjere direktno.
+                const itemWidth = function ( el ) {
+                    const $el  = $( el );
+                    const img  = $el.find( 'img' ).get( 0 );
+                    const w    = img ? Number( img.getAttribute( 'width' ) ) : 0;
+                    const h    = img ? Number( img.getAttribute( 'height' ) ) : 0;
+                    if ( ! w || ! h ) {
+                        return $el.outerWidth( true );
+                    }
+                    const cs    = window.getComputedStyle( img );
+                    const maxW  = parseFloat( cs.maxWidth ) || Infinity;
+                    const maxH  = parseFloat( cs.maxHeight ) || Infinity;
+                    const scale = Math.min( 1, maxW / w, maxH / h );
+                    return ( $el.outerWidth( true ) - $el.width() ) + w * scale;
+                };
+                const widths    = $original.map( function () { return itemWidth( this ); } ).get();
+                const setWidth  = widths.reduce( function ( sum, w ) { return sum + w; }, 0 );
+                const needed    = Math.max( window.screen.width, window.innerWidth );
+
+                if ( setWidth > 0 && setWidth < needed ) {
+                    const copies = Math.min( BRANDS_MAX_COPIES, Math.ceil( needed / setWidth ) );
+                    for ( let i = 1; i < copies; i++ ) {
+                        $original.each( function () {
+                            $( this ).clone().attr( { 'aria-hidden': 'true', 'data-dp-repeat': '' } )
+                                .find( 'a' ).attr( 'tabindex', '-1' ).end().appendTo( $brands );
+                        } );
+                    }
+                }
+            }
 
             initSlider( $brands, {
                 infinite:       true,
@@ -307,6 +348,16 @@ jQuery( function ( $ ) {
                 pauseOnFocus:   false,
                 swipe:          false,
                 touchMove:      false,
+            } );
+
+            // Slick u initADA() vraca tabindex=0 aktivnim slajdovima (init i postSlide); kopije niza ostaju
+            // izvan tab-redoslijeda (isti obrazac kao segments: odlozeno na afterChange/reInit).
+            const stripRepeatFocus = function () {
+                $brands.find( '[data-dp-repeat] a' ).attr( 'tabindex', '-1' );
+            };
+            stripRepeatFocus();
+            $brands.on( 'reInit afterChange', function () {
+                setTimeout( stripRepeatFocus, 0 );
             } );
 
             // prefers-reduced-motion: bez kontinuiranog autoplaya (logotipi ostaju vidljivi, uz ručno

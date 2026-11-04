@@ -5,6 +5,19 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## 2026-11-04 (C2-1) - PDP info column, catalog-number order, Description tabs: IMPLEMENTED / TECHNICALLY VERIFIED ON STAGING, VISUAL QA PENDING
+
+Roadmap C2 (batch C2-1 only). Code `22a5e71` (`sass/pages/shop-single.scss`, generated `css/pages/shop-single.css`, `woocommerce/content-single-product.php`). Figma PDP-01 `11148:32726` / PDP-02 `11148:32859`: info column `11148:32792`, tabs `11148:32815`, description `11148:32814`. Staging only; deployed with `git pull --ff-only` (7aa1e90 -> 22a5e71, staging tree clean), served CSS MD5 equals the local build.
+
+- **A. Info column:** `.product-summary` `max-width` 550 -> 481 px at >= 1200 px (Figma x838-1319, right-aligned); 550 px kept at <= 1199 px. Gallery and grid untouched, so the gallery-to-info gap (about 131 px vs Figma 31 px) stays until C2-2.
+- **B. Catalog number:** the existing `.product-sku` block was moved below the `<h1>` (same markup, classes, conditional and `.product-sku__value`). Spacing: 8 px above, 64 px below (owner-approved; no EAN row added). `h1:has(+ .product-sku)` drops the title margin so spacing is not doubled; without a catalog number the old 20 px title margin remains. Below 768 px the bottom spacing is 20 px (inferred; Figma is desktop-only).
+- **C. Description:** `.wc-tabs-section` `max-width: 485px; margin-left: auto` at >= 1200 px (Figma x834-1319), panel padding 4 px left / 25 px right (text x838, 456 px). Reset to full width at <= 1199 px. PHP structure, conditional rendering, ADR-028 (Description only) unchanged.
+- **Measured on staging (DOM, authenticated; carape-lava-lamp, c-sun, cruise-screen-black-0 at 1440 / 1024 / 768 / 390, via same-origin iframes):** order h1 > sku > price (OOS: h1 > sku > stock) everywhere; 1440: summary 481 px, h1-to-sku 8 px, sku-to-price 64 px, tabs 485 px with the same right edge as the summary, description text 456 px wide, 4 px inset; <= 1024: summary 449 / 329 px (max-width 550 rule inactive), tabs full width, 390 px sku margin 20 px; no horizontal overflow in any of the 12 cases. Slick initialised, two gallery arrows present.
+- **Functional (non-mutating):** c-sun variation selection updates the catalog number (`S/C` -> `S/C/B/+0`), add-to-cart enabled after selection; price, stock text, quantity (hidden for max=1 simple products, number input for variable) and add-to-cart unchanged; out-of-stock product still shows no price, "Proizvod nije na stanju" and the back-in-stock form; gallery next arrow and thumbnail click change slides, fancybox links present. No add-to-cart, order or data change.
+- **Observation (not a regression):** the native variation description (about 490 px tall on c-sun) is longer in the narrower 481 px column.
+- **Visual QA PENDING:** only one real screenshot succeeded (c-sun, 1440, top of page: title above catalog number, 64 px gap, right-aligned info column); the controlled browser tab was intermittently `hidden` and the other screenshots timed out, so the tabs area and the 1024 / 768 / 390 layouts have DOM evidence only and no side-by-side Figma comparison was made. Owner visual confirmation required; pixel-perfect or human-verified alignment is NOT claimed.
+- **Still open:** C2-2 (gallery rail/size, arrows decision), C2-3 (USP strip content), C2-4 (quantity stepper, variation pills), plus owner decisions (share row, OOS price, "Povezani proizvodi" heading, ~80 px top offset, tabs vertical gap).
+
 ## 2026-11-04 (homepage brands selection) - 13 brands, STAGING CONTENT CHANGE (DB, not in Git)
 
 Content-only change on staging homepage (page ID 17, ACF block `acf/brands-section`, field `selected_brands`). No PHP, JavaScript, SCSS or template changes. Production untouched (none exists).

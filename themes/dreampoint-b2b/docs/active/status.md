@@ -5,6 +5,17 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## 2026-11-04 (homepage brands selection) - 13 brands, STAGING CONTENT CHANGE (DB, not in Git)
+
+Content-only change on staging homepage (page ID 17, ACF block `acf/brands-section`, field `selected_brands`). No PHP, JavaScript, SCSS or template changes. Production untouched (none exists).
+
+- **Before (9):** Izipizi, Djeco, Janod, Notabag, Eat My Socks, LA COQUE FRANCAISE, Gaston luga, DOCK & BAY, SECRID. Djeco and Janod had neither a logo nor products (rendered as text).
+- **After (13 unique):** the seven retained brands in their original relative order (Izipizi, Notabag, Eat My Socks, LA COQUE FRANCAISE, Gaston luga, DOCK & BAY, SECRID) plus NUUNA, 24Bottles, A Fan Of, Leuchtturm1917, Design Letters ApS, PRINTWORKS. All 13 have a logo file and at least one product; term IDs `257,19,258,259,260,261,262,273,264,265,272,266,274`. The six additions carry `_dp_brand_fixture`, which is documented as valid ERP-backed brands, not test-only (`decisions.md`, fixture marker note).
+- **Method:** exact substring replacement of the `selected_brands` array in page 17's `post_content`, verified byte-for-byte (reverting the substring reproduces the original). Backup of the original content and metadata: `/home/dreampoint.b2b/backup-recovery/brands-selection-20261104-111905/`; WP revision 10 of page 17 also holds the previous state.
+- **Measured on staging (DOM, not human visual):** server HTML renders 13 unique logo items; 1920 px: no JS repetition needed (13 real + 14 clones), uncovered right-edge width 0 px over a full visible cycle of all 13 positions; 2560 px: the existing JS repetition remains expected (26 real slides), static coverage 0 px; scrolling 59.0-60.2 px/s at 1920/1440/768/390; reduced motion verified (paused at load, resumes live, logos loaded); Segments and brands initialise, no console errors.
+- **NOT VERIFIED:** human visual confirmation; a full visible-tab dynamic cycle at 2560 px (only 4 positions were captured, the tab turned hidden); brand product counts are global term counts, not per-customer visibility.
+- **Deployment note:** this is staging database content. Git deployment does not transfer it; any other environment would need the same ACF selection edited separately.
+
 ## 2026-11-04 (brands marquee, wide viewports) - Right-edge coverage gap FIXED ON STAGING
 
 Code `dc2c20d` (`js/slick-init.js`, brands block only; not bundled, no build). Staging only. Resolves the "symptom B" recorded in the entry below.

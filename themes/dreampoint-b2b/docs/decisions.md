@@ -2184,3 +2184,31 @@ Restore: `woocommerce_flat_rate_2_settings.title` = "Fiksna cijena dostave"; `wo
 - **Keyboard:** card action buttons show the two-tone focus ring; no layout shift or clipping, also in the PDP related slider. The product image link and the product title link have no visible focus indicator (global `a:focus { outline: none !important }`, pre-existing and unrelated to B1.1): tracked as roadmap X21, not fixed.
 - **Absent contexts:** homepage product cards (0), cart cross-sells, placeholder images and sale (`del`) cards are not present on staging.
 - **Supplier media limitation:** attachments 14024, 14127, 14144 (products 14006, 14124, 14137) are 300x300 originals and cannot produce a 500 px `card-loop`; they need higher-resolution sources.
+
+
+### ADR-038 addendum - final closure (2026-11-04): B1.1 Option C COMPLETE - VERIFIED ON STAGING
+
+**Final status:** B1.1 Option C is COMPLETE - VERIFIED ON STAGING (2026-11-04). This supersedes "PARTIALLY COMPLETE - NOT FULLY VERIFIED" in the previous addendum. Earlier ADR history is unchanged. No production deployment is authorized (no production environment exists).
+
+**Manual DPR verification (owner, 2026-11-04, Chrome DevTools device emulation, staging `/shop/`, 12 product cards, actual `currentSrc` values):**
+
+| Viewport | DPR | Rendered image width | Selected resources (12 images) |
+|---|---:|---:|---|
+| 768 px | 2 | 217 px | 12/12 500x500 |
+| 1440 px | 2 | 277 px | 4 x 500x500; 8 x 768x768 |
+| 1440 px | 3 | 277 px | 4 x 768x768; 8 x original 1000x1000 |
+| 390 px | 2 | 171 px | 4 x 300x300; 8 x 500x500 |
+| 390 px | 3 | 171 px | 4 x 500x500; 8 x 768x768 |
+
+- All 12 images were represented in each test. No unexpected original at DPR 2.
+- **Eager vs lazy:** the 4 eager cards (LCP filter strips `auto, `, so the explicit `sizes` hint of ~250 css px applies) select the candidates predicted in the previous addendum (1440: 500 / 768, 390: 300 / 500). The 8 lazy cards keep `sizes="auto, ..."`, so the browser uses the actual rendered width (277 / 171 px) and selects one candidate larger. This is consistent with the srcset arithmetic and the observed rendered widths; it was not separately proven in code.
+- At desktop DPR 3, 8 lazy cards select the original 1000x1000 (277 css px x 3 = 831 px needs more than the 768 candidate). Consistent with the available candidates and high density; it can raise transferred bytes. NOT recorded as a defect without further evidence.
+
+**Limits (what the manual tests do NOT establish):** exact transferred bytes per image; visual sharpness on physical DPR 2/3 displays; a statistically reliable LCP improvement (LCP element is the heading/banner, not a product image, and no baseline exists); optimal image-transfer efficiency. Not every possible image-loading or performance scenario was tested.
+
+**Established earlier (unchanged):** dedicated `card-loop` 500x500 proportional size, no hard crop; 448 of 451 featured attachments have the derivative; 3 originals (14024, 14127, 14144; products 14006, 14124, 14137) are 300x300 and served via fallback; card geometry equals the B1 baseline; commercially relevant product details restored; DPR 1 selection verified; no B1.1-specific functional regression identified.
+
+**Independent follow-ups (not part of B1.1 closure):**
+- **X21** keyboard focus on product image/title links stays OPEN (pre-existing global `a:focus` reset; roadmap X21).
+- Supplier media: the three 300x300 originals need higher-resolution sources; no larger derivative can restore missing detail; images not modified.
+- Optional future optimization: eager and lazy cards select different candidates; `sizes`/transfer efficiency may be evaluated later only if real performance evidence justifies it. No implementation task created.

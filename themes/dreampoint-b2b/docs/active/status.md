@@ -5,14 +5,14 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
-## 2026-11-03 (B1.1) - Product card images: uncropped `card-loop`, STAGING ROLLED OUT (partially verified)
+## 2026-11-03 (B1.1) - Product card images: uncropped `card-loop`, COMPLETE - VERIFIED ON STAGING (closed 2026-11-04)
 
 Code `12998bc` (`functions.php`, `woocommerce/content-product.php`, `sass/components/_content.scss`, generated `style.css`); full record in `docs/decisions.md` ADR-038.
 
 - **What changed:** new soft image size `card-loop` 500x500 for product cards (metadata-based selection with `product-loop` fallback, explicit `sizes` hint, LCP filter covers it and strips `sizes=auto` for eager images, card image CSS no longer keyed to `attachment-product-loop`). `product-loop` is untouched.
 - **Media:** `card-loop` generated only for the 451 featured attachments (10 pilot + 441 in batches of 50, per-batch verification against metadata backups, originals/old derivatives untouched): 448 done, 3 originals are 300x300 and cannot produce a 500 px derivative (attachments 14024, 14127, 14144; products 14006, 14124, 14137, still served as full 300x300 files, need better source images). Backups: `/home/dreampoint.b2b/backup-recovery/b11-card-loop-20261103-135617/`.
 - **Verified on staging (1440/1024/768/390):** shop, category, brand, search and PDP related slider all render `card-loop`, card geometry identical to B1, no overflow, first 4 images eager + `fetchpriority=high` without `auto` sizes, lazy images keep `auto`; recovered edges visible on the fans and the Dash Bumbag/Duffel bags; 1x transfer -39% (12 images on /shop/) and -52% (4 pilot images) versus `product-loop`; no console errors, no related PHP warnings.
-- **NOT VERIFIED:** DPR 2/3 (tool limitation), LCP, keyboard focus ring in this pass, sale/placeholder cards, homepage product blocks, cart cross-sells, and one unreproduced single measurement where an image selected the 1000 px original.
+- **Closure 2026-11-04:** manual DPR 2/3 check (Chrome DevTools, owner) recorded in ADR-038 final closure addendum; no unexpected original at DPR 2; at 1440 DPR 3 eight lazy cards select the 1000 px original (not a defect without further evidence). Still NOT VERIFIED/out of scope: exact transferred bytes, physical-display sharpness, LCP improvement, sale/placeholder cards, homepage product blocks, cart cross-sells. Independent follow-up X21 (keyboard focus on image/title links) stays open.
 - **Rollback:** see ADR-038 (revert the commit; restoring media metadata needs the backup above).
 
 ## 2026-11-03 (B1) - Product card Figma alignment, VISUAL/UI VERIFIED ON STAGING

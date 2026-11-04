@@ -5,6 +5,15 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## 2026-11-04 (homepage sliders) - Segments/Brands pre-Slick layout, DEPLOYED ON STAGING - PARTIALLY COMPLETE, NOT FULLY VERIFIED
+
+Code `12137ba` (CSS only: `sass/blocks/segments-section.scss`, `sass/blocks/brands.scss`, generated `css/blocks/segments-section.css`, `css/blocks/brands.css`). Staging only.
+
+- **Root cause (measured, staging, authenticated):** `.segments-slider` and `.brands-slider` had no pre-init layout. `.slick-slider { opacity:0 }` does not apply before Slick adds the class, and Slick initialises only after the deferred scripts (~1.1 s on a cold load). Before init the segment boxes stacked at full container width (1440: tile 1200x1791, slider 1200x5372, document 7256 px; 768: tile 690x1030; 390: slider 1535) and the brand items stacked vertically (342 px, then 51 px).
+- **Fix:** `:not(.slick-initialized)` pre-init rules, the same pattern as `hero.scss`. Segments: flex row `width: calc(100% + 24px)`, `margin: 0 -12px`, boxes `flex: 0 0 calc(100%/3)` with 12 px side padding (mirrors `.slick-list`/`.slick-slide`), 50% at `max-width: 990px` and 100% at `766px` (Slick applies its responsive settings for window width < 991 / < 767), `padding-bottom: 50px` at <= 990 for the dots. Brands: single `nowrap` flex row, `overflow: hidden`, `min-height: 51px`, items `flex: 0 0 auto`, margin `0 36px` (first item 0 left). No JS, template or Slick-default changes.
+- **Geometry after deploy (pre-init vs post-init, deployed CSS, hashes of both CSS files equal to the commit):** segments tile identical at 1440 (384x573 @x113), 768 (333x497 @x32), 390 (343x512 @x16); brands slider 51 px before and after at all three; first brand logo x = 0 before and after; no horizontal overflow; document height equal at 768 (2922) and 390 (3152); at 1440 the first sample was 2465 vs 2486 post-init (21 px, sampled before the brands row had a laid-out first item; not attributed to the sliders).
+- **NOT VERIFIED:** visual QA. The controlled browser tab reported `visibilityState: hidden` in the filmstrip run, so screenshots do not prove what a user sees; no hard-reload/throttled run was possible (CDP emulation blocked). Brands continuous autoplay could not be confirmed (Slick pauses autoplay in a hidden tab: track transform unchanged); segments arrows/dots navigation not exercised (3 slides at 1440; 768/390 dots not clicked). No console errors during the measured loads. Owner should visually confirm a normal and a hard reload at 1440/768/390.
+
 ## 2026-11-03 (B1.1) - Product card images: uncropped `card-loop`, COMPLETE - VERIFIED ON STAGING (closed 2026-11-04)
 
 Code `12998bc` (`functions.php`, `woocommerce/content-product.php`, `sass/components/_content.scss`, generated `style.css`); full record in `docs/decisions.md` ADR-038.

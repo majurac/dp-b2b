@@ -154,6 +154,24 @@ function dreampoint_b2b_variation_catalog_number( array $data, $parent, $variati
 add_filter( 'woocommerce_available_variation', 'dreampoint_b2b_variation_catalog_number', 10, 3 );
 
 /**
+ * Expose the selected variation's own EAN (WooCommerce global unique ID, imported from the ERP barcode)
+ * to the PDP JS. Variable parents carry no EAN, so there is no parent fallback: an empty value hides the
+ * EAN item.
+ *
+ * @param array                $data      Variation data for the add-to-cart form.
+ * @param WC_Product_Variable  $parent    Parent product.
+ * @param WC_Product_Variation $variation Variation.
+ * @return array
+ */
+function dreampoint_b2b_variation_ean( array $data, $parent, $variation ): array {
+	$data['dp_global_unique_id'] = trim( (string) $variation->get_global_unique_id() );
+
+	return $data;
+}
+
+add_filter( 'woocommerce_available_variation', 'dreampoint_b2b_variation_ean', 10, 3 );
+
+/**
  * Popular searches — the configured search terms shown as chips in the header search panel and in
  * Quick Order. Single source: ACF option repeater `search_popular_terms` (sub-field `term`) on the
  * `theme-settings` options page. No hard-coded terms; returns [] when ACF or the option is unavailable.

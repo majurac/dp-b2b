@@ -184,11 +184,23 @@ $permalink = get_permalink($product_id);
                             
                             <h1 itemprop="name"><?php echo esc_html($product_name); ?></h1>
 
-                            <?php if ('' !== $catalog_number) : ?>
-                                <span class="product-sku">
-                                    <?php esc_html_e('Kataloški broj', 'dreampoint-b2b'); ?>:
-                                    <span class="product-sku__value" data-default="<?php echo esc_attr($catalog_number); ?>"><?php echo esc_html($catalog_number); ?></span>
-                                </span>
+                            <?php
+                            // EAN (WooCommerce global unique ID, imported from the ERP barcode). Variable parents carry none:
+                            // their EAN lives on the variations and is filled in by js/product-single.js on found_variation.
+                            $ean = $is_variable ? '' : trim((string) $product->get_global_unique_id());
+                            $has_sku_row = '' !== $catalog_number || '' !== $ean || $is_variable;
+                            ?>
+                            <?php if ($has_sku_row) : ?>
+                                <div class="product-sku"<?php echo ('' === $catalog_number && '' === $ean) ? ' hidden' : ''; ?>>
+                                    <span class="product-sku__item product-sku__item--catalog"<?php echo '' === $catalog_number ? ' hidden' : ''; ?>>
+                                        <?php esc_html_e('Kataloški broj', 'dreampoint-b2b'); ?>:
+                                        <span class="product-sku__value" data-default="<?php echo esc_attr($catalog_number); ?>"><?php echo esc_html($catalog_number); ?></span>
+                                    </span>
+                                    <span class="product-sku__item product-sku__item--ean"<?php echo '' === $ean ? ' hidden' : ''; ?>>
+                                        <?php esc_html_e('EAN', 'dreampoint-b2b'); ?>:
+                                        <span class="product-ean__value" data-default="<?php echo esc_attr($ean); ?>"><?php echo esc_html($ean); ?></span>
+                                    </span>
+                                </div>
                             <?php endif; ?>
                             
                             <?php $non_binding_mpc = dreampoint_b2b_get_non_binding_mpc($product); ?>

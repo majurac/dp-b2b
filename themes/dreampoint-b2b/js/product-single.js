@@ -196,9 +196,26 @@ jQuery(function ($) {
 
         // Catalog number of the selected variation (PHP: dreampoint_b2b_variation_catalog_number)
         if (variation.dp_catalog_number) {
-            $('.product-sku__value').text(variation.dp_catalog_number);
+            setSkuItem('.product-sku__value', variation.dp_catalog_number);
         }
+
+        // EAN of the selected variation (PHP: dreampoint_b2b_variation_ean); no parent fallback
+        setSkuItem('.product-ean__value', variation.dp_global_unique_id || '');
     });
+
+    /**
+     * Set the value of a catalog-number / EAN item in the metadata row and keep the row visible
+     * only while at least one item has a value (an empty item never shows its label).
+     */
+    function setSkuItem(valueSelector, value) {
+        const $value = $(valueSelector);
+        const $item = $value.closest('.product-sku__item');
+        const $row = $item.closest('.product-sku');
+
+        $value.text(value);
+        $item.prop('hidden', !value);
+        $row.prop('hidden', !$row.find('.product-sku__item:not([hidden])').length);
+    }
     
     /**
      * Single-option attributes (marked server-side with .dp-single-selected)
@@ -236,10 +253,9 @@ jQuery(function ($) {
             $('.product-summary .price-container').html(window.originalPriceHtml);
         }
 
-        // Restore the parent's catalog number
-        $('.product-sku__value').each(function() {
-            $(this).text($(this).attr('data-default'));
-        });
+        // Restore the parent's catalog number and EAN (a variable parent has no EAN: the item hides)
+        setSkuItem('.product-sku__value', $('.product-sku__value').attr('data-default') || '');
+        setSkuItem('.product-ean__value', $('.product-ean__value').attr('data-default') || '');
     });
     
     // ========================================================================

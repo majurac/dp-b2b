@@ -343,11 +343,16 @@ $dp-pdp-sticky-gap: 24px;
             @include bp(sm-down) {
                 margin-top: 24px;
             }
-            // Figma PDP-01 (11148:32794): Montserrat 500 / 14/20, -0.154px; row sits below the title,
-            // 8px above and 64px below (owner-approved C2-1; 64px kept for the absent EAN row's space).
-            // The 64px step is desktop; the stacked (<768px) layout keeps the previous 20px gap.
-            span.product-sku {
-                display: block;
+            // Figma PDP-01 (11148:32794): Montserrat 500 / 14/20, -0.154px; one row below the title:
+            // "Kataloški broj: ..." and "EAN: ..." side by side with a 32px gap, 8px above and 64px below
+            // (owner-approved C2-1; the 64px step belongs to the whole row, not to each item). The 64px
+            // step is desktop; the stacked (<768px) layout keeps the previous 20px gap. Items wrap
+            // naturally on narrow widths; an item without a value is `hidden` (JS keeps it in sync).
+            .product-sku {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                column-gap: 32px;
                 font-family: 'Montserrat';
                 font-style: normal;
                 font-weight: 500;
@@ -359,6 +364,13 @@ $dp-pdp-sticky-gap: 24px;
                 margin-bottom: 64px;
                 @include bp(sm-down) {
                     margin-bottom: 20px;
+                }
+                &[hidden],
+                .product-sku__item[hidden] {
+                    display: none;
+                }
+                .product-sku__item {
+                    white-space: nowrap;
                 }
             }
             .tag + .tag {
@@ -376,7 +388,7 @@ $dp-pdp-sticky-gap: 24px;
                 flex-grow: 1;
                 margin-bottom: 20px;
                 // The catalog-number row follows the title and carries its own 8px top spacing
-                &:has(+ .product-sku) {
+                &:has(+ .product-sku:not([hidden])) {
                     margin-bottom: 0;
                 }
                 @include bp(md-down) {

@@ -447,26 +447,82 @@ $dp-pdp-sticky-gap: 24px;
             }
             .variations_form {
                 .variations {
+                    // C2-4: attribute fields stack vertically at every width (label above its dropdown).
                     tbody {
                         display: flex;
-                        gap: 16px;
-                        @include bp(md-down) {
-                            flex-direction: column;
-                        }
+                        flex-direction: column;
+                        gap: $dp-space-16;
                     }
 
                     tr {
                         display: flex;
                         flex-direction: column;
-                        flex: 1;
+                        flex: 0 0 auto;
                     }
                     th {
                         text-align: left;
+                        padding: 0;
                         +td {
-                            margin-top: 5px;
+                            margin-top: $dp-space-8;
+                            padding: 0;
                         }
+                        // Same label as the global form fields (div.custom-form: 16/600, secondary text)
                         label {
-                            @include paragraph-normal;
+                            font-weight: 600;
+                            font-size: 16px;
+                            line-height: 1.25;
+                            letter-spacing: 0;
+                            color: $dp-color-text-secondary;
+                        }
+                    }
+                    // Dropdown = the global form-control look (div.custom-form Select2: 44px, radius 6, #fcfcfd,
+                    // control border, 14px / 16px below lg, hover ring, monochrome focus ring). Select2 stays the
+                    // native select's front end; only its presentation changes.
+                    .select2-container {
+                        width: 100%;
+                        height: 44px;
+                        padding: 0 $dp-space-16;
+                        background: $dp-color-bg-mono;
+                        border: 1px solid $dp-color-border-control;
+                        border-radius: $dp-radius-textarea;
+                        font-family: $dp-font-body;
+                        font-size: 14px;
+                        font-weight: 400;
+                        line-height: 18px;
+                        letter-spacing: 0;
+                        color: $dp-color-text-primary;
+                        @include bp(md-down) {
+                            font-size: 16px;
+                        }
+                        &:hover {
+                            border-color: $dp-color-text-tertiary;
+                            box-shadow: 0 0 0 3px $dp-color-bg-tertiary;
+                        }
+                        &.select2-container--focus,
+                        &.select2-container--open {
+                            @include dp-form-focus-ring;
+                        }
+                        &.select2-container--disabled {
+                            background: $dp-color-bg-tertiary;
+                            border-color: $dp-color-border-secondary;
+                            box-shadow: none;
+                            color: $dp-color-text-disabled;
+                            cursor: not-allowed;
+                        }
+                        .select2-selection__rendered {
+                            font-size: inherit;
+                            line-height: 18px;
+                            color: $dp-color-text-primary;
+                        }
+                        .select2-selection__placeholder {
+                            color: $dp-color-text-secondary;
+                        }
+                        .select2-selection__arrow:after {
+                            color: $dp-color-text-primary;
+                        }
+                        // The container carries the focus indicator; avoid a second UA outline inside it.
+                        .select2-selection:focus-visible {
+                            outline: 0;
                         }
                     }
                     // Single-option attributes: pre-selected in PHP, control hidden.
@@ -604,43 +660,176 @@ $dp-pdp-sticky-gap: 24px;
             }
         }
         
+        // Figma PDP quantity (11276:47876) + Add to cart (11276:25632), C2-4: quantity 160x48, 16px radius, 48px arrow
+        // cells with 1px dividers, 24px value; button flex:1, 8px gap. When the info column is too narrow for both on
+        // one row, the button wraps below the quantity at full width (no label wrapping, no overflow).
         .addcart-wrapper {
             display: flex;
-            gap: 8px;
-            .button--icon-after {
-                &:after {
-                    content: "\e918";
-                }
-            }
+            flex-wrap: wrap;
+            gap: $dp-space-8;
             .qty-number {
-                min-width: 104px;
-                .number  {
-                    height: 100%;
-                    input[type=text], input[type=number], span, .quantity {
+                flex: 0 0 auto;
+                .number {
+                    position: relative;
+                    width: 160px;
+                    max-width: none;
+                    height: 48px;
+                    background: $dp-color-bg-primary;
+                    border: 1px solid $dp-color-border-primary;
+                    border-radius: $dp-radius-btn-m;
+                    // Quantity input (WooCommerce native; stays the source of truth)
+                    .quantity {
+                        flex: 1 1 auto;
+                        min-width: 0;
                         height: 100%;
                     }
                     input[type=text], input[type=number] {
-                        border-top: 0;
-                        border-bottom: 0;
+                        width: 100%;
+                        height: 100%;
+                        padding: 0;
+                        border: 0;
+                        border-radius: 0;
+                        background: transparent;
+                        font-family: $dp-font-body;
+                        font-size: 24px;
+                        font-weight: 400;
+                        line-height: 32px;
+                        color: $dp-color-text-tertiary;
+                        -moz-appearance: textfield;
+                        appearance: textfield;
+                        &::-webkit-outer-spin-button,
+                        &::-webkit-inner-spin-button {
+                            -webkit-appearance: none;
+                            margin: 0;
+                        }
+                        &:focus-visible {
+                            outline: 0;
+                            box-shadow: inset 0 0 0 2px $dp-color-text-primary;
+                        }
+                    }
+                    // Arrow cells: real <button>s, 48x48 hit area, 24px icon, divider towards the value
+                    .minus, .plus {
+                        flex: 0 0 48px;
+                        min-width: 48px;
+                        width: 48px;
+                        height: 100%;
+                        margin: 0;
+                        padding: 0;
+                        background: transparent;
+                        border: 0;
+                        color: $dp-color-icon-secondary;
+                        font-size: 24px;
+                        line-height: 1;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        cursor: pointer;
+                        i {
+                            font-size: 24px;
+                            line-height: 1;
+                        }
+                        &:hover {
+                            color: $dp-color-text-primary;
+                        }
+                        &:focus-visible {
+                            outline: 0;
+                            box-shadow: inset 0 0 0 2px $dp-color-text-primary;
+                        }
+                        // At a limit (still clickable so the maximum-quantity notice shows) or fixed quantity
+                        &.disabled,
+                        &:disabled {
+                            color: $dp-color-text-disabled;
+                            cursor: not-allowed;
+                        }
+                    }
+                    .minus {
+                        border-right: 1px solid $dp-color-border-primary;
+                        border-radius: 15px 0 0 15px;
+                        &.disabled,
+                        &:disabled {
+                            border-right-color: $dp-color-border-secondary;
+                        }
+                    }
+                    .plus {
+                        border-left: 1px solid $dp-color-border-primary;
+                        border-radius: 0 15px 15px 0;
+                        &.disabled,
+                        &:disabled {
+                            border-left-color: $dp-color-border-secondary;
+                        }
+                    }
+                    // Static value, shown instead of the input while min equals max (e.g. max=1)
+                    .qty-static {
+                        display: none;
+                        flex: 1 1 auto;
+                        min-width: 0;
+                        height: 100%;
+                        align-items: center;
+                        justify-content: center;
+                        font-family: $dp-font-body;
+                        font-size: 24px;
+                        font-weight: 400;
+                        line-height: 32px;
+                        color: $dp-color-text-tertiary;
+                        cursor: default;
+                        // The global `.qty-number .number span` rule (16px, 44px high, 32px min-width, hover colour)
+                        // also matches this nested span; inherit the 24px value typography from `.qty-static` instead.
+                        .qty-static__value {
+                            display: block;
+                            min-width: 0;
+                            height: auto;
+                            font: inherit;
+                            color: inherit;
+                            cursor: inherit;
+                        }
+                        // Visually hidden prefix for assistive tech ("Količina: 1")
+                        .qty-static__label {
+                            position: absolute;
+                            width: 1px;
+                            height: 1px;
+                            min-width: 0;
+                            margin: -1px;
+                            padding: 0;
+                            overflow: hidden;
+                            clip-path: inset(50%);
+                            white-space: nowrap;
+                        }
+                    }
+                    &.number--fixed {
+                        // The native input stays in the form (submitted value) but is taken out of the layout
+                        .quantity {
+                            position: absolute;
+                            width: 1px;
+                            height: 1px;
+                            margin: -1px;
+                            overflow: hidden;
+                            clip-path: inset(50%);
+                        }
+                        .qty-static {
+                            display: flex;
+                        }
                     }
                 }
             }
             button[type="submit"] {
-                flex-grow: 1;
-                @include bp(md) {
-                    padding: 0 8px;
-                    font-size: 14px;
+                flex: 1 1 auto;
+                min-width: 190px;
+                white-space: nowrap;
+                // Cart icon (icomoon .icon-cart), Figma 20px
+                &.button--icon-after:after {
+                    content: "\e901";
+                    font-size: 20px;
                 }
-                @include bp(sm-down) {
-                    padding: 0 8px;
-                }
-                @include bp(xxs-down) {
-                    font-size: 14px;
-                }
-                &:after {
-                    @include bp(xxs-down) {
-                        display: none;
-                    }
+                // WooCommerce marks the button .disabled (no disabled attribute) until a variation is chosen and keeps
+                // its own click handling/notice, so pointer-events stay on. Same tokens as button-figma-disabled.
+                &.disabled,
+                &.disabled:hover,
+                &.disabled:focus {
+                    background: $dp-color-bg-primary;
+                    color: $dp-color-text-disabled;
+                    border-color: $dp-color-border-secondary;
+                    box-shadow: none;
+                    cursor: not-allowed;
                 }
             }
 

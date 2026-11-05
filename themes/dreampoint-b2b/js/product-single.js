@@ -22,19 +22,15 @@ jQuery(function ($) {
         e.preventDefault();
         
         const $button = $(this);
-        const $input = $button.closest('.quantity, .number').find('input.qty');
+        const $input = $button.closest('.number').find('input.qty');
         const min = parseFloat($input.attr('min')) || 1;
         const step = parseFloat($input.attr('step')) || 1;
         const currentValue = parseFloat($input.val()) || min;
         let newValue = currentValue - step;
-        
-        // Don't go below minimum
+
+        // Don't go below minimum (the persistent aria-disabled state shows the limit)
         if (newValue < min) {
             newValue = min;
-            
-            // Visual feedback when minimum reached
-            $button.addClass('disabled');
-            setTimeout(() => $button.removeClass('disabled'), 200);
         }
         
         $input.val(newValue).trigger('change');
@@ -53,23 +49,19 @@ jQuery(function ($) {
         e.preventDefault();
         
         const $button = $(this);
-        const $input = $button.closest('.quantity, .number').find('input.qty');
-        const max = parseFloat($input.attr('max')) || Infinity;
+        const $input = $button.closest('.number').find('input.qty');
+        const max = getMaxQuantity($input);
         const step = parseFloat($input.attr('step')) || 1;
         const currentValue = parseFloat($input.val()) || 0;
         let newValue = currentValue + step;
-        
+
         // Check if exceeds maximum
         if (newValue > max) {
             newValue = max;
-            
+
             // Show notification if max reached
             if (max !== Infinity) {
                 showMaxQuantityNotification(max);
-                
-                // Visual feedback
-                $button.addClass('disabled');
-                setTimeout(() => $button.removeClass('disabled'), 200);
             }
         }
         
@@ -88,7 +80,7 @@ jQuery(function ($) {
     $(document).on('change blur', '#product-single-main input.qty', function() {
         const $input = $(this);
         const min = parseFloat($input.attr('min')) || 1;
-        const max = parseFloat($input.attr('max')) || Infinity;
+        const max = getMaxQuantity($input);
         let value = parseFloat($input.val()) || min;
         
         // Constrain to min/max
@@ -108,30 +100,60 @@ jQuery(function ($) {
     });
     
     /**
-     * Update plus/minus button disabled states
-     * 
+     * Update plus/minus button states.
+     *
+     * At a limit the button gets aria-disabled + .disabled but stays clickable, so the "maximum
+     * quantity" notice keeps working. When min equals max (e.g. max=1, also when a selected variation
+     * sets it) the stepper switches to a static value and both buttons are really disabled.
+     *
      * @param {jQuery} $input - Quantity input element
      * @param {number} value - Current quantity value
      */
     function updateQuantityButtons($input, value) {
         const min = parseFloat($input.attr('min')) || 1;
-        const max = parseFloat($input.attr('max')) || Infinity;
-        const $container = $input.closest('.quantity, .number');
+        const max = getMaxQuantity($input);
+        const $container = $input.closest('.number');
         const $minusBtn = $container.find('.minus');
         const $plusBtn = $container.find('.plus');
-        
-        // Update minus button
-        if (value <= min) {
-            $minusBtn.addClass('disabled').attr('disabled', true);
-        } else {
-            $minusBtn.removeClass('disabled').removeAttr('disabled');
+        const isFixed = max !== Infinity && min === max;
+
+        $container.toggleClass('number--fixed', isFixed);
+        $container.find('.qty-static__value').text(value);
+        $minusBtn.add($plusBtn).prop('disabled', isFixed);
+
+        setLimitState($minusBtn, !isFixed && value <= min);
+        setLimitState($plusBtn, !isFixed && max !== Infinity && value >= max);
+    }
+
+    /**
+     * Maximum quantity of the stepper. On a variable product WooCommerce rewrites the input's min/max only
+     * when a variation is found and never restores them on reset, so while no variation is selected
+     * (empty variation_id) the stale `max` is ignored here; WooCommerce clamps the value again as soon as
+     * a variation is selected. The attributes themselves are never touched.
+     *
+     * @param {jQuery} $input - Quantity input element
+     * @return {number} Maximum quantity, Infinity when unlimited or not (yet) known
+     */
+    function getMaxQuantity($input) {
+        const $form = $input.closest('form.variations_form');
+
+        if ($form.length && !parseInt($form.find('input.variation_id').val(), 10)) {
+            return Infinity;
         }
-        
-        // Update plus button
-        if (max !== Infinity && value >= max) {
-            $plusBtn.addClass('disabled').attr('disabled', true);
+
+        return parseFloat($input.attr('max')) || Infinity;
+    }
+
+    /**
+     * Mark a stepper button as being at its limit (visual + assistive state, still clickable).
+     */
+    function setLimitState($button, atLimit) {
+        $button.toggleClass('disabled', atLimit);
+
+        if (atLimit) {
+            $button.attr('aria-disabled', 'true');
         } else {
-            $plusBtn.removeClass('disabled').removeAttr('disabled');
+            $button.removeAttr('aria-disabled');
         }
     }
     
@@ -182,10 +204,17 @@ jQuery(function ($) {
         window.originalPriceHtml = $('.product-summary .price-container').html();
     }
     
+    // WooCommerce empties variation_id synchronously before firing this event whenever an attribute
+    // changes or the form is cleared: leave the fixed-quantity presentation until a variation is found again.
+    $(document).on('woocommerce_variation_has_changed', 'form.variations_form', function() {
+        initQuantityControls();
+    });
+
     // Reinitialize after variation change (WooCommerce)
     $(document).on('found_variation', 'form.variations_form', function(event, variation) {
-        // Reinitialize quantity controls
-        setTimeout(initQuantityControls, 100);
+        // WooCommerce's own found_variation handler (bound on the form, so it runs before this delegated
+        // one) has already set variation_id and the new min/max on the quantity input.
+        initQuantityControls();
         
         // Update price display when variation is selected
         if (variation.price_html) {
@@ -353,13 +382,13 @@ jQuery(function ($) {
         // Arrow Up
         if (e.which === 38) {
             e.preventDefault();
-            $input.closest('.quantity, .number').find('.plus').trigger('click');
+            $input.closest('.number').find('.plus').trigger('click');
         }
-        
+
         // Arrow Down
         if (e.which === 40) {
             e.preventDefault();
-            $input.closest('.quantity, .number').find('.minus').trigger('click');
+            $input.closest('.number').find('.minus').trigger('click');
         }
     });
     

@@ -18,20 +18,17 @@ global $product;
 	do_action( 'woocommerce_before_add_to_cart_quantity' ); ?>
 
 	<div class="addcart-wrapper">
-		<div class="qty-number">
-	        <div class="number">
-		        <span class="minus"><i class="icon-arrow-left"></i></span>
-				<?php woocommerce_quantity_input(
-					array(
-						'min_value'   => $product->get_min_purchase_quantity(),
-						'max_value'   => $product->get_max_purchase_quantity(),
-						'input_value' => isset( $_POST['quantity'] ) ? wc_stock_amount( wp_unslash( $_POST['quantity'] ) ) : $product->get_min_purchase_quantity(), // WPCS: CSRF ok, input var ok.
-					)
-				); ?>
-				<span class="plus"><i class="icon-arrow-right"></i></span>
-        	</div>
-    	</div>
-	    <!-- /.qty-number -->
+		<?php
+		get_template_part(
+			'template-parts/pdp-quantity',
+			null,
+			array(
+				'min_value'   => $product->get_min_purchase_quantity(),
+				'max_value'   => $product->get_max_purchase_quantity(),
+				'input_value' => isset( $_POST['quantity'] ) ? wc_stock_amount( wp_unslash( $_POST['quantity'] ) ) : $product->get_min_purchase_quantity(), // WPCS: CSRF ok, input var ok.
+			)
+		);
+		?>
 		<?php do_action( 'woocommerce_after_add_to_cart_quantity' );
 		?>
 	

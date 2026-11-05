@@ -682,6 +682,16 @@ $dp-pdp-sticky-gap: 24px;
             max-width: none;
             margin-left: 0;
         }
+        // The section can start `hidden` (variable products whose description comes from the selected
+        // variation, js/product-single.js); make sure `.block` cannot override the attribute.
+        &[hidden] {
+            display: none;
+        }
+        // Desktop/tablet: the 40px gap before the USP strip is `#product-single .features` margin-top (below),
+        // so the section's own bottom padding (.block, 50-64px) must not add to it.
+        @include bp(sm-up) {
+            padding-bottom: 0;
+        }
         .woocommerce-tabs {
             @include custom-tabs;
             // Figma PDP Tab (11148:32816): 14/600, 0.28px tracking, sentence case, 2px active line
@@ -739,10 +749,10 @@ $dp-pdp-sticky-gap: 24px;
     }
 }
 
-// Products without a description have no .wc-tabs-section, whose 64px bottom padding otherwise separates
-// the main block from the strip, so the strip would touch the gallery/info block. Figma keeps 40px between
-// the content above and the USP frame (PDP-01 11148:32726: description bottom 1036 -> frame 1076).
-#product-single-main:not(:has(.wc-tabs-section)) + .features {
+// Stable 40px gap before the USP strip at >= 768px whatever the description state (parent description,
+// selected variation description, or hidden/absent Description tab). Figma: description text bottom 1036 ->
+// USP frame 1076 (PDP-01 11148:32726). The preceding block adds no bottom spacing of its own here.
+#product-single .features {
     @include bp(sm-up) {
         margin-top: 40px;
     }

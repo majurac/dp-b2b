@@ -201,6 +201,51 @@ jQuery(function ($) {
 
         // EAN of the selected variation (PHP: dreampoint_b2b_variation_ean); no parent fallback
         setSkuItem('.product-ean__value', variation.dp_global_unique_id || '');
+
+        // Description tab: the selected variation's description overrides the parent's
+        // (PHP: dreampoint_b2b_variation_description_payload)
+        setDescription(variation.dp_variation_description || '');
+    });
+
+    /**
+     * Description tab content: the parent description is the default and the fallback; a selected
+     * variation's description (server-formatted by WooCommerce, same HTML WooCommerce itself inserts)
+     * replaces it. The section stays `hidden` while there is nothing to show. Idempotent: WooCommerce
+     * fires the variation events several times per selection, and the last call always wins.
+     */
+    const $descSection = $('.wc-tabs-section');
+    const $descPanel = $('#tab-description');
+    let parentDescriptionHtml = null;
+    let appliedDescription = null;
+
+    function setDescription(variationHtml) {
+        if (!$descPanel.length) {
+            return;
+        }
+
+        // Capture the parent description (everything except the <h2>) before the first change
+        if (parentDescriptionHtml === null) {
+            parentDescriptionHtml = $descPanel.clone().children('h2').remove().end().html() || '';
+            appliedDescription = parentDescriptionHtml; // the server-rendered panel already shows it
+        }
+
+        const html = variationHtml || parentDescriptionHtml;
+
+        if (html !== appliedDescription) {
+            const $heading = $descPanel.children('h2').first().detach();
+            $descPanel.empty().append($heading).append(html);
+            appliedDescription = html;
+        }
+
+        $descSection.prop('hidden', '' === $.trim(html));
+    }
+
+    // Capture the initial (parent) state right away, before any variation event
+    setDescription('');
+
+    // No variation is selected any more (incomplete or non-matching selection): back to the parent state
+    $(document).on('hide_variation', 'form.variations_form', function() {
+        setDescription('');
     });
 
     /**
@@ -256,6 +301,9 @@ jQuery(function ($) {
         // Restore the parent's catalog number and EAN (a variable parent has no EAN: the item hides)
         setSkuItem('.product-sku__value', $('.product-sku__value').attr('data-default') || '');
         setSkuItem('.product-ean__value', $('.product-ean__value').attr('data-default') || '');
+
+        // Restore the parent description (or hide the empty Description tab)
+        setDescription('');
     });
     
     // ========================================================================

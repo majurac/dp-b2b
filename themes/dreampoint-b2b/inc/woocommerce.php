@@ -459,10 +459,63 @@ add_filter(
  */
 function dreampoint_b2b_product_tabs( array $tabs ): array {
 	$allowed = [ 'description' ];
+	$tabs    = array_intersect_key( $tabs, array_flip( $allowed ) );
 
-	return array_intersect_key( $tabs, array_flip( $allowed ) );
+	// A variable product whose parent has no long description but whose selectable variations do:
+	// register the same native Description tab (same callback/template) so js/product-single.js can fill it
+	// with the selected variation's description. The template renders the section hidden until then.
+	global $product;
+	if (
+		! isset( $tabs['description'] )
+		&& $product instanceof WC_Product_Variable
+		&& dreampoint_b2b_has_variation_description( $product )
+	) {
+		$tabs['description'] = [
+			'title'    => __( 'Description', 'woocommerce' ),
+			'priority' => 10,
+			'callback' => 'woocommerce_product_description_tab',
+		];
+	}
+
+	return $tabs;
 }
 add_filter( 'woocommerce_product_tabs', 'dreampoint_b2b_product_tabs', 99 );
+
+/**
+ * Whether at least one selectable (visible) variation of a variable product has a description.
+ * Uses WooCommerce's own variation visibility rules; stops at the first description found.
+ *
+ * @param WC_Product_Variable $product Variable product.
+ * @return bool
+ */
+function dreampoint_b2b_has_variation_description( WC_Product_Variable $product ): bool {
+	foreach ( $product->get_available_variations( 'objects' ) as $variation ) {
+		if ( '' !== trim( (string) $variation->get_description() ) ) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Variation descriptions are shown in the PDP Description tab (js/product-single.js), not under the
+ * variation selectors: keep WooCommerce's formatted HTML in `dp_variation_description` and empty the
+ * native `variation_description`, so the native `.woocommerce-variation-description` renders nothing.
+ * (Only WooCommerce's own variation.php template consumes `variation_description`.)
+ *
+ * @param array                $data      Variation data for the add-to-cart form.
+ * @param WC_Product_Variable  $parent    Parent product.
+ * @param WC_Product_Variation $variation Variation.
+ * @return array
+ */
+function dreampoint_b2b_variation_description_payload( array $data, $parent, $variation ): array {
+	$data['dp_variation_description'] = trim( (string) ( $data['variation_description'] ?? '' ) );
+	$data['variation_description']    = '';
+
+	return $data;
+}
+add_filter( 'woocommerce_available_variation', 'dreampoint_b2b_variation_description_payload', 20, 3 );
 
 /**
  * Main cart only: variation lines limited to Boja and Dioptrija (display only).

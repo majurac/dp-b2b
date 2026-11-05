@@ -350,8 +350,14 @@ $permalink = get_permalink($product_id);
                 woocommerce_output_product_data_tabs();
                 $dp_tabs_html = trim( (string) ob_get_clean() );
                 ?>
+                <?php
+                // The Description tab can exist without a parent description (variable products whose variations
+                // have one, see dreampoint_b2b_product_tabs()): then the section starts hidden and js/product-single.js
+                // shows it with the selected variation's description.
+                $dp_parent_has_description = '' !== trim( (string) get_post_field( 'post_content', $product_id ) );
+                ?>
                 <?php if ( '' !== $dp_tabs_html ) : ?>
-                    <div class="wc-tabs-section block">
+                    <div class="wc-tabs-section block"<?php echo $dp_parent_has_description ? '' : ' hidden'; ?>>
                         <?php echo $dp_tabs_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- native WooCommerce tabs template output. ?>
                     </div>
                 <?php endif; ?>

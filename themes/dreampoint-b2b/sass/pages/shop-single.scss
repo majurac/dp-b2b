@@ -8,6 +8,10 @@
     }
 }
 
+// Primary header bar height (sass/components/_header.scss, 72px) used by the sticky gallery column.
+$dp-pdp-header-height: 72px;
+$dp-pdp-sticky-gap: 24px;
+
 #product-single-main {
     .product-main-info {
         max-width: 1200px;
@@ -21,8 +25,27 @@
         .pos-sticky {
             @include bp(sm-up) {
                 position: sticky;
-                top: 0;
+                // Clear the sticky primary header (#header: 72px tall at every width >= 768px, top = admin bar
+                // height via `body.admin-bar #header`, see _content.scss) plus a 24px gap. The admin bar adds
+                // 32px (46px at <= 782px) only when it is present; customers without it get no extra offset.
+                top: calc(#{$dp-pdp-header-height} + #{$dp-pdp-sticky-gap});
                 height: fit-content;
+                body.admin-bar & {
+                    top: calc(32px + #{$dp-pdp-header-height} + #{$dp-pdp-sticky-gap});
+                    @media screen and (max-width: 782px) {
+                        top: calc(46px + #{$dp-pdp-header-height} + #{$dp-pdp-sticky-gap});
+                    }
+                }
+                // Short viewports: a stuck column taller than the space under the header would hide its bottom
+                // part, so it scrolls normally (gallery <= ~412px tall at >= 1200px, up to ~610px below).
+                @media (max-height: 600px) {
+                    position: static;
+                }
+                @include bp(lg-down) {
+                    @media (max-height: 780px) {
+                        position: static;
+                    }
+                }
             }
         }
         >.row {
@@ -97,7 +120,9 @@
                 background-color: #fff;
                 aspect-ratio: 1/1;
                 margin-bottom: 12px;
-                border: 1px solid rgba(17,17,17,0.1);
+                // Figma PDP-01 main image (11149:71103): radius 8px, no stroke. overflow clips the slides to the radius.
+                border-radius: $dp-radius-md;
+                overflow: hidden;
                 div {
                     height: 100%;
                     display: flex!important;
@@ -145,7 +170,10 @@
                     background-color: #fff;
                     margin-left: auto;
                     margin-right: auto;
-                    border: 1px solid rgba(17,17,17,0.1);
+                    // Figma PDP-01 thumbnail: 1px border-primary (#d2d6db), radius 8px
+                    border: 1px solid $dp-color-border-primary;
+                    border-radius: $dp-radius-md;
+                    overflow: hidden;
                     img {
                         @include centre(both);
                         max-width: 100%;
@@ -165,15 +193,71 @@
                     }
                 }   
             }
+            // Gallery arrows: 36px white rounded squares, 1px border-primary, 16px chevron, 16px inside the image.
+            // Desktop (hover + fine pointer): hidden until the image is hovered or the gallery has keyboard focus;
+            // touch/coarse pointers keep them visible with a 44px hit area (the :after extends the 36px visual).
+            .slick-prev, .slick-next {
+                width: 36px;
+                height: 36px;
+                border: 1px solid $dp-color-border-primary;
+                border-radius: $dp-radius-md;
+                background-color: $dp-color-bg-primary;
+                color: $dp-color-text-secondary;
+                &:before {
+                    font-size: 16px;
+                }
+                &:hover {
+                    background-color: $dp-color-bg-tertiary;
+                    border-color: $dp-color-icon-secondary;
+                    color: $dp-color-text-secondary;
+                }
+                // Global `button:focus { outline: none !important }` removes the default ring (see _content.scss
+                // .nav-btns); two-tone ring, visible on light and dark photos.
+                &:focus-visible {
+                    box-shadow: 0 0 0 2px $dp-color-bg-primary, 0 0 0 4px $dp-color-text-primary;
+                }
+                &.slick-hidden {
+                    display: none;
+                }
+                @media (hover: hover) and (pointer: fine) {
+                    opacity: 0;
+                    pointer-events: none;
+                    transition: opacity 0.18s ease;
+                    @media (prefers-reduced-motion: reduce) {
+                        transition: none;
+                    }
+                }
+                @media (hover: none), (pointer: coarse) {
+                    &:after {
+                        content: "";
+                        position: absolute;
+                        top: -4px;
+                        right: -4px;
+                        bottom: -4px;
+                        left: -4px;
+                    }
+                }
+            }
+            .slick-prev:before {
+                content: "\e914";
+            }
+            .slick-next:before {
+                content: "\e915";
+            }
             .slick-prev {
-                left: 20px;
+                left: 16px;
             }
             .slick-next {
-                right: 20px;
+                right: 16px;
             }
-            .slick-prev, .slick-next {
-                background-color: $dp-color-btn-primary-bg;
-                color: $white;
+            @media (hover: hover) and (pointer: fine) {
+                .slider-for:hover .slick-prev,
+                .slider-for:hover .slick-next,
+                .slider-for:focus-within .slick-prev,
+                .slider-for:focus-within .slick-next {
+                    opacity: 1;
+                    pointer-events: auto;
+                }
             }
             img {
                 /*object-fit: cover;

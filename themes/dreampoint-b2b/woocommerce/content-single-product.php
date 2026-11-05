@@ -362,7 +362,7 @@ $permalink = get_permalink($product_id);
     </div>
     <!-- /#product-single-main -->
 
-    <?php echo do_shortcode('[product_features]'); ?>
+    <?php echo do_shortcode('[company_features]'); // USP strip (Figma PDP-01 11148:32836); data: ACF option features_items ?>
     
     <!-- Recommended Products -->
     <div class="products-row-area slider-grid block" id="recomended-products">

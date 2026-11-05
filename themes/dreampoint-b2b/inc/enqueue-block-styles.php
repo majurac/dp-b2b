@@ -18,6 +18,12 @@ defined( 'ABSPATH' ) || exit;
  */
 add_action( 'wp', 'dreampoint_b2b_enqueue_block_styles' );
 function dreampoint_b2b_enqueue_block_styles(): void {
+    // The PDP renders [company_features] directly from its template (no block in post_content),
+    // so it needs the Company Features stylesheet explicitly.
+    if ( function_exists( 'is_product' ) && is_product() ) {
+        dreampoint_b2b_enqueue_block_style( 'company-features' );
+    }
+
     if ( ! is_singular() && ! is_front_page() ) {
         return;
     }
@@ -50,14 +56,22 @@ function dreampoint_b2b_enqueue_block_styles(): void {
         if ( ! isset( $block_css_map[ $block_name ] ) ) {
             continue;
         }
-        $slug = $block_css_map[ $block_name ];
-        wp_enqueue_style(
-            'dp-block-' . $slug,
-            get_template_directory_uri() . '/css/blocks/' . $slug . '.css',
-            [ 'dp-style' ],
-            dreampoint_b2b_asset_ver( 'css/blocks/' . $slug . '.css' )
-        );
+        dreampoint_b2b_enqueue_block_style( $block_css_map[ $block_name ] );
     }
+}
+
+/**
+ * Enqueue css/blocks/{slug}.css under the handle dp-block-{slug} (WordPress dedupes the handle).
+ *
+ * @param string $slug CSS slug in css/blocks/.
+ */
+function dreampoint_b2b_enqueue_block_style( string $slug ): void {
+    wp_enqueue_style(
+        'dp-block-' . $slug,
+        get_template_directory_uri() . '/css/blocks/' . $slug . '.css',
+        [ 'dp-style' ],
+        dreampoint_b2b_asset_ver( 'css/blocks/' . $slug . '.css' )
+    );
 }
 
 /**

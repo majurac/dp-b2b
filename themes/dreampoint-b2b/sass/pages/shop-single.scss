@@ -729,41 +729,12 @@ $dp-pdp-sticky-gap: 24px;
     }
 }
 
-.product-features {
-    /*padding-top: 75px;
-    padding-bottom: 75px;*/
-    @include bp(sm-down) {
-        padding-top: 64px;
-    }
-    .product-features-content {
-        max-width: 996px;
-        margin-left: auto;
-        margin-right: auto;
-        width: 100%;
-        .item {
-            text-align: center;
-            .features-icon + .features-text {
-                margin-top: 20px;
-            }
-            h3 {
-                font-family: 'Petrona';
-                font-style: normal;
-                font-weight: 500;
-                font-size: 18px;
-                line-height: 22px;
-                text-align: center;
-                color: $text-primary;
-            }
-            p {
-                margin-top: 8px;
-                font-family: 'Montserrat';
-                font-style: normal;
-                font-weight: 500;
-                font-size: 14px;
-                line-height: 16px;
-                letter-spacing: 0.02em;
-                color: $text-primary;
-            }
-        }
+// C2-3 (Figma PDP-01 11148:32836): the PDP USP strip reuses the Company Features block markup/CSS
+// (css/blocks/company-features.css, 64px vertical padding on HOME); Figma PDP uses 24px top/bottom.
+// Desktop/tablet only: below 768px the block keeps its own spacing (no mobile design exists).
+#product-single .features .features-content {
+    @include bp(sm-up) {
+        padding-top: 24px;
+        padding-bottom: 24px;
     }
 }

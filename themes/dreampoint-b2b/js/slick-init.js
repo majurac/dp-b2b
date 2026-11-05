@@ -501,25 +501,44 @@ jQuery( function ( $ ) {
             ],
         } );
 
+        // Desktop (>= 1200px, C2-2): vertical rail with a 4-thumbnail window (fewer when the gallery is
+        // shorter); the rail moves with the main slider (asNavFor), so every image stays reachable.
+        // Below 1200px: the original horizontal rail. Slick applies a `breakpoint` when the window is
+        // narrower than it (non-mobile-first), so 1200 means "<= 1199px" and matches the CSS media query.
+        // Slick rebuilds the rail itself on a breakpoint change and keeps the current slide, so no resize
+        // listener is needed. Each breakpoint entry restates `vertical` because entries are not cumulative.
+        const navSlideCount = $sliderNav.children().length;
+        $sliderNav.closest( '.product-slider' ).toggleClass( 'is-single-image', navSlideCount <= 1 );
+
         $sliderNav.slick( {
-            infinite:       true,
-            slidesToShow:   4,
-            slidesToScroll: 1,
-            asNavFor:       '#product-single-main .slider-for',
-            dots:           false,
-            arrows:         false,
-            focusOnSelect:  true,
-            centerMode:     false,
+            infinite:         true,
+            vertical:         true,
+            verticalSwiping:  true,
+            slidesToShow:     Math.max( 1, Math.min( 4, navSlideCount ) ),
+            slidesToScroll:   1,
+            asNavFor:         '#product-single-main .slider-for',
+            dots:             false,
+            arrows:           false,
+            focusOnSelect:    true,
+            centerMode:       false,
             responsive: [
                 {
-                    breakpoint: 1199,
-                    settings: { slidesToShow: 3, arrows: false },
+                    breakpoint: 1200,
+                    settings: { vertical: false, verticalSwiping: false, slidesToShow: 3, arrows: false },
                 },
                 {
                     breakpoint: 767,
-                    settings: { slidesToShow: 4, arrows: false },
+                    settings: { vertical: false, verticalSwiping: false, slidesToShow: 4, arrows: false },
                 },
             ],
+        } );
+
+        // Wrap-around (prev on the first image -> last image) leaves the infinite rail on its first
+        // thumbnails; re-sync the rail so the active thumbnail is always inside the visible window.
+        $sliderFor.on( 'afterChange', function ( event, slick, current ) {
+            if ( $sliderNav.hasClass( 'slick-initialized' ) && $sliderNav.slick( 'slickCurrentSlide' ) !== current ) {
+                $sliderNav.slick( 'slickGoTo', current, true );
+            }
         } );
 
         // --- Prebacivanje slika varijacija ---

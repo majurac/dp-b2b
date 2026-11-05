@@ -43,6 +43,30 @@
                 }
             }
         }
+        // C2-2 (Figma PDP-01 11148:32726): gallery column takes the remaining width, the info column keeps
+        // 485px of content (481px summary + the 4px the Description tabs extend to the left, C2-1) plus the
+        // column padding, so the info column and tabs stay at their C2-1 positions. Gallery-to-info gap is
+        // 32px. The gallery is capped at 687px (128 thumbs + 16 + 543 image) and shrinks below ~1400px.
+        // Below 1200px the original 50/50 grid is untouched.
+        @include bp(lg-up) {
+            >.row {
+                >.pos-sticky {
+                    flex: 1 1 0;
+                    min-width: 0;
+                    max-width: none;
+                }
+                >.col-md-6:not(.pos-sticky) {
+                    flex: 0 0 calc(485px + 32px);
+                    max-width: calc(485px + 32px);
+                }
+            }
+        }
+        @include bp(xl-up) {
+            >.row >.col-md-6:not(.pos-sticky) {
+                flex-basis: calc(485px + 24px);
+                max-width: calc(485px + 24px);
+            }
+        }
         .product-brand {
             position: absolute;
             right: 8px;
@@ -158,6 +182,69 @@
                 width: auto;
                 margin-left: auto;
                 margin-right: auto;
+            }
+            // C2-2 desktop gallery (>= 1200px): vertical 4-thumbnail rail on the left (128x97, 8px gap),
+            // 4:3 main image (543x407 at full width), 16px between them. Below 1200px nothing here applies
+            // (horizontal rail + square main image). Slick switches the rail orientation in js/slick-init.js.
+            @include bp(lg-up) {
+                display: flex;
+                align-items: flex-start;
+                gap: 16px;
+                max-width: 687px;
+                // The info column box is 485px (tabs) while the summary is 481px; give the 4px back to the gallery
+                // so the visible gallery-to-summary gap stays 32px below ~1400px (where the 687px cap applies).
+                margin-right: -4px;
+                .slider-for {
+                    order: 2;
+                    flex: 1 1 0;
+                    min-width: 0;
+                    aspect-ratio: 4/3;
+                    margin-bottom: 0;
+                    img {
+                        width: 100%;
+                        height: 100%;
+                        max-height: none;
+                        object-fit: contain;
+                    }
+                }
+                .slider-nav {
+                    order: 1;
+                    flex: 0 0 128px;
+                    width: 128px;
+                    min-width: 0;
+                    .slick-list {
+                        // the 8px slide gap is also added after the last visible thumb; pull it back
+                        margin: 0 0 -8px;
+                    }
+                    // Slick wraps each thumbnail: .slick-slide > div > .thumb. The slide carries the size and the
+                    // 8px gap; Slick measures its outer height to size the 4-thumbnail window.
+                    .slick-slide {
+                        height: 97px;
+                        margin: 0 0 8px;
+                        border: 0;
+                        >div {
+                            display: block !important;
+                            height: 100%;
+                        }
+                    }
+                    .thumb {
+                        aspect-ratio: auto;
+                        width: 100%;
+                        height: 100%;
+                        margin: 0;
+                    }
+                }
+                // Single image: no rail; the image keeps its Figma position next to the info column.
+                &.is-single-image {
+                    .slider-nav {
+                        display: none;
+                    }
+                    .slider-for {
+                        flex: 0 0 auto;
+                        width: min(543px, 100%);
+                        margin-left: auto;
+                    }
+                }
             }
         }
         .product-summary {

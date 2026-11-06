@@ -213,10 +213,10 @@ $permalink = get_permalink($product_id);
                                 </div>
                             <?php endif; ?>
 
-                            <?php if ($product->get_price() && $is_in_stock) : ?>
+                            <?php if ($product->get_price()) : // Shown for out-of-stock products too (Figma PDP-02); price/visibility rules stay native. ?>
                                 <span class="price price-container <?php echo $product->is_on_sale() ? 'onsale' : ''; ?>" itemprop="offers" itemscope itemtype="http://schema.org/Offer">
                                     <?php echo wp_kses_post($product->get_price_html()); ?>
-                                    <meta itemprop="availability" content="https://schema.org/InStock">
+                                    <meta itemprop="availability" content="<?php echo esc_attr($is_in_stock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock'); ?>">
                                     <meta itemprop="url" content="<?php echo esc_url($permalink); ?>">
                                 </span>
                             <?php endif; ?>
@@ -276,69 +276,6 @@ $permalink = get_permalink($product_id);
                                 <?php esc_html_e('Pošaljite upit', 'dreampoint-b2b'); ?>
                             </a>
                             <?php endif; ?>
-
-                            <!-- Social Share -->
-                            <div class="share">
-                                <span class="share-label"><?php esc_html_e('Podijeli:', 'dreampoint-b2b'); ?></span>
-                                <ul class="icons">
-                                    <li class="icons__item">
-                                        <a 
-                                            class="icon" 
-                                            href="https://www.facebook.com/sharer/sharer.php?u=<?php echo urlencode($permalink); ?>" 
-                                            target="_blank" 
-                                            rel="noopener noreferrer"
-                                            aria-label="<?php esc_attr_e('Podijeli na Facebooku', 'dreampoint-b2b'); ?>"
-                                        >
-                                            <i class="icon-facebook" aria-hidden="true"></i>
-                                        </a>
-                                    </li>
-                                    <li class="icons__item">
-                                        <a 
-                                            class="icon" 
-                                            href="https://wa.me/?text=<?php echo urlencode($product_name . ' ' . $permalink); ?>" 
-                                            target="_blank" 
-                                            rel="noopener noreferrer"
-                                            aria-label="<?php esc_attr_e('Podijeli na WhatsApp', 'dreampoint-b2b'); ?>"
-                                        >
-                                            <i class="icon-whatsapp" aria-hidden="true"></i>
-                                        </a>
-                                    </li>
-                                    <li class="icons__item">
-                                        <a 
-                                            class="icon" 
-                                            href="viber://forward?text=<?php echo urlencode($product_name . ' ' . $permalink); ?>" 
-                                            target="_blank" 
-                                            rel="noopener noreferrer"
-                                            aria-label="<?php esc_attr_e('Podijeli na Viber', 'dreampoint-b2b'); ?>"
-                                        >
-                                            <i class="icon-viber" aria-hidden="true"></i>
-                                        </a>
-                                    </li>
-                                    <li class="icons__item">
-                                        <a 
-                                            class="icon" 
-                                            href="https://twitter.com/intent/tweet?text=<?php echo urlencode($product_name . ' ' . $permalink); ?>" 
-                                            target="_blank" 
-                                            rel="noopener noreferrer"
-                                            aria-label="<?php esc_attr_e('Podijeli na Twitter', 'dreampoint-b2b'); ?>"
-                                        >
-                                            <i class="icon-twitter" aria-hidden="true"></i>
-                                        </a>
-                                    </li>
-                                    <li class="icons__item">
-                                        <a 
-                                            class="icon" 
-                                            href="https://www.linkedin.com/shareArticle?mini=true&url=<?php echo urlencode($permalink); ?>&title=<?php echo urlencode($product_name); ?>" 
-                                            target="_blank" 
-                                            rel="noopener noreferrer"
-                                            aria-label="<?php esc_attr_e('Podijeli na LinkedIn', 'dreampoint-b2b'); ?>"
-                                        >
-                                            <i class="icon-linkedin" aria-hidden="true"></i>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                            <!-- /.share -->
                         </div>
                         <!-- /.product-summary -->
                     </div>
@@ -382,7 +319,7 @@ $permalink = get_permalink($product_id);
     <div class="products-row-area slider-grid block" id="recomended-products">
         <div class="container">
             <div class="section-heading">
-                <h2><?php esc_html_e('Predloženo za vas', 'dreampoint-b2b'); ?></h2>
+                <h2><?php esc_html_e('Povezani proizvodi', 'dreampoint-b2b'); ?></h2>
                 <?php get_template_part( 'template-parts/slider-nav' ); ?>
             </div>
             

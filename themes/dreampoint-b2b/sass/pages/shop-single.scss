@@ -8,6 +8,20 @@
     }
 }
 
+// PDP top spacing (Figma PDP-02): header -> breadcrumb 32px, breadcrumb -> gallery/title 32px (about 79px in total).
+// The shared banner keeps its own spacing elsewhere; only the PDP banner is adjusted. The breadcrumb nav carries a 24px
+// bottom margin, so 8px of banner bottom padding + 24px + no `.block` top padding = 32px. The banner padding applies from
+// 768px; the `.block` top padding is removed at every width.
+#product-single.block {
+    padding-top: 0;
+}
+@include bp(sm-up) {
+    body.single-product .inner-page .inner-heading {
+        padding-top: 32px;
+        padding-bottom: 8px;
+    }
+}
+
 // Primary header bar height (sass/components/_header.scss, 72px) used by the sticky gallery column.
 $dp-pdp-header-height: 72px;
 $dp-pdp-sticky-gap: 24px;
@@ -868,32 +882,6 @@ $dp-pdp-sticky-gap: 24px;
                 }
             }
 
-        }
-        .share {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            padding-top: 20px;
-            margin-top: 20px;
-            border-top: 1px solid rgba($black, .1);
-            .icons {
-                display: flex;
-                gap: 16px;
-                align-items: center;
-                justify-content: flex-start;
-                li {
-                    .icon {
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        color: $dp-color-icon-secondary;
-                        font-size: 18px;
-                        &:hover {
-                            color: $text-primary;
-                        }
-                    }
-                }
-            }
         }
     
     }

@@ -1189,3 +1189,9 @@ Measured Figma values used: banner height 319 (breadcrumb 12 px, H1 Petrona 600 
 Decisions: tabs are the three existing terms (`faq-category`, `term_id` order), server-side filter (`?faq_cat`), the subtitle is editor-managed in ACF `intro_text_faq` (FAQ only; Contact keeps `intro_text_contact`; no hardcoded default, empty = no intro; corrected in `0180ac8`), content untouched, title stays Croatian. Questions use the `text-primary` token instead of the Figma fallback `black` (visually identical). The global `heading-6` mixin and other accordions were not touched; all rules are scoped to `#faq-body` / `.inner-heading .faq-tabs` / `.faq-pagination`.
 
 Result and limits: see `docs/active/status.md` 2026-11-03 (E2 FAQ). Pagination with real data is NOT VERIFIED (3 posts per category, page size 10); the Figma pagination styling was checked on injected non-persistent markup only.
+
+## 59. C2-4 PDP quantity, Add-to-cart and variation selectors (2026-11-06, CLOSED / STAGING VERIFIED / OWNER ACCEPTED)
+
+Figma PDP-01/02 (nodes `11148:32808` group, `11276:47876` quantity, `11276:25632` button, `11148:32954` variations). The project owner explicitly accepted the complete C2-4 implementation on staging on 2026-11-06 (quantity stepper, Add-to-cart button, native Select2 variation selectors). Commits `e1b0b93` (controls), `c61a48d` (F1/F2/F3 + R1), `a3e4855` (PDP visual follow-ups); staging QA PASS.
+
+Decision: the **native Select2 variation selectors are the approved final design**; the pill variations drawn in Figma (node `11148:32954`) are deliberately NOT implemented and the question is not reopened. Accepted limitation R1-T1 and the unverified scenarios (D2 sequence, real Back-in-Stock submission/e-mail, phone-enabled form, simple out-of-stock fixture, AJAX variation path) are listed in `docs/active/status.md` 2026-11-06 (C2-4 closure). Parent C2 stays PARTIAL.

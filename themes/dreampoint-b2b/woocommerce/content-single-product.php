@@ -49,7 +49,9 @@ $permalink = get_permalink($product_id);
         <div class="container">
             <div class="product-main-info">
                 <div class="row pos-relative">
-                    
+                    <?php // .product-main-cols = gallery + info columns; `display: contents` from 1200px (shop-single.scss). ?>
+                    <div class="product-main-cols">
+
                     <!-- Product Images Column -->
                     <div class="col-md-6 pos-sticky">
                         <?php
@@ -341,26 +343,32 @@ $permalink = get_permalink($product_id);
                         <!-- /.product-summary -->
                     </div>
                     <!-- /.col-md-6 -->
+                    </div>
+                    <!-- /.product-main-cols -->
+
+                    <!-- Product Tabs (Description only, see dreampoint_b2b_product_tabs()) -->
+                    <?php
+                    ob_start();
+                    woocommerce_output_product_data_tabs();
+                    $dp_tabs_html = trim( (string) ob_get_clean() );
+                    ?>
+                    <?php
+                    // The Description tab can exist without a parent description (variable products whose variations
+                    // have one, see dreampoint_b2b_product_tabs()): then the section starts hidden and js/product-single.js
+                    // shows it with the selected variation's description.
+                    $dp_parent_has_description = '' !== trim( (string) get_post_field( 'post_content', $product_id ) );
+                    ?>
+                    <?php
+                    // Rendered INSIDE the row (not after it) so the sticky gallery's containing block extends over the
+                    // description: at >= 1200px the row is a grid with the tabs under the info column (shop-single.scss).
+                    ?>
+                    <?php if ( '' !== $dp_tabs_html ) : ?>
+                        <div class="wc-tabs-section block"<?php echo $dp_parent_has_description ? '' : ' hidden'; ?>>
+                            <?php echo $dp_tabs_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- native WooCommerce tabs template output. ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
                 <!-- /.row -->
-                
-                <!-- Product Tabs (Description only, see dreampoint_b2b_product_tabs()) -->
-                <?php
-                ob_start();
-                woocommerce_output_product_data_tabs();
-                $dp_tabs_html = trim( (string) ob_get_clean() );
-                ?>
-                <?php
-                // The Description tab can exist without a parent description (variable products whose variations
-                // have one, see dreampoint_b2b_product_tabs()): then the section starts hidden and js/product-single.js
-                // shows it with the selected variation's description.
-                $dp_parent_has_description = '' !== trim( (string) get_post_field( 'post_content', $product_id ) );
-                ?>
-                <?php if ( '' !== $dp_tabs_html ) : ?>
-                    <div class="wc-tabs-section block"<?php echo $dp_parent_has_description ? '' : ' hidden'; ?>>
-                        <?php echo $dp_tabs_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- native WooCommerce tabs template output. ?>
-                    </div>
-                <?php endif; ?>
             </div>
             <!-- /.product-main-info -->
         </div>

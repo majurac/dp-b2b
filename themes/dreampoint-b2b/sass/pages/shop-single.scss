@@ -71,21 +71,45 @@ $dp-pdp-sticky-gap: 24px;
         // column padding, so the info column and tabs stay at their C2-1 positions. Gallery-to-info gap is
         // 32px. The gallery is capped at 687px (128 thumbs + 16 + 543 image) and shrinks below ~1400px.
         // Below 1200px the original 50/50 grid is untouched.
+        // Layout of the row (gallery + info columns in `.product-main-cols`, then the Description tabs): below 1200px
+        // the wrapper is the same wrapping flex row as before and the tabs wrap under it, so the sticky gallery stays
+        // confined to the wrapper (it releases with the info column and never floats over the description); from 1200px
+        // the row is a grid and the wrapper is `display: contents`, so the gallery spans both grid rows and its sticky
+        // range covers the Description tabs instead of ending with the info column.
+        .product-main-cols {
+            display: flex;
+            flex-wrap: wrap;
+            flex: 0 0 100%;
+            max-width: 100%;
+            @include bp(lg-up) {
+                display: contents;
+            }
+        }
         @include bp(lg-up) {
             >.row {
-                >.pos-sticky {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) calc(485px + 32px);
+                align-items: start;
+                >.product-main-cols >.pos-sticky {
+                    grid-column: 1;
+                    grid-row: 1 / span 2;
                     flex: 1 1 0;
                     min-width: 0;
                     max-width: none;
                 }
-                >.col-md-6:not(.pos-sticky) {
+                >.product-main-cols >.col-md-6:not(.pos-sticky) {
+                    grid-column: 2;
+                    grid-row: 1;
                     flex: 0 0 calc(485px + 32px);
                     max-width: calc(485px + 32px);
                 }
             }
         }
         @include bp(xl-up) {
-            >.row >.col-md-6:not(.pos-sticky) {
+            >.row {
+                grid-template-columns: minmax(0, 1fr) calc(485px + 24px);
+            }
+            >.row >.product-main-cols >.col-md-6:not(.pos-sticky) {
                 flex-basis: calc(485px + 24px);
                 max-width: calc(485px + 24px);
             }
@@ -874,13 +898,21 @@ $dp-pdp-sticky-gap: 24px;
     
     }
     .wc-tabs-section {
-        // Figma PDP-01 tabs (11148:32815): 485px, right-aligned with the info column (x834-1319);
+        // Figma PDP-01 tabs (11148:32815): 485px, aligned with the info column (x834-1319);
         // description text inset to x838 / 456px wide. Full width again at <= 1199px.
-        max-width: 485px;
-        margin-left: auto;
-        @include bp(lg-down) {
+        // The section is the last child of `.product-main-info > .row` (content-single-product.php): a full-width flex
+        // line under `.product-main-cols` below 1200px, grid row 2 under the info column from 1200px (margins = the
+        // column padding, so the width stays 485px).
+        flex: 0 0 calc(100% - 32px);
+        max-width: calc(100% - 32px);
+        margin: 0 16px;
+        @include bp(lg-up) {
+            grid-column: 2;
+            grid-row: 2;
             max-width: none;
-            margin-left: 0;
+        }
+        @include bp(xl-up) {
+            margin: 0 12px;
         }
         // The section can start `hidden` (variable products whose description comes from the selected
         // variation, js/product-single.js); make sure `.block` cannot override the attribute.
@@ -956,4 +988,102 @@ $dp-pdp-sticky-gap: 24px;
     @include bp(sm-up) {
         margin-top: 40px;
     }
+}
+
+// PDP variation Select2 dropdown: compact option rows (same density as the account/contact dropdowns in
+// `_content.scss`: Montserrat 14/400, 18px line-height, 8px 12px padding). The panel is appended to <body>, so it is
+// scoped by the PDP body class (`single-product`; the variation selects are the only Select2 instances on it, and the
+// list id is derived from the select id, not reliably from its name). Filters, checkout, registration and the other
+// pages are untouched. Colours/states stay as they were; long labels wrap.
+body.single-product .select2-dropdown .select2-results__option {
+    padding: 8px 12px;
+    font-family: $dp-font-body;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 18px;
+    letter-spacing: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+// PDP Back-in-Stock subscribe form (Figma PDP-02 11148:32975): one row, email input + primary XL button, 8px gap.
+// Markup = theme override back-in-stock-notifier-for-woocommerce/default-form.php (no Bootstrap panel, no heading, no
+// name field, so no legacy panel styles need neutralising); the plugin's own `.cwgstock_button` rules (full width, sky
+// blue, 5px top padding) are outranked by the id-scoped selector below. No plugin inline styles remain, so no
+// `!important`. The plugin's blockUI overlay (loading) positions itself on the section.
+#product-single-main .cwginstock-subscribe-form {
+    position: relative;
+    margin: $dp-space-16 0 0;
+    padding: 0;
+    background: none;
+    border: 0;
+    font-family: $dp-font-body;
+    .cwginstock-subscribe-form__row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: $dp-space-8;
+        align-items: stretch;
+        margin: 0;
+    }
+    // Optional phone field (plugin "Show Phone" setting, off by default): intl-tel-input wraps it in `.iti`; the wrapper
+    // takes a full line of the row and the input gets the same control look as the email input.
+    .iti {
+        flex: 1 0 100%;
+        min-width: 0;
+    }
+    .cwgstock_email,
+    .cwgstock_phone {
+        // grow 999 vs the button's 1: the input takes the free width on one line; when it would get < 200px the button
+        // wraps below and fills the line (narrow info columns at 768-1199px and on phones).
+        flex: 999 1 200px;
+        min-width: 0;
+        height: 48px;
+        margin: 0;
+        padding: 12px $dp-space-16;
+        background: $dp-color-bg-mono;
+        border: 1px solid $dp-color-border-primary;
+        border-radius: $dp-radius-textarea;
+        font-family: $dp-font-body;
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 18px;
+        letter-spacing: 0;
+        text-align: left;
+        color: $dp-color-text-primary;
+        &::placeholder {
+            color: $dp-color-text-secondary;
+            opacity: 1;
+        }
+        &:hover {
+            border-color: $dp-color-text-tertiary;
+        }
+        &:focus,
+        &:focus-visible {
+            outline: 0;
+            @include dp-form-focus-ring;
+        }
+    }
+    // Figma Primary XL (the same .button--xl design as Add to cart); the plugin's full width / skyblue / padding are reset.
+    .cwgstock_button.button {
+        @include button-figma-primary('xl');
+        flex: 1 0 auto;
+        width: auto;
+        margin: 0;
+        white-space: nowrap;
+        cursor: pointer;
+    }
+    .cwgstock_output {
+        flex: 0 0 100%;
+        margin-top: $dp-space-8;
+        &:empty {
+            margin-top: 0;
+        }
+    }
+}
+
+// While the Back-in-Stock form of the selected unavailable variation is displayed, the quantity + Add-to-cart row is
+// hidden (Figma PDP-02 replaces it with the subscribe row). The class is set by `syncBackInStockRow()` in
+// js/product-single.js; only `display` changes, the row and WooCommerce's fields stay in the form.
+#product-single-main .single_variation_wrap.dp-bis-active > .woocommerce-variation-add-to-cart {
+    display: none;
 }

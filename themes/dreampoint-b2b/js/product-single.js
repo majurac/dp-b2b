@@ -258,7 +258,25 @@ jQuery(function ($) {
     // these delegated handlers run after them, so the quantity lock mirrors the final state.
     $(document).on('show_variation hide_variation', 'form.variations_form', function() {
         initQuantityControls();
+        syncBackInStockRow($(this));
     });
+
+    /**
+     * Back-in-Stock form (plugin template override, back-in-stock-notifier-for-woocommerce/default-form.php): while the
+     * form of the CURRENTLY selected variation is displayed, the quantity + Add-to-cart row is hidden by CSS
+     * (`.dp-bis-active`, shop-single.scss). The plugin renders one form per unavailable variation inside the variation
+     * block, which WooCommerce replaces on every `show_variation`; the form carries its variation id, so a stale
+     * event (a form of another variation, or an empty / reset selection) never hides the controls of the current one.
+     * Driven only by the existing show/hide events; the row's markup and WooCommerce's fields stay untouched.
+     *
+     * @param {jQuery} $form - The `form.variations_form`
+     */
+    function syncBackInStockRow($form) {
+        const formVariationId = parseInt($form.find('.single_variation .cwginstock-subscribe-form .cwg-variation-id').val(), 10);
+        const currentVariationId = parseInt($form.find('input.variation_id').val(), 10);
+
+        $form.find('.single_variation_wrap').toggleClass('dp-bis-active', !!formVariationId && formVariationId === currentVariationId);
+    }
 
     // R1 guard: WooCommerce schedules `show_variation` 300 ms after `found_variation` and never cancels it, so
     // a reset / incomplete selection inside that window is followed by a stale `show_variation` that re-enables

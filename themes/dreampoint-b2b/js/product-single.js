@@ -23,6 +23,11 @@ jQuery(function ($) {
         
         const $button = $(this);
         const $input = $button.closest('.number').find('input.qty');
+
+        if (isQuantityLocked($input)) {
+            return false;
+        }
+
         const min = parseFloat($input.attr('min')) || 1;
         const step = parseFloat($input.attr('step')) || 1;
         const currentValue = parseFloat($input.val()) || min;
@@ -50,6 +55,11 @@ jQuery(function ($) {
         
         const $button = $(this);
         const $input = $button.closest('.number').find('input.qty');
+
+        if (isQuantityLocked($input)) {
+            return false;
+        }
+
         const max = getMaxQuantity($input);
         const step = parseFloat($input.attr('step')) || 1;
         const currentValue = parseFloat($input.val()) || 0;
@@ -116,13 +126,47 @@ jQuery(function ($) {
         const $minusBtn = $container.find('.minus');
         const $plusBtn = $container.find('.plus');
         const isFixed = max !== Infinity && min === max;
+        const isLocked = isQuantityLocked($input);
 
         $container.toggleClass('number--fixed', isFixed);
+        $container.toggleClass('number--locked', isLocked);
         $container.find('.qty-static__value').text(value);
-        $minusBtn.add($plusBtn).prop('disabled', isFixed);
+        $minusBtn.add($plusBtn).prop('disabled', isFixed || isLocked);
 
-        setLimitState($minusBtn, !isFixed && value <= min);
-        setLimitState($plusBtn, !isFixed && max !== Infinity && value >= max);
+        // readOnly (not disabled): the value stays in the submitted form. aria-disabled mirrors the lock.
+        $input.prop('readOnly', isLocked);
+
+        if (isLocked) {
+            $input.attr('aria-disabled', 'true');
+        } else {
+            $input.removeAttr('aria-disabled');
+        }
+
+        setLimitState($minusBtn, !isFixed && !isLocked && value <= min);
+        setLimitState($plusBtn, !isFixed && !isLocked && max !== Infinity && value >= max);
+    }
+
+    /**
+     * Whether the quantity is locked because purchasing is unavailable. WooCommerce is the single source of
+     * truth: on a variable product it sets/removes `.disabled` on the Add-to-cart button in its own
+     * `hide_variation` / `show_variation` handlers (purchasable, in stock and visible are all folded into it;
+     * `variation_id` alone is not enough, an unavailable variation still has one). `show_variation` fires about
+     * 300 ms after `found_variation`, so the lock is released only once WooCommerce enables purchasing.
+     * Simple products have no variations form and are never locked here (their form is only rendered when
+     * purchasable and in stock).
+     *
+     * @param {jQuery} $input - Quantity input element
+     * @return {boolean}
+     */
+    function isQuantityLocked($input) {
+        const $form = $input.closest('form.variations_form');
+
+        // Also locked while no variation is selected (empty / "0" variation_id), even if a stale WooCommerce
+        // `show_variation` has wrongly removed `.disabled` from the button (see the R1 guard below).
+        return $form.length > 0 && (
+            $form.find('.single_add_to_cart_button').hasClass('disabled') ||
+            !parseInt($form.find('input.variation_id').val(), 10)
+        );
     }
 
     /**
@@ -208,6 +252,29 @@ jQuery(function ($) {
     // changes or the form is cleared: leave the fixed-quantity presentation until a variation is found again.
     $(document).on('woocommerce_variation_has_changed', 'form.variations_form', function() {
         initQuantityControls();
+    });
+
+    // WooCommerce toggles the Add-to-cart `.disabled` state in its own (form-bound) handlers of these events;
+    // these delegated handlers run after them, so the quantity lock mirrors the final state.
+    $(document).on('show_variation hide_variation', 'form.variations_form', function() {
+        initQuantityControls();
+    });
+
+    // R1 guard: WooCommerce schedules `show_variation` 300 ms after `found_variation` and never cancels it, so
+    // a reset / incomplete selection inside that window is followed by a stale `show_variation` that re-enables
+    // Add-to-cart and re-shows the old variation block. WooCommerce empties `variation_id` synchronously on every
+    // such change, so an empty id when `show_variation` arrives means the event is stale: re-emit WooCommerce's
+    // own `hide_variation` on the variation block (its `onHide` restores the disabled / selection-needed state;
+    // the handlers above and the description reset then run as for a normal reset). Runs after WooCommerce's
+    // form-bound `onShow` (delegated handler), is idempotent and never fires for a valid selection.
+    $(document).on('show_variation', 'form.variations_form', function() {
+        const $form = $(this);
+
+        if (parseInt($form.find('input.variation_id').val(), 10)) {
+            return;
+        }
+
+        $form.find('.single_variation').stop(true, true).hide().trigger('hide_variation');
     });
 
     // Reinitialize after variation change (WooCommerce)
@@ -379,6 +446,12 @@ jQuery(function ($) {
         const $input = $(this);
         const step = parseFloat($input.attr('step')) || 1;
         
+        // Locked: no shortcut may change the quantity (readOnly already blocks the native spin)
+        if (isQuantityLocked($input) && (e.which === 38 || e.which === 40)) {
+            e.preventDefault();
+            return;
+        }
+
         // Arrow Up
         if (e.which === 38) {
             e.preventDefault();

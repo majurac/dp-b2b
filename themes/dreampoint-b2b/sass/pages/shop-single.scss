@@ -795,6 +795,14 @@ $dp-pdp-sticky-gap: 24px;
                             white-space: nowrap;
                         }
                     }
+                    // Locked while WooCommerce reports Add-to-cart as unavailable (js/product-single.js; also rendered
+                    // server-side for variable products so there is no interactive first paint)
+                    &.number--locked {
+                        opacity: 0.6;
+                        input.qty {
+                            cursor: not-allowed;
+                        }
+                    }
                     &.number--fixed {
                         // The native input stays in the form (submitted value) but is taken out of the layout
                         .quantity {
@@ -821,14 +829,17 @@ $dp-pdp-sticky-gap: 24px;
                     font-size: 20px;
                 }
                 // WooCommerce marks the button .disabled (no disabled attribute) until a variation is chosen and keeps
-                // its own click handling/notice, so pointer-events stay on. Same tokens as button-figma-disabled.
+                // its own click handling/notice, so pointer-events stay on. The enabled look is kept in every
+                // state (hover/focus/active included) and only the reduced opacity signals "unavailable".
                 &.disabled,
                 &.disabled:hover,
-                &.disabled:focus {
-                    background: $dp-color-bg-primary;
-                    color: $dp-color-text-disabled;
-                    border-color: $dp-color-border-secondary;
+                &.disabled:focus,
+                &.disabled:active {
+                    background: $dp-color-btn-primary-bg;
+                    color: $dp-color-btn-primary-text;
+                    border-color: $dp-color-btn-primary-bg;
                     box-shadow: none;
+                    opacity: 0.6;
                     cursor: not-allowed;
                 }
             }

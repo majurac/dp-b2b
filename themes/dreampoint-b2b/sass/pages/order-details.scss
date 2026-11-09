@@ -48,10 +48,17 @@
         flex-direction: column;
     }
 
+    // D6: typography shared by View Order and Thank You (same markup, same stylesheet):
+    // 10px uppercase label above a 16/600 value, as in the My Account orders table.
     li {
         flex-grow: 1;
-        @include paragraph-normal;
-        color: $dp-color-text-primary;
+        font-family: $dp-font-body;
+        font-size: 10px;
+        font-weight: 500;
+        line-height: 18px;
+        letter-spacing: normal;
+        text-transform: uppercase;
+        color: $dp-color-text-secondary;
         text-align: center;
 
         @include bp(sm-up) {
@@ -60,9 +67,12 @@
 
         strong {
             display: block;
-            margin-top: 8px;
-            @include paragraph-normal;
-            font-weight: 500;
+            margin-top: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            line-height: 24px;
+            letter-spacing: normal;
+            text-transform: none;
             color: $dp-color-text-primary;
 
             @include bp(sm-down) {
@@ -103,9 +113,7 @@
 h2.woocommerce-order-details__title,
 h2.wc-bacs-bank-details-heading {
     display: flex;
-    @include heading-5;
-    font-weight: 500;
-    color: $dp-color-text-primary;
+    @include account-card-title;
 }
 
 .wod-title-holder {
@@ -204,10 +212,13 @@ h2.wc-bacs-bank-details-heading {
         }
 
         td {
-            @include paragraph-normal;
-            font-weight: 500;
             text-align: right;
             color: $dp-color-text-primary;
+        }
+
+        // D6: the grand total row is emphasised (row class added in woocommerce/order/order-details.php)
+        .woocommerce-table__row--order_total {
+            th, td { font-weight: 600; }
         }
     }
 
@@ -235,12 +246,20 @@ h2.wc-bacs-bank-details-heading {
         }
     }
 
+    // D6: items and totals 16/400 with a 24px line height (My Account body typography)
     td, th {
-        @include paragraph-normal;
+        padding: 0;
+        font-family: $dp-font-body;
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 24px;
+        letter-spacing: normal;
         color: $dp-color-text-primary;
 
         a { color: inherit; }
     }
+
+    .product-quantity { font-weight: 600; }
 
     .includes_tax       { display: none; }
     .payment_method-row { display: none; }

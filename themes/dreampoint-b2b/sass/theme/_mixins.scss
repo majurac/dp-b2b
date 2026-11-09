@@ -15,6 +15,19 @@
     box-shadow: 0 0 0 2px $dp-color-bg-primary, 0 0 0 4px $dp-color-text-primary;
 }
 
+// Figma card / section title: Montserrat 600 14px, 0.02em tracking, uppercase.
+// Shared by My Account cards (myaccount.scss) and the order details title (order-details.scss).
+@mixin account-card-title {
+    margin: 0;
+    font-family: $dp-font-body;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: normal;
+    letter-spacing: 0.28px;
+    text-transform: uppercase;
+    color: $dp-color-text-primary;
+}
+
 // Soft gray focus for FORM FIELDS only (inputs, textareas, selects, Select2, Blocks checkout fields): neutral dark-gray
 // border + subtle 3px gray ring. Buttons / links keep the strong `dp-focus-ring` above. Sets border-color too, so a
 // component whose border sits on an inner element must include it on that element.

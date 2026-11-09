@@ -1,17 +1,5 @@
 @import '../theme/mixins';
 
-// Figma card / section title: Montserrat 600 14px, 0.02em tracking, uppercase
-@mixin account-card-title {
-    margin: 0;
-    font-family: $dp-font-body;
-    font-size: 14px;
-    font-weight: 600;
-    line-height: normal;
-    letter-spacing: 0.28px;
-    text-transform: uppercase;
-    color: $dp-color-text-primary;
-}
-
 // Figma AUTH-01/02 (1440 wide): page `#f3f4f6`, content column 584px (half of the 1200px container minus 16px) starting
 // 80px below the top, photo column from 50% + 17px to the right edge. The photo is the ACF option `lr_image`
 // (still empty on staging; the template renders `.lr-image` only when set). Tablet/mobile steps are inferred (no frames).
@@ -853,14 +841,16 @@
     li { list-style: none; }
 }
 
-.woocommerce-order-overview__status {
+// `li` raises specificity above the shared order-details.scss `.woocommerce-order-overview li strong` value rules,
+// so the account pill keeps its own uppercase / margin / line height.
+.woocommerce-order-overview li.woocommerce-order-overview__status {
     text-align: center !important;
     span, strong {
         @include caption-m;
         padding: 4px 12px;
         border: 1px solid $dp-color-border-primary;
         text-transform: uppercase;
-        font-weight: 500;
+        font-weight: 600;
         display: flex !important;
         font-size: 12px !important;
         align-items: center;

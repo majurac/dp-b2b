@@ -155,7 +155,7 @@ if ( $show_downloads ) {
 			<?php
 			foreach ( $order->get_order_item_totals() as $key => $total ) {
 				?>
-					<tr>
+					<tr class="woocommerce-table__row--<?php echo esc_attr( sanitize_html_class( $key ) ); ?>">
 						<th scope="row"><?php echo esc_html( $total['label'] ); ?></th>
 						<td><?php echo wp_kses_post( $total['value'] ); ?></td>
 					</tr>

@@ -7,19 +7,98 @@
     }
     // Figma BR-01 underline tabs: Montserrat 600 14/tracking .28px, 36px high, 24px gap,
     // 1px baseline under the whole row, 2px underline on the active tab.
+    // Below md (same breakpoint as the My Account mobile menu, myaccount.scss) the same buttons become the
+    // options of a dropdown opened by .brand-segments__trigger; filtering stays in js/brands-navigation.js.
     .brand-segments {
-        display: flex;
-        gap: 24px;
+        position: relative;
         margin-bottom: 48px;
-        border-bottom: 1px solid $dp-color-border-secondary;
-        @include bp(sm-down) {
-            gap: 16px;
-            margin-bottom: 20px;
-            // Four labels do not fit 343px at the Figma tab width: scroll the row instead of wrapping.
-            overflow-x: auto;
-            scrollbar-width: none;
-            &::-webkit-scrollbar {
-                display: none;
+        @include bp(md-down) {
+            margin-bottom: 32px;
+            // Chevron + open state: same icon/animation as the My Account dropdown (.wrapper-dropdown:after).
+            &:after {
+                position: absolute;
+                top: 18px;
+                right: 16px;
+                margin-top: -8px;
+                font-size: 16px;
+                line-height: 16px;
+                font-family: 'icomoon';
+                content: "\e91a";
+                color: $text-primary;
+                pointer-events: none;
+                @include animate-fade;
+            }
+            &.is-open:after {
+                transform: rotate(180deg);
+            }
+        }
+        // Trigger exists in the markup but only shows below md (mirrors .tab-placeholder in My Account).
+        &__trigger {
+            display: none;
+            @include bp(md-down) {
+                display: flex;
+                align-items: center;
+                position: relative;
+                width: 100%;
+                margin: 0;
+                padding: 8px 40px 8px 16px;
+                font-family: $dp-font-body;
+                font-size: 16px;
+                font-weight: 400;
+                line-height: 18px;
+                letter-spacing: 0;
+                text-align: left;
+                color: $dp-color-text-secondary;
+                background: $white;
+                border: 1px solid $dp-color-border-primary;
+                border-radius: 0;
+                cursor: pointer;
+                appearance: none;
+                &:focus-visible {
+                    outline: 0;
+                    box-shadow: 0 0 0 2px $dp-color-bg-primary, 0 0 0 4px $dp-color-text-primary;
+                }
+            }
+        }
+        // Visually hidden purpose prefix for the accessible name ("Segment: <current>").
+        &__prefix {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+        }
+        &__list {
+            display: flex;
+            gap: 24px;
+            border-bottom: 1px solid $dp-color-border-secondary;
+            @include bp(md-down) {
+                position: absolute;
+                top: calc(100% + 4px);
+                left: 0;
+                right: 0;
+                z-index: 100;
+                flex-direction: column;
+                gap: 0;
+                border: 1px solid $dp-color-border-primary;
+                border-radius: 6px;
+                background: $white;
+                overflow: hidden;
+                opacity: 0;
+                visibility: hidden; // closed options must not be focusable
+                pointer-events: none;
+                // closing: stay visible until the fade ends; opening (.is-open): visible at once
+                transition: opacity .3s ease-out, visibility 0s linear .3s;
+            }
+        }
+        @include bp(md-down) {
+            &.is-open .brand-segments__list {
+                opacity: 1;
+                visibility: visible;
+                pointer-events: auto;
+                transition: opacity .3s ease-out, visibility 0s;
             }
         }
         &__tab {
@@ -40,10 +119,6 @@
             letter-spacing: 0.28px;
             line-height: normal;
             white-space: nowrap;
-            @include bp(sm-down) {
-                min-width: 0;
-                padding: 0 8px;
-            }
             // Underline sits on the row baseline (-1px) so the active 2px bar covers the 1px line.
             &::after {
                 content: '';
@@ -65,6 +140,34 @@
             }
             &.is-active::after {
                 background: $dp-color-bg-brand;
+            }
+            // Dropdown option: My Account option look (16/18 body font, active = brand fill, no underline).
+            @include bp(md-down) {
+                min-width: 0;
+                width: 100%;
+                height: auto;
+                padding: 8px 16px;
+                border-radius: 0;
+                font-size: 16px;
+                font-weight: 400;
+                letter-spacing: 0;
+                line-height: 18px;
+                text-align: left;
+                background: $white;
+                &::after {
+                    display: none;
+                }
+                &:hover {
+                    background: $dp-color-bg-tertiary;
+                }
+                &.is-active,
+                &.is-active:hover {
+                    color: $white;
+                    background: $background-brand;
+                }
+                &.is-active:focus-visible {
+                    box-shadow: inset 0 0 0 2px $white;
+                }
             }
         }
     }

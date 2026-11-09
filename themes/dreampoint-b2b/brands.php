@@ -55,14 +55,20 @@ get_header();
                 if ( ! empty( $used_segments ) ) :
                     ?>
                     <div class="brand-segments">
-                        <button type="button" class="brand-segments__tab is-active" data-segment="all" aria-pressed="true">
-                            <?php esc_html_e( 'Svi brendovi', 'dreampoint-b2b' ); ?>
+                        <?php // Mobile dropdown trigger (hidden >= md via CSS); same pattern as the My Account menu. ?>
+                        <button type="button" class="brand-segments__trigger" aria-expanded="false" aria-controls="brand-segments-list">
+                            <span class="brand-segments__prefix"><?php esc_html_e( 'Segment:', 'dreampoint-b2b' ); ?> </span><span class="brand-segments__current"><?php esc_html_e( 'Svi brendovi', 'dreampoint-b2b' ); ?></span>
                         </button>
-                        <?php foreach ( $used_segments as $segment_value => $segment_label ) : ?>
-                            <button type="button" class="brand-segments__tab" data-segment="<?php echo esc_attr( $segment_value ); ?>" aria-pressed="false">
-                                <?php echo esc_html( $segment_label ); ?>
+                        <div class="brand-segments__list" id="brand-segments-list">
+                            <button type="button" class="brand-segments__tab is-active" data-segment="all" aria-pressed="true">
+                                <?php esc_html_e( 'Svi brendovi', 'dreampoint-b2b' ); ?>
                             </button>
-                        <?php endforeach; ?>
+                            <?php foreach ( $used_segments as $segment_value => $segment_label ) : ?>
+                                <button type="button" class="brand-segments__tab" data-segment="<?php echo esc_attr( $segment_value ); ?>" aria-pressed="false">
+                                    <?php echo esc_html( $segment_label ); ?>
+                                </button>
+                            <?php endforeach; ?>
+                        </div>
                     </div>
                     <?php
                 endif;

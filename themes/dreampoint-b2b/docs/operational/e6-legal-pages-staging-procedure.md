@@ -1,6 +1,6 @@
 # E6-A — Legal Pages on Staging (Draft Creation Procedure)
 
-Status: **PREPARED LOCALLY, NOT DEPLOYED** (2026-11-09). Staging has none of this yet. No production environment exists.
+Status: **DONE ON STAGING (2026-11-09).** Drafts created by the seed script (IDs 23564, 23565, A2), then published with the privacy/terms assignments (L2); code deployed at `b04b16d`. Only localhost + staging exist (no production environment). Current state: `docs/operational/e6-cookie-compliance-staging-handoff.md` section 0.
 
 Git deploys carry code only, not database content. The two legal pages are DB content, so they must be created on each target by script. Nothing here publishes a page, installs a plugin, or changes a WordPress/WooCommerce setting.
 
@@ -43,7 +43,11 @@ Local drafts: Privacy ID 2438, Terms ID 2439 (IDs differ per environment). Scrip
 Privacy: `mailto:` targets `info@dreampoint.hr` while the visible text is `info@dream-point.hr`; "Vaša prava" appears twice (sections 3 and 7); text is generic (offers, transactions, billing) and not B2B/ERP-specific; no controller identity (company name/OIB), legal basis, retention period or supervisory authority; cookie section claims implied consent ("by using the site you agree") and lists analytics/marketing cookies, which conflicts with a consent banner and needs checking against what the shop really sets.
 Terms: generic company terms with no delivery, returns/withdrawal, BACS payment, ordering or B2B contract clauses; mentions kuna ("or euro, depending on regulations"); contact `<a>` has no `href`; liability clause needs legal confirmation.
 
-## Not yet done (E6 dependencies)
+## Status after deployment (2026-11-09; was "Not yet done")
+
+- Published on staging: `/politika-privatnosti/` (23564) and `/opci-uvjeti-poslovanja/` (23565); `wp_page_for_privacy_policy = 23564`, `woocommerce_terms_page_id = 23565`. Legal text may be edited later by the client; no legal review is required in the current staging phase. The pages are only reachable by authenticated users (closed B2B system, guest gate in `inc/b2b-registration.php`).
+- The registration `accept_toc` checkbox was removed (`b04b16d`); the points below are the original pre-deployment list and are historical.
+
 
 - Client review/approval of both texts, then publish (owner action).
 - Cookie consent: the same plugin as `dream-point.hr` (GDPR Cookie Compliance) needs owner approval to install; the "Postavke kolačića" footer target depends on how the plugin opens its preferences. Unknown what cookies the shop sets today.

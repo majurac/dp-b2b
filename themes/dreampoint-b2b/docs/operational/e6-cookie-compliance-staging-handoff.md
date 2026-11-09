@@ -1,8 +1,26 @@
-# E6 — Legal Pages & Cookie Compliance: Local Handoff and Staging Checklist
+# E6 — Legal Pages & Cookie Compliance: Final Status, Local Handoff and Staging Record
 
-Status: **IMPLEMENTED AND QA-VERIFIED LOCALLY (2026-11-09); NOTHING DEPLOYED, NOTHING PUBLISHED.** Only localhost + staging exist (no production). Companion: `docs/operational/e6-legal-pages-staging-procedure.md` (draft legal pages + seed script).
+Status: **COMPLETE ON STAGING (2026-11-09), deployed and verified at commit `b04b16d`; legal pages published on staging.** Only localhost + staging exist (no production environment). Sections 1 and 4 below are the historical pre-deployment record; the current state is section 0. Companion: `docs/operational/e6-legal-pages-staging-procedure.md` (draft legal pages + seed script).
 
-## 1. What is done, pending, and blocked
+## 0. Final status (end of day 2026-11-09) - E6 STAGING COMPLETE
+
+**Environments: localhost + staging only. There is no production environment.** Everything below was done on staging (`dreampoint.b2b.uncledev.cloud`, site user `dream9399`); nothing was or will be planned for production.
+
+- **Code:** staging, local and `origin/master` all at `b04b16d` (verified clean). E6 commits: `a152f08`, `068fc78`, `8347957`, `9991d9f`, `93d099a`; C3 brands listing and mobile dropdown (`e6b88cd`, `ebe969d`) shipped in the same deploy; `b04b16d` = registration privacy checkbox removed (`inc/my-account.php`) + Rich Text pages `padding-top: 0` (`sass/blocks/wysiwyg.scss`, `css/blocks/wysiwyg.css`).
+- **Phases:** A0 (backup) - A5 (final audit) COMPLETE; T1 (Moove font) COMPLETE; D1 / D1.1 (necessary-only consent persistence) COMPLETE; L2 (legal pages published) COMPLETE.
+- **GDPR Cookie Compliance 5.3.1 (Moove)** installed from the official package, configured and active on staging (settings are DB data, keyed in `moove_gdpr_plugin_settings`; see section 2). Staging additions after the original configuration: `moove_gdpr_plugin_font_type = 2` (inherits Montserrat), `moove_gdpr_strictly_necessary_cookies_functionality = 2` (necessary category always on, so "Spremi postavke" persists a necessary-only choice), `moove_gdpr_reject_all_button_enable = 1` ("Samo neophodni" inside the preferences modal only; the banner keeps one "Prihvaćam" button plus the inline "postavkama" link; banner reject stays off). Logo = staging ACF `logo` (attachment 23397).
+- **WooCommerce Order Attribution disabled** (`woocommerce_feature_order_attribution_enabled = no`); no `sbjs_*` cookies. `woocommerce_allow_tracking` and `woocommerce_analytics_enabled` untouched (`yes`). APROS exporter reads explicit meta keys only; no dependency on attribution data.
+- **Legal pages published on staging:** Politika privatnosti (ID 23564, `/politika-privatnosti/`) and Opći uvjeti poslovanja (ID 23565, `/opci-uvjeti-poslovanja/`), text unchanged (verbatim `dream-point.hr`), Rich Text template. `wp_page_for_privacy_policy = 23564`, `woocommerce_terms_page_id = 23565` (checkout now shows the terms checkbox). Footer legal links resolve to the internal pages; "Postavke kolačića" opens the Moove preferences modal.
+- **Legal pages are intentionally restricted to authenticated users** (closed B2B system): `dreampoint_b2b_restrict_guest_access()` in `inc/b2b-registration.php` redirects guests to `/my-account` for everything except login, registration and password reset. This is by design and is not to be "fixed".
+- **Registration form:** the `accept_toc` privacy/terms checkbox was removed (no validation depended on it); all other fields and validation unchanged. `remove_action(... 'wc_registration_privacy_policy_text' ...)` is kept so WooCommerce's default privacy text does not appear.
+- **Legal text** may be edited later by the client in WP Admin. No legal review is required for the current staging phase; the known content gaps listed in `e6-legal-pages-staging-procedure.md` stay informational.
+- **Backups / snapshots (staging, outside web root, mode 600):** `/home/dreampoint.b2b/backups/pre-e6-20261109-133729/` holds the A0 DB export, theme archive, option and page inventories, and the Moove option snapshots `…-pre-T1.json` and `…-pre-D1.1.json` (rollback reference: restore keys individually, verify in a fresh WP-CLI process).
+
+**Known future-consent limitation (preserve):** "Prihvaćam" writes `{strict, thirdparty, advanced, performance, preference} = 1` regardless of which categories are enabled (hard-coded in the plugin's `moove_gdpr_save_cookies()`, `main.js`). Nothing activates today (no scripts are defined for any category, no tracking IDs, no consumers of the cookie in theme/plugins). **Before any optional cookie category or tracking script is introduced, consent must be renewed:** add a small theme filter on `gdpr_extend_loc_data` that sets `gdpr_consent_version` (> 1), which makes the plugin discard existing consent cookies (including unversioned ones) and ask again; also reconsider an equally prominent reject option in the banner and a consent log (Premium) at that point.
+
+**Other notes:** Moove settings are DB-only (not in Git); re-apply from section 2 plus the staging additions above if the plugin is reinstalled or the DB is replaced. The two legal pages were created by WP-CLI, so `post_author = 0`. The consent cookie has no `Secure` flag (plugin default; optional hardening via the plugin's `gdpr_cookie_custom_attributes` filter).
+
+## 1. What was done, pending, and blocked (pre-deployment snapshot, 2026-11-09 morning)
 
 | Item | State |
 |---|---|
@@ -52,7 +70,7 @@ Consent is stored in the browser cookie `moove_gdpr_popup` (365 days; `strict:1`
 - **Banner button CSS** (`sass/components/_header.scss`, same block): the plugin hard-codes white text on the brand colour and its own white `:hover`/`:focus` fill, so on the dark bar the banner `button.mgbutton` is overridden (selector chain + `moove-gdpr-dark-scheme` + `html` prefix) with the B2B secondary button tokens (`button-figma-secondary-colors`: rest `#f9fafb`/`#384250`, hover `#f3f4f6`, pressed `#e5e7eb`) and an inverted two-tone focus ring. Panel buttons stay native.
 - **Mobile CSS** (`sass/components/_header.scss`, compiled into `style.css`): at <=767.98px the banner is lifted by `$dp-mobile-toolbar-height` (73px) only when `body:has(#header .action-btns)` (the standard header; the Quick Order header `dp-qo-header` has no such toolbar and keeps `bottom: 0`); the preferences overlay is raised above the toolbar (z-index 10000); banner buttons get `min-height: 44px`. No selector touches the navigation.
 
-## 4. Staging checklist (nothing here has been done on staging)
+## 4. Staging checklist (EXECUTED 2026-11-09 as phases A0-A5; historical record)
 
 Do in this order; stop and report on any unexpected result.
 

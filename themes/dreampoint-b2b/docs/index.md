@@ -80,6 +80,7 @@ Active engineering guidance lives in:
 | Doc | Use when |
 |-----|----------|
 | `docs/operational/staging-quick-order-checklist.md` | Before any Quick Order staging deploy |
+| `docs/operational/e6-cookie-compliance-staging-handoff.md` | E6 final local handoff: done vs pending, exact GDPR Cookie Compliance configuration (Croatian labels, colours, logo, footer integration) and the ordered staging checklist — implemented locally, NOT deployed |
 | `docs/operational/e6-legal-pages-staging-procedure.md` | Creating the E6-A draft legal pages (Privacy, Terms; Rich Text template) on staging via `e6-legal-pages/seed-legal-pages.php` — prepared locally, NOT deployed |
 
 ---

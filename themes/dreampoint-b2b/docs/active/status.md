@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## 2026-11-09 (E6 final local handoff) - E6 IMPLEMENTED AND QA-VERIFIED LOCALLY — NOT DEPLOYED, NOT PUBLISHED
+
+E6 (legal pages + cookie consent) is complete locally: legal pages and footer helper `a152f08`; GDPR Cookie Compliance 5.3.1 integration (footer reopening via `#gdpr_cookie_modal`, hr strings `.po/.mo`, mobile banner CSS) `068fc78`. Local-only (no commit): plugin settings (Strictly Necessary only, Croatian labels, brand colour `#0d121c`, site logo) and WooCommerce Order Attribution disabled (E6-B2; usage tracking untouched). Exact plugin configuration, code behaviour and the ordered staging checklist (APROS exporter grep, Order Attribution, cookie inventory, plugin install, translation, mobile banner, Quick Order layout, footer link, legal pages) are in `docs/operational/e6-cookie-compliance-staging-handoff.md`. Pending: client legal approval of both texts and the "only necessary cookies" wording, owner approval for staging changes. Nothing was deployed.
+
 ## 2026-11-09 (E6-A) - LEGAL PAGES PREPARED LOCALLY — NOT DEPLOYED, NOT PUBLISHED
 
 Local draft pages "Politika privatnosti" and "Opći uvjeti poslovanja" (verbatim `dream-point.hr` text, Rich Text template `rich-text-page.php`, preview QA 1440/390 px passed). Code: Rich Text wrapper class `wysiwyg-block` + `wysiwyg.css` enqueue for that template; footer legal links use an internal page only when published (otherwise the `dream-point.hr` URLs). WordPress/WooCommerce settings (privacy page, WC terms page) untouched; footer, registration and checkout unchanged. Staging creation: `docs/operational/e6-legal-pages-staging-procedure.md` (idempotent seed script, drafts only). Open: client legal review (gaps listed in the procedure), publishing, cookie consent plugin (approval), privacy-page setting. Nothing was deployed.

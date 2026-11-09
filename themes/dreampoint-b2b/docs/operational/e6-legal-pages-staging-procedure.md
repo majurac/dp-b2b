@@ -50,4 +50,6 @@ Terms: generic company terms with no delivery, returns/withdrawal, BACS payment,
 - After publishing: set `wp_page_for_privacy_policy` to the published privacy page (this also activates the registration privacy checkbox in `inc/my-account.php`, which currently renders nothing because the privacy page is a draft). WooCommerce terms page for checkout is a separate owner decision.
 - Footer then switches to the internal pages by itself (published pages only).
 
+Cookie consent (plugin configuration, footer integration, full staging checklist): `docs/operational/e6-cookie-compliance-staging-handoff.md`.
+
 Roadmap: `docs/active/master-roadmap.md` E6.

@@ -15,7 +15,7 @@
     get_header();
         
     ?>
-    <div id="rich-text-page">
+    <div id="rich-text-page" class="wysiwyg-block">
         <div class="container">
             <div class="inner-body block">
                 <?php the_content(); ?>

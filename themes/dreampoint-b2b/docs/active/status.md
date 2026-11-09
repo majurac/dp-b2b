@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## 2026-11-09 (E6-A) - LEGAL PAGES PREPARED LOCALLY — NOT DEPLOYED, NOT PUBLISHED
+
+Local draft pages "Politika privatnosti" and "Opći uvjeti poslovanja" (verbatim `dream-point.hr` text, Rich Text template `rich-text-page.php`, preview QA 1440/390 px passed). Code: Rich Text wrapper class `wysiwyg-block` + `wysiwyg.css` enqueue for that template; footer legal links use an internal page only when published (otherwise the `dream-point.hr` URLs). WordPress/WooCommerce settings (privacy page, WC terms page) untouched; footer, registration and checkout unchanged. Staging creation: `docs/operational/e6-legal-pages-staging-procedure.md` (idempotent seed script, drafts only). Open: client legal review (gaps listed in the procedure), publishing, cookie consent plugin (approval), privacy-page setting. Nothing was deployed.
+
 ## 2026-11-06 (C2-5 closure + C2 reconciliation) - C2-5 CLOSED / STAGING VERIFIED / OWNER ACCEPTED (2026-11-06); C2 CLOSED - documentation only
 
 The project owner explicitly accepted the complete C2-5 implementation on staging on 2026-11-06. Documentation-only entry: no application code, staging, database or plugin was touched.

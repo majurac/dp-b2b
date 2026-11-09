@@ -24,6 +24,12 @@ function dreampoint_b2b_enqueue_block_styles(): void {
         dreampoint_b2b_enqueue_block_style( 'company-features' );
     }
 
+    // The Rich Text template (rich-text-page.php) renders post_content as plain editor HTML (no ACF block), so it
+    // reuses the WYSIWYG block typography (headings, lists, spacing) via the `wysiwyg-block` wrapper class.
+    if ( is_page_template( 'rich-text-page.php' ) ) {
+        dreampoint_b2b_enqueue_block_style( 'wysiwyg' );
+    }
+
     if ( ! is_singular() && ! is_front_page() ) {
         return;
     }

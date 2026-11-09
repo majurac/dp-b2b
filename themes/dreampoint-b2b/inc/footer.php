@@ -103,16 +103,25 @@ function dreampoint_b2b_footer_sitemap_columns( $rows ): array {
 }
 
 /**
+ * Permalink of an internal legal page, but ONLY once it is published; otherwise the given fallback URL.
+ * A draft or missing page therefore never reaches the footer (no broken or exposed link).
+ */
+function dreampoint_b2b_legal_page_url( string $slug, string $fallback ): string {
+	$page = get_page_by_path( $slug, OBJECT, 'page' );
+	return ( $page instanceof WP_Post && 'publish' === $page->post_status ) ? (string) get_permalink( $page ) : $fallback;
+}
+
+/**
  * The three legal items of the credits area, in this order. By owner request they point to the corporate
- * dream-point.hr pages (the B2B shop has no legal pages of its own yet); replace the URLs here once
- * shop-specific pages exist.
+ * dream-point.hr pages until the shop's own pages (`politika-privatnosti`, `opci-uvjeti-poslovanja`) are
+ * published; from then on the first two switch to the internal pages automatically.
  *
  * @return array<int, array{label: string, url: string}>
  */
 function dreampoint_b2b_footer_legal_links(): array {
 	return [
-		[ 'label' => __( 'Politika privatnosti', 'dreampoint-b2b' ), 'url' => 'https://dream-point.hr/privacy-policy/' ],
-		[ 'label' => __( 'Opći uvjeti poslovanja', 'dreampoint-b2b' ), 'url' => 'https://dream-point.hr/opci-uvjeti-poslovanja/' ],
+		[ 'label' => __( 'Politika privatnosti', 'dreampoint-b2b' ), 'url' => dreampoint_b2b_legal_page_url( 'politika-privatnosti', 'https://dream-point.hr/privacy-policy/' ) ],
+		[ 'label' => __( 'Opći uvjeti poslovanja', 'dreampoint-b2b' ), 'url' => dreampoint_b2b_legal_page_url( 'opci-uvjeti-poslovanja', 'https://dream-point.hr/opci-uvjeti-poslovanja/' ) ],
 		[ 'label' => __( 'Postavke kolačića', 'dreampoint-b2b' ), 'url' => 'https://dream-point.hr/postavke-kolacica/' ],
 	];
 }

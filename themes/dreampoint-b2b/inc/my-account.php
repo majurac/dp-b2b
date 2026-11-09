@@ -147,50 +147,15 @@ function dreampoint_b2b_dashboard_active_class($classes, $endpoint) {
 }
 
 // ============================================================================
-// REGISTRATION FORM - Privacy Policy Checkbox
+// REGISTRATION FORM - Privacy Policy Text
 // ============================================================================
 
 /**
- * Remove default WooCommerce privacy policy text
+ * Remove default WooCommerce privacy policy text from the registration form.
+ * Closed B2B system: legal pages are not available to guests, so the registration form shows
+ * no privacy/terms text or acceptance checkbox.
  */
 remove_action('woocommerce_register_form', 'wc_registration_privacy_policy_text', 20);
-
-/**
- * Add custom privacy policy checkbox
- * Croatian translation with proper formatting
- */
-add_action('woocommerce_register_form', 'dreampoint_b2b_custom_privacy_checkbox', 20);
-function dreampoint_b2b_custom_privacy_checkbox() {
-    $privacy_url = get_privacy_policy_url();
-    
-    if (!$privacy_url) {
-        return; // Exit if no privacy policy page set
-    }
-    
-    ?>
-    <div class="woocommerce-privacy-policy-text custom-checkbox">
-        <label class="woocommerce-form__label woocommerce-form__label-for-checkbox woocommerce-form-login__accept_toc accept-terms">
-            <input 
-                class="woocommerce-form__input woocommerce-form__input-checkbox" 
-                name="accept_toc" 
-                type="checkbox" 
-                id="accept_toc" 
-                value="1" 
-                required 
-                aria-required="true"
-            >
-            <span>
-                <?php 
-                printf(
-                    __('Pročitao/la sam i razumijem Dream Point d.o.o. <a href="%s" target="_blank" rel="noopener">Politiku privatnosti</a> koja objašnjava kako se moji podaci koriste i kako ih mogu povući ili izmijeniti.', 'dreampoint-b2b'),
-                    esc_url($privacy_url)
-                );
-                ?>
-            </span>
-        </label>
-    </div>
-    <?php
-}
 
 // ============================================================================
 // ACCOUNT FORM - Phone Field

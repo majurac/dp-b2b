@@ -1112,6 +1112,27 @@ html #moove_gdpr_cookie_info_bar.moove-gdpr-dark-scheme .moove-gdpr-info-bar-con
     }
 }
 
+// The inline "postavkama" link (button.change-settings-button): the plugin's dark-scheme :hover/:focus rules set the
+// text to the brand colour (#0d121c), which vanishes on the #202020 bar, and :focus adds a brand-coloured halo.
+// Keep it an underlined text link in the surrounding light text colour in every state, with no background; keyboard
+// focus gets the same inverted two-tone ring as the banner button. Does not match .mgbutton (Prihvaćam).
+html #moove_gdpr_cookie_info_bar.moove-gdpr-dark-scheme .moove-gdpr-info-bar-container .moove-gdpr-info-bar-content button.change-settings-button {
+    &,
+    &:hover,
+    &:focus,
+    &:active {
+        background: none;
+        color: inherit;
+        text-decoration: underline;
+        box-shadow: none;
+    }
+    &:focus-visible {
+        outline: 0;
+        border-radius: 2px;
+        box-shadow: 0 0 0 2px $dp-color-bg-brand, 0 0 0 4px $dp-color-text-inverse;
+    }
+}
+
 // Keyboard focus rings (Step 6 accessibility fix). The global "a:focus { outline: none !important }" swallows an
 // outline, so, like the footer / QUICK ORDER, use a two-tone box-shadow ring: inner colour = the bar background,
 // outer = the text colour, so it is visible on both the dark top bar and the light main bar. Scoped to the

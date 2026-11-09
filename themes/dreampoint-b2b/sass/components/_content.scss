@@ -1159,6 +1159,10 @@ body.page-template-contact-php .select2-container .select2-dropdown {
         // `contain` keeps the whole packshot visible (the uncropped `card-loop` source, or the legacy hard-cropped
         // `product-loop` fallback); switch to `cover` for the literal Figma fill - it cuts 30%+ of tall products.
         // Not tied to a size class so the source size can change without touching the card CSS.
+        // X21: keyboard focus ring for the image link. The wrapper clips (overflow hidden), so the ring is drawn on the wrapper itself.
+        &:has(> a:focus-visible) {
+            @include dp-focus-ring;
+        }
         img {
             display: block;
             width: 100%;
@@ -1178,6 +1182,10 @@ body.page-template-contact-php .select2-container .select2-dropdown {
         gap: 8px;
         .product-title-link {
             display: block;
+            // X21: keyboard focus ring (global `a:focus` outline reset stays untouched)
+            &:focus-visible {
+                @include dp-focus-ring;
+            }
         }
         // Figma Product card (11148:32832): Montserrat 600 / 14px, sentence case, two visible lines
         .product-title {
@@ -1379,6 +1387,13 @@ body.page-template-contact-php .select2-container .select2-dropdown {
             padding: 0 25% 0 0;
         }
     }
+}
+
+// X21: PDP related-products slider. .slick-list clips (overflow hidden) and the card image sits flush with its top
+// edge, so the 4px focus ring on the image would lose its top. Padding + equal negative margin = no layout change.
+#recomended-products .slick-list {
+    padding-top: 4px;
+    margin-top: -4px;
 }
 
 .view-more-sm {

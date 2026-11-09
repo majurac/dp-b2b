@@ -1092,9 +1092,24 @@ body:has(#header .action-btns) .gdpr_lightbox-wrap {
         z-index: 10000;
     }
 }
-#moove_gdpr_cookie_info_bar .mgbutton,
-#moove_gdpr_cookie_info_bar .change-settings-button {
+// The "postavkama" settings control is an inline text link ({setting} in the banner text, as on dream-point.hr),
+// so only the pill buttons get the 44px target.
+#moove_gdpr_cookie_info_bar .mgbutton {
     min-height: 44px;
+}
+// The dark bar (#202020, native dark scheme) gets the B2B secondary button (light fill, dark text) from the
+// existing $dp-color-btn-secondary-* tokens: the plugin hard-codes white text on the brand colour, which is
+// dark here. The modal buttons keep the native brand colour (#0d121c). The selector repeats the plugin's chain
+// plus the scheme class and an `html` prefix so it also beats the plugin's own :hover/:focus rules (white fill)
+// regardless of stylesheet order; the focus ring is inverted for the dark bar.
+html #moove_gdpr_cookie_info_bar.moove-gdpr-dark-scheme .moove-gdpr-info-bar-container .moove-gdpr-info-bar-content button.mgbutton {
+    border: 1px solid $dp-color-btn-secondary-border;
+    @include button-figma-secondary-colors;
+    &:focus-visible {
+        outline: 0;
+        background: $dp-color-btn-secondary-bg;
+        box-shadow: 0 0 0 2px $dp-color-bg-brand, 0 0 0 4px $dp-color-text-inverse;
+    }
 }
 
 // Keyboard focus rings (Step 6 accessibility fix). The global "a:focus { outline: none !important }" swallows an

@@ -25,13 +25,13 @@ Stored in option `moove_gdpr_plugin_settings`. Set through the plugin screens, o
 
 | Area | Key | Value |
 |---|---|---|
-| Look | `moove_gdpr_colour_scheme` | `2` (light) |
-| | `moove_gdpr_brand_colour` | `#0d121c` |
+| Look | `moove_gdpr_colour_scheme` | `1` (dark `#202020`, as dream-point.hr; was `2` before the 2026-11-09 visual alignment) |
+| | `moove_gdpr_brand_colour` | `#0d121c` (B2B `$dp-color-btn-primary-bg`; drives the panel buttons/tabs/close icon. The reference blue `#0c4da2` was tried and replaced by the B2B theme colour on 2026-11-09) |
 | | `moove_gdpr_button_style` | `rounded` |
 | | `moove_gdpr_infobar_position` | `bottom` |
 | | `moove_gdpr_floating_button_enable` | `0` |
-| Banner text | `moove_gdpr_info_bar_content` | `<p>Ova stranica koristi samo neophodne kolačiće potrebne za prijavu, košaricu i naplatu.</p>` (no `{setting}` placeholder: the Postavke button already does it) |
-| Banner buttons | `moove_gdpr_accept_button_enable` / `_reject_button_enable` / `_settings_button_enable` | `1` / `1` / `1` |
+| Banner text | `moove_gdpr_info_bar_content` | `<p>Ova stranica koristi samo neophodne kolačiće potrebne za prijavu, košaricu i naplatu.<br>Više o kolačićima pogledajte u {setting}postavkama{/setting}.</p>` (the placeholder is paired `{setting}…{/setting}`; it renders the inline underlined "postavkama" link as on dream-point.hr) |
+| Banner buttons | `moove_gdpr_accept_button_enable` / `_reject_button_enable` / `_settings_button_enable` | `1` / `0` / `0` (banner = "Prihvaćam" + inline "postavkama" link, as dream-point.hr; the separate reject and Postavke buttons are off. Necessary-only is the only category, so there is no optional cookie to decline; the preferences panel stays reachable from the link and the footer "Postavke kolačića") |
 | | `moove_gdpr_infobar_accept_button_label` / `_reject_button_label` / `_settings_button_label` | `Prihvaćam` / `Samo neophodni` / `Postavke` |
 | Panel | `moove_gdpr_privacy_overview_tab_title` | `Pregled privatnosti` |
 | | `moove_gdpr_privacy_overview_tab_content` | `<p>Ova stranica koristi samo neophodne kolačiće koji omogućuju prijavu, košaricu i naplatu. Ne koristimo analitičke ni marketinške kolačiće.</p>` |
@@ -49,6 +49,7 @@ Consent is stored in the browser cookie `moove_gdpr_popup` (365 days; `strict:1`
 
 - **Footer** (`inc/footer.php`, `dreampoint_b2b_footer_legal_links()`): "Postavke kolačića" = `home_url( '/#gdpr_cookie_modal' )` when `MOOVE_GDPR_VERSION` is defined (set unconditionally at the top of the plugin's main file, so it exists whenever the plugin is loaded), else `https://dream-point.hr/postavke-kolacica/`. Mechanism verified in the plugin JS (`assets/scripts/main.js`): clicks on `[href*="#gdpr_cookie_modal"]` / `#moove_gdpr_cookie_modal` open the panel in place; the same hash opens it on a fresh page load. Limit: the check proves the plugin is loaded, not that its banner/panel are enabled in its settings.
 - **Translations**: loader in `inc/woocommerce.php` loads `languages/plugins/gdpr-cookie-compliance-<locale>.mo` at `init` 20 (same pattern as WBW/Silkypress). Only `determine_locale() === 'hr'` matches. Strings covered: sr-only banner title, close labels, "Cookie categories", "(opens in a new tab)", "Turn on %s first…". Settings texts above are DB data. Admin screens stay English. Local locale is `en_US` and `hr` is not installed, so QA used a temporary harness (since removed).
+- **Banner button CSS** (`sass/components/_header.scss`, same block): the plugin hard-codes white text on the brand colour and its own white `:hover`/`:focus` fill, so on the dark bar the banner `button.mgbutton` is overridden (selector chain + `moove-gdpr-dark-scheme` + `html` prefix) with the B2B secondary button tokens (`button-figma-secondary-colors`: rest `#f9fafb`/`#384250`, hover `#f3f4f6`, pressed `#e5e7eb`) and an inverted two-tone focus ring. Panel buttons stay native.
 - **Mobile CSS** (`sass/components/_header.scss`, compiled into `style.css`): at <=767.98px the banner is lifted by `$dp-mobile-toolbar-height` (73px) only when `body:has(#header .action-btns)` (the standard header; the Quick Order header `dp-qo-header` has no such toolbar and keeps `bottom: 0`); the preferences overlay is raised above the toolbar (z-index 10000); banner buttons get `min-height: 44px`. No selector touches the navigation.
 
 ## 4. Staging checklist (nothing here has been done on staging)
@@ -62,7 +63,7 @@ Do in this order; stop and report on any unexpected result.
 5. **Install plugin 5.3.1 + settings + logo** (section 2; owner approval; plugin is not tracked in Git, install on each environment).
 6. **Plugin translation:** staging `WPLANG=hr`: no English left in banner/panel (sr-only title, aria labels, "(otvara se u novoj kartici)", "Pokreće", "Isključeno").
 7. **Mobile banner** at 390px logged in: banner sits directly above the toolbar (no overlap), all banner buttons >= 44px and clickable, panel overlay covers the toolbar, toolbar unchanged after dismissing; also 1440px and logged-out login page (no gap under the banner).
-8. **Quick Order layout** (`/quick-order/`, QO header variant): check that no other fixed bottom UI (QO sticky/cart bar) overlaps the banner at 390 and 1440. Not verified anywhere yet.
+8. **Quick Order layout** (`/quick-order/`, QO header variant): check that no other fixed bottom UI (QO sticky/cart bar) overlaps the banner at 390 and 1440. Local result 2026-11-09 (390px, logged in): the QO header variant has no bottom toolbar and no other fixed bottom UI, the banner sits at `bottom: 0` with its content scrollable above it, nothing overlaps; logged-out login page: banner at `bottom: 0` (no toolbar, no gap). Still to be repeated on staging.
 9. **Footer link** opens the panel in place (no navigation) on a normal page, at 1440 and 390.
 10. **Legal pages (after client approval):** publish both pages; set `wp_page_for_privacy_policy` to the published privacy page (this also activates the registration privacy checkbox in `inc/my-account.php`, which renders nothing while the privacy page is a draft; confirm its server-side handling once visible); the WooCommerce checkout terms page is a separate owner decision. The footer then switches to the internal pages by itself.
 

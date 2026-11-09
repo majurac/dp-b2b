@@ -1,0 +1,33 @@
+# Croatian (hr) strings for the third-party "gdpr-cookie-compliance" (Moove Agency) plugin.
+# The plugin ships no hr language file; this file is loaded from the theme
+# (inc/woocommerce.php), so the plugin itself is never edited. Only the strings the
+# banner / preferences panel prints through gettext on the front end are listed.
+# Texts saved in the plugin settings (banner text, button labels, tab titles, "Powered by",
+# enabled/disabled labels) are DB data, not covered by this file.
+msgid ""
+msgstr ""
+"Project-Id-Version: DreamPoint B2B - gdpr-cookie-compliance (hr)\n"
+"Language: hr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+msgid "GDPR Cookie Banner"
+msgstr "Obavijest o kolačićima"
+
+msgid "Close GDPR Cookie Banner"
+msgstr "Zatvori obavijest o kolačićima"
+
+msgid "Close GDPR Cookie Settings"
+msgstr "Zatvori postavke kolačića"
+
+msgid "Cookie categories"
+msgstr "Kategorije kolačića"
+
+msgid "(opens in a new tab)"
+msgstr "(otvara se u novoj kartici)"
+
+#. translators: %s: name of the strictly necessary cookie category
+msgid "Turn on %s first to change this setting."
+msgstr "Prvo uključite „%s” da biste promijenili ovu postavku."

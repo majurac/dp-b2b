@@ -420,6 +420,18 @@ add_action( 'init', function (): void {
 }, 20 );
 
 /**
+ * Croatian strings for the third-party gdpr-cookie-compliance (Moove) banner and preferences panel, same
+ * mechanism as above: the plugin ships no hr file, so load our own per-locale .mo from languages/plugins/.
+ * Texts saved in the plugin settings are DB data and are not affected. A missing locale file is a no-op.
+ */
+add_action( 'init', function (): void {
+	$mofile = get_template_directory() . '/languages/plugins/gdpr-cookie-compliance-' . determine_locale() . '.mo';
+	if ( is_readable( $mofile ) ) {
+		load_textdomain( 'gdpr-cookie-compliance', $mofile );
+	}
+}, 20 );
+
+/**
  * JS (block checkout) translations for the same plugin. Its scripts call
  * wp_set_script_translations() but the plugin ships no `hr` JSON, so strings
  * rendered in JS (e.g. " (optional)") stay English. Point only that text domain

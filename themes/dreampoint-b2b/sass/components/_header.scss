@@ -1077,6 +1077,26 @@ $search-field-focus: #141414;
     }
 }
 
+// GDPR Cookie Compliance (E6-B4). The banner is fixed to the bottom (z-index 9900), the same place as the
+// fixed mobile toolbar (z-index 9999), which would cover its buttons: on phones lift the banner by the toolbar
+// height, only on pages that actually render the toolbar (logged-out login page has none). The preferences
+// overlay (z-index 9990) also sits under the toolbar, so lift it above. Banner buttons get a 44px touch target.
+body:has(#header .action-btns) #moove_gdpr_cookie_info_bar {
+    @include bp(sm-down) {
+        bottom: $dp-mobile-toolbar-height;
+    }
+}
+body:has(#header .action-btns) .gdpr_lightbox,
+body:has(#header .action-btns) .gdpr_lightbox-wrap {
+    @include bp(sm-down) {
+        z-index: 10000;
+    }
+}
+#moove_gdpr_cookie_info_bar .mgbutton,
+#moove_gdpr_cookie_info_bar .change-settings-button {
+    min-height: 44px;
+}
+
 // Keyboard focus rings (Step 6 accessibility fix). The global "a:focus { outline: none !important }" swallows an
 // outline, so, like the footer / QUICK ORDER, use a two-tone box-shadow ring: inner colour = the bar background,
 // outer = the text colour, so it is visible on both the dark top bar and the light main bar. Scoped to the

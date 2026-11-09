@@ -122,7 +122,12 @@ function dreampoint_b2b_footer_legal_links(): array {
 	return [
 		[ 'label' => __( 'Politika privatnosti', 'dreampoint-b2b' ), 'url' => dreampoint_b2b_legal_page_url( 'politika-privatnosti', 'https://dream-point.hr/privacy-policy/' ) ],
 		[ 'label' => __( 'Opći uvjeti poslovanja', 'dreampoint-b2b' ), 'url' => dreampoint_b2b_legal_page_url( 'opci-uvjeti-poslovanja', 'https://dream-point.hr/opci-uvjeti-poslovanja/' ) ],
-		[ 'label' => __( 'Postavke kolačića', 'dreampoint-b2b' ), 'url' => 'https://dream-point.hr/postavke-kolacica/' ],
+		[
+			'label' => __( 'Postavke kolačića', 'dreampoint-b2b' ),
+			// With GDPR Cookie Compliance active, the `#gdpr_cookie_modal` anchor opens its preferences panel (the plugin JS
+			// handles clicks on [href*="#gdpr_cookie_modal"] and the hash on load); otherwise keep the external page.
+			'url'   => defined( 'MOOVE_GDPR_VERSION' ) ? home_url( '/#gdpr_cookie_modal' ) : 'https://dream-point.hr/postavke-kolacica/',
+		],
 	];
 }
 

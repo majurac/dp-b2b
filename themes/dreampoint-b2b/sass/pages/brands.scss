@@ -5,35 +5,66 @@
     @include bp(sm-down) {
         padding-top: 0!important;
     }
+    // Figma BR-01 underline tabs: Montserrat 600 14/tracking .28px, 36px high, 24px gap,
+    // 1px baseline under the whole row, 2px underline on the active tab.
     .brand-segments {
         display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-bottom: 32px;
+        gap: 24px;
+        margin-bottom: 48px;
+        border-bottom: 1px solid $dp-color-border-secondary;
         @include bp(sm-down) {
-            gap: 6px;
+            gap: 16px;
             margin-bottom: 20px;
+            // Four labels do not fit 343px at the Figma tab width: scroll the row instead of wrapping.
+            overflow-x: auto;
+            scrollbar-width: none;
+            &::-webkit-scrollbar {
+                display: none;
+            }
         }
         &__tab {
             appearance: none;
             background: none;
-            border: 1px solid $dp-color-border-control;
-            border-radius: 100px;
+            border: 0;
+            border-radius: 4px 4px 0 0;
             color: $text-primary;
             cursor: pointer;
-            padding: 8px 20px;
-            transition: .25s ease-in-out;
-            &:hover {
-                border-color: $text-primary;
+            flex: 0 0 auto;
+            min-width: 103px;
+            height: 36px;
+            padding: 0 4px;
+            position: relative;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.28px;
+            line-height: normal;
+            white-space: nowrap;
+            @include bp(sm-down) {
+                min-width: 0;
+                padding: 0 8px;
             }
+            // Underline sits on the row baseline (-1px) so the active 2px bar covers the 1px line.
+            &::after {
+                content: '';
+                position: absolute;
+                left: 0;
+                right: 0;
+                bottom: -1px;
+                height: 2px;
+                background: transparent;
+                transition: background-color .25s ease-in-out;
+            }
+            &:hover::after {
+                background: $dp-color-border-control;
+            }
+            // Two-tone inset ring (the global focus reset removes native outlines).
             &:focus-visible {
-                outline: 2px solid $dp-color-bg-brand;
-                outline-offset: 2px;
+                outline: none;
+                box-shadow: inset 0 0 0 2px $dp-color-bg-brand, inset 0 0 0 4px $dp-color-bg-mono;
             }
-            &.is-active {
-                background: $background-brand;
-                border-color: $background-brand;
-                color: $text-primary-inverse;
+            &.is-active::after {
+                background: $dp-color-bg-brand;
             }
         }
     }
@@ -54,8 +85,12 @@
             }
             .col {
                 flex-grow: 0;
-                min-width: 33.333333%;
+                min-width: 25%;
                 padding-left: 12px;
+                // Figma BR-01 is 4 columns; tablet keeps the previous 3.
+                @include bp(md-down) {
+                    min-width: 33.333333%;
+                }
                 padding-right: 12px;
                 @include bp(sm-down) {
                     flex-basis: 50%;
@@ -72,6 +107,12 @@
                 display: block;
                 width: 100%;
                 height: 100%;
+                overflow: hidden;
+                // Global "a:focus { outline: none !important }": ring is an outer two-tone box-shadow
+                // (the .col padding leaves room for it).
+                &:focus-visible {
+                    box-shadow: 0 0 0 2px $dp-color-bg-mono, 0 0 0 4px $dp-color-bg-brand;
+                }
                 &:after {
                     @include after-cnt;
                     background: linear-gradient(180deg, rgba(0, 0, 0, 0.5) 16.95%, rgba(0, 0, 0, 0.5) 44.28%);
@@ -89,14 +130,39 @@
             .brand-image {
                 width: 100%;
                 display: block;
-                height: 236px;
+                // Figma BR-01 card is 282x269; mobile keeps the previous fixed 236px height.
+                aspect-ratio: 282 / 269;
                 object-fit: cover;
+                transition: transform .4s ease-in-out;
+                @include bp(sm-down) {
+                    aspect-ratio: auto;
+                    height: 236px;
+                }
+            }
+            a:hover .brand-image {
+                transform: scale(1.04);
+            }
+            @media (prefers-reduced-motion: reduce) {
+                .brand-image {
+                    transition: none;
+                }
+                a:hover .brand-image {
+                    transform: none;
+                }
             }
             // Card without a hero photograph: keep the same 236px area on the brand colour (no broken
             // placeholder image); the logo / brand name stays centred and white as on photo cards.
             a.no-hero {
-                min-height: 236px;
+                aspect-ratio: 282 / 269;
                 background: $dp-color-bg-brand;
+                transition: background-color .25s ease-in-out;
+                &:hover {
+                    background: $dp-color-text-secondary;
+                }
+                @include bp(sm-down) {
+                    aspect-ratio: auto;
+                    min-height: 236px;
+                }
                 &:after {
                     display: none;
                 }

@@ -69,7 +69,7 @@ Delivered priorities from that phase:
 |--------|--------------|
 | Quick Order local-state workspace (current) | `docs/frozen/quick-order-local-state-architecture.md` |
 | CartSync real-time engine (superseded 2026-07-10) | `docs/frozen/quick-order-sync-architecture.md` |
-| Checkout logic (payment rules, billing) | `docs/frozen/checkout-logic.md` |
+| Checkout logic (billing prefill, billing master protection; payment rules removed in A8) | `docs/frozen/checkout-logic.md` |
 | Visibility engine (bucket rules) | Theme `inc/` — see `CLAUDE.md` |
 | WOOF/WBW filter integration | `docs/frozen/quick-order-local-state-architecture.md` §11 (WBW Integration Doctrine) |
 

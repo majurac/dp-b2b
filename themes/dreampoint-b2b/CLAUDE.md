@@ -235,7 +235,7 @@ If something already works, do not touch it.
 Archived implementations are in `docs/frozen/`.
 Read the relevant file before modifying any completed feature.
 
-- `docs/frozen/checkout-logic.md` — payment rules, billing prefill, billing data protection
+- `docs/frozen/checkout-logic.md` — billing prefill, billing master protection (the shipping-based payment rules described in its original text were removed in A8; see its "Superseded / Current Implementation" section)
 
 ---
 

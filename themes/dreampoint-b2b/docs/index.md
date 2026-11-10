@@ -59,7 +59,7 @@ Active engineering guidance lives in:
 
 | Doc | System |
 |-----|--------|
-| `docs/frozen/checkout-logic.md` | Checkout — payment rules, billing prefill, WooCommerce Blocks billing data protection |
+| `docs/frozen/checkout-logic.md` | Checkout — billing prefill, billing master protection (classic + Blocks); shipping-based payment rules removed in A8 (see its "Superseded / Current Implementation" section) |
 | `docs/frozen/quick-order-local-state-architecture.md` | Quick Order — local state workspace model (canonical, current). Milestone COMPLETE 2026-07-21; Addendum 2026-10-05 covers redesign slices 1–3 (footer wording, card/OPCIJA rendering, search/chips); Addendum 2026-10-06 covers Slice 4 (native-first filter sidebar, visibility-safe terms). |
 | `docs/frozen/quick-order-sync-architecture.md` | CartSync — real-time debounce engine (SUPERSEDED 2026-07-10 — see local-state doc) |
 

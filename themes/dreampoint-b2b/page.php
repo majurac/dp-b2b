@@ -14,7 +14,7 @@
 
 get_header();
 ?>
-<main id="primary-content" class="site-main">
+<main<?php echo dreampoint_b2b_header_renders_main_target() ? '' : ' id="primary-content" tabindex="-1"'; ?> class="site-main">
     <?php the_content(); ?>
 </main>
 <?php

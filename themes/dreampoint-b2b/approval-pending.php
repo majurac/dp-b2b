@@ -26,7 +26,7 @@ if ( $dp_success_notices ) {
 get_header();
 ?>
 
-<main id="primary-content" class="login-register login-register--pending">
+<main id="primary-content" class="login-register login-register--pending" tabindex="-1">
     <div class="container">
         <div class="lr-content">
             <div id="lr-logo">

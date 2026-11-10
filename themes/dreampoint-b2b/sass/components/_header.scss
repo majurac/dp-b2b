@@ -1158,3 +1158,8 @@ html #moove_gdpr_cookie_info_bar.moove-gdpr-dark-scheme .moove-gdpr-info-bar-con
     color: $dp-color-text-primary;
     box-shadow: 0 0 0 2px $dp-color-bg-primary, 0 0 0 4px $dp-color-text-primary;
 }
+// The skip-link target is a non-interactive container made focusable with tabindex="-1" so keyboard
+// focus really moves there; it must not show a focus ring after activation.
+#primary-content[tabindex="-1"]:focus {
+    outline: 0;
+}

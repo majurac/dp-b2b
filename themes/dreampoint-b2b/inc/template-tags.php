@@ -174,6 +174,16 @@ function dreampoint_b2b_is_quick_order_page(): bool {
 }
 
 /**
+ * True when header.php renders the skip-link target (`<div class="inner-page" id="primary-content">`).
+ * Page templates with their own <main> print that id only when this is false (standalone auth screens and the
+ * guest login render no header wrapper), so a page never has two #primary-content elements.
+ */
+function dreampoint_b2b_header_renders_main_target(): bool {
+	return dreampoint_b2b_is_quick_order_page()
+		|| ( ! dreampoint_b2b_is_standalone_auth_page() && ( ! is_account_page() || is_user_logged_in() ) );
+}
+
+/**
  * Returns the Quick Order page URL. Guards against the plugin being inactive —
  * DP_Quick_Order_Config may not exist if dp-b2b-quick-order is deactivated.
  *

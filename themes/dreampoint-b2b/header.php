@@ -76,8 +76,8 @@ $company_phone = get_field('company_phone', 'option') ?: '';
             }
             ?>
         </div>
-        <div class="inner-page inner-page--quick-order" id="primary-content">
-    <?php elseif ( ! $is_standalone_auth && ( ! is_account_page() || is_user_logged_in() ) ) : ?>
+        <div class="inner-page inner-page--quick-order" id="primary-content" tabindex="-1">
+    <?php elseif ( dreampoint_b2b_header_renders_main_target() ) : ?>
         <style>@media (max-width: 767px) {body {padding-bottom: 72px;}}</style>
         <div class="menu-overlay" aria-hidden="true"></div>
 
@@ -359,7 +359,7 @@ $company_phone = get_field('company_phone', 'option') ?: '';
             ?>
         </div>
 
-        <div class="inner-page" id="primary-content">
+        <div class="inner-page" id="primary-content" tabindex="-1">
             <?php
             /**
              * Inner Page Heading

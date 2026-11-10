@@ -5,6 +5,13 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## 2026-11-10 (A8 payment rules cleanup) - IMPLEMENTED AND LOCALLY CHECKED; COMMITTED FOR STAGING DEPLOY; NOT OWNER-VERIFIED
+
+Owner-approved removal of the obsolete shipping-method-specific payment restrictions in `inc/checkout-logic.php` (+1/-99 lines): `dreampoint_b2b_payment_rules()` (`pickup_location` / `local_pickup` -> `bacs`, `gls` -> `stripe` / `paypal`), the resolver `dreampoint_b2b_resolve_allowed_gateways()`, the `woocommerce_available_payment_gateways` filter and the two validations that used the resolver (classic `woocommerce_checkout_process`, Blocks `woocommerce_store_api_checkout_update_order_from_request`). No other consumer existed in the theme; no documented requirement (ADR-037, frozen checkout-logic) called for them. Billing -> shipping prefill and the T7.1/T7.2 billing master protection are untouched. No replacement filter and no hardcoded BACS restriction was added (ADR-037: BACS is the only intended gateway).
+- **Config alignment:** staging has only `bacs` enabled (`cod` and `cheque` disabled). Localhost had `cod` enabled; `woocommerce_cod_settings.enabled` was changed `yes` -> `no` locally (every other setting untouched), so localhost now matches staging. Staging payment settings were NOT modified.
+- **Local checks (Blocks checkout, no order submitted):** GLS (`flat_rate:2`) and pickup (`pickup_location:0`) both offer only BACS (preselected), no notices, console 0 errors. Observed before the config change: removing the filter alone exposed COD on pickup because COD was enabled locally; this does not apply to staging (COD disabled).
+- **Remaining limitations:** no authenticated staging browser check of checkout; a real BACS order was not placed; if COD is ever re-enabled it will no longer be hidden on pickup. Owner verification pending.
+
 ## 2026-11-10 (C4 closure + unused brand_color field) - C4 CLOSED - OWNER VERIFIED (2026-11-10); `brand_color` ACF field removed from the JSON definition (not yet committed/deployed)
 
 The project owner visually verified the C4 brand detail hero on staging (commit `3d8b3a5`, staging HEAD `3d8b3a5`). This supersedes the "staging verification result not yet recorded" wording of the C4 entry below. Not claimed: automated tests; verification = owner visual confirmation only.

@@ -1688,6 +1688,10 @@ Capabilities added without a parallel system: `.button--s` (24px), `.button--des
 
 ---
 
+### ADR-022 addendum (2026-11-10) - Shop Brand CTA removed from the brand detail hero (C4, owner decision)
+
+The owner revised the earlier decision to keep the Shop Brand CTA (`brand-hero.php`, `button-xl`) in the brand detail hero: Figma BR-02 (`11148:39940`) is authoritative for the hero content, and it contains no button and no brand logo. The CTA and the brand logo (with its light tile) were removed from the hero markup and styles (not hidden). The brand name is the visible H1 inside the hero panel (Montserrat 700 40/49, white; 32/40 below 768 px); the `.inner-heading` banner above the hero no longer renders an H1 on brand detail pages (breadcrumb and `intro_text_brands` stay). The earlier statements that `brand-hero.php` "keeps `button-xl`" / "Shop Brand CTA deliberately left unchanged" remain as history and are superseded for that one CTA. Legacy callers of `button-primary` / `button-outline` are unaffected.
+
 ## ADR-023 — Toastify add-to-cart notice: keep DreamPoint's native-WooCommerce integration; no Suplementi migration
 
 **Date:** 2026-10-09

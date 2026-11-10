@@ -5,6 +5,16 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## 2026-11-10 (C4 brand detail hero) - IMPLEMENTED AND LOCALLY QA-CHECKED; COMMITTED FOR STAGING DEPLOY (staging result recorded in the closure entry that follows the deploy)
+
+C4 (brand detail hero, Figma BR-02 `11148:39940`) is implemented and QA-checked locally (1440 / 768-1024 / 390 px, representative brands with and without a hero photo). Committed together with the staging deploy; the staging smoke-test result is NOT part of this entry.
+- **Files:** `sass/pages/brands.scss` (hero block `#brand-single`), generated `css/pages/brands.css`, `template-parts/brand-hero.php`, `header.php` (one `elseif (is_tax('product_brand'))` branch that skips the banner H1).
+- **Layout:** solid black panel (`$dp-color-bg-footer`, #000 as drawn in Figma), 429 px (35.75 %) at 1440 on the left with the brand name H1 (Montserrat 700 40/49, white; 32/40 below 768 px) and the description (16/20); photo fills the rest; hero height is content-driven with a 416 px minimum on desktop (long descriptions make it taller, owner-approved); 45 % panel at 768-991 px; below 768 px photo (300 px) above the panel; no diagonal clip. Brands without a hero photo: the panel spans the container width.
+- **Heading structure:** exactly one H1 (the brand name in the panel); the large `.inner-heading` H1 banner is not rendered on brand detail pages; breadcrumb kept; `intro_text_brands` kept (scoped style `body.tax-product_brand .inner-heading .intro-text`, empty locally so only checked through a temporary DOM element).
+- **Owner revisions (history):** first the logo (on a light tile) and the Shop Brand CTA (light variant) were kept; the final owner decision follows Figma: logo and CTA removed from the markup and styles, brand name as the visible H1 (see decisions.md ADR-022 addendum 2026-11-10).
+- **Remaining differences from Figma:** hero is taller than 416 px for long descriptions; panel fill is pure black (matches the Figma sample, not the `#0d121c` brand token); mobile has no Figma frame (pragmatic stacking); description wraps by width, not by Figma's manual line breaks.
+- **Not verified:** staging render, real hero photos/descriptions on staging, brands whose logo was the only content (logo no longer shown), `intro_text_brands` with real content.
+
 ## 2026-11-10 (final closure) - X21, D6, X6 and Orders e-mail-verification notice CLOSED - OWNER VERIFIED - documentation only
 
 The project owner visually verified all four items on staging (commits `888393d`, `c63def3`, `a3a6eb4`; staging HEAD `a3a6eb4`). Documentation-only: no code or runtime change. This entry supersedes every "NOT VERIFIED" limitation in the entry below for X6 (reset-password visual check, staging Orders notice and staging render of login/registration), which are now owner-confirmed; the entry below is kept as history. Still not claimed: automated or keyboard-test records.

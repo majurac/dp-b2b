@@ -285,20 +285,48 @@
     }
 }
 
+// Brand detail hero (Figma BR-02 11148:39940): 1200x416 at 1440, solid black 429px panel (35.75% of the
+// container) on the left with the brand name (H1) and description, photo fills the rest (no logo, no CTA).
+// Below 768px the photo stacks above the panel; no fixed height.
 #brand-single {
     padding-top: 24px;
     .brand-hero {
-        .brand-hero-slider {
+        .container {
+            position: relative;
             @include bp(sm-up) {
-                padding-left: 208px;
+                display: flex;
+                flex-direction: row-reverse; // photo is first in the DOM, panel on the left
+                align-items: stretch;
+            }
+            // Without a hero photo the panel spans the whole container instead of sitting in a 429px box
+            &:not(:has(.brand-hero-slider img)) .slide-content {
+                flex: 1 1 100%;
+                max-width: none;
+            }
+        }
+        .brand-hero-slider {
+            position: relative;
+            min-width: 0;
+            @include bp(sm-up) {
+                flex: 1 1 auto;
+                min-height: 416px;
             }
             img {
+                display: block;
                 width: 100%;
                 object-fit: cover;
-                aspect-ratio: 900 / 612;
+                @include bp(sm-up) {
+                    position: absolute;
+                    inset: 0;
+                    height: 100%;
+                }
                 @include bp(sm-down) {
                     height: 300px;
                 }
+            }
+            // No suitable hero photo: no empty photo column, the panel spans the full width
+            &:not(:has(img)) {
+                display: none;
             }
         }
         .nav-btns {
@@ -321,69 +349,76 @@
                     }
                 }
             }
-           
-        }
-        .container {
-            position: relative;
-            
         }
         .slide-content {
-            
+            background: $dp-color-bg-footer; // #000000, verified against the Figma panel fill
+            color: $dp-color-text-inverse;
             @include bp(sm-up) {
-                max-width: 497px;
-                width: 100%;
-                height: auto;
-                clip-path: polygon(100% 0, 96% 50%, 100% 100%, 0 100%, 0 0);
-                @include centre(y);
+                flex: 0 0 35.75%; // 429px of the 1200px container
+                max-width: 429px;
             }
-            @include bp(sm-down) {
-                position: relative;
+            // 768-991px: the container is ~706px, so a wider panel keeps the text column readable
+            @include bp(md) {
+                flex-basis: 45%;
+                max-width: none;
             }
             .slide-content-in {
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
-                gap: 40px;
+                align-items: flex-start;
+                gap: 24px;
                 height: 100%;
-                z-index: 1;
-                position: relative;
+                padding: 24px 16px;
                 @include bp(sm-up) {
-                    padding: 70px 64px 70px 46px;
+                    padding: 40px clamp(24px, 3.7vw, 53px); // 53px at 1440, tighter on narrower desktops
                 }
             }
-            @include bp(md) {
-                max-width: 520px;
-            }
-            @include bp(sm-down) {
-                padding: 16px;
-            }
-            &:before {
-                bottom: 0;
-                left: -47px;
-                content: '';
-                display: block;
-                position: absolute;
-                width: 432px;
-                height: 628px;
-                clip-path: polygon(100% 0, 96% 50%, 100% 100%, 0 100%, 0 0);
-                @include bp(sm-down) {
-                    display: none;
-                }
-            }
+            // Figma BR-02: brand name as the visible H1 (Montserrat 700 40/49, white)
             h1 {
-                display: none;
+                margin: 0;
+                font-family: $dp-font-body;
+                font-weight: 700;
+                font-size: 40px;
+                line-height: 49px;
+                letter-spacing: 0;
+                text-transform: none;
+                color: $dp-color-text-inverse;
+                overflow-wrap: anywhere;
+                @include bp(sm-down) {
+                    font-size: 32px;
+                    line-height: 40px;
+                }
             }
-            .brand-logo-wrapper {
-                max-width: 200px;
-            }
-            p {
-                @include paragraph-large;
-                font-weight: 400;
-                color: $text-primary;
-            }
-            .button {
-                align-self: start;
+            .brand-description {
+                p {
+                    @include paragraph-large;
+                    font-size: 16px;
+                    line-height: 20px;
+                    letter-spacing: 0;
+                    font-weight: 400;
+                    color: $dp-color-text-inverse;
+                    + p {
+                        margin-top: 12px;
+                    }
+                }
             }
         }
+    }
+}
+// Brand single: the large H1 banner is gone (the H1 is the hero panel title), so the optional
+// intro text (ACF option intro_text_brands) no longer follows an h1 and needs the same look directly.
+body.tax-product_brand .inner-heading .intro-text {
+    margin-top: 16px;
+    max-width: 380px;
+    font-family: $dp-font-body;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 24px;
+    color: $dp-color-text-secondary;
+    p {
+        margin: 0;
+        font: inherit;
+        color: inherit;
     }
 }

@@ -401,6 +401,8 @@ $company_phone = get_field('company_phone', 'option') ?: '';
                         } elseif (is_category()) {
                             echo '<h1>' . esc_html(single_cat_title('', false)) . '</h1>';
 
+                        } elseif (is_tax('product_brand')) {
+                            // Brand single: the one H1 (brand name) is rendered inside the brand hero panel.
                         } elseif (is_tax()) {
                             echo '<h1>' . esc_html(single_term_title('', false)) . '</h1>';
 

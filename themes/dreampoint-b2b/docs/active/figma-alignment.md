@@ -188,7 +188,7 @@ The client confirmed that wishlist functionality is no longer required and the s
 - Staging validation: final staging HEAD `56ce5f17fe6de728e51cd35f905843979e5919a3`. Primary/Secondary L/M/XL, hover/pressed/focus-visible and disabled verified in a real browser; login and lost-password (XL), contact (L), mini-cart (M), PDP/cart (XL), My Account (L), search dropdown (M); no new page-level overflow at 1440/390/360/320; only the known console 404s.
 
 ### Outstanding (recorded, not resolved)
-- Shop Brand CTA (`brand-hero.php`, class `button-xl`, no CSS): no Figma instance in BR-01/BR-02 and no brand page rendered it on staging; it renders as the default L Primary. Figma size unresolved, non-blocking.
+- Shop Brand CTA (`brand-hero.php`, class `button-xl`, no CSS): no Figma instance in BR-01/BR-02 and no brand page rendered it on staging; it renders as the default L Primary. Figma size unresolved, non-blocking. **Superseded 2026-11-10 (C4):** the Shop Brand CTA and the brand logo were removed from the brand hero by owner decision (Figma BR-02 has neither); see decisions.md ADR-022 addendum.
 - Not rendered on staging, hence NOT runtime-validated: hero block, about block, blog card hover (`_content.scss` card `.button` hover is still the legacy olive and may differ from Figma), WooCommerce notice buttons (`woocommerce.scss` notice `.button` keeps its own height/padding).
 - Mobile `Filtriraj` (`header-shop-archive.php`, `--outline --sm`) is 32px high; touch-target adequacy still to be checked. Other `--sm` consumers without a Figma frame (search dropdown, my-address "Izmijeni", order-details) are now M by semantics.
 - Unmapped plain `.button` consumers (thank-you, orders "Prikazi", cart update/coupon) now render as L by semantics without a Figma frame.

@@ -22,10 +22,6 @@ $current_brand = get_queried_object();
 $brand_id       = $current_brand->term_id;
 $taxonomy_slug  = $current_brand->taxonomy;
 
-// Get brand logo directly from WooCommerce Brands thumbnail option
-$brand_logo_id  = get_term_meta( $brand_id, 'thumbnail_id', true );
-$brand_logo_url = $brand_logo_id ? wp_get_attachment_url( $brand_logo_id ) : '';
-
 // Get brand description
 $brand_description = term_description( $brand_id, $taxonomy_slug );
 
@@ -55,15 +51,11 @@ $main_brand_image_id   = is_array( $main_brand_image_acf ) && isset( $main_brand
             <div class="slide-content">
                 <div class="slide-content-in">
                     <h1><?php echo esc_html( $current_brand->name ); ?></h1>
-                    <?php if ( $brand_logo_url ) : ?>
-                        <div class="brand-logo-wrapper"><img src="<?php echo esc_url( $brand_logo_url ); ?>" alt="<?php echo esc_attr( $current_brand->name ); ?>" class="brand-logo"></div>
-                        <?php endif; ?>
                          <?php if ( $brand_description ) : ?>
                             <div class="brand-description">
                                 <?php echo wp_kses_post( $brand_description ); // Use wp_kses_post for safe HTML output ?>
                             </div>
                         <?php endif; ?>
-                    <a href="#products-page" class="button button-xl"><?php esc_html_e( 'Shop Brand', 'dreampoint-b2b' ); ?></a>
                 </div>
             </div>
         </div>

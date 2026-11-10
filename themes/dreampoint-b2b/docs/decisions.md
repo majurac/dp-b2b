@@ -2212,3 +2212,76 @@ Restore: `woocommerce_flat_rate_2_settings.title` = "Fiksna cijena dostave"; `wo
 - **X21** keyboard focus on product image/title links stays OPEN (pre-existing global `a:focus` reset; roadmap X21).
 - Supplier media: the three 300x300 originals need higher-resolution sources; no larger derivative can restore missing detail; images not modified.
 - Optional future optimization: eager and lazy cards select different candidates; `sizes`/transfer efficiency may be evaluated later only if real performance evidence justifies it. No implementation task created.
+
+## Appendix — Visibility Debugging Caveats
+
+Relocated verbatim from the theme `CLAUDE.md` (§ Visibility System Status) on 2026-11-10 to reduce always-loaded instruction size; `CLAUDE.md` keeps the condensed invariants.
+
+### Debugging Caveat — get_terms() on product_brand
+
+`product_brand` queries are filtered by this visibility engine through the `get_terms` filter (`inc/visibility/class-query-filter.php` → `filter_brand_terms()`). WP Admin and WP-CLI can therefore legitimately return different term counts for the same taxonomy.
+
+- An unauthenticated WP-CLI context (`get_current_user_id() = 0`) may receive an empty `product_brand` term set even when the taxonomy actually contains terms — a logged-in admin (`manage_options`) bypasses the filter and sees the full set.
+- This is expected behavior caused by the visibility layer, not missing taxonomy data or a wrong database.
+- When debugging Brands functionality, verify the execution context (logged-in admin vs. anonymous/CLI vs. a specific visibility test user) before assuming `product_brand` terms do not exist.
+
+Rule of thumb: an empty `product_brand` result is a visibility-context signal, not proof of missing data.
+
+### Debugging Caveat — multiple `_price` postmeta rows on variable products
+
+`COUNT(_price) > 1` for a `product` post is **not** corruption by itself — check `product_type` before treating it as an anomaly.
+
+- **Variable parent:** WooCommerce (`WC_Product_Variable_Data_Store_CPT::sync_price()`, WC 11.0.1) stores **one `_price` postmeta row per distinct visible-variation price**, sorted, and intentionally deletes the parent's `_regular_price` / `_sale_price`. Multiple `_price` rows plus absent parent regular/sale price is the correct native state.
+- **Simple product:** multiple `_price` rows may be anomalous and worth investigating.
+- Full analysis (and why a 2026-09 audit briefly misclassified 16 Apros variable parents as corrupted): `docs/decisions.md` ADR-006.
+
+## Appendix — ACF Governance (original CLAUDE.md text)
+
+Relocated verbatim from the theme `CLAUDE.md` on 2026-11-10 to reduce always-loaded instruction size; `CLAUDE.md` keeps the condensed mandatory rules. Original heading levels below are unchanged.
+
+## ACF Governance
+
+### ACF Governance Standard
+
+- All active editable field groups must be tracked in `acf-json/` and committed to Git
+- ACF Pro GUI remains the primary editing interface — `acf-json/` provides Git protection and reproducibility
+- New field groups must be exported to `acf-json/` immediately after creation in the GUI
+- DB-only field groups require explicit justification — no silent accumulation
+- Orphaned or unused field groups must not be retained without purpose — remove them
+- Governance operations (export, deletion, sync) must not modify runtime behavior
+
+### Field Group Creation Doctrine
+
+- Do not introduce new permanent Theme Field Groups as JSON-only definitions. Always create/edit through the ACF admin UI, or import an existing JSON definition using ACF's native sync mechanism (`acf_import_field_group()` — the same call the admin "Sync available" action triggers). A hand-authored JSON file with no matching DB post (`ID = 0`) is a temporary/incomplete state, never the intended end state.
+- Every persistent field group must end up with BOTH: a `acf-field-group` database post AND a matching file in `acf-json/`. The JSON file remains the canonical, version-controlled source; the database post is the editable mirror the ACF admin UI operates on.
+- After introducing or syncing a field group, verify: it appears in **Custom Fields → Field Groups** without a permanent "Sync available" badge, Local JSON sync is functioning correctly, and no other field group targets the same location (duplicate) or exists without a matching JSON/DB counterpart (orphan).
+- Known pre-existing exceptions (JSON-only, `ID = 0`, not to be "fixed" proactively): `group_dp_bucket_fields` (Customer Bucket Rules — part of the frozen visibility system; do not touch without explicit request) and `group_685f00b0c4d10` (Page Intro Text). `group_udp_product_bundle` is registered via PHP by a plugin (`local => php`, not JSON) and is entirely out of theme scope.
+
+### JSON / DB Mirror Must Stay In Sync BEFORE Editing A Group In The Admin (2026-10-14 incident)
+
+Saving a field group in the WordPress ACF editor exports the DATABASE definition over `acf-json/<group>.json`. If the DB mirror is stale (fields added only through JSON never reach it), the save silently deletes those fields from the JSON (General Settings lost 9 definitions, `copyright` config reverted). Before any admin edit of a group: confirm the DB mirror equals the canonical JSON (no "Sync available", compare field counts / definitions). Prefer editing field definitions in JSON via Git. Staging also needs a clean working tree (`git status`) or the next pull fails. The DB mirror is aligned with a by-ID update of the existing group post (never `acf_import_field_group()` by key: it creates a duplicate group and duplicate field posts). Details: `docs/active/figma-alignment.md` section 32.
+
+### Local JSON Priority
+
+When a field group already exists in `acf-json/`, ACF treats the local JSON file as authoritative.
+
+Observed behavior:
+- `acf_get_field_group( $key )` returns an object with `ID = 0` when a local JSON version exists
+- export logic that relies on a database-backed field group will produce incomplete exports (empty `fields` array)
+- this is expected ACF behavior, not a bug
+
+Operational rule — before any field-group export, sync validation, or governance operation:
+1. Check whether the field group already exists in `acf-json/`
+2. If yes — load by post ID (not by key): `acf_get_field_group( $post_id )`
+3. Pass the post ID to `acf_get_fields()` to retrieve fields from the database
+4. Do not assume `acf_get_field_group( $key )` represents a database-backed object
+
+### Updating Existing Theme Field Groups
+
+- When updating an existing permanent Theme Field Group, never rely on `acf_get_field_group( $key )` when Local JSON is enabled.
+- With Local JSON enabled, `acf_get_field_group( $key )` may resolve to the JSON-derived object (`ID = 0`) instead of the real database-backed Field Group.
+- Updates must always target the actual database-backed Field Group rather than the Local JSON-derived object.
+- After the database update, allow ACF to regenerate/synchronize the Local JSON — do not hand-edit the JSON file to reflect the change.
+- This prevents accidental duplicate Field Groups and preserves the DB-first → Local JSON mirror doctrine.
+
+This rule was introduced after a real-world duplicate Field Group incident on the DreamPoint B2B project: updating an existing Field Group by key (instead of by post ID) caused ACF to treat the Local JSON-derived object as authoritative, fail to recognize the existing database post, and create a second, empty, duplicate Field Group post under the same key. Future sessions should treat this as the reason the by-post-ID rule exists, not an abstract precaution.

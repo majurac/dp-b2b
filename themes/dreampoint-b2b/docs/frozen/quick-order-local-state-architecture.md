@@ -445,3 +445,213 @@ Staging-accepted at plugin v1.0.29. Full record, validation order and acceptance
 - **Confirmed failure ≠ ambiguous request failure:** a chunk without a usable response (network, any non-2xx, malformed body, or the configured 10 s timeout, now enforced via `AbortController`) leaves its rows untouched (quantity kept, no row error) and shows one global "Nismo mogli potvrditi je li dodano…" message; no auto-retry. **Residual risk (documented, not solved):** because the sync is additive, a manual retry after a lost-but-applied response would add twice. No idempotency / stock reservation was added.
 - **Server:** variation ownership (`get_parent_id() === product_id`) is verified before any stock is read; hidden/nonexistent/unpublished/mismatched all return the same `product_unavailable`; an existing cart line now respects current stock (`out_of_stock` / `quantity_unavailable`). No stock figure in any client contract.
 - **Still out of scope:** Excel Import, mobile QO design, WBW `orderby` drop.
+
+## Appendix A — Original CLAUDE.md "Quick Order System (Phase 6)" rules (relocated 2026-11-10, verbatim)
+
+Relocated unchanged from the theme `CLAUDE.md` to reduce the always-loaded instruction size. `CLAUDE.md` keeps the condensed standing invariants; this appendix is the full original wording and remains authoritative detail. Heading levels below are original (`###` sub-sections).
+
+## Quick Order System (Phase 6)
+
+Dreampoint B2B will include a CUSTOM Quick Order system.
+Do NOT propose third-party Quick Order plugins.
+
+Architecture goals:
+- optimized for large B2B orders
+- fast bulk ordering
+- minimal page reloads
+- WooCommerce-native cart compatibility
+- scalable for large catalogs and variations
+
+IMPORTANT:
+Quick Order is NOT a normal WooCommerce archive.
+Treat it as a specialized B2B ordering interface.
+
+### UX Goals
+
+- extremely fast ordering
+- inline quantity editing
+- fast filtering
+- minimal clicks
+- mobile usability
+- stable performance with large catalogs
+
+Expected layout:
+- table/grid-based ordering interface
+- sticky cart summary/footer
+- inline quantity controls
+- variation selection inline
+- stock visibility inline
+- price visibility inline
+
+Potential future support:
+- matrix ordering
+- SKU quick search
+- repeat previous orders
+- saved order templates
+- favorites/frequent products
+
+### Technical Rules
+
+Use WooCommerce native cart/session as source of truth.
+
+DO NOT:
+- build custom cart persistence
+- replace WooCommerce cart logic
+- create custom PHP session handling
+- create custom cookie-based cart systems
+
+Allowed:
+- localStorage only as temporary frontend UX cache
+- frontend JS state for debounce batching
+- AJAX synchronization with WooCommerce cart
+
+### Cart Synchronization
+
+Preferred architecture:
+- frontend state stores temporary quantities
+- quantities sync to WooCommerce cart via AJAX
+- debounce/throttle requests during rapid quantity changes
+
+IMPORTANT:
+Checkout, totals, shipping, taxes, coupons, and payment methods must continue using native WooCommerce behavior.
+
+### Variation Handling
+
+CRITICAL — Do NOT use `get_available_variations()` on large product collections.
+Reason: huge memory usage and slow response times.
+
+Preferred approach:
+- lightweight variation payloads
+- precomputed variation data
+- optimized REST/API responses
+- minimal variation hydration
+
+### Filtering
+
+Quick Order filtering must remain compatible with:
+- visibility system
+- bucket rules
+- brand/category restrictions
+- custom offer visibility
+
+Do NOT bypass visibility filtering.
+
+### Performance
+
+Quick Order must be optimized for large catalogs, large variation counts, and many simultaneous quantity changes.
+
+Prefer:
+- paginated or lazy-loaded product lists
+- lightweight API responses
+- debounce AJAX sync
+- minimal DOM re-rendering
+
+Avoid:
+- loading entire catalogs at once
+- giant variation payloads
+- unnecessary WooCommerce object hydration
+- repeated full cart refreshes
+
+### Architecture Direction
+
+Preferred future architecture:
+- custom REST API endpoint(s) (`/wp-json/dreampoint-b2b/v1/quick-order`)
+- custom frontend rendering
+- WooCommerce-native backend/cart
+- progressive enhancement approach
+
+IMPORTANT:
+Do not implement major architecture changes unless explicitly requested.
+
+### Scope Protection
+
+Visibility system is DONE. Checkout logic is DONE.
+
+Do NOT:
+- redesign checkout
+- redesign visibility system
+- modify bucket/access logic
+- introduce new permission architecture
+
+Quick Order must integrate with existing systems, not replace them.
+Before modifying checkout, payment, or visibility logic — read `docs/frozen/checkout-logic.md`.
+
+### WooCommerce Blocks Compatibility
+
+Quick Order must remain compatible with:
+- WooCommerce Cart Block
+- WooCommerce Checkout Block
+- Store API
+
+Prefer:
+- Store API aware architecture
+- WooCommerce-native cart operations
+- compatibility with block-based checkout
+
+Avoid:
+- legacy fragment refresh dependencies
+- assumptions tied to classic shortcode checkout
+- mini-cart fragment hacks
+- legacy WooCommerce AJAX fragment patterns
+
+IMPORTANT:
+Existing checkout logic already supports WooCommerce Blocks and Store API behavior.
+Quick Order must integrate with the current checkout architecture instead of introducing parallel cart logic.
+
+### Simplicity Rule
+
+Quick Order should remain operationally simple.
+
+Prefer:
+- incremental improvements
+- minimal moving parts
+- WooCommerce-native behavior
+- straightforward architecture
+- simple debugging and maintainability
+
+Avoid:
+- microservice-style architecture
+- unnecessary abstraction layers
+- premature optimization
+- frontend state managers unless clearly needed
+- Redux-style architecture
+- event bus systems
+- CQRS patterns
+- repository/service over-abstraction
+- "domain-driven" architecture for standard WooCommerce flows
+
+IMPORTANT:
+This is a WooCommerce B2B project, not a SaaS platform.
+Keep architecture pragmatic and maintainable.
+
+### API Performance Rules
+
+Quick Order endpoints must be optimized for:
+- low memory usage
+- minimal database queries
+- minimal payload size
+
+Prefer:
+- selective field responses
+- raw/lightweight data structures
+- batched updates where appropriate
+- minimal WooCommerce object hydration
+- optimized variation payloads
+
+Avoid:
+- returning full WooCommerce product objects
+- recursive variation hydration
+- unnecessary meta loading
+- calling `wc_get_product()` in large product loops
+- large unpaginated variation payloads
+
+IMPORTANT:
+Calling `wc_get_product()` or `get_available_variations()` across large product collections can cause:
+- memory explosion
+- Redis/object cache churn
+- excessive object hydration
+- slow AJAX/API responses
+
+Quick Order must remain performant on large B2B catalogs with high variation counts.
+
+---

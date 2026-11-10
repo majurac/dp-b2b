@@ -99,23 +99,10 @@ Visibility behavior has been verified for:
 IMPORTANT:
 Do not touch visibility code unless explicitly requested.
 
-### Debugging Caveat — get_terms() on product_brand
+### Debugging Caveats (full original text: `docs/decisions.md` § "Appendix — Visibility Debugging Caveats")
 
-`product_brand` queries are filtered by this visibility engine through the `get_terms` filter (`inc/visibility/class-query-filter.php` → `filter_brand_terms()`). WP Admin and WP-CLI can therefore legitimately return different term counts for the same taxonomy.
-
-- An unauthenticated WP-CLI context (`get_current_user_id() = 0`) may receive an empty `product_brand` term set even when the taxonomy actually contains terms — a logged-in admin (`manage_options`) bypasses the filter and sees the full set.
-- This is expected behavior caused by the visibility layer, not missing taxonomy data or a wrong database.
-- When debugging Brands functionality, verify the execution context (logged-in admin vs. anonymous/CLI vs. a specific visibility test user) before assuming `product_brand` terms do not exist.
-
-Rule of thumb: an empty `product_brand` result is a visibility-context signal, not proof of missing data.
-
-### Debugging Caveat — multiple `_price` postmeta rows on variable products
-
-`COUNT(_price) > 1` for a `product` post is **not** corruption by itself — check `product_type` before treating it as an anomaly.
-
-- **Variable parent:** WooCommerce (`WC_Product_Variable_Data_Store_CPT::sync_price()`, WC 11.0.1) stores **one `_price` postmeta row per distinct visible-variation price**, sorted, and intentionally deletes the parent's `_regular_price` / `_sale_price`. Multiple `_price` rows plus absent parent regular/sale price is the correct native state.
-- **Simple product:** multiple `_price` rows may be anomalous and worth investigating.
-- Full analysis (and why a 2026-09 audit briefly misclassified 16 Apros variable parents as corrupted): `docs/decisions.md` ADR-006.
+- `product_brand` terms are filtered by the visibility engine (`get_terms` filter, `inc/visibility/class-query-filter.php` → `filter_brand_terms()`). Unauthenticated WP-CLI (`get_current_user_id() = 0`) can legitimately get an empty set; a logged-in `manage_options` admin bypasses the filter. An empty `product_brand` result is a visibility-context signal, not proof of missing data — verify the execution context (admin / anonymous-CLI / a visibility test user) first.
+- `COUNT(_price) > 1` on a variable parent is native WooCommerce state (one `_price` row per distinct visible-variation price; parent `_regular_price`/`_sale_price` intentionally absent), not corruption — check `product_type` first. Multiple `_price` rows on a simple product may be anomalous. Analysis: `docs/decisions.md` ADR-006.
 
 ---
 
@@ -285,258 +272,27 @@ ignore it completely.
 
 ## ACF Governance
 
-### ACF Governance Standard
+Full original rules and incident detail (verbatim): `docs/decisions.md` § "Appendix — ACF Governance (original CLAUDE.md text)". Mandatory rules:
 
-- All active editable field groups must be tracked in `acf-json/` and committed to Git
-- ACF Pro GUI remains the primary editing interface — `acf-json/` provides Git protection and reproducibility
-- New field groups must be exported to `acf-json/` immediately after creation in the GUI
-- DB-only field groups require explicit justification — no silent accumulation
-- Orphaned or unused field groups must not be retained without purpose — remove them
-- Governance operations (export, deletion, sync) must not modify runtime behavior
-
-### Field Group Creation Doctrine
-
-- Do not introduce new permanent Theme Field Groups as JSON-only definitions. Always create/edit through the ACF admin UI, or import an existing JSON definition using ACF's native sync mechanism (`acf_import_field_group()` — the same call the admin "Sync available" action triggers). A hand-authored JSON file with no matching DB post (`ID = 0`) is a temporary/incomplete state, never the intended end state.
-- Every persistent field group must end up with BOTH: a `acf-field-group` database post AND a matching file in `acf-json/`. The JSON file remains the canonical, version-controlled source; the database post is the editable mirror the ACF admin UI operates on.
-- After introducing or syncing a field group, verify: it appears in **Custom Fields → Field Groups** without a permanent "Sync available" badge, Local JSON sync is functioning correctly, and no other field group targets the same location (duplicate) or exists without a matching JSON/DB counterpart (orphan).
-- Known pre-existing exceptions (JSON-only, `ID = 0`, not to be "fixed" proactively): `group_dp_bucket_fields` (Customer Bucket Rules — part of the frozen visibility system; do not touch without explicit request) and `group_685f00b0c4d10` (Page Intro Text). `group_udp_product_bundle` is registered via PHP by a plugin (`local => php`, not JSON) and is entirely out of theme scope.
-
-### JSON / DB Mirror Must Stay In Sync BEFORE Editing A Group In The Admin (2026-10-14 incident)
-
-Saving a field group in the WordPress ACF editor exports the DATABASE definition over `acf-json/<group>.json`. If the DB mirror is stale (fields added only through JSON never reach it), the save silently deletes those fields from the JSON (General Settings lost 9 definitions, `copyright` config reverted). Before any admin edit of a group: confirm the DB mirror equals the canonical JSON (no "Sync available", compare field counts / definitions). Prefer editing field definitions in JSON via Git. Staging also needs a clean working tree (`git status`) or the next pull fails. The DB mirror is aligned with a by-ID update of the existing group post (never `acf_import_field_group()` by key: it creates a duplicate group and duplicate field posts). Details: `docs/active/figma-alignment.md` section 32.
-
-### Local JSON Priority
-
-When a field group already exists in `acf-json/`, ACF treats the local JSON file as authoritative.
-
-Observed behavior:
-- `acf_get_field_group( $key )` returns an object with `ID = 0` when a local JSON version exists
-- export logic that relies on a database-backed field group will produce incomplete exports (empty `fields` array)
-- this is expected ACF behavior, not a bug
-
-Operational rule — before any field-group export, sync validation, or governance operation:
-1. Check whether the field group already exists in `acf-json/`
-2. If yes — load by post ID (not by key): `acf_get_field_group( $post_id )`
-3. Pass the post ID to `acf_get_fields()` to retrieve fields from the database
-4. Do not assume `acf_get_field_group( $key )` represents a database-backed object
-
-### Updating Existing Theme Field Groups
-
-- When updating an existing permanent Theme Field Group, never rely on `acf_get_field_group( $key )` when Local JSON is enabled.
-- With Local JSON enabled, `acf_get_field_group( $key )` may resolve to the JSON-derived object (`ID = 0`) instead of the real database-backed Field Group.
-- Updates must always target the actual database-backed Field Group rather than the Local JSON-derived object.
-- After the database update, allow ACF to regenerate/synchronize the Local JSON — do not hand-edit the JSON file to reflect the change.
-- This prevents accidental duplicate Field Groups and preserves the DB-first → Local JSON mirror doctrine.
-
-This rule was introduced after a real-world duplicate Field Group incident on the DreamPoint B2B project: updating an existing Field Group by key (instead of by post ID) caused ACF to treat the Local JSON-derived object as authoritative, fail to recognize the existing database post, and create a second, empty, duplicate Field Group post under the same key. Future sessions should treat this as the reason the by-post-ID rule exists, not an abstract precaution.
+- **Tracking:** every active editable field group lives in `acf-json/` and is committed to Git. ACF Pro GUI remains the primary editing interface; export to `acf-json/` immediately after creating a group in the GUI. DB-only groups need explicit justification; remove orphaned/unused groups. Governance operations (export, deletion, sync) must not modify runtime behavior.
+- **Creation:** never add a permanent Theme Field Group as JSON-only. Create/edit through the ACF admin UI, or import an existing JSON definition via ACF's native sync (`acf_import_field_group()`, same call as the admin "Sync available" action). A hand-authored JSON with no DB post (`ID = 0`) is a temporary state. Every persistent group must end with BOTH an `acf-field-group` DB post AND a matching `acf-json/` file (JSON = canonical, version-controlled; DB post = editable mirror). After introducing/syncing a group verify: no permanent "Sync available" badge, Local JSON sync works, no duplicate or orphan group.
+- **Known JSON-only exceptions** (`ID = 0`, do not "fix" proactively): `group_dp_bucket_fields` (Customer Bucket Rules, frozen visibility system — do not touch without explicit request) and `group_685f00b0c4d10` (Page Intro Text). `group_udp_product_bundle` is PHP-registered by a plugin (`local => php`) — out of theme scope.
+- **JSON/DB mirror before admin edits (2026-10-14 incident):** saving a group in the ACF editor exports the DB definition over `acf-json/<group>.json`; a stale DB mirror silently deletes JSON-only fields (General Settings lost 9 definitions). Before any admin edit confirm the DB mirror equals the canonical JSON (no "Sync available", compare field counts/definitions); prefer editing definitions in JSON via Git. Staging needs a clean working tree (`git status`) or the next pull fails. Align the DB mirror with a by-ID update of the existing post, never `acf_import_field_group()` by key (creates duplicate group and field posts). Details: `docs/active/figma-alignment.md` section 32.
+- **Local JSON priority / updates:** with Local JSON enabled `acf_get_field_group( $key )` returns a JSON-derived object (`ID = 0`) — expected ACF behavior. For any export, sync validation, governance operation or update: load by post ID (`acf_get_field_group( $post_id )`), pass the post ID to `acf_get_fields()`, target the real DB-backed group, never rely on the key. After the DB update let ACF regenerate the Local JSON; do not hand-edit it. Reason: a by-key update once created a second, empty, duplicate group under the same key (DreamPoint B2B incident).
 
 ---
 
-## Quick Order System (Phase 6)
+## Quick Order System
 
-Dreampoint B2B will include a CUSTOM Quick Order system.
-Do NOT propose third-party Quick Order plugins.
+Custom B2B ordering interface (not a normal WooCommerce archive). Do NOT propose third-party Quick Order plugins. Status: COMPLETE, maintenance mode (`docs/active/current-phase.md`). Canonical architecture: `docs/frozen/quick-order-local-state-architecture.md`; the full original rule text (UX goals, technical, cart sync, variation, filtering, performance, Blocks, simplicity, API rules) is preserved verbatim there in "Appendix A".
 
-Architecture goals:
-- optimized for large B2B orders
-- fast bulk ordering
-- minimal page reloads
-- WooCommerce-native cart compatibility
-- scalable for large catalogs and variations
-
-IMPORTANT:
-Quick Order is NOT a normal WooCommerce archive.
-Treat it as a specialized B2B ordering interface.
-
-### UX Goals
-
-- extremely fast ordering
-- inline quantity editing
-- fast filtering
-- minimal clicks
-- mobile usability
-- stable performance with large catalogs
-
-Expected layout:
-- table/grid-based ordering interface
-- sticky cart summary/footer
-- inline quantity controls
-- variation selection inline
-- stock visibility inline
-- price visibility inline
-
-Potential future support:
-- matrix ordering
-- SKU quick search
-- repeat previous orders
-- saved order templates
-- favorites/frequent products
-
-### Technical Rules
-
-Use WooCommerce native cart/session as source of truth.
-
-DO NOT:
-- build custom cart persistence
-- replace WooCommerce cart logic
-- create custom PHP session handling
-- create custom cookie-based cart systems
-
-Allowed:
-- localStorage only as temporary frontend UX cache
-- frontend JS state for debounce batching
-- AJAX synchronization with WooCommerce cart
-
-### Cart Synchronization
-
-Preferred architecture:
-- frontend state stores temporary quantities
-- quantities sync to WooCommerce cart via AJAX
-- debounce/throttle requests during rapid quantity changes
-
-IMPORTANT:
-Checkout, totals, shipping, taxes, coupons, and payment methods must continue using native WooCommerce behavior.
-
-### Variation Handling
-
-CRITICAL — Do NOT use `get_available_variations()` on large product collections.
-Reason: huge memory usage and slow response times.
-
-Preferred approach:
-- lightweight variation payloads
-- precomputed variation data
-- optimized REST/API responses
-- minimal variation hydration
-
-### Filtering
-
-Quick Order filtering must remain compatible with:
-- visibility system
-- bucket rules
-- brand/category restrictions
-- custom offer visibility
-
-Do NOT bypass visibility filtering.
-
-### Performance
-
-Quick Order must be optimized for large catalogs, large variation counts, and many simultaneous quantity changes.
-
-Prefer:
-- paginated or lazy-loaded product lists
-- lightweight API responses
-- debounce AJAX sync
-- minimal DOM re-rendering
-
-Avoid:
-- loading entire catalogs at once
-- giant variation payloads
-- unnecessary WooCommerce object hydration
-- repeated full cart refreshes
-
-### Architecture Direction
-
-Preferred future architecture:
-- custom REST API endpoint(s) (`/wp-json/dreampoint-b2b/v1/quick-order`)
-- custom frontend rendering
-- WooCommerce-native backend/cart
-- progressive enhancement approach
-
-IMPORTANT:
-Do not implement major architecture changes unless explicitly requested.
-
-### Scope Protection
-
-Visibility system is DONE. Checkout logic is DONE.
-
-Do NOT:
-- redesign checkout
-- redesign visibility system
-- modify bucket/access logic
-- introduce new permission architecture
-
-Quick Order must integrate with existing systems, not replace them.
-Before modifying checkout, payment, or visibility logic — read `docs/frozen/checkout-logic.md`.
-
-### WooCommerce Blocks Compatibility
-
-Quick Order must remain compatible with:
-- WooCommerce Cart Block
-- WooCommerce Checkout Block
-- Store API
-
-Prefer:
-- Store API aware architecture
-- WooCommerce-native cart operations
-- compatibility with block-based checkout
-
-Avoid:
-- legacy fragment refresh dependencies
-- assumptions tied to classic shortcode checkout
-- mini-cart fragment hacks
-- legacy WooCommerce AJAX fragment patterns
-
-IMPORTANT:
-Existing checkout logic already supports WooCommerce Blocks and Store API behavior.
-Quick Order must integrate with the current checkout architecture instead of introducing parallel cart logic.
-
-### Simplicity Rule
-
-Quick Order should remain operationally simple.
-
-Prefer:
-- incremental improvements
-- minimal moving parts
-- WooCommerce-native behavior
-- straightforward architecture
-- simple debugging and maintainability
-
-Avoid:
-- microservice-style architecture
-- unnecessary abstraction layers
-- premature optimization
-- frontend state managers unless clearly needed
-- Redux-style architecture
-- event bus systems
-- CQRS patterns
-- repository/service over-abstraction
-- "domain-driven" architecture for standard WooCommerce flows
-
-IMPORTANT:
-This is a WooCommerce B2B project, not a SaaS platform.
-Keep architecture pragmatic and maintainable.
-
-### API Performance Rules
-
-Quick Order endpoints must be optimized for:
-- low memory usage
-- minimal database queries
-- minimal payload size
-
-Prefer:
-- selective field responses
-- raw/lightweight data structures
-- batched updates where appropriate
-- minimal WooCommerce object hydration
-- optimized variation payloads
-
-Avoid:
-- returning full WooCommerce product objects
-- recursive variation hydration
-- unnecessary meta loading
-- calling `wc_get_product()` in large product loops
-- large unpaginated variation payloads
-
-IMPORTANT:
-Calling `wc_get_product()` or `get_available_variations()` across large product collections can cause:
-- memory explosion
-- Redis/object cache churn
-- excessive object hydration
-- slow AJAX/API responses
-
-Quick Order must remain performant on large B2B catalogs with high variation counts.
-
----
+Standing invariants:
+- WooCommerce native cart/session is the source of truth. NO custom cart persistence, custom PHP session handling or cookie-based cart. localStorage only as a temporary UX cache; frontend JS state for debounce batching; sync to the WC cart via debounced AJAX (no repeated full cart refreshes).
+- Checkout, totals, shipping, taxes, coupons and payment stay native and Blocks/Store API compatible. No legacy fragment refresh / mini-cart fragment hacks, no classic-shortcode-checkout assumptions, no parallel cart logic.
+- Filtering must never bypass visibility, bucket rules, brand/category restrictions or custom offer visibility. Visibility and checkout logic are DONE: do not redesign them, modify bucket/access logic or add a permission architecture. Read `docs/frozen/checkout-logic.md` before touching checkout/payment/visibility.
+- NEVER call `get_available_variations()` or `wc_get_product()` across large product collections; no full product objects, recursive variation hydration, unnecessary meta loading, whole-catalog loads or giant unpaginated variation payloads. Use lightweight/precomputed variation payloads, selective-field responses, paginated/lazy lists, batched updates, minimal DOM re-rendering.
+- Architecture: custom REST endpoint(s) (`/wp-json/dreampoint-b2b/v1/quick-order`), progressive enhancement; no major architecture change unless explicitly requested.
+- Keep it simple (WooCommerce B2B project, not a SaaS platform): no microservices, frontend state managers (Redux-style), event bus, CQRS, repository/service over-abstraction, DDD, or premature optimization.
 
 ## Quick Order — Filtering Is Native-First (ADR-015)
 

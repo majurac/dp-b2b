@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## 2026-11-10 (final closure) - X21, D6, X6 and Orders e-mail-verification notice CLOSED - OWNER VERIFIED - documentation only
+
+The project owner visually verified all four items on staging (commits `888393d`, `c63def3`, `a3a6eb4`; staging HEAD `a3a6eb4`). Documentation-only: no code or runtime change. This entry supersedes every "NOT VERIFIED" limitation in the entry below for X6 (reset-password visual check, staging Orders notice and staging render of login/registration), which are now owner-confirmed; the entry below is kept as history. Still not claimed: automated or keyboard-test records.
+
 ## 2026-11-10 (X21 + D6 closure) - IMPLEMENTED / VISUALLY VERIFIED ON STAGING - documentation only
 
 Documentation-only entry: no code, staging, database or Git history was touched. Both items were implemented on 2026-11-09 and are ancestors of staging HEAD `b04b16d`; the project owner explicitly confirmed the visual result on staging.

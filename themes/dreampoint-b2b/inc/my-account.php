@@ -615,3 +615,7 @@ add_filter( 'woocommerce_my_account_my_orders_actions', function( $actions ) {
 	}
 	return $actions;
 }, 101 );
+
+// Closed B2B system: partners have no guest orders to link, so the native WooCommerce
+// "Confirm email address" prompt on My Account > Orders is unnecessary. Suppress the prompt only.
+add_filter( 'woocommerce_customer_email_verification_should_show_prompt', '__return_false' );

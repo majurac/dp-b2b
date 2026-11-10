@@ -152,7 +152,7 @@ $lr_image = get_field('lr_image', 'option');
                 
                     <p class="woocommerce-form-row form-row">
                         <?php wp_nonce_field( 'woocommerce-register', 'woocommerce-register-nonce' ); ?>
-                        <button type="submit" class="button button--xl button--icon-after woocommerce-Button woocommerce-button button<?php echo esc_attr( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' ); ?> woocommerce-form-register__submit" name="register" value="<?php esc_attr_e( 'Register', 'woocommerce' ); ?>"><?php esc_html_e( 'Register', 'woocommerce' ); ?></button>
+                        <button type="submit" class="button button--xl woocommerce-Button woocommerce-button button<?php echo esc_attr( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' ); ?> woocommerce-form-register__submit" name="register" value="<?php esc_attr_e( 'Register', 'woocommerce' ); ?>"><?php esc_html_e( 'Register', 'woocommerce' ); ?></button>
                     </p>
                 
                     <div class="lr-footer">

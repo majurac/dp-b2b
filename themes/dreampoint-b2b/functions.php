@@ -627,6 +627,16 @@ function dreampoint_b2b_scripts(): void {
             true
         );
         wp_script_add_data( 'dreampoint-b2b-wbw-filter-param-fix', 'strategy', 'defer' );
+
+        // Count on WBW's native Show More control ("Prikazi vise (N)"); labels come from WBW's translated strings.
+        wp_enqueue_script(
+            'dreampoint-b2b-wbw-show-more-count',
+            get_template_directory_uri() . '/js/wbw-show-more-count.js',
+            [],
+            dreampoint_b2b_asset_ver( 'js/wbw-show-more-count.js' ),
+            true
+        );
+        wp_script_add_data( 'dreampoint-b2b-wbw-show-more-count', 'strategy', 'defer' );
     }
 
     // --- JS: B2B registracija — višekorački obrazac, samo za nelogirane na account stranicama ---

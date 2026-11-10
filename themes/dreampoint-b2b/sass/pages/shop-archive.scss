@@ -255,11 +255,36 @@
     }
 }
 
+// The filter box is positioned (it hosts the absolutely placed card heading), so the off-canvas close button, which used
+// to be placed against the fixed panel, is re-anchored to the card top: 26px above it = 20px from the top of the 46px
+// panel padding, i.e. where it was before (also in the admin-bar variant: 66px - 92px).
+.products-lhs-filter-wrap .products-lhs-filter .close-mobile-filters {
+    @include bp(md-down) {
+        top: -26px;
+        right: 0;
+    }
+}
+
 .products-lhs-filter {
     // Figma grey filter card (surface #f3f4f6, 8px inner padding)
+    position: relative;
+    // Figma card heading "FILTERI" (frame 56x23 at 8/8, sections start 47px from the card top): theme-owned span,
+    // absolutely placed in the card's top padding, so WBW's own markup is untouched.
+    .dp-filter-card-title {
+        @include account-card-title;
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        z-index: 1;
+        padding: 4px;
+        line-height: 15px;
+    }
+    &:not(:has(.wpfMainWrapper)) .dp-filter-card-title {
+        display: none;
+    }
     .wpfMainWrapper {
         background: $dp-color-bg-tertiary;
-        padding: 8px;
+        padding: 47px 8px 8px;
     }
     // Active filter chips (Figma: 28px high, 4px radius, 12px/600 label, x icon after the label)
     .wpfSelectedParameters {
@@ -374,6 +399,7 @@
         }
     }
     .wpfFilterButtons {
+        margin-top: 15px;
         .wpfFilterButton.wpfButton {
             @include button-primary('m');
             min-height: 0;
@@ -476,6 +502,76 @@
             min-height: 26px;
             padding: 0 4px;
             cursor: pointer;
+        }
+        // Price range (WBW + jQuery UI slider): 4px track, brand-coloured range, 16px round handles, tokenised number inputs.
+        // The slider keeps 8px side margins so the handles (which overhang the track ends by 8px) never clip or overflow.
+        // `.ui-slider` is repeated because WBW's jQuery UI theme sets the track border / background with the same specificity
+        .wpfPriceFilterRange.ui-slider {
+            box-sizing: border-box;
+            height: 4px;
+            margin: 16px 8px 16px;
+            border: 0;
+            border-radius: 2px;
+            background: $dp-color-border-primary;
+            .ui-slider-range {
+                height: 100%;
+                border: 0;
+                border-radius: 2px;
+                // !important only because WBW's jQuery UI theme forces `.ui-widget-header { background: #e8eded !important }`
+                background: $dp-color-bg-brand !important;
+            }
+            .ui-slider-handle {
+                top: -6px;
+                width: 16px;
+                height: 16px;
+                margin-left: -8px;
+                box-sizing: border-box;
+                // the 1px #000 border is forced by WBW's jQuery UI theme (!important); only the shape is changed here
+                border-radius: 50%;
+                background: $dp-color-bg-primary;
+                cursor: grab;
+                &:active {
+                    cursor: grabbing;
+                }
+                &:focus-visible {
+                    outline: 0;
+                    @include dp-focus-ring;
+                }
+            }
+        }
+        .wpfPriceInputs {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            .wpfCurrencySymbol,
+            .wpfFilterDelimeter {
+                font-family: $dp-font-body;
+                font-size: 14px;
+                line-height: 18px;
+                color: $dp-color-text-tertiary;
+            }
+            // WBW styles these inputs with ID selectors (#wpfMinPrice / #wpfMaxPrice), so the IDs are repeated here
+            .wpfPriceRangeField#wpfMinPrice,
+            .wpfPriceRangeField#wpfMaxPrice {
+                flex: 1 1 0;
+                min-width: 0;
+                height: 32px;
+                box-sizing: border-box;
+                padding: 0 8px;
+                border: 1px solid $dp-color-border-primary;
+                border-radius: $dp-radius-md;
+                background-color: $dp-color-bg-mono;
+                font-family: $dp-font-body;
+                font-size: 14px;
+                font-weight: 400;
+                line-height: 18px;
+                color: $dp-color-text-primary;
+                &:focus-visible {
+                    outline: 0;
+                    @include dp-form-focus-ring;
+                }
+            }
         }
         // Figma checkbox: 16px, radius 4, 1px border; checked = brand fill with a light tick (native input, no hidden control).
         // The class is doubled on purpose: WBW's `.wpfFilterWrapper[data-filter-type] .wpfCheckbox.wpfMulti input` ties otherwise.

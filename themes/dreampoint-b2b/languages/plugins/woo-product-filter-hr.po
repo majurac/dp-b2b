@@ -32,3 +32,9 @@ msgstr "Pretraži ..."
 
 msgid "Sort Products"
 msgstr "Poredaj proizvode"
+
+msgid "Show More"
+msgstr "Prikaži više"
+
+msgid "Show Fewer"
+msgstr "Prikaži manje"

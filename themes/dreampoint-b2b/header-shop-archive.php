@@ -23,6 +23,7 @@
                     <button class="close-mobile-filters">
                         <i class="icon-xmark"></i>
                     </button>
+                    <span class="dp-filter-card-title"><?php esc_html_e( 'Filteri', 'dreampoint-b2b' ); ?></span>
                     <?php echo do_shortcode('[wpf-filters id=1]'); ?>
                 </div>
             </div>

@@ -5,6 +5,11 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## 2026-11-10 (A8 closure + roadmap refresh) - A8 CLOSED - OWNER VERIFIED (2026-11-10); roadmap sections 0 and 7 reconciled - documentation only
+
+The project owner visually verified the staging checkout after commit `a078fe9`: GLS offers BACS only, local pickup offers BACS only, and switching between the two delivery methods works without errors. This supersedes "not owner-verified" in the A8 entry below (kept as history). No code, staging, database or Git history was touched by this entry; verification = owner visual confirmation only, no automated test claimed.
+- **Roadmap reconciliation:** `docs/active/master-roadmap.md` section 0 and section 7 were refreshed to the 2026-11-10 state (old text kept as "Historical ... superseded" subsections); A1 / D1 rows got a "superseded" note (T7 / T7.1 / T7.2 closed 2026-11-02, commit `b192b37`, staging synced); A8 marked closed.
+
 ## 2026-11-10 (A8 payment rules cleanup) - IMPLEMENTED AND LOCALLY CHECKED; COMMITTED FOR STAGING DEPLOY; NOT OWNER-VERIFIED
 
 Owner-approved removal of the obsolete shipping-method-specific payment restrictions in `inc/checkout-logic.php` (+1/-99 lines): `dreampoint_b2b_payment_rules()` (`pickup_location` / `local_pickup` -> `bacs`, `gls` -> `stripe` / `paypal`), the resolver `dreampoint_b2b_resolve_allowed_gateways()`, the `woocommerce_available_payment_gateways` filter and the two validations that used the resolver (classic `woocommerce_checkout_process`, Blocks `woocommerce_store_api_checkout_update_order_from_request`). No other consumer existed in the theme; no documented requirement (ADR-037, frozen checkout-logic) called for them. Billing -> shipping prefill and the T7.1/T7.2 billing master protection are untouched. No replacement filter and no hardcoded BACS restriction was added (ADR-037: BACS is the only intended gateway).

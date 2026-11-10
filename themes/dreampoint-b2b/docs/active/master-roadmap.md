@@ -6,9 +6,10 @@ Environments: localhost + staging (`dreampoint.b2b.uncledev.cloud`) only. **No p
 
 ## 0. Baseline (verified 2026-11-10; Git facts from the session, staging taken from the deploy results)
 
-- Repo `C:/xampp2/htdocs/dp-b2b`, branch `master`, HEAD `a078fe9` (A8), equal to `origin/master`; no uncommitted changes at the end of the session.
-- Staging (`dreampoint.b2b.uncledev.cloud`): Git HEAD `a078fe9`, working tree clean (fast-forward deploys as `dream9399`). Only localhost + staging exist.
-- Closed 2026-11-10 and NOT to be reopened: X21, D6, X6, Orders e-mail-verification notice, C4 (hero `3d8b3a5`, unused `brand_color` ACF field removed `39c114d`), A8 (`a078fe9`). Before that (see the rows): T7 / T7.1 / T7.2 / A1 / D1 (2026-11-02), B1, B3, B4, C2, C3, D2-D5, E2-E6.
+- Repo `C:/xampp2/htdocs/dp-b2b`, branch `master`, HEAD `a243b40` (end-of-day checkpoint 2026-11-10), equal to `origin/master` and to staging HEAD (`a243b40452573273359cfac254d40c23d7c65663`, verified at the last deploy); working tree clean when the day ended (this section was edited afterwards and may show as uncommitted).
+- Staging (`dreampoint.b2b.uncledev.cloud`): Git HEAD `a243b40`, working tree clean (fast-forward deploys as `dream9399`). Only localhost + staging exist.
+- **Awaiting owner verification (implemented and deployed, NOT closed): B2 / T9 WBW filter sidebar** (`562e93a`, `9df4eae`, `79c6636`, `a243b40`; WBW filter 1 Categories `f_enable_title_mobile` `no` -> `yes_close` applied on staging, backup `/home/dreampoint.b2b/backup-recovery/wbw-filter1-mobile-title-20261110-140757/`). The next session starts with the owner's authenticated staging review: FILTERI heading, price slider/inputs, 15px button spacing, Croatian Show More / Show Fewer with count, Categories title on a real phone, desktop + mobile layout, Quick Order regression. Details, limitations and accepted decisions: `status.md` 2026-11-10 (B2 / T9 final refinements and the two entries below it). No new implementation without owner approval; sticky sidebar was deliberately rejected; Quick Order filter styling is the separate E1 task; C1 sidebar part is covered by B2 but C1 stays open.
+- Closed 2026-11-10 and NOT to be reopened: X21, D6, X6, Orders e-mail-verification notice, C4 (hero `3d8b3a5`, unused `brand_color` ACF field removed `39c114d`), A8 (`a078fe9`), G4 skip-link target (`0d4098e`), X18 frozen checkout documentation aligned (`9569992`). Before that (see the rows): T7 / T7.1 / T7.2 / A1 / D1 (2026-11-02), B1, B3, B4, C2, C3, D2-D5, E2-E6.
 - Figma: primary file `Te4kr3o8kXDgBLzHewKSYU` (page UI `11148:22601`, desktop 1440 only); BR-02 `11148:39940`; the other node ids are in the rows and in `figma-alignment.md`.
 
 ## 0a. Historical baseline (2026-10-31) - SUPERSEDED by section 0 above, kept as history
@@ -180,7 +181,7 @@ Closed and NOT reopened: T1–T3b, T4 (partially verified), T5, T6, N1/N4/N5, Se
 ## 7. Next Ready Tasks (reconciled 2026-11-10; no unresolved external decision needed)
 
 1. ~~G4 residual: skip-link target focusable~~ **CLOSED - OWNER VERIFIED (2026-11-10; commit `0d4098e`, staging; see status.md 2026-11-10 G4 closure)**. Other G4 residuals (contrast, touch targets, screen-reader test) are not ready without an owner decision. Next ready task: see the 2026-11-10 recommendation in the session report / section 8.
-2. Other open items need an owner or external decision and are NOT ready: A2, A4 (client approval of interim shipping methods), A5, A6, A7, A9, A11, B2, E1, C1 (after B2), X2-X4, X9, X14-X16, WS-F.
+2. **B2 / T9: implemented and deployed, awaiting the owner's authenticated staging verification (see section 0); do not reopen or extend.** Other open items need an owner or external decision and are NOT ready: A2, A4 (client approval of interim shipping methods), A5, A6, A7, A9, A11, E1 (Quick Order visual, separate task), C1 (non-sidebar parts, after B2 is verified), X2-X4, X9, X14-X16, WS-F.
 3. Closed since the 2026-10-31 list below: D1, D3, D4, D5, E2, E3-E5, B1, B3, B4, C2, C3, C4, D2, D6, E6, X6, X21, A8.
 
 ## 7a. Historical list (2026-10-31) - SUPERSEDED by section 7 above, kept as history

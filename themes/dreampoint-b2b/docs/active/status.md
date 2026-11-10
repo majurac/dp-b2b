@@ -5,6 +5,11 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## 2026-11-10 (G4 closure) - G4 skip-link target CLOSED - OWNER VERIFIED (2026-11-10) - documentation only
+
+The project owner personally verified the staging behaviour of the skip link (commit `0d4098e`, staging HEAD `0d4098e`) on standard pages and Quick Order: keyboard activation moves focus to the main content with no unwanted focus outline and no visual regression. This supersedes "awaiting staging / owner verification" in the G4 entry below (kept as history). Verification = owner confirmation only; not claimed: Safari / iOS, screen-reader announcement, real keyboard activation on the guest login and `approval-pending`.
+- **Scope closed:** only the skip-link target residual of the G4 accessibility group (focusable, single `#primary-content`). The other G4 residuals stay open: search placeholder 2.75:1 and search border 1.92:1 contrast, touch targets < 44 px, no screen-reader test (`figma-alignment.md` sections 29-30).
+
 ## 2026-11-10 (G4 skip-link target) - IMPLEMENTED AND LOCALLY CHECKED; COMMITTED FOR STAGING DEPLOY; AWAITING STAGING / OWNER VERIFICATION (NOT CLOSED)
 
 Accessibility residual from `figma-alignment.md` section 30 ("the skip link target `#primary-content` is not focusable"): the skip link now really moves keyboard focus to the main-content target, and every page has exactly one `id="primary-content"`.

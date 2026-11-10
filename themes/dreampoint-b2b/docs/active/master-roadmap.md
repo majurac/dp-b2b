@@ -139,7 +139,7 @@ Effort for WS-F: UNKNOWN (no reliable basis until A3/A4 are decided).
 
 ### WS-G — Final acceptance (all NOT STARTED, run last)
 
-G1 end-to-end functional QA (A10 + D1 + QO) · G2 ERP/APROS integration QA · G3 responsive visual QA 1440/1024/768/390/360 · G4 accessibility (open: search placeholder 2.75:1, search border 1.92:1, touch targets <44 px, skip-link target not focusable, no screen-reader test; §29–30) · G5 translation consistency (T6 residue, B3, B4, WBW, "Best seller", colour names) · G6 regression sweep (frozen systems: visibility, checkout, QO) · G7 unused-components cleanup (`.categories-btn`, about block).
+G1 end-to-end functional QA (A10 + D1 + QO) · G2 ERP/APROS integration QA · G3 responsive visual QA 1440/1024/768/390/360 · G4 accessibility (open: search placeholder 2.75:1, search border 1.92:1, touch targets <44 px, no screen-reader test; §29–30; skip-link target focusable CLOSED 2026-11-10, `0d4098e`) · G5 translation consistency (T6 residue, B3, B4, WBW, "Best seller", colour names) · G6 regression sweep (frozen systems: visibility, checkout, QO) · G7 unused-components cleanup (`.categories-btn`, about block).
 
 ## 5. Carried-over open items (preserved, not superseded by U01–U16)
 
@@ -179,7 +179,7 @@ Closed and NOT reopened: T1–T3b, T4 (partially verified), T5, T6, N1/N4/N5, Se
 
 ## 7. Next Ready Tasks (reconciled 2026-11-10; no unresolved external decision needed)
 
-1. ~~G4 residual: skip-link target focusable~~ IMPLEMENTED 2026-11-10 (locally checked, committed for staging deploy; awaiting staging / owner verification, NOT closed; see status.md 2026-11-10 G4). Next ready task: none identified without an owner decision - select from section 8.
+1. ~~G4 residual: skip-link target focusable~~ **CLOSED - OWNER VERIFIED (2026-11-10; commit `0d4098e`, staging; see status.md 2026-11-10 G4 closure)**. Other G4 residuals (contrast, touch targets, screen-reader test) are not ready without an owner decision. Next ready task: see the 2026-11-10 recommendation in the session report / section 8.
 2. Other open items need an owner or external decision and are NOT ready: A2, A4 (client approval of interim shipping methods), A5, A6, A7, A9, A11, B2, E1, C1 (after B2), X2-X4, X9, X14-X16, WS-F.
 3. Closed since the 2026-10-31 list below: D1, D3, D4, D5, E2, E3-E5, B1, B3, B4, C2, C3, C4, D2, D6, E6, X6, X21, A8.
 

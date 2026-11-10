@@ -3,28 +3,6 @@
     "title": "Brand Fields",
     "fields": [
         {
-            "key": "field_67d2b023b4885",
-            "label": "Color",
-            "name": "brand_color",
-            "aria-label": "",
-            "type": "color_picker",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "default_value": "",
-            "enable_opacity": 0,
-            "return_format": "string",
-            "allow_in_bindings": 0,
-            "custom_palette_source": "",
-            "palette_colors": "",
-            "show_color_wheel": true
-        },
-        {
             "key": "field_68302324d99a1",
             "label": "Featured Image",
             "name": "brand_image",
@@ -102,5 +80,5 @@
     "display_title": "",
     "allow_ai_access": false,
     "ai_description": "",
-    "modified": 1785756094
+    "modified": 1794310273
 }

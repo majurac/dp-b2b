@@ -5,6 +5,12 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## 2026-11-10 (C4 closure + unused brand_color field) - C4 CLOSED - OWNER VERIFIED (2026-11-10); `brand_color` ACF field removed from the JSON definition (not yet committed/deployed)
+
+The project owner visually verified the C4 brand detail hero on staging (commit `3d8b3a5`, staging HEAD `3d8b3a5`). This supersedes the "staging verification result not yet recorded" wording of the C4 entry below. Not claimed: automated tests; verification = owner visual confirmation only.
+- **`brand_color` removal:** the Color field (`field_67d2b023b4885`, name `brand_color`, `color_picker`) was removed from `acf-json/group_675053191eac4.json` (group "Brand Fields", location taxonomy `product_brand`; `modified` bumped). The group keeps `brand_image` and `brand_segment` unchanged. Source = version-controlled Local JSON in the theme. Dependency check: no reference to `brand_color` / `field_67d2b023b4885` in PHP, JS, SCSS, JSON or templates; no `get_field('brand_color')` / term-meta reader in the theme. Existing term meta (`brand_color` values in `wp_termmeta`) was NOT touched or deleted.
+- **Pending (needs separate approval, DB change):** the ACF DB mirror of the "Brand Fields" group (localhost and staging) still carries the field until aligned. Per the ACF governance rule (2026-10-14 incident) saving the group in the ACF editor would export the stale DB definition over the JSON, so do not edit this group in the admin before the mirror is aligned by post ID (never by key); expect a "Sync available" badge after deploy. Not verified: whether the field still renders on the term edit screen before that sync.
+
 ## 2026-11-10 (C4 brand detail hero) - IMPLEMENTED AND LOCALLY QA-CHECKED; COMMITTED FOR STAGING DEPLOY (staging result recorded in the closure entry that follows the deploy)
 
 C4 (brand detail hero, Figma BR-02 `11148:39940`) is implemented and QA-checked locally (1440 / 768-1024 / 390 px, representative brands with and without a hero photo). Committed together with the staging deploy; the staging smoke-test result is NOT part of this entry.

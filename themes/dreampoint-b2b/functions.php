@@ -388,6 +388,11 @@ function dreampoint_b2b_scripts(): void {
     }
     if ( is_shop() || is_product_category() || is_product_tag() || is_tax( 'product_brand' ) ) {
         wp_enqueue_style( 'dp-page-shop-archive', get_template_directory_uri() . '/css/pages/shop-archive.css', [ 'dp-style' ], dreampoint_b2b_asset_ver( 'css/pages/shop-archive.css' ) );
+        // Translatable label of the active-filter chips row (CSS ::before in shop-archive.scss reads this custom property).
+        wp_add_inline_style(
+            'dp-page-shop-archive',
+            '.products-lhs-filter{--dp-active-filters-label:' . wp_json_encode( __( 'Aktivni filteri', 'dreampoint-b2b' ), JSON_UNESCAPED_UNICODE ) . ';}'
+        );
     }
     if ( is_product() ) {
         wp_enqueue_style( 'dp-page-shop-single', get_template_directory_uri() . '/css/pages/shop-single.css', [ 'dp-style' ], dreampoint_b2b_asset_ver( 'css/pages/shop-single.css' ) );

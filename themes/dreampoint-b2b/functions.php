@@ -612,6 +612,16 @@ function dreampoint_b2b_scripts(): void {
             true
         );
         wp_script_add_data( 'dreampoint-b2b-mobile-product-filters', 'strategy', 'defer' );
+
+        // WBW getFilterParam JSON.parse fix (active filter chip x); same cause as ADR-015, archives only (Quick Order ships its own).
+        wp_enqueue_script(
+            'dreampoint-b2b-wbw-filter-param-fix',
+            get_template_directory_uri() . '/js/wbw-filter-param-fix.js',
+            [ 'jquery' ],
+            dreampoint_b2b_asset_ver( 'js/wbw-filter-param-fix.js' ),
+            true
+        );
+        wp_script_add_data( 'dreampoint-b2b-wbw-filter-param-fix', 'strategy', 'defer' );
     }
 
     // --- JS: B2B registracija — višekorački obrazac, samo za nelogirane na account stranicama ---

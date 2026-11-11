@@ -5,6 +5,15 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## 2026-11-11 (C1-2 archive pagination) - IMPLEMENTED, LOCALLY QA-CHECKED, DEPLOYED TO STAGING; AWAITING OWNER VERIFICATION; C1 STAYS OPEN
+
+Scope: Figma CAT-02 (`11148:33646`) pagination node `11149:63785` on Shop, product category / tag and brand archives (and product search, which WooCommerce treats as the Shop archive). Native WooCommerce pagination is kept (links, query-string handling, first / last page behaviour); WBW AJAX pagination is inactive (invalid `data-filter-settings` JSON), so navigation is native.
+- **Files:** `inc/woocommerce.php` (`dreampoint_b2b_archive_pagination_args()` on `woocommerce_pagination_args`, limited to the archives that load `shop-archive.css`), `sass/pages/shop-archive.scss` (+ compiled `css/pages/shop-archive.css`). Global `_content.scss` untouched (shared with My Account orders).
+- **Design (owner decision: arrows only, no "Nazad" / "Naprijed" text):** 40x40 controls, 12px gap between the arrow and the first number, current page radius 8, other pages radius 20, arrow icons = FAQ SVG masks (`img/ico/faq-arrow-*.svg`), visually hidden translatable labels "Prethodna stranica" / "Sljedeća stranica", `box-shadow` focus ring (global `a:focus { outline: none !important }`), hover `#f3f4f6` on the arrows.
+- **Mobile (<= 575px, owner option 3):** 11 controls cannot fit one row, so only previous arrow, "current / total" and next arrow are shown; other numbers and the ellipsis are `display: none` (not focusable, not in the accessibility tree). The total comes from a hidden `.dp-pagination__total` span added through `after_page_number` (the native markup has no total page count).
+- **Local QA:** 1440 matches Figma; 390 and 360 single row, no horizontal overflow; first / last page keep the native missing arrow; native URLs keep `orderby` and WBW parameters; real click on next works; arrow hover verified.
+- **Limitations:** brand archive pagination and the Croatian labels were not browser-verified (no local brand has more than 15 products; no `hr` language pack locally); first / last page shift the compact mobile row because one arrow is missing (native behaviour); physical-device touch not tested. WBW `/page/N/` on sort change is unchanged (known WBW behaviour).
+
 ## 2026-11-11 (Archive cleanup: rating sort + Brands filter on brand archives) - OWNER VERIFIED - CLOSED (2026-11-11)
 
 - **Rating sort removed:** `dreampoint_b2b_catalog_orderby_without_rating()` in `inc/woocommerce.php` unsets `rating` on the core `woocommerce_catalog_orderby` filter. The other five options (default, popularity, latest, price asc / desc) are unchanged; reviews / ratings stay enabled; an old `?orderby=rating` link still loads (9 results in the test) and the dropdown shows the default label. WBW sorting untouched.

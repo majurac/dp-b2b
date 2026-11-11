@@ -748,3 +748,117 @@ body.admin-bar .products-lhs-filter-wrap .products-lhs-filter .close-mobile-filt
     }
 
 }
+
+// ---------------------------------------------------------------------------
+// Archive pagination (Figma CAT-02 node 11149:63785)
+// Native WooCommerce markup (nav > ul.page-numbers > li > a|span). Scoped here (not in the global _content.scss, which
+// is shared with My Account orders): 40x40 controls, current page radius 8, other pages radius 20, arrow-only
+// previous/next (SVG mask icons reused from the FAQ pagination) with a visually hidden screen-reader label.
+// The global rule styles every descendant span (`span:not(.prev, .next)`), so the icon/label spans reset it explicitly.
+// ---------------------------------------------------------------------------
+.woocommerce-pagination ul.page-numbers {
+    margin-bottom: 0;
+    padding-left: 0;
+    list-style: none;
+    li {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    li > a.page-numbers,
+    li > span.page-numbers {
+        min-width: 40px;
+        width: auto;
+        border-radius: 20px;
+        text-decoration: none;
+        &.current {
+            border-radius: 8px;
+        }
+        &.prev,
+        &.next {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            margin: 0;
+            padding: 0;
+            color: $dp-color-text-primary;
+            background: transparent;
+            &.prev { margin-right: 10px; } // 2px list gap + 10px = Figma 12px between the arrow and the first number
+            &.next { margin-left: 10px; }
+        }
+    }
+    li > a.page-numbers {
+        // Global `a:focus { outline: none !important }` removes outlines, so the ring is a box-shadow (project pattern)
+        &:focus-visible {
+            box-shadow: 0 0 0 2px $dp-color-bg-mono, 0 0 0 4px $dp-color-bg-brand;
+        }
+        &.prev:hover,
+        &.next:hover {
+            color: $dp-color-text-primary;
+            background: #f3f4f6;
+        }
+    }
+    li > a.page-numbers .dp-pagination__icon {
+        display: block;
+        width: 20px;
+        height: 20px;
+        flex: 0 0 20px;
+        background: currentColor;
+        &--prev {
+            -webkit-mask: url("../../img/ico/faq-arrow-left.svg") center / contain no-repeat;
+            mask: url("../../img/ico/faq-arrow-left.svg") center / contain no-repeat;
+        }
+        &--next {
+            -webkit-mask: url("../../img/ico/faq-arrow-right.svg") center / contain no-repeat;
+            mask: url("../../img/ico/faq-arrow-right.svg") center / contain no-repeat;
+        }
+    }
+    li > a.page-numbers .dp-pagination__label {
+        position: absolute;
+        display: block;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        padding: 0;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+        border: 0;
+        background: transparent;
+    }
+    // Total page count: only used by the compact mobile layout below
+    li > .page-numbers .dp-pagination__total {
+        display: none;
+    }
+
+    // Mobile (<= 575px): previous arrow, "current / total", next arrow. 11 controls of 40px cannot fit one row, so the
+    // other numbers and the ellipsis are display:none (removed from layout, tab order and the accessibility tree).
+    // Native markup and URLs stay; first/last page keep the native missing prev/next.
+    @include bp(xs-down) {
+        gap: 0;
+        li > a.page-numbers:not(.prev):not(.next),
+        li > span.page-numbers.dots {
+            display: none;
+        }
+        li > span.page-numbers.current {
+            min-width: 40px;
+            padding: 0 12px;
+            border-radius: 0;
+            color: $dp-color-text-primary;
+            background: transparent;
+            white-space: nowrap;
+            // the global `span:not(.prev, .next)` rule would give this span the 40x40 control box, so reset it
+            .dp-pagination__total {
+                display: block;
+                width: auto;
+                height: auto;
+                margin-left: 4px;
+                background: transparent;
+                color: inherit;
+            }
+        }
+    }
+}

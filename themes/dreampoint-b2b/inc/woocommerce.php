@@ -595,3 +595,30 @@ function dreampoint_b2b_catalog_orderby_without_rating( array $options ): array 
 	return $options;
 }
 add_filter( 'woocommerce_catalog_orderby', 'dreampoint_b2b_catalog_orderby_without_rating' );
+
+/**
+ * Archive pagination: arrow-only previous/next controls (Figma CAT-02 pagination).
+ *
+ * Native WooCommerce pagination is kept as is (links, query-string handling, first/last page behaviour); only the
+ * previous/next link content changes. Each arrow is a decorative icon (styled in shop-archive.scss) plus a visually
+ * hidden, translatable screen-reader label, because native `prev`/`next` links have no accessible name.
+ * Limited to the same archives that load shop-archive.css, so the markup is never output without its styles.
+ *
+ * @param array<string,mixed> $args Pagination arguments of woocommerce/loop/pagination.php.
+ * @return array<string,mixed>
+ */
+function dreampoint_b2b_archive_pagination_args( array $args ): array {
+	if ( ! ( is_shop() || is_product_category() || is_product_tag() || is_tax( 'product_brand' ) ) ) {
+		return $args;
+	}
+
+	$args['prev_text'] = '<span class="dp-pagination__icon dp-pagination__icon--prev" aria-hidden="true"></span><span class="dp-pagination__label">' . esc_html__( 'Prethodna stranica', 'dreampoint-b2b' ) . '</span>';
+	$args['next_text'] = '<span class="dp-pagination__icon dp-pagination__icon--next" aria-hidden="true"></span><span class="dp-pagination__label">' . esc_html__( 'Sljedeća stranica', 'dreampoint-b2b' ) . '</span>';
+
+	// Total page count for the compact mobile layout ("2 / 29"); hidden by CSS above 575px (display:none, so it is
+	// neither visible nor exposed to assistive technology there). Native markup has no total page count to read.
+	$args['after_page_number'] = '<span class="dp-pagination__total"> / ' . esc_html( number_format_i18n( (int) ( $args['total'] ?? 1 ) ) ) . '</span>';
+
+	return $args;
+}
+add_filter( 'woocommerce_pagination_args', 'dreampoint_b2b_archive_pagination_args' );

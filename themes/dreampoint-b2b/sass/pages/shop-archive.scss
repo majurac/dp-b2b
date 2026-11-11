@@ -22,12 +22,19 @@
         left: 0;
         opacity: 0;
         pointer-events: none;
-        padding: 46px 16px 16px 16px;
+        padding: 46px 16px 32px 16px;
         width: 100%;
         height: 100%;
+        height: 100dvh; // follows the visible viewport on mobile browsers with a collapsing address bar
         z-index: 9999;
         align-items: flex-start;
         background-color: $white;
+        // The panel is the only scroll container: a filter card taller than the viewport scrolls here, so every
+        // section and the bottom buttons stay reachable (the close button is fixed, see below).
+        overflow-x: hidden;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
         @include animate-fade;
     }
     .close-mobile-filters {
@@ -251,17 +258,59 @@
 // card) stays under the page title block. Pure CSS (:has), so it follows WBW re-rendering.
 @include bp(md-up) {
     #products-page .row.pos-r:has(.wpfSelectedParameter) {
-        margin-top: 12px;
+        margin-top: $dp-space-12;
+    }
+    // Brand archive: the Brand hero sits directly above #products-page (no title block like the shop), so the chips row,
+    // which hangs 76px above the card, would touch the hero. 24px more keeps the card position 48px under the chips and
+    // leaves a 24px gap between the hero and the chips; nothing changes while no filter is active.
+    body.tax-product_brand #products-page .row.pos-r:has(.wpfSelectedParameter) {
+        margin-top: $dp-space-12 + $dp-space-24;
     }
 }
 
-// The filter box is positioned (it hosts the absolutely placed card heading), so the off-canvas close button, which used
-// to be placed against the fixed panel, is re-anchored to the card top: 26px above it = 20px from the top of the 46px
-// panel padding, i.e. where it was before (also in the admin-bar variant: 66px - 92px).
+// Off-canvas panel (< 992px): the panel itself scrolls, so the close button is fixed to the viewport (20px from the
+// top, 16px from the right, below the WP admin bar when it is shown) and always reachable. A round white background
+// keeps it readable above scrolled filter content. The body does not scroll behind the open panel.
 .products-lhs-filter-wrap .products-lhs-filter .close-mobile-filters {
     @include bp(md-down) {
-        top: -26px;
-        right: 0;
+        position: fixed;
+        top: 20px;
+        right: 16px;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background-color: $white;
+    }
+}
+body.admin-bar .products-lhs-filter-wrap .products-lhs-filter .close-mobile-filters {
+    @include bp(md-down) {
+        top: 52px; // 32px admin bar + 20px
+    }
+    @media screen and (max-width: 782px) {
+        top: 66px; // 46px admin bar + 20px
+    }
+}
+@include bp(md-down) {
+    body.filter-open {
+        overflow: hidden;
+    }
+}
+
+// Desktop (>= 992px): the filter column sticks below the sticky 72px header (+24px gap, + the 32px admin bar when it
+// is shown) and ends at the bottom of the row, so it never runs over the footer. Pure CSS; a card taller than the
+// viewport is accepted by the owner (sections can be collapsed). The column must not stretch, otherwise there would
+// be no room to stick.
+@include bp(md-up) {
+    .products-lhs-filter-wrap {
+        position: sticky;
+        top: 96px;
+        align-self: flex-start;
+    }
+    body.admin-bar .products-lhs-filter-wrap {
+        top: 128px;
     }
 }
 
@@ -503,11 +552,21 @@
             padding: 0 4px;
             cursor: pointer;
         }
+        // Price block: WBW gives .wpfFilterContent 10px side padding and a 100%-wide slider, so the slider (8px side
+        // margins) overflowed its box and sat shifted right (track 31px from the card edge on the left, 15px on the right).
+        // The owner-proposed padding (0 left / 15px right) centres the track but leaves the number inputs 13px / 28px; the
+        // measured symmetric result is no content padding plus an auto-width slider: track 21 / 21, handles and inputs
+        // 13 / 13 from the card edge, i.e. flush with the section titles and checkbox rows.
+        &[data-filter-type="wpfPrice"] .wpfFilterContent {
+            padding-left: 0;
+            padding-right: 0;
+        }
         // Price range (WBW + jQuery UI slider): 4px track, brand-coloured range, 16px round handles, tokenised number inputs.
         // The slider keeps 8px side margins so the handles (which overhang the track ends by 8px) never clip or overflow.
         // `.ui-slider` is repeated because WBW's jQuery UI theme sets the track border / background with the same specificity
         .wpfPriceFilterRange.ui-slider {
             box-sizing: border-box;
+            width: auto; // WBW sets 100%, which together with the side margins overflows the content box
             height: 4px;
             margin: 16px 8px 16px;
             border: 0;

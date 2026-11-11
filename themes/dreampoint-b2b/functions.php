@@ -174,6 +174,7 @@ if ( class_exists( 'WooCommerce' ) ) {
     require get_template_directory() . '/inc/homepage-segments.php';
     require get_template_directory() . '/inc/wbw-multi-search-compat.php';
     require get_template_directory() . '/inc/wbw-price-indexing-compat.php';
+    require get_template_directory() . '/inc/wbw-brand-filter-compat.php';
     require get_template_directory() . '/inc/contact-form.php';
 }
 

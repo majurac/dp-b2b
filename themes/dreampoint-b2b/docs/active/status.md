@@ -5,7 +5,7 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
-## 2026-11-11 (P1 incident: WBW parent category returns no products) - FIX LOCALLY QA-CHECKED; OWNER-APPROVED FOR CONTROLLED STAGING DEPLOYMENT; NOT OWNER VERIFIED (staging browser QA pending)
+## 2026-11-11 (P1 incident: WBW parent category returns no products) - OWNER VERIFIED - CLOSED (2026-11-11)
 
 Separate functional incident (not B2 / T9, not C1-1). Reported on staging: `/shop/?wpf_fbv=1&product_brand_list=izipizi&wpf_filter_cat_list_1s=naocale` shows no products.
 
@@ -18,7 +18,10 @@ Separate functional incident (not B2 / T9, not C1-1). Reported on staging: `/sho
 - **Visual regression:** list stays flat (`data-show-hierarchical=false`), one chip per selection, Show More (31) / Show Fewer unchanged, sticky wrapper and mobile off-canvas (fixed, scrollable, body locked) unchanged, no horizontal overflow. No SCSS / CSS touched.
 - **Limits / NOT verified:** WBW's AJAX refresh endpoint (admin-ajax) builds its own query and is not covered (the sidebar navigates, so it is not the active path locally; unverified on staging); a WBW preselect category clause on a request that also carries the URL key would be corrected too (none configured); NOT IN broadening is a decision (switchable by dropping the NOT IN case); staging NOT verified (needs an authenticated browser: expected 53 for the reported URL in the admin visibility context, account-specific visibility may reduce it).
 - **Owner decisions (2026-11-11):** flat B2 / T9 sidebar kept, WBW dashboard settings unchanged; descendant-inclusive behavior approved for IN, AND and NOT IN (excluding a parent also excludes its descendants).
-- **Status:** committed for controlled staging deployment (see `git log`); server-side checks only, authenticated browser verification of the reported URL is PENDING owner QA; does not close C1 / C1-1.
+- **Closure (2026-11-11):** implementation commit `314285bd1302f7833a9357bcb7d1270e12bd3644` (`inc/wbw-category-children-compat.php`, one `require` in `functions.php`, this entry), local regression 19/19 PASS, controlled staging deployment as a fast-forward (`19fc57b` -> `314285b`), staging server-side verification (reported combination 0 -> 53, parent 0 -> 53, leaf 16, brand 72, unfiltered 451, `NOT` parent 451 -> 398, native archive 53; WBW filter 1 settings md5 unchanged, no PHP errors; a WP-CLI simulation, not a browser test), then the owner confirmed ALL FIVE authenticated staging browser checks on 2026-11-11: (1) the original Izipizi + Naocale URL returns the matching products, (2) selecting the Naocale parent in the sidebar includes descendant categories, (3) combined brand + stock + sorting works, (4) chip removal and Clear All work, (5) the flat B2 / T9 sidebar, Show More / Show Fewer and the console are unchanged.
+- **Decisions kept:** flat B2 / T9 sidebar and unchanged WBW dashboard settings; descendant-inclusive for IN, AND and NOT IN (excluding a parent excludes its descendants).
+- **Maintenance:** review the compatibility layer after every WBW (woo-product-filter / woofilter-pro) update; delete `inc/wbw-category-children-compat.php` and its `require` once WBW itself includes descendants for `wpf_filter_cat_list*`. Not covered by design: WBW's admin-ajax refresh path (not active for the archive).
+- **Boundaries:** B2 / T9 stays closed; C1-1 sorting stays deployed and functionally owner-verified, C1 itself stays open (C1-2 pagination NOT STARTED, C1-3 subtitle DEFERRED); E1 Quick Order filter styling NOT STARTED; removal of the average-rating sort option is a separate pending task.
 
 ## 2026-11-11 (C1-1 archive sort bar) - IMPLEMENTED AND LOCALLY QA-CHECKED, NOT COMMITTED; AWAITING OWNER APPROVAL FOR COMMIT / STAGING; C1 STAYS OPEN
 

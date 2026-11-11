@@ -5,11 +5,12 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
-## 2026-11-11 (Archive cleanup: rating sort + Brands filter on brand archives) - IMPLEMENTED AND LOCALLY QA-CHECKED, NOT COMMITTED; STAGING VERIFICATION PENDING
+## 2026-11-11 (Archive cleanup: rating sort + Brands filter on brand archives) - OWNER VERIFIED - CLOSED (2026-11-11)
 
 - **Rating sort removed:** `dreampoint_b2b_catalog_orderby_without_rating()` in `inc/woocommerce.php` unsets `rating` on the core `woocommerce_catalog_orderby` filter. The other five options (default, popularity, latest, price asc / desc) are unchanged; reviews / ratings stay enabled; an old `?orderby=rating` link still loads (9 results in the test) and the dropdown shows the default label. WBW sorting untouched.
 - **Brands filter hidden on brand archives:** WBW has no per-archive option for the Brand block (page / category display settings apply to the whole filter), so `sass/pages/shop-archive.scss` (+ compiled `css/pages/shop-archive.css`) hides `body.tax-product_brand .products-lhs-filter .wpfFilterWrapper[data-filter-type="wpfBrand"]` (stable block type, no generated ids). Section spacing stays 8px (the next block's own margin-top), no gap or stray rule.
 - **Local QA:** Shop, two category archives and two brand archives at 1440 and 390: brand block shown on Shop / categories, hidden only on brand archives, 8px gaps, no horizontal overflow; sorting by click works with active filters (brand archive + In Stock + price asc 13 ascending; Shop + brand + parent category + price desc 9 descending); mobile off-canvas opens; console clean. Staging not verified (needs an authenticated browser).
+- **Closure (2026-11-11):** implementation commit `c8e882120579664b30b0a3526499c1971579741c` (`inc/woocommerce.php`, `sass/pages/shop-archive.scss`, `css/pages/shop-archive.css`, this entry), deployed to staging as a fast-forward (`8ef9c95` -> `c8e8821`, working tree clean, staging smoke: orderby keys without `rating`, compiled rule present, no PHP errors); the owner confirmed all five authenticated staging browser QA checks on 2026-11-11. B2 / T9 and the WBW parent-category incident stay closed; C1 stays open (C1-2 pagination NOT STARTED, C1-3 subtitle DEFERRED); E1 NOT STARTED.
 
 ## 2026-11-11 (P1 incident: WBW parent category returns no products) - OWNER VERIFIED - CLOSED (2026-11-11)
 

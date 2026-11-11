@@ -5,7 +5,9 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
-## 2026-11-11 (C1-2 archive pagination) - IMPLEMENTED, LOCALLY QA-CHECKED, DEPLOYED TO STAGING; AWAITING OWNER VERIFICATION; C1 STAYS OPEN
+## 2026-11-11 (C1-2 archive pagination) - OWNER VERIFIED - CLOSED (2026-11-11); C1 STAYS OPEN
+
+**Closure:** implementation commit `960610031e68c708d6d1f277b2234b07644697f8`, deployed to staging as a fast-forward (`01835d8` -> `9606100`, working tree clean, staging smoke: `php -l`, filter and compiled rule present, CSS 200). The owner confirmed all five authenticated staging browser QA checks: desktop and mobile layout, previous / next navigation, WBW filter and sorting preservation, and no visual or console regressions. This supersedes "awaiting owner verification" below; the limitations listed below (brand archive with more than 15 products, Croatian labels, physical-device touch) were not separately recorded as verified. Remaining C1 scope: C1-3 archive subtitle DEFERRED, other archive parts not audited, so C1 is NOT closed; E1 Quick Order filter styling NOT STARTED.
 
 Scope: Figma CAT-02 (`11148:33646`) pagination node `11149:63785` on Shop, product category / tag and brand archives (and product search, which WooCommerce treats as the Shop archive). Native WooCommerce pagination is kept (links, query-string handling, first / last page behaviour); WBW AJAX pagination is inactive (invalid `data-filter-settings` JSON), so navigation is native.
 - **Files:** `inc/woocommerce.php` (`dreampoint_b2b_archive_pagination_args()` on `woocommerce_pagination_args`, limited to the archives that load `shop-archive.css`), `sass/pages/shop-archive.scss` (+ compiled `css/pages/shop-archive.css`). Global `_content.scss` untouched (shared with My Account orders).

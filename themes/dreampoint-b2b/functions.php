@@ -396,6 +396,10 @@ function dreampoint_b2b_scripts(): void {
             '.products-lhs-filter{--dp-active-filters-label:' . wp_json_encode( __( 'Aktivni filteri', 'dreampoint-b2b' ), JSON_UNESCAPED_UNICODE ) . ';}'
         );
     }
+    // Quick Order filter sidebar skin (E1); the page itself and its markup are owned by the dp-b2b-quick-order plugin.
+    if ( is_page( 'quick-order' ) ) {
+        wp_enqueue_style( 'dp-page-quick-order-filters', get_template_directory_uri() . '/css/pages/quick-order-filters.css', [ 'dp-style' ], dreampoint_b2b_asset_ver( 'css/pages/quick-order-filters.css' ) );
+    }
     if ( is_product() ) {
         wp_enqueue_style( 'dp-page-shop-single', get_template_directory_uri() . '/css/pages/shop-single.css', [ 'dp-style' ], dreampoint_b2b_asset_ver( 'css/pages/shop-single.css' ) );
     }

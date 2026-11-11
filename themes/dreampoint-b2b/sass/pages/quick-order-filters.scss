@@ -1,0 +1,298 @@
+@import '../theme/mixins';
+
+// ---------------------------------------------------------------------------
+// Quick Order filter sidebar (E1, Figma QO-01 11148:33784 left column; QO-02 adds the checked state)
+// Theme-level skin only, loaded on the Quick Order page only (functions.php). Scoped under `.dp-quick-order`; the plugin
+// (dp-b2b-quick-order) markup, the WBW filter 3 markup/settings and ADR-015 behaviour are untouched. Shop B2 / T9 rules
+// (`.products-lhs-filter`, shop-archive.scss) are deliberately NOT shared or refactored.
+// Specificity: plugin CSS uses 1-3 classes, WBW CSS loads after the theme, so selectors here use 4+ classes; `!important`
+// only where a vendor/plugin rule is `!important` (WBW checked state, plugin focus outline).
+//
+// The plugin renders the sidebar column as three sibling blocks (header, "Popularno" fieldset, WBW area). Figma shows one
+// grey card (#f3f4f6, 8px padding, no radius), so each block gets the same surface and horizontal padding with no gap
+// between them; together they read as one card.
+// ---------------------------------------------------------------------------
+.dp-quick-order {
+    // Card title "FILTERI" + the plugin's reset button (not in Figma, kept for function)
+    .dp-qo-filters-header {
+        margin: 0;
+        padding: 8px 8px 16px; // Figma: sections start 47px from the card top (8 + 23px title + 16px gap)
+        background: $dp-color-bg-tertiary;
+        &__title {
+            @include account-card-title;
+            padding: 4px;
+            font-size: 12px;
+            line-height: 15px;
+            letter-spacing: 0.24px;
+            color: $dp-color-text-primary;
+        }
+    }
+    .dp-qo-filters-header .dp-qo-catalog-filters__clear {
+        font-family: $dp-font-body;
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 18px;
+        color: $dp-color-text-secondary;
+        &:focus-visible {
+            outline: 0;
+            @include dp-focus-ring;
+        }
+    }
+
+    // "Popularno" group (plugin fieldset): Figma "Sidebar header" + "Sidebar button" rows
+    .dp-qo-catalog-filters {
+        margin: 0;
+        display: block; // plugin: flex. A rendered legend straddles the top border and the surface is only painted from its
+        padding: 0 8px 8px; // middle (white strip above "Popularno"); a floated, full-width legend flows as a normal row instead. Bottom 8px = section gap, expanded or collapsed
+        background: $dp-color-bg-tertiary;
+    }
+    .dp-qo-catalog-filters .dp-qo-catalog-filters__legend {
+        float: left; // still the fieldset's legend element (accessible name unchanged)
+        margin: 0;
+    }
+    .dp-qo-catalog-filters .dp-qo-catalog-filters__content {
+        clear: both;
+    }
+    .dp-qo-catalog-filters .dp-qo-catalog-filters__toggle {
+        min-height: 26px;
+        padding: 0 0 1px 4px;
+        font-family: $dp-font-body;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 24px;
+        letter-spacing: -0.28px;
+        color: $dp-color-text-primary;
+        // Expanded section: 1px rule under the header (Figma "Sidebar header")
+        &[aria-expanded="true"] {
+            border-bottom: 1px solid $dp-color-border-primary;
+        }
+        &:focus-visible {
+            outline: 0 !important; // plugin sets `outline: ... !important`
+            @include dp-focus-ring;
+        }
+    }
+    // The plugin swaps the text glyph (+ / −) in JS; it is hidden and a chevron is drawn instead, rotated when expanded
+    .dp-qo-catalog-filters .dp-qo-catalog-filters__toggle-icon {
+        position: relative;
+        width: 16px;
+        height: 16px;
+        margin-left: 8px;
+        font-size: 0;
+        &::after {
+            content: "\e91a"; // chevron-down (same icomoon glyph as the Shop sidebar)
+            position: absolute;
+            inset: 0;
+            display: block;
+            font-family: icomoon;
+            font-size: 16px;
+            line-height: 16px;
+            color: $dp-color-icon-primary;
+            @include animate-fade;
+        }
+    }
+    .dp-qo-catalog-filters .dp-qo-catalog-filters__toggle[aria-expanded="true"] .dp-qo-catalog-filters__toggle-icon::after {
+        transform: rotate(180deg);
+    }
+    .dp-qo-catalog-filters .dp-qo-catalog-filters__content {
+        gap: 5px;
+        margin-top: 0; // padding, not margin: `clear: both` (above) would swallow a top margin
+        padding: 8px 0 0;
+    }
+    .dp-qo-catalog-filters .dp-qo-catalog-filter {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 26px;
+        padding: 0 4px;
+        font-family: $dp-font-body;
+        font-size: 12px;
+        font-weight: 400;
+        line-height: 18px;
+        color: $dp-color-icon-primary; // Figma label colour #111927
+    }
+
+    // WBW filter 3 area: same grey surface, sections 8px apart
+    .dp-qo-filter-area {
+        margin: 0;
+        padding: 0 8px 8px;
+        background: $dp-color-bg-tertiary;
+    }
+    .dp-qo-filter-area .wpfFilterWrapper {
+        margin: 0;
+        padding: 0; // WBW adds 5px top and bottom; Figma has 8px between sections (margin below)
+        + .wpfFilterWrapper {
+            margin-top: 8px;
+        }
+        .wpfFilterContent {
+            margin-top: 8px;
+        }
+        .wpfFilterTitle {
+            box-sizing: border-box;
+            min-height: 26px;
+            margin: 0;
+            padding: 0 0 1px 4px;
+            // 1px rule only under an expanded section (WBW shows a minus icon then)
+            &:has(.fa-minus) {
+                border-bottom: 1px solid $dp-color-border-primary;
+            }
+            .fa {
+                font-family: icomoon !important;
+                &::before {
+                    display: none;
+                }
+                &::after {
+                    display: inline-block;
+                    content: "\e91a"; // chevron-down; rotated when the section is expanded
+                    font-family: icomoon;
+                    font-size: 16px;
+                    font-weight: 400;
+                    color: $dp-color-icon-primary;
+                    @include animate-fade;
+                }
+                &.fa-minus::after {
+                    transform: rotate(180deg);
+                }
+            }
+        }
+        // Figma "Sidebar header" label: Montserrat 400 14px, tracking -0.28px, sentence case
+        .wfpTitle {
+            height: auto;
+            margin: 0;
+            padding: 0;
+            font-family: $dp-font-body;
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 24px;
+            letter-spacing: -0.28px;
+            text-transform: none;
+            color: $dp-color-text-primary;
+        }
+        // WBW repeats the block title as a description line: that is the duplicate visible heading. It is removed from the
+        // layout only; the block keeps its accessible name through the title element.
+        .wfpDescription {
+            display: none;
+        }
+        .wpfFilterTaxNameWrapper {
+            font-family: $dp-font-body;
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 18px;
+            letter-spacing: 0;
+            color: $dp-color-icon-primary;
+        }
+        .wpfLiLabel {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 26px;
+            padding: 0 4px;
+            cursor: pointer;
+        }
+        li + li {
+            margin-top: 5px;
+        }
+        .wpfFilterVerScroll {
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+        // Functional search fields stay (owner decision); skinned like the Figma "input-container" (32px, radius 8, icon)
+        .wpfSearchWrapper {
+            margin: 0 0 5px;
+            input.wpfSearchFieldsFilter {
+                box-sizing: border-box;
+                width: 100%;
+                height: 32px;
+                margin: 0;
+                padding: 0 16px 0 40px !important; // WBW pro: `.wpfSearchWrapper input { padding: 5px !important }`
+                border: 1px solid $dp-color-border-primary;
+                border-radius: 8px;
+                background-color: $dp-color-bg-mono;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23111927' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11.5' cy='11.5' r='9.5'/%3E%3Cpath d='M22 22l-2-2'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: 16px center;
+                background-size: 16px 16px;
+                font-family: $dp-font-body;
+                font-size: 14px;
+                font-weight: 400;
+                line-height: 18px;
+                color: $dp-color-text-primary;
+                &::placeholder {
+                    color: $dp-color-text-secondary;
+                    opacity: 1;
+                }
+                &:focus-visible {
+                    outline: 0;
+                    @include dp-form-focus-ring;
+                }
+            }
+        }
+        // Show More / Show Fewer (WBW's native control and strings): Figma "Sidebar button" without checkbox,
+        // Montserrat Medium 10px / 18px, no icon, no underline
+        .wpfShowMoreWrapper,
+        .wpfShowFewerWrapper {
+            display: flex;
+            align-items: center;
+            min-height: 26px;
+            padding: 4px;
+            font-family: $dp-font-body;
+            font-size: 10px;
+            font-weight: 500;
+            line-height: 18px;
+            letter-spacing: 0;
+            text-transform: none;
+            text-decoration: none;
+            color: $dp-color-text-primary;
+            cursor: pointer;
+        }
+    }
+
+    // Checkboxes (plugin group + WBW blocks): 16px, radius 4, 1px border, checked = brand fill with a light tick.
+    // Same measurements as the accepted Shop sidebar; border #6c727e keeps 3:1 against the card (WCAG 1.4.11).
+    .dp-qo-catalog-filters .dp-qo-catalog-filter__input,
+    .dp-qo-filter-area .wpfFilterWrapper .wpfCheckbox.wpfCheckbox input[type="checkbox"] {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 16px;
+        min-width: 16px; // plugin 18px / WBW min-width 18px
+        height: 16px;
+        flex: none;
+        margin: 0;
+        border: 1px solid $dp-color-icon-secondary;
+        border-radius: 4px;
+        background-color: $dp-color-bg-mono;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 12px 12px;
+        &:checked {
+            // !important only because the plugin / WBW force #303030 on checked boxes
+            background-color: $dp-color-bg-brand !important;
+            border-color: $dp-color-bg-brand !important;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.2l2.4 2.4 4.6-5' fill='none' stroke='%23f9fafb' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        }
+        &:focus-visible {
+            outline: 0 !important; // plugin sets `outline: ... !important`
+            @include dp-focus-ring;
+        }
+    }
+    .dp-qo-filter-area .wpfFilterWrapper .wpfCheckbox.wpfCheckbox {
+        display: inline-flex;
+        align-items: center;
+        flex: none;
+        width: 16px; // WBW leaves a 5px gap after the box; Figma has 8px (the li gap)
+    }
+
+    // WBW buttons inside the area (if rendered): theme button ecosystem, like the Shop sidebar
+    .dp-qo-filter-area .wpfFilterButtons {
+        margin-top: 15px;
+        .wpfFilterButton.wpfButton {
+            @include button-primary('m');
+            min-height: 0;
+            text-transform: none;
+        }
+        .wpfClearButton.wpfButton {
+            @include button-outline('m');
+            min-height: 0;
+            text-transform: none;
+        }
+    }
+}

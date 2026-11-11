@@ -299,6 +299,13 @@ body:is(.post-type-archive-product, .tax-product_cat, .tax-product_brand) {
     }
 }
 
+// Brand archive: the page is already one brand, so WBW's Brands filter block is redundant. Hidden by its stable block
+// type (never the generated ids); Shop and category archives keep it. display:none leaves no gap: the 8px section spacing
+// comes from the next block's own margin-top.
+body.tax-product_brand .products-lhs-filter .wpfFilterWrapper[data-filter-type="wpfBrand"] {
+    display: none;
+}
+
 // Off-canvas panel (< 992px): the panel itself scrolls, so the close button is fixed to the viewport (20px from the
 // top, 16px from the right, below the WP admin bar when it is shown) and always reachable. A round white background
 // keeps it readable above scrolled filter content. The body does not scroll behind the open panel.

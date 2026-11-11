@@ -5,6 +5,12 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## 2026-11-11 (Archive cleanup: rating sort + Brands filter on brand archives) - IMPLEMENTED AND LOCALLY QA-CHECKED, NOT COMMITTED; STAGING VERIFICATION PENDING
+
+- **Rating sort removed:** `dreampoint_b2b_catalog_orderby_without_rating()` in `inc/woocommerce.php` unsets `rating` on the core `woocommerce_catalog_orderby` filter. The other five options (default, popularity, latest, price asc / desc) are unchanged; reviews / ratings stay enabled; an old `?orderby=rating` link still loads (9 results in the test) and the dropdown shows the default label. WBW sorting untouched.
+- **Brands filter hidden on brand archives:** WBW has no per-archive option for the Brand block (page / category display settings apply to the whole filter), so `sass/pages/shop-archive.scss` (+ compiled `css/pages/shop-archive.css`) hides `body.tax-product_brand .products-lhs-filter .wpfFilterWrapper[data-filter-type="wpfBrand"]` (stable block type, no generated ids). Section spacing stays 8px (the next block's own margin-top), no gap or stray rule.
+- **Local QA:** Shop, two category archives and two brand archives at 1440 and 390: brand block shown on Shop / categories, hidden only on brand archives, 8px gaps, no horizontal overflow; sorting by click works with active filters (brand archive + In Stock + price asc 13 ascending; Shop + brand + parent category + price desc 9 descending); mobile off-canvas opens; console clean. Staging not verified (needs an authenticated browser).
+
 ## 2026-11-11 (P1 incident: WBW parent category returns no products) - OWNER VERIFIED - CLOSED (2026-11-11)
 
 Separate functional incident (not B2 / T9, not C1-1). Reported on staging: `/shop/?wpf_fbv=1&product_brand_list=izipizi&wpf_filter_cat_list_1s=naocale` shows no products.

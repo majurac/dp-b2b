@@ -580,3 +580,18 @@ function dreampoint_b2b_cart_item_data_html( array $cart_item ): string {
 
 	return $html;
 }
+
+/**
+ * Archive sorting: drop "Sort by average rating" (product ratings / reviews are not used on this shop).
+ *
+ * Only the dropdown option is removed through the core `woocommerce_catalog_orderby` filter; reviews and ratings stay
+ * enabled and an old `?orderby=rating` link keeps working. Every other sorting option is untouched.
+ *
+ * @param array<string,string> $options Catalog ordering options.
+ * @return array<string,string>
+ */
+function dreampoint_b2b_catalog_orderby_without_rating( array $options ): array {
+	unset( $options['rating'] );
+	return $options;
+}
+add_filter( 'woocommerce_catalog_orderby', 'dreampoint_b2b_catalog_orderby_without_rating' );

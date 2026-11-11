@@ -296,3 +296,21 @@
         }
     }
 }
+
+// ---------------------------------------------------------------------------
+// Duplicate filter UI below "Aktivni filteri" (owner review of the E1 staging sidebar)
+// 1) The WBW selected-filters node rendered by `[wpf-selected-filters id=3]` inside `.dp-qo-toolbar__filters`
+//    (a second copy of the active chips + WBW's own "Clear All"). The plugin's "Aktivni filteri" row builds its own
+//    chips from the filter state and removes filters through WBW, and the sidebar keeps "Poništi filtere" and WBW's
+//    "Clear"; the node stays in the DOM and WBW keeps updating it, it is only not displayed.
+// 2) "Strana 1 / 1": the plugin pagination row when there is a single page (no previous / next button). Pages > 1 keep
+//    the whole row (info + buttons).
+// ---------------------------------------------------------------------------
+.dp-quick-order {
+    .dp-qo-toolbar__filters .selected-prod_atributes .wpfSelectedParameters {
+        display: none;
+    }
+    .dp-qo-pagination:not(:has([data-page])) {
+        display: none;
+    }
+}

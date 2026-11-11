@@ -10,8 +10,9 @@
      * label text is rewritten here, from WBW's own translated strings (`woobewooPfTraslate`); the count is the real
      * number of `.wpfMoreHidden` options. A MutationObserver re-applies it after WBW re-renders or toggles the list.
      */
-    const root = document.querySelector( '.products-lhs-filter' );
-    if ( ! root ) return;
+    // Shop / product archives: `.products-lhs-filter`; Quick Order page (E1): `.dp-qo-filter-area` (WBW filter 3).
+    const roots = document.querySelectorAll( '.products-lhs-filter, .dp-qo-filter-area' );
+    if ( ! roots.length ) return;
 
     const strings = window.woobewooPfTraslate || {};
     const setLabel = ( el, text ) => {
@@ -21,7 +22,7 @@
     };
 
     const update = () => {
-        root.querySelectorAll( '.wpfFilterVerScroll' ).forEach( ( list ) => {
+        roots.forEach( ( root ) => root.querySelectorAll( '.wpfFilterVerScroll' ).forEach( ( list ) => {
             const more = list.querySelector( ':scope > .wpfShowMoreWrapper' );
             if ( more ) {
                 const hidden = list.querySelectorAll( ':scope > li.wpfMoreHidden' ).length;
@@ -29,14 +30,15 @@
             }
             const fewer = list.querySelector( ':scope > .wpfShowFewerWrapper' );
             if ( fewer ) setLabel( fewer, ( strings.ShowFewer || 'Show Fewer' ).trim() );
-        } );
+        } ) );
     };
 
-    new MutationObserver( update ).observe( root, {
+    const observer = new MutationObserver( update );
+    roots.forEach( ( root ) => observer.observe( root, {
         childList: true,
         subtree: true,
         attributes: true,
         attributeFilter: [ 'class' ],
-    } );
+    } ) );
     update();
 }() );

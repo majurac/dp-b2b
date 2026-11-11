@@ -645,6 +645,18 @@ function dreampoint_b2b_scripts(): void {
         wp_script_add_data( 'dreampoint-b2b-wbw-show-more-count', 'strategy', 'defer' );
     }
 
+    // Quick Order filter sidebar (E1): the same Show More count script, rooted at `.dp-qo-filter-area` (see the script).
+    if ( is_page( 'quick-order' ) ) {
+        wp_enqueue_script(
+            'dreampoint-b2b-wbw-show-more-count',
+            get_template_directory_uri() . '/js/wbw-show-more-count.js',
+            [],
+            dreampoint_b2b_asset_ver( 'js/wbw-show-more-count.js' ),
+            true
+        );
+        wp_script_add_data( 'dreampoint-b2b-wbw-show-more-count', 'strategy', 'defer' );
+    }
+
     // --- JS: B2B registracija — višekorački obrazac, samo za nelogirane na account stranicama ---
     if ( is_account_page() && ! is_user_logged_in() ) {
         wp_enqueue_script(

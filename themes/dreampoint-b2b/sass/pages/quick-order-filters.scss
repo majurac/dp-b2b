@@ -332,3 +332,115 @@
         top: 128px;
     }
 }
+
+// ---------------------------------------------------------------------------
+// Results toolbar (E1): one compact row above the list. Left = the plugin pagination ("Strana x / y" + Prethodna /
+// Sljedeca, rendered by product-list.js); right = "Poredaj po" + WBW's native Sort select (filter view 2). The plugin
+// template places `.dp-qo-pagination` and `.dp-qo-sort` inside `.dp-qo-toolbar`. Visual language follows the Shop sort bar
+// (shop-archive.scss C1-1): 12px label in the tertiary text colour, #f3f4f6 chip 28px high, 12/600 value. WBW's own English
+// "Sort by" title row (+ collapse icon) is hidden; the select keeps WBW's markup, id and AJAX behaviour.
+// The toolbar wraps naturally (no hardcoded breaks): on narrow screens the sort control drops under the pagination.
+// ---------------------------------------------------------------------------
+.dp-quick-order {
+    .dp-qo-toolbar {
+        align-items: center;
+        gap: 8px 16px;
+        margin-bottom: 16px;
+    }
+    .dp-qo-pagination {
+        padding: 0;
+        gap: 8px;
+        flex: 0 0 auto;
+    }
+    .dp-qo-pagination .dp-qo-page-info {
+        font-family: $dp-font-body;
+        font-size: 12px;
+        font-weight: 400;
+        line-height: normal;
+        color: $dp-color-text-tertiary;
+        white-space: nowrap;
+    }
+    .dp-qo-pagination .dp-qo-btn {
+        @include button-outline('m');
+        min-height: 0;
+        border-radius: 4px;
+        white-space: nowrap;
+        &:focus-visible {
+            @include dp-focus-ring;
+        }
+    }
+
+    .dp-qo-toolbar__filters {
+        gap: 8px;
+    }
+
+    .dp-qo-sort {
+        gap: 11px;
+        margin-left: auto; // stays on the right, also when the pagination is hidden (single page)
+        font-family: $dp-font-body;
+        .wpfMainWrapper {
+            margin: 0;
+        }
+        .wpfFilterWrapper {
+            margin: 0;
+            padding: 0;
+        }
+        .wpfFilterTitle {
+            display: none; // WBW's English "Sort by" title + collapse icon; replaced by `.dp-qo-sort__label`
+        }
+        .wpfFilterContent {
+            display: block;
+            margin: 0;
+            padding: 0;
+        }
+    }
+    .dp-qo-sort .dp-qo-sort__label {
+        flex: 0 0 auto;
+        font-size: 12px;
+        font-weight: 400;
+        line-height: normal;
+        color: $dp-color-text-tertiary;
+        white-space: nowrap;
+    }
+    .dp-qo-sort .wpfFilterContent #wpfSortProducts { // ID: WBW styles the select by `#wpfSortProducts` (frontend.woofilters.css)
+        appearance: none;
+        height: 28px;
+        min-height: 0 !important; // vendor: frontend.woofilters.css sets `#wpfSortProducts { min-height: 44px !important }`
+        min-width: 160px;
+        max-width: 100%;
+        margin: 0;
+        padding: 0 28px 0 8px;
+        border: 0;
+        border-radius: 4px;
+        background: $dp-color-bg-tertiary url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none' stroke='%23111927' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E") no-repeat right 8px center;
+        font-family: $dp-font-body;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: normal;
+        letter-spacing: 0.24px;
+        color: $dp-color-text-primary;
+        text-overflow: ellipsis;
+        cursor: pointer;
+        &:focus-visible {
+            outline: 0;
+            @include dp-focus-ring;
+        }
+    }
+    @include bp(md-down) {
+        .dp-qo-sort {
+            flex: 1 1 100%;
+            margin-left: 0;
+        }
+        .dp-qo-sort .wpfFilterContent {
+            flex: 1 1 auto;
+        }
+        .dp-qo-sort .wpfMainWrapper,
+        .dp-qo-sort .wpfFilterWrapper {
+            flex: 1 1 auto;
+        }
+        .dp-qo-sort .wpfFilterContent #wpfSortProducts {
+            width: 100%;
+            height: 36px; // touch target, as the Shop sort on phones
+        }
+    }
+}

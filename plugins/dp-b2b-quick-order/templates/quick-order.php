@@ -175,9 +175,10 @@ $dp_qo_active_filters = [
 					<ul class="dp-qo-chip-list dp-qo-chip-list--active"></ul>
 				</div>
 
-				<div class="dp-qo-pagination"></div>
-
 				<div class="dp-qo-toolbar">
+					<?php /* Pagination lives inside the toolbar so it shares one row with the sort control (E1 toolbar alignment). ProductList finds it by class only. */ ?>
+					<div class="dp-qo-pagination"></div>
+
 					<div class="dp-qo-toolbar__filters">
 						<div class="selected-prod_atributes">
 							<?php echo do_shortcode('[wpf-selected-filters id=3]'); ?>
@@ -225,6 +226,8 @@ $dp_qo_active_filters = [
 					</div><!-- /.dp-qo-toolbar__filters -->
 
 					<div class="dp-qo-sort">
+						<?php /* Visible label for WBW's native sort select (#wpfSortProducts); WBW's own English "Sort by" title row is hidden by the theme skin. */ ?>
+						<label class="dp-qo-sort__label" for="wpfSortProducts"><?php esc_html_e( 'Poredaj po', 'dp-b2b-quick-order' ); ?></label>
 						<?php echo do_shortcode('[wpf-filters id=2]'); ?>
 					</div>
 				</div><!-- /.dp-qo-toolbar -->

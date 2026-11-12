@@ -48,6 +48,20 @@
         }
     } );
 
+    /**
+     * Quick Order (E1): the panel has no Apply button, so it closes after a real filter pick (checkbox / radio, QO-owned or
+     * WBW). Shop / Brands keep their behaviour (the panel stays open there), hence the `.dp-quick-order` gate. Only trusted
+     * user events count: WBW's own programmatic `change` triggers (Clear, state restore) and text inputs such as the brand
+     * search never close it, and expanding groups / Show More are not inputs of this kind.
+     */
+    if ( $( '.dp-quick-order' ).length ) {
+        $filterWrap.on( 'change', 'input[type="checkbox"], input[type="radio"]', function ( e ) {
+            if ( ! e.originalEvent || ! e.originalEvent.isTrusted || ! $filterWrap.hasClass( 'active' ) ) return;
+            $filterWrap.removeClass( 'active' );
+            $body.removeClass( 'filter-open' );
+        } );
+    }
+
     // =========================================================================
     // PRISTUPAČNOST
     // =========================================================================

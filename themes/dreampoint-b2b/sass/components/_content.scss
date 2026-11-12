@@ -802,7 +802,9 @@ body.page-template-contact-php .select2-container .select2-dropdown {
 
 // The product archives (shop, category, brand) reuse this panel for the sort dropdown (C1-1); their only Select2 is the
 // sort control. Panel position/stacking and the unclipped list are in `pages/shop-archive.scss`.
-:is(body.woocommerce-account, body.page-template-contact-php, body.post-type-archive-product, body.tax-product_cat, body.tax-product_brand) .select2-dropdown {
+// The Quick Order page (E1, `.dp-quick-order` wrapper; no body class identifies it) reuses it for its sort dropdown too; its
+// z-index / width / unclipped list come from the shared `sort-select2-panel` mixin in `pages/quick-order-filters.scss`.
+:is(body.woocommerce-account, body.page-template-contact-php, body.post-type-archive-product, body.tax-product_cat, body.tax-product_brand, body:has(.dp-quick-order)) .select2-dropdown {
     background: $dp-color-bg-mono;
     border: 1px solid $dp-color-border-control;
     border-radius: $dp-radius-textarea;

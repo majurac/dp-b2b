@@ -46,9 +46,19 @@ $dp_qo_active_filters = [
 	 * admin > Filters > edit > Options tab) solely so that check finds a
 	 * target and stops reloading. Quick Order never reads its content —
 	 * WBW's injected HTML lands here and is discarded. See readme.md.
+	 *
+	 * The second hidden wrapper below is the matching sink for WBW's
+	 * pagination HTML. When no .woocommerce-pagination exists in the container,
+	 * WBW inserts its response pagination as a SIBLING after the loop
+	 * container, which rendered a stray native pagination bar above the search
+	 * field. With this nav present WBW replaces it in place (or empties it), so
+	 * the replacement stays inside the hidden wrapper. It must be a separate
+	 * element from the placeholder: WBW overwrites the placeholder's content
+	 * with .html() on every AJAX update, which would remove a nav nested in it.
 	 */
 	?>
 	<div class="dp-qo-wbw-ajax-placeholder" hidden aria-hidden="true"></div>
+	<div class="dp-qo-wbw-pagination-sink" hidden aria-hidden="true"><nav class="woocommerce-pagination"></nav></div>
 
 	<div class="container">
 		<div class="row">

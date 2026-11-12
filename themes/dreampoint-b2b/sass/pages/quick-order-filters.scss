@@ -314,3 +314,21 @@
         display: none;
     }
 }
+
+// ---------------------------------------------------------------------------
+// Sticky filter column: same pure-CSS behaviour as the Shop / brand archive `.products-lhs-filter-wrap`
+// (shop-archive.scss): desktop only (md-up = the `col-lg-3` breakpoint), top 96px = 72px sticky header + 24px gap,
+// +32px when the admin bar is shown. The flex column must not stretch (`align-self: flex-start`), otherwise there is
+// no room to stick; it ends with the row, so it never runs over the footer. A card taller than the viewport is
+// accepted, as on Shop (sections can be collapsed). Below md-up the column stacks and is not sticky, as on Shop.
+// ---------------------------------------------------------------------------
+@include bp(md-up) {
+    .dp-quick-order .row > .col-lg-3 {
+        position: sticky;
+        top: 96px;
+        align-self: flex-start;
+    }
+    body.admin-bar .dp-quick-order .row > .col-lg-3 {
+        top: 128px;
+    }
+}

@@ -500,6 +500,11 @@ body:has(.dp-quick-order) {
     border: 0;
     border-radius: 8px;
     background: $dp-color-bg-tertiary;
+    // Figma 11276:22102: outer frame 104px, 40px content at y=32 (32px above and below). The generated code's `py-8` was an
+    // auto-layout export artefact; geometry is authoritative. Content is centred (plugin `align-items: center`); a wrapped bar is already taller.
+    @media (min-width: 768px) {
+        min-height: 104px;
+    }
     box-shadow: $dp-shadow-card-xl; // Figma card/xl: 0 2 5 .16 + 0 10 24 .20
     flex-wrap: wrap; // 196px buttons + totals do not fit one row in the 992-1199px column; the group then wraps instead of squeezing text
 

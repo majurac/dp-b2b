@@ -458,3 +458,137 @@ body:has(.dp-quick-order) {
         display: none;
     }
 }
+
+// ---------------------------------------------------------------------------
+// Quick Order chips + bottom cart bar (E1 slice 1, Figma QO-01 11148:33784: chip row 11276:22072, cart bar 11276:22102)
+// Visual skin only: plugin markup, JS and behaviour are untouched. Plugin CSS (1-2 classes) loses to the 3+ class selectors
+// below, so no `!important` except where the plugin / WBW rule is itself `!important` (WBW chip background).
+// Not specified in Figma and therefore left as the plugin has it: the chip remove (x) glyph colour, chip hover colour,
+// the "Aktivni filteri" state (no frame; it reuses the chip skin), the mobile (< 768px) layout of the bar.
+// ---------------------------------------------------------------------------
+.dp-quick-order {
+    // Row: label + chips, 8px apart
+    .dp-qo-state-row {
+        gap: 8px;
+    }
+    .dp-qo-state-row__label {
+        padding: 4px; // Figma: label is a 4px-padded menu item
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: normal;
+        letter-spacing: 0.24px;
+        color: $dp-color-text-secondary;
+    }
+    // Popular chips (plugin buttons) and active chips (QO chips + WBW selected-parameter nodes)
+    .dp-qo-state-row .dp-qo-filter-chip,
+    .dp-qo-state-row .wpfSelectedParameter {
+        padding: 6px 8px;
+        border-radius: 4px;
+        background: $dp-color-bg-tertiary !important;
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: normal;
+        letter-spacing: 0.24px;
+        color: $dp-color-text-primary;
+    }
+}
+
+.dp-quick-order .dp-qo-footer {
+    padding: 8px 16px;
+    border: 0;
+    border-radius: 8px;
+    background: $dp-color-bg-tertiary;
+    box-shadow: $dp-shadow-card-xl; // Figma card/xl: 0 2 5 .16 + 0 10 24 .20
+    flex-wrap: wrap; // 196px buttons + totals do not fit one row in the 992-1199px column; the group then wraps instead of squeezing text
+
+    .dp-qo-footer__summary {
+        gap: 8px;
+    }
+    .dp-qo-footer__icon {
+        width: 40px;
+        height: 40px;
+    }
+    .dp-qo-footer__counts {
+        gap: 0;
+    }
+    .dp-qo-footer__counts,
+    .dp-qo-footer__total {
+        font-size: 12px;
+        line-height: 20px;
+        letter-spacing: -0.132px;
+        color: $dp-color-text-secondary;
+    }
+    .dp-qo-footer__items,
+    .dp-qo-footer__subtotal-amount {
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 20px;
+        color: $dp-color-text-secondary;
+    }
+    .dp-qo-footer__rows,
+    .dp-qo-footer__total-label {
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 20px;
+        color: $dp-color-text-secondary;
+    }
+    .dp-qo-footer__total {
+        gap: 0;
+    }
+    .dp-qo-footer__actions {
+        gap: 24px;
+        margin-left: auto; // stays right-aligned when the bar wraps
+    }
+    .dp-qo-footer__cart-link,
+    .dp-qo-footer__add-to-cart {
+        box-sizing: border-box;
+        flex: 0 1 auto;
+        width: 196px; // Figma 196px (a width, not a flex-basis, so the actions group's intrinsic size is 2 x 196px); may shrink
+        min-width: 0;
+        height: 40px;
+        padding: 0 12px;
+        border-radius: 24px;
+        font-family: inherit;
+        font-size: 16px;
+        font-weight: 600;
+        line-height: 16px;
+        letter-spacing: 0.32px;
+    }
+    .dp-qo-footer__cart-link {
+        border-color: $dp-color-bg-brand;
+        background: $dp-color-bg-brand;
+        color: $dp-color-bg-secondary;
+        &:hover {
+            border-color: $dp-color-btn-primary-hover;
+            background: $dp-color-btn-primary-hover;
+            color: $dp-color-bg-secondary;
+        }
+    }
+    .dp-qo-footer__add-to-cart {
+        border-color: $dp-color-bg-brand;
+        background: $dp-color-bg-primary;
+        color: $dp-color-text-primary;
+        &:hover:not(:disabled) {
+            background: $dp-color-btn-secondary-hover-bg;
+        }
+    }
+    @include bp(sm-down) {
+        padding: 8px 12px;
+        .dp-qo-footer__actions {
+            gap: 12px;
+        }
+        .dp-qo-footer__cart-link,
+        .dp-qo-footer__add-to-cart {
+            flex: 1 1 0;
+            padding: 0 8px;
+            font-size: 14px; // plugin's phone size kept: 16px does not fit two buttons at 320-390px
+            letter-spacing: 0.28px;
+            @media (max-width: 359.98px) {
+                font-size: 13px; // 14px label overflows a 117px button at 320px
+                letter-spacing: 0.2px;
+            }
+        }
+    }
+}

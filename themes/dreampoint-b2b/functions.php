@@ -233,6 +233,7 @@ function dreampoint_b2b_needs_select2(): bool {
            is_product_category()             ||
            is_product_tag()                  ||
            is_tax( 'product_brand' )         ||
+           is_page( 'quick-order' )          || // E1: WBW sort select in the results toolbar (js/select2-init.js)
            dreampoint_b2b_akcija_page_detected();
 }
 
@@ -645,8 +646,18 @@ function dreampoint_b2b_scripts(): void {
         wp_script_add_data( 'dreampoint-b2b-wbw-show-more-count', 'strategy', 'defer' );
     }
 
-    // Quick Order filter sidebar (E1): the same Show More count script, rooted at `.dp-qo-filter-area` (see the script).
+    // Quick Order filter sidebar (E1): the same Show More count script, rooted at `.dp-qo-filter-area` (see the script),
+    // and the Shop/Brands mobile filter panel script (the plugin template uses the same class contract).
     if ( is_page( 'quick-order' ) ) {
+        wp_enqueue_script(
+            'dreampoint-b2b-mobile-product-filters',
+            get_template_directory_uri() . '/js/mobile-product-filters.js',
+            [ 'jquery' ],
+            _S_VERSION,
+            true
+        );
+        wp_script_add_data( 'dreampoint-b2b-mobile-product-filters', 'strategy', 'defer' );
+
         wp_enqueue_script(
             'dreampoint-b2b-wbw-show-more-count',
             get_template_directory_uri() . '/js/wbw-show-more-count.js',
@@ -835,7 +846,7 @@ function dreampoint_b2b_optimize_product_query( WP_Query $query ): void {
 add_action( 'wp_head', 'dreampoint_b2b_select2_admin_bar_fix' );
 function dreampoint_b2b_select2_admin_bar_fix(): void {
     // contact.php: CF7 select sa Select2 (isti ofset panela kao na WooCommerce stranicama)
-    if ( ! is_woocommerce() && ! is_cart() && ! is_checkout() && ! is_account_page() && ! is_page_template( 'contact.php' ) ) return;
+    if ( ! is_woocommerce() && ! is_cart() && ! is_checkout() && ! is_account_page() && ! is_page_template( 'contact.php' ) && ! is_page( 'quick-order' ) ) return; // quick-order: E1 sort Select2 panel, same offset
     if ( ! is_admin_bar_showing() ) return;
 
     $type_attr = current_theme_supports( 'html5', 'style' ) ? '' : ' type="text/css"';

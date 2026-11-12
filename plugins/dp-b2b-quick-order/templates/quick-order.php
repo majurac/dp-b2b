@@ -63,7 +63,18 @@ $dp_qo_active_filters = [
 	<div class="container">
 		<div class="row">
 
-			<div class="col-lg-3">
+			<?php
+			/*
+			 * `products-lhs-filter-wrap` + `close-mobile-filters` + the `.sort-filter .filter-btn` trigger below are the same
+			 * class contract the Shop / Brands sidebar uses, so the theme's js/mobile-product-filters.js turns this column into
+			 * the off-canvas panel below 992px (E1). The theme skin lives in quick-order-filters.scss; the column is not moved
+			 * or duplicated, so WBW keeps a single filter instance.
+			 */
+			?>
+			<div class="col-lg-3 products-lhs-filter-wrap">
+				<button type="button" class="close-mobile-filters" aria-label="<?php esc_attr_e( 'Zatvori filtere', 'dp-b2b-quick-order' ); ?>">
+					<i class="icon-xmark" aria-hidden="true"></i>
+				</button>
 				<div class="dp-qo-filters-header">
 					<span class="dp-qo-filters-header__title"><?php esc_html_e( 'Filteri', 'dp-b2b-quick-order' ); ?></span>
 					<button type="button" class="dp-qo-catalog-filters__clear">
@@ -173,6 +184,10 @@ $dp_qo_active_filters = [
 				<div class="dp-qo-state-row" data-qo-state="active" hidden>
 					<span class="dp-qo-state-row__label"><?php esc_html_e( 'Aktivni filteri', 'dp-b2b-quick-order' ); ?></span>
 					<ul class="dp-qo-chip-list dp-qo-chip-list--active"></ul>
+				</div>
+
+				<div class="sort-filter dp-qo-filter-trigger">
+					<button type="button" class="button button--outline button--sm filter-btn"><?php esc_html_e( 'Filtriraj', 'dp-b2b-quick-order' ); ?></button>
 				</div>
 
 				<div class="dp-qo-toolbar">

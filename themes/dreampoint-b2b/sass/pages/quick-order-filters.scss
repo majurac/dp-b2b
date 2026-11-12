@@ -378,20 +378,17 @@
         gap: 11px;
         margin-left: auto; // stays on the right, also when the pagination is hidden (single page)
         font-family: $dp-font-body;
-        .wpfMainWrapper {
-            margin: 0;
-        }
-        .wpfFilterWrapper {
+        .wpfMainWrapper,
+        .wpfFilterWrapper,
+        .wpfFilterContent {
             margin: 0;
             padding: 0;
-        }
-        .wpfFilterTitle {
-            display: none; // WBW's English "Sort by" title + collapse icon; replaced by `.dp-qo-sort__label`
         }
         .wpfFilterContent {
             display: block;
-            margin: 0;
-            padding: 0;
+        }
+        .wpfFilterTitle {
+            display: none; // WBW's English "Sort by" title + collapse icon; replaced by `.dp-qo-sort__label`
         }
     }
     .dp-qo-sort .dp-qo-sort__label {
@@ -402,45 +399,62 @@
         color: $dp-color-text-tertiary;
         white-space: nowrap;
     }
-    .dp-qo-sort .wpfFilterContent #wpfSortProducts { // ID: WBW styles the select by `#wpfSortProducts` (frontend.woofilters.css)
-        appearance: none;
-        height: 28px;
-        min-height: 0 !important; // vendor: frontend.woofilters.css sets `#wpfSortProducts { min-height: 44px !important }`
-        min-width: 160px;
-        max-width: 100%;
-        margin: 0;
-        padding: 0 28px 0 8px;
-        border: 0;
-        border-radius: 4px;
-        background: $dp-color-bg-tertiary url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none' stroke='%23111927' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E") no-repeat right 8px center;
-        font-family: $dp-font-body;
-        font-size: 12px;
-        font-weight: 600;
-        line-height: normal;
-        letter-spacing: 0.24px;
-        color: $dp-color-text-primary;
-        text-overflow: ellipsis;
-        cursor: pointer;
-        &:focus-visible {
-            outline: 0;
-            @include dp-focus-ring;
-        }
-    }
     @include bp(md-down) {
         .dp-qo-sort {
             flex: 1 1 100%;
             margin-left: 0;
         }
+        .dp-qo-sort .wpfMainWrapper,
+        .dp-qo-sort .wpfFilterWrapper,
         .dp-qo-sort .wpfFilterContent {
             flex: 1 1 auto;
         }
-        .dp-qo-sort .wpfMainWrapper,
-        .dp-qo-sort .wpfFilterWrapper {
-            flex: 1 1 auto;
+    }
+}
+
+// The sort select is wrapped by the theme's Select2 (js/select2-init.js) and uses the same chip as the Shop sort bar
+// (shared mixin). `#page` prefix: the generic `#page .select2-container` form-control rule (_content.scss) would win.
+#page .dp-quick-order .dp-qo-sort .select2-container {
+    @include sort-select2-chip;
+}
+// Open-state panel (appended to <body>), same skin and stacking as the Shop sort panel.
+body:has(.dp-quick-order) {
+    @include sort-select2-panel;
+}
+
+// Toolbar rhythm: 24px above (popular searches / filter trigger -> toolbar), 20px below (toolbar -> column labels).
+// The toolbar row stays 32px high; it only shows its controls, so no extra blank space when pagination is hidden.
+.dp-quick-order .dp-qo-toolbar {
+    margin-top: 24px;
+    margin-bottom: 20px;
+    @include bp(md-down) {
+        margin-top: 16px;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Mobile filters (< 992px): the filter column becomes the same off-canvas panel as the Shop / Brands sidebar (shared
+// mixins, `.products-lhs-filter-wrap`; driven by js/mobile-product-filters.js). The trigger is the Shop "Filtriraj"
+// button (`.button--outline.button--sm.filter-btn`), full width, hidden on desktop where the column is a sticky sidebar.
+// ---------------------------------------------------------------------------
+@include mobile-filter-panel('.dp-quick-order .products-lhs-filter-wrap');
+@include mobile-filter-close('.dp-quick-order .products-lhs-filter-wrap .close-mobile-filters');
+.dp-quick-order .products-lhs-filter-wrap .close-mobile-filters {
+    @include bp(md-up) {
+        display: none; // invisible on desktop in Shop too (opacity 0); here it also leaves the keyboard focus order
+    }
+}
+.dp-quick-order .dp-qo-filter-trigger {
+    margin-top: 16px;
+    .filter-btn {
+        @include bp(md-up) {
+            display: none;
         }
-        .dp-qo-sort .wpfFilterContent #wpfSortProducts {
+        @include bp(md-down) {
             width: 100%;
-            height: 36px; // touch target, as the Shop sort on phones
         }
+    }
+    @include bp(md-up) {
+        display: none;
     }
 }

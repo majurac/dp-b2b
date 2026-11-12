@@ -45,6 +45,35 @@
 
     initSelect2( '.form-group select' );
     initSelect2( '.sort-area select' );
+    // Quick Order results toolbar (E1): WBW's native Sort By select (#wpfSortProducts, filter view 2). The original select
+    // keeps its id/options and WBW's change handler; Select2 only wraps it and fires the same jQuery `change` on pick.
+    initSelect2( '.dp-qo-sort select' );
+
+    // Quick Order sort lifecycle. Filtering through the WBW filter 3 view resets this select (view 2) to its first option
+    // without a `change` event and drops `orderby` from the URL, while ProductList keeps the last chosen sort. Remember the
+    // user's pick (`select2:select` fires only for real picks) and restore it after each WBW AJAX update; only the value
+    // and the Select2 display are synced, no `change` is triggered, so WBW does not run another request.
+    const $qoSort = $( '.dp-qo-sort select' );
+    if ( $qoSort.length ) {
+        // Initial state must match ProductList (`#orderBy` defaults to `title` asc, and a valid `orderby` URL param wins; see
+        // product-list.js #applyOrderbyParam). WBW renders its first option (`price`) when there is no param, so the control
+        // would show "Cijena: niza prema visoj" over a title-sorted list. Only value + Select2 display are set, no `change`.
+        const urlSort = new URLSearchParams( window.location.search ).get( 'orderby' );
+        const hasOption = ( value ) => $qoSort.find( 'option' ).toArray().some( ( o ) => o.value === value );
+        let chosenSort = urlSort && hasOption( urlSort ) ? urlSort : ( hasOption( 'title' ) ? 'title' : $qoSort.val() );
+        if ( $qoSort.val() !== chosenSort ) {
+            $qoSort.val( chosenSort ).trigger( 'change.select2' );
+        }
+        $qoSort.on( 'select2:select', function () {
+            chosenSort = $qoSort.val();
+        } );
+        document.addEventListener( 'wpfAjaxSuccess', function () {
+            if ( $qoSort.val() !== chosenSort ) {
+                $qoSort.val( chosenSort );
+            }
+            $qoSort.trigger( 'change.select2' );
+        } );
+    }
     initSelect2( '.variations select', variationOptions );
 
     // Contact Form 7 selects (Contact page). They sit in .wpcf7-form-control-wrap, not in

@@ -991,3 +991,178 @@
 
     }
 }
+
+// ---------------------------------------------------------------------------
+// Mobile filter off-canvas panel (< 992px), shared by the Shop / archive sidebar (shop-archive.scss) and the Quick Order
+// sidebar (quick-order-filters.scss). Driven by js/mobile-product-filters.js (`.active` on the wrap, `body.filter-open`,
+// `.close-mobile-filters`, trigger `.sort-filter .filter-btn`). Output is unchanged for Shop; only the root selectors differ.
+// ---------------------------------------------------------------------------
+@mixin mobile-filter-panel($wrap) {
+    #{$wrap} {
+        @include bp(md-down) {
+            position: fixed;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            pointer-events: none;
+            padding: 46px 16px 32px 16px;
+            width: 100%;
+            height: 100%;
+            height: 100dvh; // follows the visible viewport on mobile browsers with a collapsing address bar
+            z-index: 9999;
+            align-items: flex-start;
+            background-color: $white;
+            // The panel is the only scroll container: a filter card taller than the viewport scrolls here, so every
+            // section and the bottom buttons stay reachable (the close button is fixed, see below).
+            overflow-x: hidden;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+            @include animate-fade;
+        }
+        .close-mobile-filters {
+            margin-left: auto;
+            padding: 0;
+            border: 0;
+            background: none;
+            font-size: 24px;
+            position: absolute;
+            top: 20px;
+            right: 16px;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            @include animate-fade;
+        }
+        &.active {
+            @include bp(md-down) {
+                opacity: 1;
+                pointer-events: auto;
+            }
+            .close-mobile-filters {
+                @include bp(md-down) {
+                    opacity: 1;
+                    pointer-events: auto;
+                }
+            }
+        }
+        
+    }
+}
+
+// Close button + scroll lock of the same panel. $close is the full selector of the close button.
+@mixin mobile-filter-close($close) {
+    #{$close} {
+        @include bp(md-down) {
+            position: fixed;
+            top: 20px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: $white;
+        }
+    }
+    body.admin-bar #{$close} {
+        @include bp(md-down) {
+            top: 52px; // 32px admin bar + 20px
+        }
+        @media screen and (max-width: 782px) {
+            top: 66px; // 46px admin bar + 20px
+        }
+    }
+    @include bp(md-down) {
+        body.filter-open {
+            overflow: hidden;
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Sort select as a Select2 chip (Figma CAT-02 / C1-1): 28px #f3f4f6 chip, 12/600 value, chevron. Shared by the Shop archive
+// sort bar (shop-archive.scss) and the Quick Order results toolbar (quick-order-filters.scss). Include inside the selector
+// that targets the generated `.select2-container`.
+// ---------------------------------------------------------------------------
+@mixin sort-select2-chip {
+    display: block;
+    position: relative;
+    width: auto;
+    height: 28px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font-family: $dp-font-body;
+    @include bp(md-down) {
+        flex: 1 1 auto;
+        height: 36px; // touch target on phones; Figma is desktop-only
+    }
+    .selection {
+        display: block;
+        height: 100%;
+    }
+    .select2-selection--single {
+        height: 100%;
+        border: 0;
+        border-radius: 4px;
+        background: $dp-color-bg-tertiary;
+        outline-offset: 2px;
+    }
+    .select2-selection__rendered {
+        display: flex;
+        align-items: center;
+        height: 100%;
+        margin: 0;
+        padding: 0 28px 0 8px; // 8px inset + 4px gap + 16px arrow + 8px inset (arrow is positioned below)
+        font-size: 12px;
+        font-weight: 600;
+        line-height: normal;
+        letter-spacing: 0.24px;
+        color: $dp-color-text-primary;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .select2-selection__arrow {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        top: 0;
+        right: 8px;
+        width: 16px;
+        height: 100%;
+        b {
+            display: none;
+        }
+        &:after {
+            @include centre(y);
+            font-family: icomoon;
+            font-size: 16px;
+            line-height: 1;
+            color: $dp-color-text-primary;
+            // same chevron glyph as the other theme selects (`#page .select2-container`, _content.scss); the
+            // earlier archive rule used \e902 but lost the cascade to that one, so \e902 was never displayed here
+            content: "\e91a";
+            @include animate-fade;
+        }
+    }
+    &.select2-container--open .select2-selection__arrow:after {
+        transform: translateY(-50%) rotate(180deg);
+    }
+}
+
+// Open-state dropdown panel of that sort select (appended to <body>): stacks above the sticky header (9999), at least as
+// wide as the trigger, and shows all options without Select2's default 200px list cap. Include inside a body-scoped rule.
+@mixin sort-select2-panel {
+    .select2-container .select2-dropdown {
+        z-index: 10000;
+        min-width: 100%;
+    }
+    .select2-results > .select2-results__options {
+        max-height: none;
+        overflow-y: visible;
+    }
+}

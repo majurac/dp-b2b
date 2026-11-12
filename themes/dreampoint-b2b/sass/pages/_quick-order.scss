@@ -1,53 +1,76 @@
 // Minimal header for the Quick Order page (docs/frozen/quick-order-local-state-architecture.md §7)
 .dp-qo-header {
-    border-bottom: 1px solid $border-secondary;
-    background: $white;
+    // Figma QO-01 primary menu 11148:33872: 72px bar, #f9fafb, 1200px content (the `container` class on the inner wrapper),
+    // 56px logo, 24px gap, back link / centred label / cart spread between. Quick Order page only (header.php branch).
+    background: $dp-color-bg-secondary;
 
     &__inner {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        padding: 16px 24px;
-        gap: 16px;
+        gap: 24px;
+        min-height: 72px;
+        padding-top: 8px;
+        padding-bottom: 8px;
         @include bp(sm-down) {
-            padding: 12px 16px;
+            gap: 12px;
+            min-height: 56px;
+            padding-left: 16px;
+            padding-right: 16px;
         }
     }
 
+    // Logo and back link become direct flex items of the inner row; the auto margins below spread
+    // back link | label | cart like Figma's space-between without a wrapper.
     &__left {
-        display: flex;
-        align-items: center;
-        gap: 20px;
+        display: contents;
     }
 
     &__logo img {
         display: block;
-        height: 32px;
+        height: 56px;
         width: auto;
+        @include bp(sm-down) {
+            height: 40px; // no mobile frame in Figma: conservative
+        }
     }
 
     &__back {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
-        color: $black;
+        gap: 4px;
+        margin-right: auto;
+        padding: 4px;
+        color: $dp-color-text-primary;
+        font-family: $dp-font-body;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: normal;
+        letter-spacing: 0.24px;
         text-decoration: none;
-        font-size: 13px;
+        i { font-size: 16px; }
         @include bp(sm-down) {
             span { display: none; } // icon-only on mobile — label kept in DOM for accessibility
         }
         &:hover { color: $dp-color-btn-secondary-hover-text; }
     }
 
+    // Plain navigation text, not a heading (the page's only H1 is in the header band)
     &__center {
-        @include heading-6;
-        color: $black;
+        color: $dp-color-text-primary;
+        font-family: $dp-font-body;
+        font-size: 16px;
+        font-weight: 700;
+        line-height: normal;
+        letter-spacing: 0.32px;
+        text-transform: none;
         white-space: nowrap;
     }
 
     &__right {
         display: flex;
         align-items: center;
+        margin-left: auto;
+        .icon-cart { font-size: 24px; } // Figma cart glyph 24px; button, count and fragments unchanged
     }
 
     // The theme's global `a, button, input, textarea { outline: none!important }`

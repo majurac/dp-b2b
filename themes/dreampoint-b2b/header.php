@@ -39,7 +39,7 @@ $company_phone = get_field('company_phone', 'option') ?: '';
     ?>
     <?php if ( $is_quick_order ) : ?>
         <header id="header" class="dp-qo-header" role="banner">
-            <div class="dp-qo-header__inner">
+            <div class="dp-qo-header__inner container">
                 <div class="dp-qo-header__left">
                     <?php if ( ! empty( $company_logo['url'] ) ) : ?>
                         <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="dp-qo-header__logo" aria-label="<?php esc_attr_e( 'Početna stranica', 'dreampoint-b2b' ); ?>">

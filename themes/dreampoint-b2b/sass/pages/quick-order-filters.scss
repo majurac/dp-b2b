@@ -597,3 +597,139 @@ body:has(.dp-quick-order) {
         }
     }
 }
+
+// ---------------------------------------------------------------------------
+// Quick Order page header band (E1 slice 2, Figma QO-01 header 11276:22034): H1 + intro on the left, Search + Excel Import
+// + Popular Searches / Active Filters on the right. The markup (plugin template) moves the existing controls here without
+// changing IDs / classes / data attributes, so ProductList and the import trigger work as before. Figma is 1440px only:
+// below 992px the two columns stack; other responsive values follow the `.inner-heading` steps (conservative, not Figma).
+// Watermark: Quick Order-specific `img/bg/dp-pattern-quick-order.png`, built from the Figma raster of the header layer
+// (node 11276:22035, image f8486, 1440x960, colour #050708). The Figma export is the artwork BEFORE the layer's 20% opacity
+// (alpha up to 250, and the generated code applies `opacity-20` on the layer), so alpha was scaled by 0.2 exactly once
+// (round(a * 0.2), 51 levels, lossless indexed PNG); graduated alpha and antialiased edges are kept. The shared
+// `dp-pattern.png` is a flat 1-bit mask (alpha 7, about 10%) used by the other banners and stays untouched.
+// Position / size rule as `.inner-heading`.
+// ---------------------------------------------------------------------------
+.dp-quick-order .dp-qo-page-header {
+    padding: 24px 0;
+    background-image: url("../../img/bg/dp-pattern-quick-order.png");
+    background-repeat: no-repeat;
+    background-size: 1440px 960px;
+    background-position: calc(100% + 336px) -744px;
+    @include bp(sm-down) {
+        background-image: none; // same as `.inner-heading`
+    }
+
+    &__inner {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        @include bp(md-up) { // >= 992px (theme `md-up`, as the sidebar / filter panel breakpoints)
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 24px;
+        }
+    }
+    &__text {
+        @include bp(md-up) {
+            flex: 0 0 380px; // Figma text column 380px
+            max-width: 380px;
+        }
+    }
+    &__title {
+        margin: 0;
+        font-family: $dp-font-heading;
+        font-size: 64px;
+        font-weight: 600;
+        line-height: 72px;
+        letter-spacing: 0;
+        text-transform: none;
+        color: $dp-color-text-primary;
+        @include bp(lg-down) {
+            font-size: 48px;
+            line-height: 56px;
+        }
+        @include bp(sm-down) {
+            font-size: 32px;
+            line-height: 40px;
+        }
+    }
+    &__intro {
+        margin: 4px 0 0; // Figma 4px between H1 and intro
+        font-family: $dp-font-body;
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 20px;
+        letter-spacing: -0.176px;
+        color: $dp-color-text-secondary;
+    }
+    &__controls {
+        min-width: 0;
+        @include bp(md-up) {
+            flex: 1 1 auto;
+            padding-top: 67px; // Figma: controls start 67px below the band padding
+        }
+    }
+
+    // Search row: search 40px centred against the 48px Excel Import button, 13px apart
+    .dp-qo-search-row {
+        align-items: center;
+        gap: 13px;
+        margin: 0 0 8px;
+    }
+    .dp-qo-search {
+        &::before { // Figma 16px search glyph (the theme's icomoon search icon, as in the header search)
+            content: "\e904";
+            position: absolute;
+            top: 50%;
+            left: 16px;
+            transform: translateY(-50%);
+            font-family: 'icomoon' !important;
+            font-size: 16px;
+            line-height: 1;
+            color: $dp-color-text-primary;
+            pointer-events: none;
+        }
+    }
+    .dp-qo-search__input {
+        height: 40px;
+        padding: 0 44px 0 40px;
+        border: 1px solid $dp-color-border-primary;
+        border-radius: 8px;
+        background: $dp-color-bg-mono;
+        font-family: $dp-font-body;
+        font-size: 16px;
+        color: $dp-color-text-primary;
+        &::placeholder {
+            color: $dp-color-text-secondary;
+            opacity: 1;
+        }
+    }
+    .dp-qo-import-trigger {
+        height: 48px;
+        gap: 8px;
+        padding: 0 12px;
+        border: 1px solid $dp-color-bg-brand;
+        border-radius: 24px; // owner decision (Figma export shows no radius)
+        background: $dp-color-bg-primary;
+        font-family: $dp-font-body;
+        font-size: 16px;
+        font-weight: 600;
+        line-height: 16px;
+        letter-spacing: 0.32px;
+        color: $dp-color-text-primary;
+        &:hover {
+            background: $dp-color-btn-secondary-hover-bg;
+        }
+    }
+    .dp-qo-import-trigger__icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    // Chip rows sit under the search row inside the band: Figma 4px top / 12px bottom padding
+    .dp-qo-state-row {
+        margin: 0;
+        padding: 4px 0 12px;
+    }
+}

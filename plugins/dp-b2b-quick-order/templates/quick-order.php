@@ -60,6 +60,72 @@ $dp_qo_active_filters = [
 	<div class="dp-qo-wbw-ajax-placeholder" hidden aria-hidden="true"></div>
 	<div class="dp-qo-wbw-pagination-sink" hidden aria-hidden="true"><nav class="woocommerce-pagination"></nav></div>
 
+	<?php
+	/*
+	 * Page header band (E1, Figma QO-01 header 11276:22034). Left: the page's only H1 + intro; right: the Search, Excel
+	 * Import and Popular Searches / Active Filters elements, MOVED here unchanged from the product column (same IDs,
+	 * classes, data attributes and DOM order inside #dp-quick-order, so ProductList / import JS find them exactly as
+	 * before; nothing is duplicated). The band's skin lives in the theme (quick-order-filters.scss).
+	 */
+	?>
+	<div class="dp-qo-page-header">
+		<div class="container">
+			<div class="dp-qo-page-header__inner">
+				<div class="dp-qo-page-header__text">
+					<h1 class="dp-qo-page-header__title"><?php esc_html_e( 'Quick order', 'dp-b2b-quick-order' ); ?></h1>
+					<p class="dp-qo-page-header__intro"><?php esc_html_e( 'Brzo pronađite proizvode i unesite količine za narudžbu', 'dp-b2b-quick-order' ); ?></p>
+				</div>
+				<div class="dp-qo-page-header__controls">
+				<div class="dp-qo-search-row">
+				<form class="dp-qo-search" role="search" novalidate>
+					<label class="dp-qo-search__label" for="dp-qo-search-input">
+						<?php esc_html_e( 'Pretraga proizvoda', 'dp-b2b-quick-order' ); ?>
+					</label>
+					<input
+						type="text"
+						id="dp-qo-search-input"
+						class="dp-qo-search__input"
+						value="<?php echo esc_attr( $dp_qo_search_term ); ?>"
+						placeholder="<?php esc_attr_e( 'Pretražite naziv, kataloški broj, SKU ili EAN', 'dp-b2b-quick-order' ); ?>"
+						autocomplete="off"
+						enterkeyhint="search"
+					>
+					<button type="button" class="dp-qo-search__clear" aria-label="<?php esc_attr_e( 'Očisti pretragu', 'dp-b2b-quick-order' ); ?>" hidden>&times;</button>
+				</form>
+				<?php /* Excel import entry point. Hidden until the import bundle initialises, so a failed script load never leaves a dead button. */ ?>
+				<button type="button" class="dp-qo-import-trigger" data-dp-qo-import aria-haspopup="dialog" hidden>
+					<svg class="dp-qo-import-trigger__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 17v-6"/><path d="m9.5 13 2.5-2.5 2.5 2.5"/></svg>
+					<span><?php esc_html_e( 'Excel Import', 'dp-b2b-quick-order' ); ?></span>
+				</button>
+				</div>
+
+				<?php
+				/*
+				 * Search/filter state row — exactly one of the two groups is visible at a time
+				 * (toggled by ProductList from the URL/WBW state, never from its own state):
+				 *   popular → no active FILTER (a search term alone does not count);
+				 *   active  → at least one QO-owned or WBW filter is active; chips are rendered
+				 *             by ProductList (QO chips from qo_* URL state, WBW chips derived from
+				 *             WBW's own checked inputs — the remove control delegates to WBW).
+				 */
+				?>
+				<div class="dp-qo-state-row" data-qo-state="popular"<?php echo $dp_qo_popular_terms ? '' : ' hidden'; ?>>
+					<span class="dp-qo-state-row__label"><?php esc_html_e( 'Popularne pretrage', 'dp-b2b-quick-order' ); ?></span>
+					<ul class="dp-qo-chip-list dp-qo-chip-list--popular">
+						<?php foreach ( $dp_qo_popular_terms as $dp_qo_popular_term ) : ?>
+							<li><button type="button" class="dp-qo-filter-chip dp-qo-filter-chip--term" data-qo-popular="<?php echo esc_attr( $dp_qo_popular_term ); ?>"><?php echo esc_html( $dp_qo_popular_term ); ?></button></li>
+						<?php endforeach; ?>
+					</ul>
+				</div>
+				<div class="dp-qo-state-row" data-qo-state="active" hidden>
+					<span class="dp-qo-state-row__label"><?php esc_html_e( 'Aktivni filteri', 'dp-b2b-quick-order' ); ?></span>
+					<ul class="dp-qo-chip-list dp-qo-chip-list--active"></ul>
+				</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
 	<div class="container">
 		<div class="row">
 
@@ -139,52 +205,6 @@ $dp_qo_active_filters = [
 			</div>
 
 			<div class="col-lg-9">
-
-				<div class="dp-qo-search-row">
-				<form class="dp-qo-search" role="search" novalidate>
-					<label class="dp-qo-search__label" for="dp-qo-search-input">
-						<?php esc_html_e( 'Pretraga proizvoda', 'dp-b2b-quick-order' ); ?>
-					</label>
-					<input
-						type="text"
-						id="dp-qo-search-input"
-						class="dp-qo-search__input"
-						value="<?php echo esc_attr( $dp_qo_search_term ); ?>"
-						placeholder="<?php esc_attr_e( 'Pretražite naziv, kataloški broj, SKU ili EAN', 'dp-b2b-quick-order' ); ?>"
-						autocomplete="off"
-						enterkeyhint="search"
-					>
-					<button type="button" class="dp-qo-search__clear" aria-label="<?php esc_attr_e( 'Očisti pretragu', 'dp-b2b-quick-order' ); ?>" hidden>&times;</button>
-				</form>
-				<?php /* Excel import entry point. Hidden until the import bundle initialises, so a failed script load never leaves a dead button. */ ?>
-				<button type="button" class="dp-qo-import-trigger" data-dp-qo-import aria-haspopup="dialog" hidden>
-					<svg class="dp-qo-import-trigger__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 17v-6"/><path d="m9.5 13 2.5-2.5 2.5 2.5"/></svg>
-					<span><?php esc_html_e( 'Excel Import', 'dp-b2b-quick-order' ); ?></span>
-				</button>
-				</div>
-
-				<?php
-				/*
-				 * Search/filter state row — exactly one of the two groups is visible at a time
-				 * (toggled by ProductList from the URL/WBW state, never from its own state):
-				 *   popular → no active FILTER (a search term alone does not count);
-				 *   active  → at least one QO-owned or WBW filter is active; chips are rendered
-				 *             by ProductList (QO chips from qo_* URL state, WBW chips derived from
-				 *             WBW's own checked inputs — the remove control delegates to WBW).
-				 */
-				?>
-				<div class="dp-qo-state-row" data-qo-state="popular"<?php echo $dp_qo_popular_terms ? '' : ' hidden'; ?>>
-					<span class="dp-qo-state-row__label"><?php esc_html_e( 'Popularne pretrage', 'dp-b2b-quick-order' ); ?></span>
-					<ul class="dp-qo-chip-list dp-qo-chip-list--popular">
-						<?php foreach ( $dp_qo_popular_terms as $dp_qo_popular_term ) : ?>
-							<li><button type="button" class="dp-qo-filter-chip dp-qo-filter-chip--term" data-qo-popular="<?php echo esc_attr( $dp_qo_popular_term ); ?>"><?php echo esc_html( $dp_qo_popular_term ); ?></button></li>
-						<?php endforeach; ?>
-					</ul>
-				</div>
-				<div class="dp-qo-state-row" data-qo-state="active" hidden>
-					<span class="dp-qo-state-row__label"><?php esc_html_e( 'Aktivni filteri', 'dp-b2b-quick-order' ); ?></span>
-					<ul class="dp-qo-chip-list dp-qo-chip-list--active"></ul>
-				</div>
 
 				<div class="sort-filter dp-qo-filter-trigger">
 					<button type="button" class="button button--outline button--sm filter-btn"><?php esc_html_e( 'Filtriraj', 'dp-b2b-quick-order' ); ?></button>

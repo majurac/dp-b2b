@@ -2217,6 +2217,21 @@ Restore: `woocommerce_flat_rate_2_settings.title` = "Fiksna cijena dostave"; `wo
 - Supplier media: the three 300x300 originals need higher-resolution sources; no larger derivative can restore missing detail; images not modified.
 - Optional future optimization: eager and lazy cards select different candidates; `sizes`/transfer efficiency may be evaluated later only if real performance evidence justifies it. No implementation task created.
 
+## ADR-039 - Product card out-of-stock presentation, homepage / cross-sell / B5 closure (2026-11-13)
+
+**Status:** Accepted and implemented (`736d0fa`), staging verified. Presentation only; ADR-016 binary stock display and all stock / pricing / ERP logic unchanged.
+
+**Decisions (owner):**
+1. **OOS badge:** out-of-stock product cards show one `.stock-badge.stock-badge--out` ("Nema na stanju", existing `$dp-color-error-text` / `$dp-color-error` tokens, reusing the in-stock `.stock-badge`) below the price / action row. The `.tag--out-of-stock` ribbon and the price-slot label (`.out-of-stock-price`) are removed. The `display_new_product_ribbon_and_discount()` OOS branch keeps its early return so promotional tags stay suppressed on OOS cards. The OOS variant is not in Figma (Figma defines only the green "Na stanju" badge).
+2. **OOS numeric price stays hidden** (no price approved for OOS cards; the PDP keeps its own native behaviour). The empty `.price-holder` stays as a flex item so the 48px row and the right-aligned action are stable.
+3. **Structured data:** the incomplete OOS `Offer` (availability only) emitted by the card template is removed and NOT replaced, because no reliable context-correct price is available at that point. Product-level `itemprop` price / currency meta stay; WooCommerce global JSON-LD was not changed or audited.
+4. **AJAX live search** (`inc/ajax-handlers.php`, own `out-of-stock-price` span) is a separate presentation context, unchanged.
+5. **Homepage product cards:** OWNER VERIFIED / CLOSED (owner acceptance; sale and placeholder variants not individually verified).
+6. **Cart cross-sells:** NOT REQUIRED / OUT OF SCOPE (Figma CART-02 has no cross-sell section); the dormant `woocommerce_cross_sell_display()` hook and `cart/cross-sells.php` override stay. PDP related products are a separate context.
+7. **B5:** COMPLETE, covered by component-level verification, with accepted limitations (320 px, exact 992 px boundary, physical touch device).
+
+**Not verified / accepted limitations:** sale and placeholder cards on staging (no qualifying data), OOS in PDP related and brand archive, global JSON-LD. Record: `status.md` 2026-11-13 (Product Card / OOS Final Closure).
+
 ## Appendix — Visibility Debugging Caveats
 
 Relocated verbatim from the theme `CLAUDE.md` (§ Visibility System Status) on 2026-11-10 to reduce always-loaded instruction size; `CLAUDE.md` keeps the condensed invariants.

@@ -254,7 +254,7 @@ Implementation commit `d77b7d1` (classic cart page only: `woocommerce/cart/cart.
 - **Functional Cart Remove click test: PASS — manually confirmed by the user on staging, 2026-10-09.** This is a user-reported manual result, not an independently executed Playwright or Claude Code test; no further test evidence or observations are recorded here. The visual QA above remained read-only (no clicks, no cart mutation).
 - The initial staging QA showed a stale `cart.css` (shared `_S_VERSION`, 7-day cache). It was fixed by `fff3d37` (per-file `dreampoint_b2b_asset_ver()` versions for page, WooCommerce and block CSS) and verified on staging: `cart.css?ver=1791548401` equals the server mtime. See `docs/active/block-css-cache-busting-followup.md` (Resolution).
 
-## 19. Product card — variable and out-of-stock actions (2026-10-09, commit `2e3a5c3`, staging browser QA PASS)
+## 19. Product card — variable and out-of-stock actions (2026-10-09, commit `2e3a5c3`, staging browser QA PASS) [historical: the OOS price-slot label described here was replaced by the `.stock-badge--out` badge on 2026-11-13, `736d0fa`, ADR-039; the OOS action link is unchanged]
 
 Product-card action status: simple product DONE earlier (section 17, Secondary M icon-only, `icon-cart`, AJAX add-to-cart E2E PASS); variable product DONE; out-of-stock DONE. Figma defines only the simple-product 32x32 card button and a green "Na stanju" badge (`Badge.stanjeprozivoda`, single variant); it has no variable or out-of-stock state, so these two follow the closest consistent presentation (approved decisions A and B).
 - `woocommerce/content-product.php` (variable and out-of-stock branches only): `button button--outline button--sm button--icon-only` (32x32, radius 8), `icon-chevron-right`, still a plain link to the product permalink (no AJAX, no `data-product_*`, no WooCommerce condition changed); the visible label became `screen-reader-text` ("Pogledaj opcije" / "Nije na stanju"), localized aria-labels and `title` kept; the old `categories-btn`, `add-cart-variable`, `hide-sm`, `hide-lg` classes were dropped from these branches (`out-of-stock-btn` kept as a hook). Out-of-stock stays a link so the product page (back-in-stock notification) remains reachable; it is not disabled and never becomes add-to-cart. The simple-product branch is unchanged.
@@ -865,7 +865,7 @@ Section 43 recorded the layout/typography and listed the photo and the wordmark 
 | Description | `.wc-tabs-section .woocommerce-Tabs-panel p` | 300 18/24.5 | 400 14/18 | 16/22 <=767 |
 | Card title | `.product-item .content-holder .product-title` | Petrona 400 20/25 uppercase | Montserrat 600 14/21, sentence case, 2-line clamp | same (old 18px lg-down step removed) |
 | Card price | `.product-item .content-holder .price-container` | 400 18/26 uppercase 0.04em | 400 20/30, no case/tracking; `del` 12px | 16/24 <=767 |
-| Card out-of-stock label | `.out-of-stock-price` | 14px/26 (inherited) | unchanged (line-height pinned to 26px) | - |
+| Card out-of-stock label | `.out-of-stock-price` (removed 2026-11-13, `736d0fa`) | 14px/26 (inherited) | unchanged (line-height pinned to 26px) | - |
 
 Colours kept on the existing tokens (`#0d121c`, `#384250`); Figma's card title fallback `#111927` and description `#000` resolve to the token in the design variables, so no colour change was made.
 

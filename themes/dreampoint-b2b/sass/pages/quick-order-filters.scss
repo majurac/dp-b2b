@@ -733,3 +733,223 @@ body:has(.dp-quick-order) {
         padding: 4px 0 12px;
     }
 }
+
+// ---------------------------------------------------------------------------
+// Quick Order product list (E1 Slice 3a, Figma QO-01 11148:33784: column header 11276:22099, card 11200:36562)
+// Theme skin over the plugin base list CSS (plugin assets/dist/quick-order.css, single-class selectors); every selector
+// here is scoped under `.dp-quick-order` (2+ classes), so it wins regardless of stylesheet order and needs no `!important`.
+// Markup, JS, REST payload and the row dataset are untouched; only presentation changes. Desktop reference 1440px.
+// Mobile/tablet keeps the plugin horizontal-scroll list (a mobile layout is a later slice; Figma has no mobile frames).
+// Owner decisions: name max two lines, variation catalog number kept, quantity value area >= 28px and growing for 3+ digits,
+// out-of-stock / backorder / added indicator preserved.
+// ---------------------------------------------------------------------------
+.dp-quick-order {
+    .dp-qo-table {
+        // Figma card: 8px padding, 120px photo, 28px gap, 237px data column, 28px gap, ~450px variation table.
+        // The product column may shrink (250px min) before the lines column (470px min), so the plugin 800px
+        // min-width / horizontal scroll threshold stays valid.
+        --qo-product-w: minmax(250px, 385px);
+        // option | availability | price | quantity | added check. Gap 8px + 20px spacers (option, availability, quantity)
+        // = Figma 28px cell spacing with the 8px price-to-stepper gap.
+        // Fixed columns (the header shares them; no max-content, so every row and the header line up): quantity column =
+        // 98px stepper (24 + 48 value area + 24 + borders) + 20px spacer.
+        --qo-line-cols: minmax(110px, 1fr) 122px 64px 118px 24px;
+        font-family: $dp-font-body;
+    }
+
+    // Column header: Figma 10/20 SemiBold, -0.11px, #384250; 8px above the first card (labels sit on the card columns).
+    .dp-qo-thead {
+        grid-template-columns: var(--qo-product-w) minmax(470px, 1fr);
+        column-gap: 28px;
+        padding: 0 8px 8px; // card border (transparent) 1px + 8px padding line the columns up with the cards
+        font-size: 10px;
+        font-weight: 600;
+        line-height: 20px;
+        letter-spacing: -0.11px;
+        color: $dp-color-text-secondary;
+        &__product {
+            padding-left: 148px; // 120px photo + 28px gap: aligns with the product name
+        }
+        &__cols {
+            column-gap: 8px;
+        }
+    }
+
+    // Card: Figma white, 1px #e5e7eb, radius 8, padding 8, 8px between cards
+    .dp-qo-card {
+        grid-template-columns: var(--qo-product-w) minmax(470px, 1fr);
+        column-gap: 28px;
+        margin: 0 0 8px;
+        padding: 8px;
+        background: $dp-color-bg-primary;
+        border: 1px solid $dp-color-border-secondary;
+        border-radius: 8px;
+    }
+
+    // Product identity: 120px photo (contain: never cropped), name <= 2 lines, catalog number, availability
+    .dp-qo-card__product {
+        gap: 28px;
+    }
+    .dp-qo-card__media {
+        flex: 0 0 120px;
+        width: 120px;
+        height: 120px;
+        background: transparent;
+        border-radius: 0;
+    }
+    .dp-qo-card__info {
+        gap: 2px;
+        padding-top: 0;
+        .dp-qo-stock {
+            margin-top: 22px; // Figma: 24px between the identity block and the availability badge (2px gap + 22px)
+        }
+    }
+    .dp-qo-name {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        overflow: hidden;
+        font-size: 16px;
+        font-weight: 600;
+        line-height: 20px;
+        color: $dp-color-text-primary;
+    }
+    .dp-qo-card__info .dp-qo-sku {
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 20px;
+        letter-spacing: -0.132px;
+        color: $dp-color-text-secondary;
+    }
+
+    // Lines: Figma 24px rows, 6px apart; cells 12/20 #384250
+    .dp-qo-card__lines {
+        gap: 6px;
+    }
+    .dp-qo-line {
+        column-gap: 8px;
+        min-height: 24px;
+        padding: 0;
+    }
+    .dp-qo-cell {
+        font-size: 12px;
+        line-height: 20px;
+        letter-spacing: -0.132px;
+        color: $dp-color-text-secondary;
+        &--option,
+        &--stock {
+            margin-right: 20px;
+        }
+        &--qty {
+            display: flex; // no inline baseline slack: the 24px stepper makes a 24px cell
+            align-items: center;
+            padding-right: 20px;
+        }
+        &--price,
+        &--price .woocommerce-Price-amount {
+            font-weight: 700;
+        }
+    }
+    .dp-qo-option__label {
+        font-weight: 500;
+        color: inherit;
+    }
+    // Variation catalog number (owner: keep): muted second line under the option, not competing with the option text
+    .dp-qo-option__code {
+        margin: 0;
+        font-size: 11px;
+        line-height: 14px;
+        letter-spacing: 0;
+        color: $dp-color-text-tertiary;
+    }
+
+    // Availability: Figma 10px Medium, 8px dot, 4px gap, 2px vertical padding (in stock: #067647 text, #17b26a dot).
+    // Out of stock / backorder keep their own colours (text + dot, never colour alone).
+    .dp-qo-stock {
+        gap: 4px;
+        padding: 2px 0;
+        font-size: 10px;
+        font-weight: 500;
+        line-height: normal;
+        letter-spacing: 0;
+        &::before {
+            width: 8px;
+            height: 8px;
+        }
+        &--instock {
+            color: $dp-color-success-strong;
+            &::before {
+                background: $dp-color-success;
+            }
+        }
+    }
+
+    // Quantity stepper: Figma 24px high, 1px #d2d6db, radius 8, white; 24px arrow buttons (16px icons), value area >= 28px.
+    // The value input keeps its role (type=number, same events). Its value area is 48px (Figma 28px minimum): fits 4-digit
+    // B2B quantities without clipping; a fixed width keeps the columns identical in every row.
+    .dp-qo-qty-wrap {
+        height: 24px;
+        border: 1px solid $dp-color-border-primary;
+        border-radius: 8px;
+        background: $dp-color-bg-primary;
+    }
+    .dp-qo-qty-btn {
+        flex: 0 0 24px;
+        width: 24px;
+        color: $dp-color-text-secondary;
+        background: $dp-color-bg-primary;
+        svg {
+            width: 16px;
+            height: 16px;
+        }
+        &:hover:not(:disabled) {
+            background: $dp-color-bg-tertiary;
+        }
+        &:disabled {
+            color: $dp-color-border-primary;
+            background: $dp-color-bg-primary;
+        }
+    }
+    .dp-qo-qty-minus {
+        border-right: 1px solid $dp-color-border-primary;
+        &:disabled {
+            border-right-color: $dp-color-border-secondary;
+        }
+    }
+    .dp-qo-qty-plus {
+        border-left: 1px solid $dp-color-border-primary;
+    }
+    .dp-qo-qty {
+        flex: 0 0 48px;
+        width: 48px;
+        min-width: 28px;
+        padding: 0 4px;
+        border: 0;
+        background: $dp-color-bg-primary;
+        font-family: $dp-font-body;
+        font-size: 15.4px;
+        font-weight: 400;
+        line-height: 1;
+        color: $dp-color-text-tertiary;
+        &:disabled {
+            background: $dp-color-bg-tertiary;
+            color: $dp-color-text-tertiary;
+        }
+    }
+    // an entered quantity reads as a value, not as the empty "0" tone
+    .is-added .dp-qo-qty:not(:disabled) {
+        color: $dp-color-text-primary;
+    }
+    // the plugin focus ring (2px outside) would be clipped by the stepper's rounded overflow; draw it inside instead
+    .dp-qo-qty:focus-visible,
+    .dp-qo-qty-btn:focus-visible {
+        outline-offset: -2px;
+    }
+
+    // Added indicator kept (visible when the quantity > 0); 24px to fill its column
+    .dp-qo-selected-check {
+        width: 24px;
+        height: 24px;
+    }
+}

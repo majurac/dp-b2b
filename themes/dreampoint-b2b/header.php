@@ -60,11 +60,14 @@ $company_phone = get_field('company_phone', 'option') ?: '';
                     <?php esc_html_e( 'QUICK ORDER', 'dreampoint-b2b' ); ?>
                 </div>
                 <div class="dp-qo-header__right">
-                    <?php
-                    if ( function_exists( 'dreampoint_b2b_woocommerce_cart_link' ) ) {
-                        dreampoint_b2b_woocommerce_cart_link();
-                    }
-                    ?>
+                    <?php /* Same wrapper classes as the main header cart (#header .action-btns .cart-btn-wrapper.action-btn); the rules are mirrored in _quick-order.scss because `.action-btns` also carries the mobile fixed bottom bar. */ ?>
+                    <div class="cart-btn-wrapper action-btn">
+                        <?php
+                        if ( function_exists( 'dreampoint_b2b_woocommerce_cart_link' ) ) {
+                            dreampoint_b2b_woocommerce_cart_link();
+                        }
+                        ?>
+                    </div>
                 </div>
             </div>
         </header>

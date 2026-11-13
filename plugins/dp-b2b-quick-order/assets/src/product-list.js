@@ -189,11 +189,15 @@ export class ProductList {
 
     /** OPCIJA..check cells of one purchasable line. Pure presentation of data the server already sent. */
     #lineCellsHTML({ optionHtml, stockHtml, priceHtml, qtyHtml }) {
+        // `data-label` is a purely visual caption (shown by CSS on narrow screens, where the column header row is hidden).
+        // It is not an accessible name: the stock text, the visually-hidden price label and the stepper's own aria-labels
+        // already describe every cell. The price caption reuses the existing "Cijena:" string without its colon.
+        const priceLabel = this.#t('priceLabel', 'Cijena:');
         return `
-      <div class="dp-qo-cell dp-qo-cell--option">${optionHtml}</div>
-      <div class="dp-qo-cell dp-qo-cell--stock">${stockHtml}</div>
-      <div class="dp-qo-cell dp-qo-cell--price"><span class="dp-qo-sr">${escHtml(this.#t('priceLabel', 'Cijena:'))} </span>${priceHtml}</div>
-      <div class="dp-qo-cell dp-qo-cell--qty">${qtyHtml}</div>
+      <div class="dp-qo-cell dp-qo-cell--option" data-label="${escAttr(this.#t('optionLabel', 'Opcija'))}">${optionHtml}</div>
+      <div class="dp-qo-cell dp-qo-cell--stock" data-label="${escAttr(this.#t('stockLabel', 'Stanje'))}">${stockHtml}</div>
+      <div class="dp-qo-cell dp-qo-cell--price" data-label="${escAttr(priceLabel.replace(/:\s*$/, ''))}"><span class="dp-qo-sr">${escHtml(priceLabel)} </span>${priceHtml}</div>
+      <div class="dp-qo-cell dp-qo-cell--qty" data-label="${escAttr(this.#t('qtyLabel', 'Količina'))}">${qtyHtml}</div>
       <div class="dp-qo-cell dp-qo-cell--check">${CHECK_ICON}</div>`;
     }
 

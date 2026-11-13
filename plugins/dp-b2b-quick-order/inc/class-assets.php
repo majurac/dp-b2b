@@ -84,6 +84,8 @@ class DP_Quick_Order_Assets {
 				],
 				'priceLabel'         => __( 'Cijena:', 'dp-b2b-quick-order' ),
 				'qtyLabel'           => __( 'Količina', 'dp-b2b-quick-order' ),
+				'optionLabel'        => __( 'Opcija', 'dp-b2b-quick-order' ),
+				'stockLabel'         => __( 'Stanje', 'dp-b2b-quick-order' ),
 				'qtyDecrease'        => __( 'Smanji količinu', 'dp-b2b-quick-order' ),
 				'qtyIncrease'        => __( 'Povećaj količinu', 'dp-b2b-quick-order' ),
 				'loadingVariations'  => __( 'Učitavanje varijacija...', 'dp-b2b-quick-order' ),

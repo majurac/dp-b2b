@@ -179,19 +179,16 @@ if ( is_shop() || is_product_category() || is_tax('product_brand') ) :
                             <?php echo wp_kses_post($product->get_price_html()); ?>
                             <meta itemprop="availability" content="https://schema.org/InStock">
                         </span>
-                    <?php elseif (!$product->is_in_stock()) : ?>
-                        <span class="price-container out-of-stock-price" itemprop="offers" itemscope itemtype="http://schema.org/Offer">
-                            <span class="out-of-stock-label"><?php esc_html_e('Nema na stanju', 'dreampoint-b2b'); ?></span>
-                            <meta itemprop="availability" content="https://schema.org/OutOfStock">
-                        </span>
-                    <?php endif; ?>
+                    <?php endif; // Out-of-stock: no price and no Offer markup here; the stock badge below carries the status. ?>
                  </div>
                  <!-- /.price-holder --> 
             </div>
             <!-- /.price-action -->
 
-            <?php if (!$out_of_stock) : ?>
-                <?php // Binary availability badge (Figma Badge.stanjeprozivoda): same is_in_stock() state as the card; never a quantity. ?>
+            <?php // Binary availability badge (Figma Badge.stanjeprozivoda): same is_in_stock() state as the card; never a quantity. ?>
+            <?php if ($out_of_stock) : ?>
+                <span class="stock-badge stock-badge--out"><?php esc_html_e('Nema na stanju', 'dreampoint-b2b'); ?></span>
+            <?php else : ?>
                 <span class="stock-badge"><?php esc_html_e('Na stanju', 'dreampoint-b2b'); ?></span>
             <?php endif; ?>
 

@@ -880,7 +880,7 @@ function dreampoint_b2b_select2_admin_bar_fix(): void {
 
 /**
  * Prikazuje oznaku proizvoda (ribbon) po prioritetu:
- *   1. Nema na zalihi
+ *   1. Nema na zalihi (bez oznake; badge "Nema na stanju" prikazuje kartica)
  *   2. Popust (prikazuje % iznos)
  *   3. Izdvojeno
  *   4. Novo (unutar 10 dana)
@@ -893,9 +893,8 @@ function display_new_product_ribbon_and_discount(): void {
 
     if ( ! $product instanceof WC_Product ) return;
 
-    // 1. Nema na lageru
+    // 1. Nema na lageru: no tag (the card shows the OOS stock badge instead); the early return keeps promo tags suppressed
     if ( ! $product->is_in_stock() ) {
-        echo '<span class="tag tag--out-of-stock">' . esc_html__( 'Nema na zalihi', 'dreampoint-b2b' ) . '</span>';
         return;
     }
 

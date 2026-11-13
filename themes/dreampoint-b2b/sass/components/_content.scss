@@ -1265,14 +1265,6 @@ body.page-template-contact-php .select2-container .select2-dropdown {
                 margin-top: 10px;
             }
         }
-        // Visible availability message in the card's price slot (the action itself is the icon-only navigation button)
-        .out-of-stock-price {
-            font-size: 14px;
-            line-height: 26px;
-            text-transform: none;
-            letter-spacing: 0;
-            color: $dp-color-text-secondary;
-        }
     }
     // Figma price row: price left, 32px action right, one 48px row (old-price slot included)
     .price-action {
@@ -1311,6 +1303,13 @@ body.page-template-contact-php .select2-container .select2-dropdown {
             height: 8px;
             border-radius: 50%;
             background-color: $dp-color-success;
+        }
+        // Out-of-stock variant (not in Figma, owner-approved): same badge, existing error tokens
+        &.stock-badge--out {
+            color: $dp-color-error-text;
+            &::before {
+                background-color: $dp-color-error;
+            }
         }
     }
     .action-holder {

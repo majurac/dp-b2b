@@ -168,15 +168,6 @@
         letter-spacing: 0.07em;
         color: #fff;
     }
-    &.tag--out-of-stock {
-        background-color: $white;
-        color: $dp-color-error-text;
-        font-weight: 500;
-        @include bp(sm-down) {
-            height: 18px;
-            padding: 0 6px;
-        }
-    }
 }
 
 .sliding-content-close {

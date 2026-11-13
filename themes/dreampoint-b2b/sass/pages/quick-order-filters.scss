@@ -746,20 +746,20 @@ body:has(.dp-quick-order) {
 .dp-quick-order {
     .dp-qo-table {
         // Figma card: 8px padding, 120px photo, 28px gap, 237px data column, 28px gap, ~450px variation table.
-        // The product column may shrink (250px min) before the lines column (470px min), so the plugin 800px
+        // The product column may shrink (250px min) before the lines column (450px min), so the plugin 800px
         // min-width / horizontal scroll threshold stays valid.
         --qo-product-w: minmax(250px, 385px);
         // option | availability | price | quantity | added check. Gap 8px + 20px spacers (option, availability, quantity)
         // = Figma 28px cell spacing with the 8px price-to-stepper gap.
         // Fixed columns (the header shares them; no max-content, so every row and the header line up): quantity column =
-        // 98px stepper (24 + 48 value area + 24 + borders) + 20px spacer.
-        --qo-line-cols: minmax(110px, 1fr) 122px 64px 118px 24px;
+        // 78px stepper (24 + 28 value area + 24 + borders, Figma) + 20px spacer.
+        --qo-line-cols: minmax(110px, 1fr) 122px 64px 98px 24px;
         font-family: $dp-font-body;
     }
 
     // Column header: Figma 10/20 SemiBold, -0.11px, #384250; 8px above the first card (labels sit on the card columns).
     .dp-qo-thead {
-        grid-template-columns: var(--qo-product-w) minmax(470px, 1fr);
+        grid-template-columns: var(--qo-product-w) minmax(450px, 1fr);
         column-gap: 28px;
         padding: 0 8px 8px; // card border (transparent) 1px + 8px padding line the columns up with the cards
         font-size: 10px;
@@ -777,7 +777,7 @@ body:has(.dp-quick-order) {
 
     // Card: Figma white, 1px #e5e7eb, radius 8, padding 8, 8px between cards
     .dp-qo-card {
-        grid-template-columns: var(--qo-product-w) minmax(470px, 1fr);
+        grid-template-columns: var(--qo-product-w) minmax(450px, 1fr);
         column-gap: 28px;
         margin: 0 0 8px;
         padding: 8px;
@@ -886,8 +886,8 @@ body:has(.dp-quick-order) {
     }
 
     // Quantity stepper: Figma 24px high, 1px #d2d6db, radius 8, white; 24px arrow buttons (16px icons), value area >= 28px.
-    // The value input keeps its role (type=number, same events). Its value area is 48px (Figma 28px minimum): fits 4-digit
-    // B2B quantities without clipping; a fixed width keeps the columns identical in every row.
+    // The value input keeps its role (type=number, same events). Its value area is the Figma 28px: two digits stay readable,
+    // longer values scroll inside the field; a fixed width keeps the columns identical in every row.
     .dp-qo-qty-wrap {
         height: 24px;
         border: 1px solid $dp-color-border-primary;
@@ -921,10 +921,11 @@ body:has(.dp-quick-order) {
         border-left: 1px solid $dp-color-border-primary;
     }
     .dp-qo-qty {
-        flex: 0 0 48px;
-        width: 48px;
+        flex: 0 0 28px;
+        width: 28px;
         min-width: 28px;
-        padding: 0 4px;
+        padding: 0;
+        text-align: center;
         border: 0;
         background: $dp-color-bg-primary;
         font-family: $dp-font-body;

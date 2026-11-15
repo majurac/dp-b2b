@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## 2026-11-15 - C5 remediation on staging - COMPLETE / VERIFIED (authenticated QA PASS)
+
+Option `woocommerce_brand_permalink` = `marka` set and one soft rewrite flush run (stored rules now 5 `marka/`, 0 `brand/`; nothing else changed). Locale independence verified in memory; authenticated QA PASS (4 brands 200, page 2, unknown slug 404, `/brendovi/` 61 links sampled, PDP brand links 200, no fatals). Backup and rollback: `figma-alignment.md` 'Remediation 2026-11-15'. RCA commit `f00bb3a`.
+
 ## 2026-11-15 - C5 brand `/marka/` 404 recurrence - READ-ONLY RCA COMPLETE; remediation awaiting owner approval
 
 Nothing changed (no flush, option, cache, deploy). Stored rewrite rules: 5 `brand/` and 0 `marka/` vs registered slug `marka`; cause = locale-dependent `__('brand')` with admin locale `en_US` vs site locale `hr`, flush on WC update / admin session reverts the 2026-10-13 repair (root cause PROBABLE-high, trigger UNVERIFIED). Proposed fix: pin `woocommerce_brand_permalink` = `marka` + one soft flush. Full evidence and test plan: `figma-alignment.md` 'Recurrence RCA 2026-11-15'; roadmap C5 updated, stays open. Next P1: A12.

@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## 2026-11-15 - C5 brand `/marka/` 404 recurrence - READ-ONLY RCA COMPLETE; remediation awaiting owner approval
+
+Nothing changed (no flush, option, cache, deploy). Stored rewrite rules: 5 `brand/` and 0 `marka/` vs registered slug `marka`; cause = locale-dependent `__('brand')` with admin locale `en_US` vs site locale `hr`, flush on WC update / admin session reverts the 2026-10-13 repair (root cause PROBABLE-high, trigger UNVERIFIED). Proposed fix: pin `woocommerce_brand_permalink` = `marka` + one soft flush. Full evidence and test plan: `figma-alignment.md` 'Recurrence RCA 2026-11-15'; roadmap C5 updated, stays open. Next P1: A12.
+
 ## 2026-11-15 - Owner requirements N1-N5 integrated - PLANNING / READ-ONLY ASSESSMENT ONLY; documentation-only checkpoint
 
 Baseline verified: local `master` = `origin/master` = `a1b7a72`, clean tree. Nothing implemented, no setting, data, plugin, template, cache or deployment change. Staging was touched by two read-only SSH queries only (`wp plugin list` fields; `grep` of mapping helper consumers; core template `@version` headers).

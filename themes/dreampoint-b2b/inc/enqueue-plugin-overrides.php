@@ -26,7 +26,14 @@ add_action( 'wp_enqueue_scripts', function (): void {
  */
 add_action( 'wp_enqueue_scripts', 'dreampoint_b2b_maybe_disable_cart_fragments', 9999 );
 function dreampoint_b2b_maybe_disable_cart_fragments(): void {
-    if ( is_cart() || is_checkout() || is_account_page() || is_page( 'quick-order' ) ) return;
+    // Quick Order: its submit bridge triggers `wc_fragment_refresh`, whose only listener is the real
+    // cart-fragments script. WooCommerce merely registers it, so it must be enqueued explicitly here (E12).
+    if ( is_page( 'quick-order' ) ) {
+        wp_enqueue_script( 'wc-cart-fragments' );
+        return;
+    }
+
+    if ( is_cart() || is_checkout() || is_account_page() ) return;
 
     wp_dequeue_script( 'wc-cart-fragments' );
     wp_deregister_script( 'wc-cart-fragments' );

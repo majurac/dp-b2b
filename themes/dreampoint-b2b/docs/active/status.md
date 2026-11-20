@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## 2026-11-20 - E12 Quick Cart synchronization - READ-ONLY RCA PARTIALLY VERIFIED (documentation only)
+
+Baseline `44cdd9f` = origin, clean. Nothing changed. Probable-high cause: the Quick Order bridge (`quick-order.js:104`) triggers `wc_fragment_refresh`, but the only listener, WooCommerce `cart-fragments.js`, is registered and NOT enqueued on the Quick Order page (theme exemption `is_page('quick-order')` only skips the stub and never enqueues it; verified by a read-only staging enqueue simulation as `vis_full`). Live browser trace blocked: no authenticated session (guest at `/my-account/`), no cart touched. Smallest fix: enqueue `wc-cart-fragments` on that page in `dreampoint_b2b_maybe_disable_cart_fragments()` (theme, ~1 line; no plugin or `mini-cart.php` change). Effort 1 h + 2 h verification. Full record: `master-roadmap.md` row E12. E12 stays OPEN; E1 not reopened.
+
 ## 2026-11-20 - A12 read-only RCA complete; four owner requirements recorded (E11, E12, E7-C, A13) - DOCUMENTATION ONLY
 
 Baseline: local `master` = `origin/master` = `652abd9`, clean tree. Nothing implemented, imported, saved, deployed, purged or configured; staging was touched only by read-only `wp eval-file` queries and `grep` over SSH (temporary helper scripts in `/tmp` on the server were removed afterwards).

@@ -954,8 +954,29 @@ $search-field-focus: #141414;
             display: flex;
             gap: 8px;
             align-items: center;
+            flex-wrap: wrap;
+            // E11: variation lines (at most two, same selection and order as the main Cart, see
+            // mini-cart.php) sit on their own row, indented to the title column (80px image + 8px gap).
             .variation {
-                display: none;
+                order: 5;
+                flex: 0 0 100%;
+                box-sizing: border-box;
+                padding-left: 88px;
+                margin: -16px 0 0;
+                font-size: 12px;
+                line-height: 18px;
+                color: $dp-color-text-tertiary;
+                .variation-pair {
+                    display: flex;
+                    align-items: baseline;
+                    column-gap: 8px;
+                }
+                dt,
+                dd,
+                p {
+                    font-size: 12px;
+                    margin: 0;
+                }
             }
             .thumb-title {
                 display: flex;

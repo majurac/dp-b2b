@@ -60,15 +60,21 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 				?>
 				<li class="woocommerce-mini-cart-item <?php echo esc_attr( apply_filters( 'woocommerce_mini_cart_item_class', 'mini_cart_item', $cart_item, $cart_item_key ) ); ?>">
 					
+					<?php
+					// Same attribute selection and order as the main Cart, at most two (E11). Printed inside the
+					// product link / wrapper, right after the title, so image, title and attributes form one block.
+					$item_data_html = dreampoint_b2b_cart_item_data_html( $cart_item, 2 );
+					?>
 					<?php if ( empty( $product_permalink ) ) : ?>
-					    <?php echo $thumbnail . '<span class="product-title">' . wp_kses_post( $product_name ) . '</span>'; ?>
+					    <div class="thumb-title">
+					        <?php echo $thumbnail . '<span class="product-title">' . wp_kses_post( $product_name ) . '</span>' . $item_data_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					    </div>
 					<?php else : ?>
 					    <a href="<?php echo esc_url( $product_permalink ); ?>" class="thumb-title">
-					        <?php echo $thumbnail . '<span class="product-title">' . wp_kses_post( $product_name ) . '</span>'; ?>
+					        <?php echo $thumbnail . '<span class="product-title">' . wp_kses_post( $product_name ) . '</span>' . $item_data_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 					    </a>
 					<?php endif; ?>
 
-					<?php echo dreampoint_b2b_cart_item_data_html( $cart_item, 2 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- same attribute selection and order as the main Cart, Quick Cart shows at most two (E11). ?>
 					<div class="quantity-price">
 						<span class="qp-label"><?php esc_html_e( 'Cijena', 'dreampoint-b2b' ); ?>:</span>
 						<!-- /.qp-label -->

@@ -954,34 +954,45 @@ $search-field-focus: #141414;
             display: flex;
             gap: 8px;
             align-items: center;
-            flex-wrap: wrap;
-            // E11: variation lines (at most two, same selection and order as the main Cart, see
-            // mini-cart.php) sit on their own row, indented to the title column (80px image + 8px gap).
-            .variation {
-                order: 5;
-                flex: 0 0 100%;
-                box-sizing: border-box;
-                padding-left: 88px;
-                margin: -16px 0 0;
-                font-size: 12px;
-                line-height: 18px;
-                color: $dp-color-text-tertiary;
-                .variation-pair {
-                    display: flex;
-                    align-items: baseline;
-                    column-gap: 8px;
-                }
-                dt,
-                dd,
-                p {
-                    font-size: 12px;
-                    margin: 0;
-                }
-            }
             .thumb-title {
-                display: flex;
-                gap: 8px;
-                align-items: center;
+                // E11: image | title + variation lines inside the product link. Four rows (spacer, title,
+                // attributes, spacer) keep the text block vertically centred against the 80px image,
+                // with or without attributes; the text column starts where the title starts.
+                display: grid;
+                grid-template-columns: 80px minmax(0, 1fr);
+                grid-template-rows: 1fr auto auto 1fr;
+                column-gap: 8px;
+                align-items: start;
+                min-width: 0;
+                img.attachment-woocommerce_thumbnail, img.woocommerce-placeholder {
+                    grid-column: 1;
+                    grid-row: 1 / -1;
+                    align-self: center;
+                }
+                .product-title {
+                    grid-column: 2;
+                    grid-row: 2;
+                    overflow-wrap: anywhere;
+                }
+                .variation {
+                    grid-column: 2;
+                    grid-row: 3;
+                    margin: 2px 0 0;
+                    font-size: 12px;
+                    line-height: 18px;
+                    color: $dp-color-text-tertiary;
+                    .variation-pair {
+                        display: flex;
+                        align-items: baseline;
+                        column-gap: 8px;
+                    }
+                    dt,
+                    dd,
+                    p {
+                        font-size: 12px;
+                        margin: 0;
+                    }
+                }
             }
             img.attachment-woocommerce_thumbnail, img.woocommerce-placeholder {
                 max-width: 80px;

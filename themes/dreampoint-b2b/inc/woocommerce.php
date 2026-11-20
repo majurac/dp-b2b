@@ -530,22 +530,27 @@ function dreampoint_b2b_variation_description_payload( array $data, $parent, $va
 add_filter( 'woocommerce_available_variation', 'dreampoint_b2b_variation_description_payload', 20, 3 );
 
 /**
- * Main cart only: variation lines limited to Boja and Dioptrija (display only).
+ * Cart item variation lines limited to Boja and Dioptrija (display only). Used by the main Cart and,
+ * with `$limit = 2`, by the mini-cart / Quick Cart (E11).
  *
- * The filter is attached just around the call below, so mini-cart, checkout, emails and order
+ * The filter is attached just around the call below, so checkout, emails and order
  * data keep the untouched WooCommerce item data. Cart item data, variation ID and stored attribute
  * values are not changed; entries that do not come from a variation attribute (other plugins) are kept.
  * "DIOPTRIJA +1,5" is shown as "+1,5".
  *
+ * Optional `$limit` (Quick Cart / mini-cart, E11): after the same selection and ordering, only the first
+ * `$limit` entries are kept. 0 (default) means no limit, so the main Cart output is unchanged.
+ *
  * @param array $cart_item Cart item.
+ * @param int   $limit     Maximum number of entries to display; 0 = unlimited.
  * @return string Formatted item data HTML.
  */
-function dreampoint_b2b_cart_item_data_html( array $cart_item ): string {
+function dreampoint_b2b_cart_item_data_html( array $cart_item, int $limit = 0 ): string {
 	$allowed = [ 'pa_boja', 'pa_dioptrija' ];
 
-	$filter = static function ( array $item_data, array $item ) use ( $allowed ): array {
+	$filter = static function ( array $item_data, array $item ) use ( $allowed, $limit ): array {
 		if ( empty( $item['variation'] ) || empty( $item['data'] ) ) {
-			return $item_data;
+			return $limit > 0 ? array_slice( $item_data, 0, $limit ) : $item_data;
 		}
 
 		// Same label WooCommerce used for the variation rows (key => taxonomy).
@@ -571,7 +576,7 @@ function dreampoint_b2b_cart_item_data_html( array $cart_item ): string {
 			$result[] = $entry;
 		}
 
-		return $result;
+		return $limit > 0 ? array_slice( $result, 0, $limit ) : $result;
 	};
 
 	add_filter( 'woocommerce_get_item_data', $filter, 99, 2 );

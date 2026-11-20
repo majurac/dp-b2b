@@ -5,6 +5,15 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## 2026-11-20 - A12 read-only RCA complete; four owner requirements recorded (E11, E12, E7-C, A13) - DOCUMENTATION ONLY
+
+Baseline: local `master` = `origin/master` = `652abd9`, clean tree. Nothing implemented, imported, saved, deployed, purged or configured; staging was touched only by read-only `wp eval-file` queries and `grep` over SSH (temporary helper scripts in `/tmp` on the server were removed afterwards).
+
+- **A12 (P1) - isolated, not systematic.** Staging, 451 published products (251 simple + 200 variable): exactly two have no price, the two reported Nuuna notebooks (posts 7576 / 7582, ERP ids 53084 / 53085, simple, in stock, ERP-managed). They have no `_price` / `_regular_price` / `_sale_price` rows at all. Failing layer: ERP source / import mapping. `AprosProvider` resolves `wholesalePrice ?? priceWithVat ?? priceWithoutVat ?? 0` and `Importer` skips every price write when the resolved price is falsy, so a missing APROS wholesale price silently yields a published, unpriced, non-purchasable product. `apros-pricing` cannot supply a price (0 country-price rows for both articles; brand discount needs `regular > 0`). Evaluated as `vis_full` (base context, partner code 0). Confidence HIGH for the layer, MEDIUM-HIGH that APROS holds no wholesale price (raw payload not inspected; no persisted importer log). Remediation (owner approval needed): confirm the price in APROS, then an owner-approved ordinary import; no code change; interim visibility is an owner decision. Full record and regression plan: `master-roadmap.md` row A12. A12 stays OPEN.
+- **Owner requirements recorded exactly once:** item 1 Quick Cart attributes -> **E11** (P3, new); item 2 Quick Cart not refreshing after the Quick Order footer add-to-cart -> **E12** (P2, new; existing `wc_fragment_refresh` bridge in `quick-order.js:104` should already refresh it, cause NOT established, five hypotheses listed); item 3 sticky `.cart-collaterals` -> **E7 Sub-item C** (existing task reused, P3, deferred); item 4 Croatian terms checkbox -> **A13** (P2, new; source = WooCommerce Blocks terms block + hr language pack + page titles, so a pure translation fix is impossible; options and recommendation recorded).
+- X22: E11 / E12 touch `mini-cart.php` (row 2), E7-C may touch `cart.php` (row 1) -> do inside the matching X22 Phase B passes; A13 is independent of X22.
+- Not reopened: C5, E1, T5, T6. No ADR added (no architectural decision made).
+
 ## 2026-11-15 - C5 remediation on staging - COMPLETE / VERIFIED (authenticated QA PASS)
 
 Option `woocommerce_brand_permalink` = `marka` set and one soft rewrite flush run (stored rules now 5 `marka/`, 0 `brand/`; nothing else changed). Locale independence verified in memory; authenticated QA PASS (4 brands 200, page 2, unknown slug 404, `/brendovi/` 61 links sampled, PDP brand links 200, no fatals). Backup and rollback: `figma-alignment.md` 'Remediation 2026-11-15'. RCA commit `f00bb3a`.

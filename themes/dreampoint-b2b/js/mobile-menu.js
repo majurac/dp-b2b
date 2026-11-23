@@ -49,12 +49,16 @@
         const $elementsToToggleVisibility = $( '.mobile-menu__bottom, .mobile-menu__contact' );
 
         // aria-expanded on submenu triggers mirrors the real state of their submenu (`ul.sub-menu.active`).
+        // The trigger is the separate `button.submenu-toggle` when the row has one (E8), otherwise the row's own link.
         function syncSubmenuAria() {
-            $( '.mobile-menu__menu li.menu-item-has-children > a' ).each( function () {
-                const $sub = $( this ).parent().children( 'ul.sub-menu' );
-                if ( $sub.length ) {
-                    $( this ).attr( 'aria-expanded', $sub.hasClass( 'active' ) ? 'true' : 'false' );
+            $( '.mobile-menu__menu li.menu-item-has-children' ).each( function () {
+                const $sub = $( this ).children( 'ul.sub-menu' );
+                if ( ! $sub.length ) return;
+                let $trigger = $( this ).children( 'button.submenu-toggle' );
+                if ( ! $trigger.length ) {
+                    $trigger = $( this ).children( 'a' );
                 }
+                $trigger.attr( 'aria-expanded', $sub.hasClass( 'active' ) ? 'true' : 'false' );
             } );
         }
         syncSubmenuAria();
@@ -70,18 +74,22 @@
             $( '.mobile-menu' )
                 .removeClass( 'active' )
                 .attr( 'aria-hidden', 'true' );
+            // Closing the menu also closes every open drill-down level, so a reopened menu starts at the top level
+            // and each submenu trigger reports aria-expanded="false".
+            $( '.mobile-menu__menu ul.sub-menu.active' ).removeClass( 'active' );
+            $( '.mobile-toggle-black-js' ).removeClass( 'active' );
+            $elementsToToggleVisibility.removeClass( 'hide' );
+            syncSubmenuAria();
             // Vrati fokus na dugme koje je otvorilo meni
             $( '.mobile-toggler' ).first().trigger( 'focus' );
         } );
 
         // --- Submenu toggle (do 3 nivoa dubine) ---
-        $( 'li.menu-item-has-children > a' ).on( 'click', function ( e ) {
-            const $parentItem = $( this ).parent();
-            const $subMenu    = $parentItem.children( 'ul.sub-menu' );
+        // Opens or closes the drill-down panel of a `li.menu-item-has-children`.
+        function toggleSubmenu( $parentItem ) {
+            const $subMenu = $parentItem.children( 'ul.sub-menu' );
 
             if ( ! $subMenu.length ) return;
-
-            e.preventDefault();
 
             if ( $subMenu.hasClass( 'active' ) ) {
 
@@ -108,6 +116,22 @@
 
             }
             syncSubmenuAria();
+        }
+
+        // Rows without a separate toggle button (e.g. "Katalog proizvoda", href="#") open their submenu from the link.
+        // Rows with `button.submenu-toggle` keep the link as a normal link to the category archive (E8).
+        $( 'li.menu-item-has-children > a' ).on( 'click', function ( e ) {
+            const $parentItem = $( this ).parent();
+
+            if ( ! $parentItem.children( 'ul.sub-menu' ).length ) return;
+            if ( $parentItem.children( 'button.submenu-toggle' ).length ) return;
+
+            e.preventDefault();
+            toggleSubmenu( $parentItem );
+        } );
+
+        $( '.mobile-menu__menu' ).on( 'click', 'button.submenu-toggle', function () {
+            toggleSubmenu( $( this ).parent() );
         } );
 
         // --- Back dugme: zatvori najdublji aktivni submenu ---

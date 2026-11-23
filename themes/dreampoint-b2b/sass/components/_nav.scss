@@ -67,6 +67,34 @@
                     align-items: center;
                     justify-content: space-between;
                     position: relative;
+                    // E8: rows with a separate `button.submenu-toggle` keep the label as a real link; the arrow is drawn
+                    // inside the 44x44 button (right edge of the row) instead of the decorative pseudo-element.
+                    &.has-submenu-toggle {
+                        &:after {
+                            display: none;
+                        }
+                        > a {
+                            padding-right: 44px;
+                        }
+                        > .submenu-toggle {
+                            position: absolute;
+                            top: 50%;
+                            right: 0;
+                            transform: translateY(-50%);
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            width: 44px;
+                            height: 44px;
+                            padding: 0;
+                            border: 0;
+                            background: none;
+                            cursor: pointer;
+                            color: $background-brand;
+                            font-size: 20px;
+                            line-height: 1;
+                        }
+                    }
                     &:after {
                         font-size: 20px;
                         font-family: icomoon;

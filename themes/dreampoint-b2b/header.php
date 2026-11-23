@@ -285,6 +285,10 @@ $company_phone = get_field('company_phone', 'option') ?: '';
                             <!-- /.action-btns -->
                             
                             <div class="btn-holder">
+                                <?php /* E9: mobile / tablet account link, immediately left of the hamburger. `.btn-holder` is display:none from 992px, where the desktop #top-header link applies. */ ?>
+                                <a href="<?php echo esc_url( get_permalink( get_option( 'woocommerce_myaccount_page_id' ) ) ); ?>" class="mobile-account-link action-btn" aria-label="<?php esc_attr_e( 'Moj račun', 'dreampoint-b2b' ); ?>">
+                                    <i class="icon-user" aria-hidden="true"></i>
+                                </a>
                                 <button 
                                     class="mobile-toggler action-btn" 
                                     aria-label="<?php esc_attr_e('Otvori mobilni meni', 'dreampoint-b2b'); ?>"

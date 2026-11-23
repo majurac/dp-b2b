@@ -239,10 +239,14 @@ function dreampoint_b2b_catalog_menu_mobile(): void {
     foreach ( $tree as $row ) {
         $has_children = ! empty( $row['children'] );
 
-        $output .= '<li class="menu-item menu-item-' . (int) $row['id'] . ( $has_children ? ' menu-item-has-children' : '' ) . '">'
+        $output .= '<li class="menu-item menu-item-' . (int) $row['id'] . ( $has_children ? ' menu-item-has-children has-submenu-toggle' : '' ) . '">'
             . '<a href="' . esc_url( $row['url'] ) . '"><span class="category-name">' . esc_html( $row['name'] ) . '</span></a>';
 
         if ( $has_children ) {
+            // E8: the label stays a real link to the category archive; this separate button opens the drill-down (js/mobile-menu.js).
+            $output .= '<button type="button" class="submenu-toggle" aria-expanded="false" aria-label="'
+                . esc_attr( sprintf( /* translators: %s: category name */ __( 'Otvori potkategorije: %s', 'dreampoint-b2b' ), $row['name'] ) )
+                . '"><i class="icon-chevron-right" aria-hidden="true"></i></button>';
             $output .= '<ul class="sub-menu">';
             foreach ( $row['children'] as $child ) {
                 $output .= '<li class="menu-item menu-item-' . (int) $child['id'] . '"><a href="' . esc_url( $child['url'] ) . '">' . esc_html( $child['name'] ) . '</a></li>';

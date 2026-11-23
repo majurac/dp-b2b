@@ -208,6 +208,18 @@
         @include bp(md-up) {
             display: none;
         }
+        // E9: account icon left of the hamburger (44x44 hit area; the icon itself is the existing `icon-user`).
+        .mobile-account-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            color: $dp-color-icon-primary;
+            font-size: 24px;
+            line-height: 1;
+            text-decoration: none;
+        }
         .mobile-toggler {
             padding: 0;
             border: 0;
@@ -226,7 +238,8 @@
         gap: 24px;
         width: 100%;
         @include bp(md) {
-            padding-right: 60px;
+            // room for the hamburger (24px) + the 44px account link next to it (E9)
+            padding-right: 108px;
         }
         @include bp(sm-up) {
             text-align: right;
@@ -1180,6 +1193,7 @@ html #moove_gdpr_cookie_info_bar.moove-gdpr-dark-scheme .moove-gdpr-info-bar-con
 #header #main-header .home-icon a:focus-visible,
 #header #main-header .cart-contents:focus-visible,
 #header #main-header .mobile-toggler:focus-visible,
+#header #main-header .mobile-account-link:focus-visible,
 #header #main-header .mobile-search-toggle:focus-visible {
     outline: 0;
     border-radius: 2px;

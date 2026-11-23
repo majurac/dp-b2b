@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## 2026-11-23 - X22-A Cart / Mini-cart template review - no required fix; version headers aligned (staging)
+
+Hunk-level review of `woocommerce/cart/cart.php` (core 11.3.0) and `woocommerce/cart/mini-cart.php` (core 11.2.2, WooCommerce 11.3.1) found no required upstream functional correction; intentional theme differences remain (see roadmap 5a rows 1-2). Only the two `@version` headers were changed (cart 10.1.0 -> 11.3.0, mini-cart 10.0.0 -> 11.2.2), deployed to staging per file as `dream9399` (diff = exactly those two lines, hashes verified, backup `/home/dreampoint.b2b/backups/x22a-20261123-132924/`); the WooCommerce Status theme-info transient `wc_system_status_theme_info` was deleted so the warnings refresh: outdated overrides 8 -> 6 (remaining: thankyou, no-products-found, result-count, form-edit-account, view-order, order-details). Smoke QA: cart renders (7 admin items untouched), E11 attributes (max 2, inside link), E12 fragments on Quick Order, E7-C sticky at 1440x900, no console errors. Local commit only, not pushed. X22 rows 3-8 stay OPEN; future WooCommerce upgrades need a fresh compatibility check.
+
 ## 2026-11-23 - A13 checkout terms label grammar - COMPLETE / VERIFIED on staging
 
 Owner chose mechanism (a). Staging DB only: Checkout page 12 `woocommerce/checkout-terms-block` now carries a `text` attribute with the required Croatian wording and the two original legal links (root-relative, same destinations). Applied through WP-CLI `eval-file` as `dream9399` (dry run, read-back and byte round-trip verified). Backup and rollback: `/home/dreampoint.b2b/backups/a13-20261123-131849/`, revision 23560. No code, language-pack, Git or staging-divergence change; localhost not changed; verified without placing an order (validation intact, layout 1440 / 768 / 390). Full record: `master-roadmap.md` row A13. X22 untouched.

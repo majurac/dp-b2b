@@ -5,9 +5,9 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
-## 2026-11-23 - E7 Sub-item C sticky cart totals - IMPLEMENTED / PARTIALLY VERIFIED on staging
+## 2026-11-23 - E7 Sub-item C sticky cart totals - COMPLETE / VERIFIED on staging
 
-Commits `3958267` (feat) + `96af078` (fix: no rAF throttling), pushed to origin/master; files: `sass/pages/cart.scss`, `css/pages/cart.css`, new `js/cart-sticky.js`, `functions.php` (is_cart enqueue). Deployed per-file (scp as site user `dream9399`); pre-deploy hashes of the 3 existing files were identical local vs staging; backup `/home/dreampoint.b2b/backups/e7c-20261123-124600/`. Staging HEAD stays `736d0fa`; its five E11/E12 modified files untouched (now plus 3 modified + 1 new E7-C files; no `git pull`). Behaviour, QA results and limitations: `master-roadmap.md` row E7 Sub-item C. X22 stays OPEN.
+Commits `3958267` (feat) + `96af078` (fix: no rAF throttling), pushed to origin/master; files: `sass/pages/cart.scss`, `css/pages/cart.css`, new `js/cart-sticky.js`, `functions.php` (is_cart enqueue). Deployed per-file (scp as site user `dream9399`); pre-deploy hashes of the 3 existing files were identical local vs staging; backup `/home/dreampoint.b2b/backups/e7c-20261123-124600/`. Staging HEAD stays `736d0fa`; its five E11/E12 modified files untouched (now plus 3 modified + 1 new E7-C files; no `git pull`). Behaviour, QA results and limitations: `master-roadmap.md` row E7 Sub-item C. Final verification 2026-11-23: the owner manually confirmed on the real staging Cart page (visible browser) that window resize across the fit threshold toggles sticky correctly and that applying a coupon / updating totals preserves sticky behaviour; the earlier hidden-tab harness limitation is closed. Documentation-only closure; no code or staging change. X22 stays OPEN.
 
 ## 2026-11-20 - END-OF-DAY CHECKPOINT (documentation only; read-only verification, nothing developed or deployed)
 

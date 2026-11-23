@@ -205,6 +205,8 @@
         align-items: center;
         @include centre(y);
         right: 15px;
+        // 12px between the account link box and the hamburger (the 44px box used to touch it)
+        gap: 12px;
         @include bp(md-up) {
             display: none;
         }
@@ -242,6 +244,14 @@
             // The room for the account link + hamburger is reserved on the column (`.action-btns-holder`), so the
             // `.action-btns` box never overlaps `.btn-holder`.
             gap: 16px;
+        }
+        @include bp(lg) {
+            // 992-1199.98px: the nav column is fixed, so the spare 8px per gap go to the (flex-grow) search field.
+            gap: 16px;
+        }
+        @include bp(md-up) {
+            // Anchor for the live-search dropdown / default panel (see `.search-area` and `#ajax-search-result`).
+            position: relative;
         }
         @include bp(sm-up) {
             text-align: right;
@@ -397,8 +407,8 @@
                 @include bp(md) {
                     flex: 1 1 0;
                     max-width: none;
-                    // 16px gap + 44px account link + 24px hamburger + 15px right inset, beyond the column's 10px padding
-                    padding-right: 94px;
+                    // 16px gap + 44px account link + 12px gap + 24px hamburger + 15px right inset, beyond the column's 10px padding
+                    padding-right: 106px;
                 }
                 @include bp(sm-down) {
                     height: auto;
@@ -558,6 +568,10 @@ $search-field-focus: #141414;
 .search-area  {
     flex-grow: 1;
     position: relative;
+    // Desktop: the dropdown / default panel are positioned against `.action-btns` (not this narrow field), see below.
+    @include bp(md-up) {
+        position: static;
+    }
     @include bp(md-down) {
         position: fixed;
         top: 0;
@@ -738,6 +752,11 @@ $search-field-focus: #141414;
     width: 100%;
     top: 100%;
     text-align: left; // header .action-btns is text-align:right on sm-up
+    // Desktop: wider than the field, left-aligned with it, never wider than the action row (no viewport overflow)
+    @include bp(md-up) {
+        left: 0;
+        width: min(100%, 560px);
+    }
     padding: 16px;
     background: #FFFFFF;
     box-shadow: $dp-shadow-card-lg;
@@ -848,6 +867,10 @@ $search-field-focus: #141414;
     width: 100%;
     top: 100%;
     text-align: left; // header .action-btns is text-align:right on sm-up — don't inherit it into results
+    @include bp(md-up) {
+        left: 0;
+        width: min(100%, 560px);
+    }
     @include bp(md-down) {
         top: 115px;
         width: calc(100% - 32px);
@@ -899,6 +922,10 @@ $search-field-focus: #141414;
         display: flex;
         gap: 24px;
         flex-direction: column;
+        @include bp(lg) {
+            padding: 16px;
+            gap: 16px;
+        }
         @include bp(md-down) {
             box-shadow: none;
             border: 1px solid $dp-color-border-primary;
@@ -911,6 +938,9 @@ $search-field-focus: #141414;
             display: flex;
             align-items: center;
             gap: 24px;
+            @include bp(lg) {
+                gap: 16px;
+            }
             .product-photo {
                 max-width: 89px;
                 min-width: 89px;
@@ -923,6 +953,8 @@ $search-field-focus: #141414;
                 display: flex;
                 flex-direction: column;
                 gap: 16px;
+                min-width: 0;
+                overflow-wrap: break-word;
                 .product-sku {
                     margin-top: -8px;
                     font-size: 12px;
@@ -963,6 +995,11 @@ $search-field-focus: #141414;
         justify-content: space-between;
         width: 100%;
         margin-top: 24px;
+        flex-wrap: wrap;
+        gap: 12px;
+        @include bp(lg) {
+            margin-top: 16px;
+        }
         form {
             text-align: right;
         }

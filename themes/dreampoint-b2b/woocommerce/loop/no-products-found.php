@@ -6,6 +6,7 @@
  * CAT-05 component so search, archive filters and WBW AJAX responses render identically.
  *
  * @package Dreampoint_B2B
+ * @version 7.8.0
  */
 
 defined( 'ABSPATH' ) || exit;

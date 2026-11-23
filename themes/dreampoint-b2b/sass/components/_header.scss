@@ -221,6 +221,11 @@
             font-size: 24px;
             line-height: 1;
             text-decoration: none;
+            // Tablet: Search and Cart use 32px icon-font glyphs; `icon-user` has more internal padding, so at 24px
+            // it looked about 25% smaller. Same 32px here (the 44x44 box is unchanged).
+            @include bp(md) {
+                font-size: 32px;
+            }
         }
         .mobile-toggler {
             padding: 0;

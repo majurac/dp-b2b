@@ -5,6 +5,10 @@ plus the WBW AJAX container-check placeholder fix deployed to staging and
 end-to-end validated; Quick Order's planned development cycle is now
 COMPLETE — see Milestone note below)
 
+## 2026-11-23 - A13 checkout terms label grammar - COMPLETE / VERIFIED on staging
+
+Owner chose mechanism (a). Staging DB only: Checkout page 12 `woocommerce/checkout-terms-block` now carries a `text` attribute with the required Croatian wording and the two original legal links (root-relative, same destinations). Applied through WP-CLI `eval-file` as `dream9399` (dry run, read-back and byte round-trip verified). Backup and rollback: `/home/dreampoint.b2b/backups/a13-20261123-131849/`, revision 23560. No code, language-pack, Git or staging-divergence change; localhost not changed; verified without placing an order (validation intact, layout 1440 / 768 / 390). Full record: `master-roadmap.md` row A13. X22 untouched.
+
 ## 2026-11-23 - E7 Sub-item C sticky cart totals - COMPLETE / VERIFIED on staging
 
 Commits `3958267` (feat) + `96af078` (fix: no rAF throttling), pushed to origin/master; files: `sass/pages/cart.scss`, `css/pages/cart.css`, new `js/cart-sticky.js`, `functions.php` (is_cart enqueue). Deployed per-file (scp as site user `dream9399`); pre-deploy hashes of the 3 existing files were identical local vs staging; backup `/home/dreampoint.b2b/backups/e7c-20261123-124600/`. Staging HEAD stays `736d0fa`; its five E11/E12 modified files untouched (now plus 3 modified + 1 new E7-C files; no `git pull`). Behaviour, QA results and limitations: `master-roadmap.md` row E7 Sub-item C. Final verification 2026-11-23: the owner manually confirmed on the real staging Cart page (visible browser) that window resize across the fit threshold toggles sticky correctly and that applying a coupon / updating totals preserves sticky behaviour; the earlier hidden-tab harness limitation is closed. Documentation-only closure; no code or staging change. X22 stays OPEN.

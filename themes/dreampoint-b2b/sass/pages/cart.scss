@@ -386,6 +386,18 @@ $cart-shadow-md: 0 1px 3px rgba(10, 14, 21, 0.1), 0 5px 12px rgba(10, 14, 21, 0.
         @include bp(lg-down) {
             margin-top: 32px;
         }
+        // E7-C sticky totals: only in the two-column layout (>= 1200px) and only while js/cart-sticky.js has
+        // confirmed that the whole card fits under the sticky header (`.is-sticky-fit`). Without JS or when the
+        // card is too tall it stays in normal flow. Top = 72px header + 24px gap; the 32px admin bar adds to it.
+        @media only screen and (min-width: 1200px) {
+            &.is-sticky-fit {
+                position: sticky;
+                top: 96px;
+            }
+            @at-root body.admin-bar #cart .cart-collaterals.is-sticky-fit {
+                top: 128px;
+            }
+        }
         // Figma summary card: tertiary surface, 8px radius, 16px padding, card/md shadow.
         .cart_totals {
             padding: 16px;

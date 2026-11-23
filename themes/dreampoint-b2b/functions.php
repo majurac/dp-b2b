@@ -564,6 +564,16 @@ function dreampoint_b2b_scripts(): void {
         wp_localize_script( 'dreampoint-b2b-cart-quantity', 'dpCartQty', [
             'maxQty' => esc_html__( 'Maksimalna količina:', 'dreampoint-b2b' ),
         ] );
+
+        // E7-C: sticky totals eligibility (fit check); no dependencies.
+        wp_enqueue_script(
+            'dreampoint-b2b-cart-sticky',
+            get_template_directory_uri() . '/js/cart-sticky.js',
+            [],
+            dreampoint_b2b_asset_ver( 'js/cart-sticky.js' ),
+            true
+        );
+        wp_script_add_data( 'dreampoint-b2b-cart-sticky', 'strategy', 'defer' );
     }
 
     // --- CSS/JS: Slick Slider ---

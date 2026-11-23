@@ -322,8 +322,19 @@ function dreampoint_b2b_mark_catalog_menu_item( $items, $args ) {
         return $items;
     }
 
+    // The label links to the WooCommerce Shop archive (like "Brendovi" links to its page); the submenu is opened by the
+    // desktop hover / focus-within panel and by the separate mobile toggle button (walker filter below).
+    $shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : '';
+
     foreach ( $items as $item ) {
         if ( in_array( 'cat-toggler', (array) $item->classes, true ) ) {
+            if ( '#' === $item->url && $shop_url ) {
+                $item->url = $shop_url;
+            }
+            // The mobile menu styles the separate toggle button / arrow through this class (see _nav.scss).
+            if ( ! in_array( 'has-submenu-toggle', (array) $item->classes, true ) ) {
+                $item->classes[] = 'has-submenu-toggle';
+            }
             return $items;
         }
     }
@@ -335,6 +346,10 @@ function dreampoint_b2b_mark_catalog_menu_item( $items, $args ) {
             $item->classes[] = 'cat-toggler';
             $item->classes[] = 'menu-item-parent-proizvodi';
             $item->classes[] = 'menu-item-has-children';
+            $item->classes[] = 'has-submenu-toggle';
+            if ( $shop_url ) {
+                $item->url = $shop_url;
+            }
             break;
         }
     }
@@ -356,14 +371,22 @@ add_filter( 'wp_nav_menu_objects', 'dreampoint_b2b_mark_catalog_menu_item', 10, 
  * @return string
  */
 function dreampoint_b2b_append_catalog_panel( $item_output, $item, $depth, $args ) {
-    if ( empty( $args->dp_catalog_panel ) || 0 !== (int) $depth ) {
+    if ( 0 !== (int) $depth || ! in_array( 'cat-toggler', (array) $item->classes, true ) ) {
         return $item_output;
     }
 
-    if ( ! in_array( 'cat-toggler', (array) $item->classes, true ) ) {
-        return $item_output;
+    if ( ! empty( $args->dp_catalog_panel ) ) {
+        return $item_output . dreampoint_b2b_catalog_menu_desktop();
     }
 
-    return $item_output . dreampoint_b2b_catalog_menu_desktop();
+    // Mobile menu render of menu-1: the label is a real link to the Shop, this separate button opens the category
+    // drill-down (same markup contract as the category rows, see dreampoint_b2b_catalog_menu_mobile() and js/mobile-menu.js).
+    if ( 'menu-1' === ( $args->theme_location ?? '' ) ) {
+        $item_output .= '<button type="button" class="submenu-toggle" aria-expanded="false" aria-label="'
+            . esc_attr( sprintf( /* translators: %s: menu item name */ __( 'Otvori kategorije: %s', 'dreampoint-b2b' ), wp_strip_all_tags( $item->title ) ) )
+            . '"><i class="icon-chevron-right" aria-hidden="true"></i></button>';
+    }
+
+    return $item_output;
 }
 add_filter( 'walker_nav_menu_start_el', 'dreampoint_b2b_append_catalog_panel', 10, 4 );

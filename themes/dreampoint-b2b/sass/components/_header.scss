@@ -238,8 +238,10 @@
         gap: 24px;
         width: 100%;
         @include bp(md) {
-            // room for the hamburger (24px) + the 44px account link next to it (E9)
-            padding-right: 108px;
+            // Tablet: compact right-aligned group Search | Quick Order | Cart | (Account | Hamburger, `.btn-holder`).
+            // The room for the account link + hamburger is reserved on the column (`.action-btns-holder`), so the
+            // `.action-btns` box never overlaps `.btn-holder`.
+            gap: 16px;
         }
         @include bp(sm-up) {
             text-align: right;
@@ -390,6 +392,14 @@
             }
             .action-btns-holder {
                 justify-content: flex-end;
+                // Tablet (768-991px): let the column take the remaining row width instead of 50%, so the action
+                // controls sit next to the account icon and hamburger on the right.
+                @include bp(md) {
+                    flex: 1 1 0;
+                    max-width: none;
+                    // 16px gap + 44px account link + 24px hamburger + 15px right inset, beyond the column's 10px padding
+                    padding-right: 94px;
+                }
                 @include bp(sm-down) {
                     height: auto;
                 }
@@ -455,6 +465,14 @@
             height: 100%;
             @include bp(md-down) {
                 display: none;
+            }
+            // Intermediate desktop (992-1199px): the 317px nav column is 4px short for "Katalog proizvoda" + chevron,
+            // so keep the labels on one line and tighten the gap (16px -> 12px).
+            @include bp(lg) {
+                gap: 12px;
+                li a {
+                    white-space: nowrap;
+                }
             }
             li {
                 height: 100%;

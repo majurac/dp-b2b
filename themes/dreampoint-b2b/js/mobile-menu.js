@@ -24,7 +24,9 @@
         const catTogglerLink  = document.querySelector( '.mobile-menu__menu .cat-toggler a' );
 
         if ( mobileSubmenu && catTogglerLink ) {
-            catTogglerLink.insertAdjacentElement( 'afterend', mobileSubmenu );
+            // Keep the separate toggle button (if any) right after the link, the drill-down panel after the button.
+            const catToggleButton = catTogglerLink.parentElement.querySelector( ':scope > button.submenu-toggle' );
+            ( catToggleButton || catTogglerLink ).insertAdjacentElement( 'afterend', mobileSubmenu );
         }
 
         // --- Reorder: premjesti .menu-item-parent-proizvodi na prvo mjesto u .first-menu ---
@@ -118,8 +120,8 @@
             syncSubmenuAria();
         }
 
-        // Rows without a separate toggle button (e.g. "Katalog proizvoda", href="#") open their submenu from the link.
-        // Rows with `button.submenu-toggle` keep the link as a normal link to the category archive (E8).
+        // Rows without a separate toggle button open their submenu from the link.
+        // Rows with `button.submenu-toggle` (category rows and "Katalog proizvoda") keep the link as a normal link (E8).
         $( 'li.menu-item-has-children > a' ).on( 'click', function ( e ) {
             const $parentItem = $( this ).parent();
 

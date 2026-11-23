@@ -24,10 +24,7 @@
 	}
 	el.dataset.dpStickyInit = '1';
 
-	var frame = 0;
-
 	function update() {
-		frame = 0;
 		if ( ! el.isConnected ) {
 			return;
 		}
@@ -36,15 +33,10 @@
 		el.classList.toggle( 'is-sticky-fit', fits );
 	}
 
-	function schedule() {
-		if ( ! frame ) {
-			frame = window.requestAnimationFrame( update );
-		}
-	}
-
-	window.addEventListener( 'resize', schedule );
+	// One class read + one height read per event: cheap enough to run unthrottled.
+	window.addEventListener( 'resize', update );
 	if ( 'ResizeObserver' in window ) {
-		new ResizeObserver( schedule ).observe( el );
+		new ResizeObserver( update ).observe( el );
 	}
 	update();
 }() );

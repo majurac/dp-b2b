@@ -228,10 +228,21 @@
             }
         }
         .mobile-toggler {
+            // G4: 44x44 hit area. The negative side margin (10px = (44 - 24) / 2) keeps the 24px icon and the
+            // 12px gap to the account link exactly where they were; the 3px svg bottom margin keeps the icon at
+            // its previous vertical position (the old button box was 24x21 with a baseline gap under the svg).
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            margin: 0 -10px;
             padding: 0;
             border: 0;
             background: none;
             svg {
+                display: block;
+                margin-bottom: 3px;
                 path {
                     fill: $dp-color-icon-primary;
                 }
@@ -327,6 +338,9 @@
             position: relative;
             .cart-contents {
                 position: relative;
+                // G4: 44px hit area around the unchanged 32px icon; the negative margin keeps layout and gaps as before.
+                padding: 6px;
+                margin: -6px;
             }
         }
         .action-btn {
@@ -362,14 +376,17 @@
                 display: none;
             }
             button {
-                padding: 0;
+                // G4: 44px hit area around the unchanged 32px icon (negative margin keeps layout and gaps as before).
+                padding: 6px;
+                margin: -6px;
                 border: 0;
                 background: none;
             }
         }
         .count {
-            right: -5px;
-            top: -5px;
+            // -5px relative to the icon box; the cart button now has 6px padding, so +1px from its padding box.
+            right: 1px;
+            top: 1px;
             position: absolute;
             min-width: 18px;
             min-height: 18px;

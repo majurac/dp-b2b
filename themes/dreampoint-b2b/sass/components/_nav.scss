@@ -151,6 +151,20 @@
     &__toggler {
         @include btn-reset;
     }
+    // G4: keyboard-only focus indicator, the same two-tone ring as the header controls (`_header.scss`, "Keyboard
+    // focus rings"). box-shadow, not outline: the global `a, button { outline: none !important }` would swallow it.
+    // Pointer and touch appearance is unchanged (:focus-visible only).
+    &__toggler:focus-visible,
+    &__menu a:focus-visible {
+        outline: 0;
+        border-radius: 2px;
+        box-shadow: 0 0 0 2px $dp-color-bg-primary, 0 0 0 4px $dp-color-text-primary;
+    }
+    // The submenu toggle sits on the right edge of the scrolling list, where an outer ring would be clipped: inset ring.
+    &__menu .submenu-toggle:focus-visible {
+        outline: 0;
+        box-shadow: inset 0 0 0 2px $dp-color-text-primary;
+    }
     &__bottom {
         .cta-buttons {
             ul {

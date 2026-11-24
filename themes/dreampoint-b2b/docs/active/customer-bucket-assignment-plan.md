@@ -1,6 +1,6 @@
 # Customer-to-Bucket Assignment Plan
 
-**Status:** PREPARATION ONLY — nothing matched, assigned or created. Awaiting client answers and APROS identifier verification.
+**Status:** PREPARATION ONLY — nothing matched, assigned or created. Client answers received 2026-11-24 (section 2a); APROS identifier verification (production access) still pending.
 **Confidentiality:** this document contains no customer-level data. The source workbook lives in `docs/client-input/customer-buckets/` (excluded from Git in this local clone only via `.git/info/exclude`). Any customer-level artifact must stay in that directory; prefer not to create copies.
 **Related:** ADR-018 (approval/activation, Apros source of truth), ADR-036 N3 (existing-customer migration plan), ADR-013, `customer-bucket-configuration-matrix.md`.
 
@@ -21,6 +21,10 @@
 3. Production verification of the identifiers (APROS export with partner code and name only, or an authorised production read).
 4. Completion of the approval/linking workflow (ADR-018) or an explicit owner decision to link manually in the interim.
 5. Bucket-definition decisions in `customer-bucket-configuration-matrix.md` §3 (a bucket must exist and be final before anyone is assigned to it).
+
+### 2a. Client answers 2026-11-24 (`B2B Bucket.docx`; tentative where stated)
+
+Decision 1: ALL 96 customers get access (99.9 % active, not all may use it). Decision 2: pre-created accounts only tentatively preferred ("Mozda") - final confirmation required. Identifiers are APROS partner codes ("Tako je!"); the earlier workbook is the APROS export of codes, names and country (the client asks whether anything else is needed); customers need the price list of their country as in APROS. The workbook is NOT the existing-customer account export (X3, contact Lešić). Decisions 3-4 depend on the production verification and on roadmap A14.
 
 ## 3. Mapping strategy
 

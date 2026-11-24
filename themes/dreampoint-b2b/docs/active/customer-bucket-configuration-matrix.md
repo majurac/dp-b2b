@@ -1,6 +1,6 @@
 # Customer Bucket Configuration Matrix (IZIPIZI wholesale)
 
-**Status:** PREPARATION ONLY — nothing configured, no bucket records created, awaiting client answers (2026-11-09).
+**Status:** PREPARATION ONLY — nothing configured, no bucket records created. Client answers to decisions 1-7 RECEIVED 2026-11-24 (section 3a); configuration still not performed and one engine question is open.
 **Engine:** existing `dp_bucket` CPT + visibility engine (`inc/visibility/`); see `CLAUDE.md`, ADR-009, ADR-018 (Finding B). No new roles, taxonomy or engine are required.
 **Source of requirements:** client workbook `docs/client-input/customer-buckets/` (sheet "Opis bucketa B2B" + image). Not tracked in Git.
 
@@ -44,6 +44,28 @@ APROS side (ADR-013): the original per-product classification is not preserved o
 7. **Future products.** Within approved categories: automatic or after separate approval?
 
 Also open, not a bucket decision: policy for approved customers without a bucket is currently "no access" (engine behavior); keep unless the client objects.
+
+### 3a. Client answers 2026-11-24 (source `docs/reference/client-apros/2026-11-24/B2B Bucket.docx`, red = client; tentative where stated)
+
+1. Restrictions apply ONLY to IZIPIZI products. 2. FULL-RANGE = the complete IZIPIZI assortment. If the other brands stay open to every bucket (the consistent reading of answer 1), FULL-RANGE is `full_access`; the `rule_based` brand-257 variant would hide all other brands and fits only if the owner wants FULL-RANGE customers limited to IZIPIZI (to be confirmed). 3. Junior Snow = ACTIVE LINE only (add 816 to ACTIVE LINE / SPORT and to SUN ADULT & CHILD where ACTIVE LINE is included; not to CHILD); ACTIVE LINE and SPORT are the same category. 4. CHILD = children sunglasses only (814). 5. CHILD ACCESSORIZE = the four listed products (Child Pearl Cord Candy Drops out of stock until further notice). 6. CUSTOM OFFER lists: the client will send them and asked for the deadline (answer owed by us). 7. New products are NOT automatic: separate approval (compatible with per-user product rows; a category answer must be expanded to current product IDs).
+
+### 3b. A14 assessment - restrictions only on IZIPIZI (2026-11-24, from the existing documentation and a read-only reading of `inc/visibility/`; nothing configured or modified)
+
+**Engine facts that decide it:** visibility comes ONLY from the bucket (`dp_access_type`: `full_access`, `rule_based`, `custom_offer`); no separate per-brand access rules exist, so "other brands stay governed by their own rules" can only be satisfied if the bucket itself lets them through. `rule_based` allow = brand OR category OR explicit include, minus explicit exclude (no category deny, no per-brand scoping); when a bucket has brand rules, `filter_brand_terms()` limits the `product_brand` term lists (brand lists, filters, archives) to those brands.
+
+| | A. Configuration only | B. Minimal targeted engine extension |
+|---|---|---|
+| How | each restricted bucket = categories of the allowed IZIPIZI lines + a brand rule for EVERY other brand + explicit include for CHILD ACCESSORIZE; FULL-RANGE = `full_access`; CUSTOM OFFER unchanged | a new bucket option "limit brand X to these categories / products, leave other brands open" (changes in the bucket field group, `resolve_bucket()`, the context object, `build_rule_based_where()`, `filter_brand_terms()` and any guard reusing the same clause) |
+| New brand in the catalog | not visible to the 3 restricted buckets until added to each one (fail-closed, silent hiding) | visible automatically |
+| Unintended exposure | low: IZIPIZI stays whitelist-only (new IZIPIZI products in allowed leaf categories appear; others need explicit approval, which matches the client's answer 7) | needs care: a mistake in the new branch could open all of IZIPIZI; mitigated by tests |
+| Unintended hiding | brand rules make `filter_brand_terms()` drop the IZIPIZI term from brand lists / filters / archive for the restricted buckets, although some IZIPIZI products are allowed (functional defect, not just maintenance) | none expected if the brand-term filter is adapted too |
+| Effort | records: 4 h (in the register); the brand-term side effect needs its own check | NOT supported by existing evidence: requires a focused read-only investigation of every enforcement point (catalog, search, direct URL, REST / Store API, Quick Order term scope, add-to-cart, cart, checkout, WBW compat) and the five `vis_*` test users, then an estimate; the visibility system stays frozen until the owner approves |
+
+**Owner direction 2026-11-24:** the preferred long-term direction is the minimal targeted extension (B) rather than maintaining a whitelist of every unrelated brand in each restricted bucket. It is NOT an approved implementation: the business rule must first be confirmed by the client, no engine modification and no bucket configuration is approved, and any other independently applicable access restriction must be preserved.
+
+**Open question that decides between them:** do restricted-bucket customers - and FULL-RANGE and CUSTOM OFFER customers - see ALL other brands, including brands added later? (Client confirmation requested, see roadmap 7c.)
+
+**Open consequence (owner decision):** answer 1 means the restricted buckets still see the other brands, which the engine cannot express (section 4: brand rules for all other brands, or a small extension of the frozen visibility system). Owner confirmation of that reading is required before any configuration.
 
 ## 4. Representation in the existing engine
 

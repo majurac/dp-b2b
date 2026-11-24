@@ -563,7 +563,23 @@ jQuery( function ( $ ) {
          * @return {number} Indeks slajda ili -1 ako nije pronađen
          */
         function findVariationSlideIndex( variation ) {
-            if ( ! variation || ! variation.image ) return -1;
+            if ( ! variation ) return -1;
+
+            // C6 R2-A: the project's variation images are the ACF repeater `product_variation_images`
+            // (PHP: dreampoint_b2b_variation_gallery_ids). The native variation image is blanked on the PDP,
+            // so the first ACF attachment ID that has a slide wins; the native matching below is the fallback.
+            const acfIds = Array.isArray( variation.dp_gallery_image_ids ) ? variation.dp_gallery_image_ids : [];
+            if ( acfIds.length ) {
+                const $imgs = $sliderFor.find( '.slick-slide:not(.slick-cloned) img' );
+                for ( let i = 0; i < acfIds.length; i++ ) {
+                    const found = $imgs.index( $imgs.filter( function () {
+                        return String( $( this ).data( 'attachment-id' ) ) === String( acfIds[ i ] );
+                    } ).first() );
+                    if ( found !== -1 ) return found;
+                }
+            }
+
+            if ( ! variation.image ) return -1;
 
             const varImgUrl = variation.image.src || variation.image.full_src || variation.image.url || '';
             const varImgId  = variation.image_id || variation.image.id || null;
@@ -605,15 +621,57 @@ jQuery( function ( $ ) {
             return targetIndex;
         }
 
+        /**
+         * Navigates the main gallery to a slide. Slick (waitForAnimate: true) silently drops slickGoTo while a
+         * transition is running, which left the gallery on a stale image after rapid variation changes. The
+         * LAST requested slide is therefore kept and applied when the running transition ends (afterChange).
+         *
+         * @param {number} index - Slide index (non-cloned) to show.
+         */
+        let pendingGallerySlide = -1;
+
+        function goToGallerySlide( index ) {
+            pendingGallerySlide = index;
+            applyPendingGallerySlide();
+        }
+
+        function applyPendingGallerySlide() {
+            if ( pendingGallerySlide < 0 ) return;
+
+            const slick = $sliderFor.slick( 'getSlick' );
+            if ( slick.animating ) return; // afterChange re-runs this
+
+            const index = pendingGallerySlide;
+            if ( slick.currentSlide === index ) {
+                pendingGallerySlide = -1;
+            } else {
+                $sliderFor.slick( 'slickGoTo', index, false );
+            }
+
+            $sliderNav.find( '.slick-slide' ).removeClass( 'slick-current' );
+            $sliderNav.find( '.slick-slide[data-slick-index="' + index + '"]' ).addClass( 'slick-current' );
+        }
+
+        // Slick's postSlide() fires `afterChange` BEFORE it clears `animating`, so the pending slide is applied on the
+        // next tick (one 0 ms timer, only when a request is pending).
+        $sliderFor.on( 'afterChange', function () {
+            if ( pendingGallerySlide >= 0 ) setTimeout( applyPendingGallerySlide, 0 );
+        } );
+
         $( document ).on( 'found_variation', 'form.variations_form', function ( event, variation ) {
+            // Stale-event guard (rapid switching, out-of-order AJAX variation responses): WooCommerce has already
+            // written the CURRENT variation_id into the form, so an event for any other variation is ignored.
+            const currentId = parseInt( $( this ).find( 'input.variation_id' ).val(), 10 );
+            if ( variation && variation.variation_id && currentId && parseInt( variation.variation_id, 10 ) !== currentId ) return;
+
             try {
                 const slideIndex = findVariationSlideIndex( variation );
 
                 if ( slideIndex !== -1 ) {
-                    $sliderFor.slick( 'slickGoTo', slideIndex, false );
-                    $sliderNav.find( '.slick-slide' ).removeClass( 'slick-current' );
-                    $sliderNav.find( '.slick-slide[data-slick-index="' + slideIndex + '"]' )
-                                .addClass( 'slick-current' );
+                    goToGallerySlide( slideIndex );
+                } else {
+                    // No dedicated image: keep the established fallback (gallery stays) and drop any older pending request.
+                    pendingGallerySlide = -1;
                 }
             } catch ( error ) {
                 if ( window.location.search.indexOf( 'debug=1' ) !== -1 ) {
@@ -623,7 +681,7 @@ jQuery( function ( $ ) {
         } );
 
         $( document ).on( 'reset_data', 'form.variations_form', function () {
-            $sliderFor.slick( 'slickGoTo', 0, false );
+            goToGallerySlide( 0 );
         } );
     }
 

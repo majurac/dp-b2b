@@ -172,6 +172,51 @@ function dreampoint_b2b_variation_ean( array $data, $parent, $variation ): array
 add_filter( 'woocommerce_available_variation', 'dreampoint_b2b_variation_ean', 10, 3 );
 
 /**
+ * Expose the ordered attachment IDs of the selected variation's own images to the PDP gallery (C6 R2-A).
+ *
+ * Variation images live in the importer's ACF repeater `product_variation_images` on the PARENT product
+ * (row = `variation_sku` + `images[].image`, return format ID), not in the native variation image. On the PDP
+ * the importer also blanks the native variation image (uncle-dev-importer hooks.php), so `variation.image_id`
+ * is useless there. The gallery already contains every ACF image (same plugin's gallery-ids filter), so the
+ * JS only needs the IDs: the first one is the slide to show. Empty array = variation without dedicated images.
+ *
+ * @param array                $data      Variation data for the add-to-cart form.
+ * @param WC_Product_Variable  $parent    Parent product.
+ * @param WC_Product_Variation $variation Variation.
+ * @return array
+ */
+function dreampoint_b2b_variation_gallery_ids( array $data, $parent, $variation ): array {
+	$data['dp_gallery_image_ids'] = [];
+
+	$sku = trim( (string) $variation->get_sku( 'edit' ) );
+	if ( '' === $sku || ! function_exists( 'get_field' ) ) {
+		return $data;
+	}
+
+	$rows = get_field( 'product_variation_images', $parent->get_id() );
+	if ( ! is_array( $rows ) ) {
+		return $data;
+	}
+
+	foreach ( $rows as $row ) {
+		if ( trim( (string) ( $row['variation_sku'] ?? '' ) ) !== $sku ) {
+			continue;
+		}
+		foreach ( (array) ( $row['images'] ?? [] ) as $image_row ) {
+			$image_id = (int) ( $image_row['image'] ?? 0 );
+			if ( $image_id > 0 ) {
+				$data['dp_gallery_image_ids'][] = $image_id;
+			}
+		}
+		break;
+	}
+
+	return $data;
+}
+
+add_filter( 'woocommerce_available_variation', 'dreampoint_b2b_variation_gallery_ids', 10, 3 );
+
+/**
  * Popular searches — the configured search terms shown as chips in the header search panel and in
  * Quick Order. Single source: ACF option repeater `search_popular_terms` (sub-field `term`) on the
  * `theme-settings` options page. No hard-coded terms; returns [] when ACF or the option is unavailable.

@@ -19,6 +19,12 @@ $args = array(
 $args = dreampoint_b2b_shared_surface_query_args( $args, $post_id ?? null );
 $args = dreampoint_b2b_apply_segment_tax_query( $args, $post_id ?? null );
 $latest_products = new WP_Query($args);
+
+// E13: on a Segment Landing page an empty product section is omitted completely
+// (heading, wrapper, message and spacing). Homepage and other pages are unchanged.
+if ( ! is_admin() && ! $latest_products->have_posts() && '' !== dreampoint_b2b_get_page_segment( $post_id ?? null ) ) {
+    return;
+}
 ?>
 
 <div class="latest-products slider-grid block">

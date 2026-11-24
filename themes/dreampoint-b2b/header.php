@@ -377,6 +377,8 @@ $company_phone = get_field('company_phone', 'option') ?: '';
             $hide_heading = is_front_page() ||
                             is_home() ||
                             is_404() ||
+                            // Segment Single (page-segment-landing.php): the hero block renders the one H1 (E13).
+                            is_page_template('page-segment-landing.php') ||
                             (function_exists('is_wc_endpoint_url') && is_wc_endpoint_url('order-received'));
             
             if (!$hide_heading) :

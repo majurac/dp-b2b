@@ -48,6 +48,32 @@ function dreampoint_b2b_get_page_segment( ?int $post_id = null ): string {
 }
 
 /**
+ * Whether an ACF Featured Section block is the hero of a Segment Landing page (E13).
+ *
+ * The hero is the FIRST `acf/featured-section` block of the page content; later instances
+ * (for example the Quick Order banner) keep the shared full-width panel layout. Pages
+ * without a segment context (Homepage, plain pages) never get the hero variant.
+ * Compares the saved block data, so no per-request static state is needed.
+ */
+function dreampoint_b2b_is_segment_hero_block( array $block, ?int $post_id = null ): bool {
+    $post_id = $post_id ?? get_the_ID();
+
+    if ( ! $post_id || '' === dreampoint_b2b_get_page_segment( $post_id ) ) {
+        return false;
+    }
+
+    foreach ( parse_blocks( (string) get_post_field( 'post_content', $post_id ) ) as $parsed ) {
+        if ( 'acf/featured-section' !== ( $parsed['blockName'] ?? '' ) ) {
+            continue;
+        }
+
+        return ( $parsed['attrs']['data'] ?? [] ) == ( $block['data'] ?? [] );
+    }
+
+    return false;
+}
+
+/**
  * Resolves product_brand term IDs assigned to the given segment via the
  * existing `brand_segment` ACF field (acf-json/group_675053191eac4.json).
  * Looked up with dp_visibility_context=shared_surface — segment membership

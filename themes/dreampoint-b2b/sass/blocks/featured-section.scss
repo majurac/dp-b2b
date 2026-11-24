@@ -100,3 +100,130 @@
         }
     }
 }
+
+// E13 Segment Single hero (rendered by blocks/templates/featured-section.php only for the first
+// Featured Section of a Segment Landing page). Figma HOME-01 "pojedinacni segment" 11148:31626:
+// card 11148:31663 (1200x478, #f3f4f6, square corners), photo 11148:31665 (719x478, object-fit cover,
+// right), badge 11148:31671 (Montserrat 500 10, 1px brand border, radius 8, padding 4/10/4/12),
+// heading 11148:31667 (Petrona 600 64/72), text 11148:31669 (Montserrat 600 20), XL button.
+// Card sits 40px below the navigation (Figma 192 -> 232). Tablet / mobile stacking is inferred from
+// the existing approved convention (no mobile frames, ADR-020).
+.featured-section--hero {
+    display: block;
+    padding: 40px 0 0; // the shared `.block` class would add 64px
+    background: transparent;
+    overflow: visible;
+
+    .segment-hero {
+        display: flex;
+        min-height: 478px;
+        background: $dp-color-bg-tertiary;
+        overflow: hidden;
+    }
+
+    .segment-hero__content {
+        flex: 1 1 0;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 48px 24px 48px 56px;
+
+        h1 {
+            margin: 0;
+            font-family: 'Petrona';
+            font-weight: 600;
+            font-size: 64px;
+            line-height: 72px;
+            letter-spacing: 0;
+            text-transform: none;
+            color: $dp-color-text-primary;
+            @include bp(lg-down) {
+                font-size: 48px;
+                line-height: 56px;
+            }
+        }
+
+        p {
+            margin: 12px 0 0;
+            max-width: 358px;
+            font-family: 'Montserrat';
+            font-weight: 600;
+            font-size: 20px;
+            line-height: normal;
+            letter-spacing: 0;
+            color: $dp-color-text-primary;
+        }
+
+        .button {
+            margin-top: 24px;
+        }
+    }
+
+    .segment-hero__badge {
+        display: inline-flex;
+        align-items: center;
+        margin: 0 0 12px;
+        padding: 4px 10px 4px 12px;
+        border: 1px solid $dp-color-bg-brand;
+        border-radius: 8px;
+        background: $dp-color-bg-tertiary;
+        font-family: 'Montserrat';
+        font-weight: 500;
+        font-size: 10px;
+        line-height: 10px; // Figma badge frame is 20px high: 4 + 10 + 4 incl. the 1px border
+        color: $dp-color-text-primary;
+    }
+
+    .segment-hero__media {
+        position: relative;
+        flex: 0 0 59.917%; // 719 / 1200
+
+        img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    }
+
+    @include bp(md-down) {
+        padding-top: 24px;
+
+        .segment-hero {
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .segment-hero__content {
+            padding: 32px 24px;
+
+            h1 {
+                font-size: 40px;
+                line-height: 48px;
+            }
+
+            p {
+                max-width: none;
+            }
+        }
+
+        .segment-hero__media {
+            flex: none;
+            order: 2;
+            width: 100%;
+            aspect-ratio: 16 / 10;
+        }
+    }
+
+    @include bp(sm-down) {
+        .segment-hero__content h1 {
+            font-size: 32px;
+            line-height: 40px;
+        }
+    }
+}

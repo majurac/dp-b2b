@@ -108,4 +108,32 @@
         color: $dp-color-text-primary;
         overflow-wrap: anywhere;
     }
+
+    // Mobile portrait (Slick shows ONE slide below 767px): the tile keeps the Figma 384:573 ratio on the
+    // full slide width, which made it ~500px tall - on many phones the dots sat below the fold and nothing
+    // hinted that more segments exist. Two scoped changes (CSS only, existing Slick config):
+    // 1) the tile height is capped to what is left of the first screen:
+    //    100svh - mobile header 72 - section padding-top 32 - Slick dots zone 50 (.slick-dotted
+    //    padding-bottom) - fixed bottom bar 73 - 8px breathing room = 235px
+    //    (minus the admin bar, 46px, via WP's --wp-admin--admin-bar--height when it is shown).
+    //    `vh` is the fallback for browsers without `svh`; min-height keeps the label usable on very
+    //    short / landscape viewports (the dots may then sit below the fold: graceful fallback).
+    // 2) .slick-list padding-right 44px narrows the slide (Slick sizes slides from the list CONTENT width)
+    //    so that 20px of the next tile stays visible inside the slider (44 - 24px slide gap = 20px).
+    //    The mirrored flex-basis keeps the pre-init layout identical (no jump when Slick starts).
+    @media (max-width: 766px) {
+        .segments-slider {
+            .slick-list {
+                padding: 0 44px 0 0;
+            }
+            &:not(.slick-initialized) .segment-box {
+                flex-basis: calc(100% - 44px);
+            }
+        }
+        .segment-tile {
+            max-height: calc(100vh - 235px);
+            max-height: calc(100svh - 235px - var(--wp-admin--admin-bar--height, 0px));
+            min-height: 260px;
+        }
+    }
 }

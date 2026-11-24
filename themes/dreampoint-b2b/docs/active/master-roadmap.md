@@ -289,10 +289,10 @@ Only genuinely open work. Hours are whole-hour estimates ONLY where the scope is
 |---|---|---|---|---|
 | A. Immediately actionable | E13 | focused Figma comparison of the Segment Single page + gap list (implementation not estimated) | owner supplies Figma node(s) | 2 |
 | | F1-F4 | read-only Figma-vs-staging checkout gap audit (scope note below WS-F) | none | 3 |
-| B. Known scope, awaiting owner decisions | A14 | create the 5 bucket records with the confirmed rules and verify with test users | owner: IZIPIZI-only reading, brand rules vs engine extension | 4 |
+| B. Known scope, awaiting owner decisions | A14 | create the 5 bucket records with the confirmed rules and verify with test users | IZIPIZI-only reading APPROVED (ADR-041, no client question); remaining: focused technical analysis (config vs engine extension) + separate implementation approval | 4 |
 | | E10 | auth-page second image configurable | owner (options a / b) | 2 |
 | | C3 | optional H1 subtitle | owner (content / source) | 1 |
-| C. External dependency (known scope) | X3 | existing-customer migration (conditional) | account export from APROS colleague Lešić via a secure channel; all vs selected users | 6 |
+| C. External dependency (known scope) | X3 | existing-customer migration (conditional) | scope = the 96 spreadsheet customers (ADR-041); production partner-code / B2B e-mail verification first (access pending, DreamPoint obtains it); the Lešić account export is only a CONDITIONAL fallback | 6 |
 | D. Controlled order testing | A10 | full checkout QA incl. the X22-B deferred thank-you and HTML order-note checks | A2, A4, owner approval for transactions | 6 |
 | | E-mail bundle | A7 e-mails, X10 real password reset, D5 CF7 delivery, C2 back-in-stock | staging SMTP | 4 |
 | | G1 residual | Quick Order and D1 re-run | A10 | 2 |
@@ -324,9 +324,9 @@ Replaces the scattered question lists for status tracking; the older matrices (`
 
 | ID | Question / deliverable | Existing partial answer | Source | Blocks launch | Next action |
 |---|---|---|---|---|---|
-| A14 | product list per CUSTOM OFFER customer (7): APROS partner code, customer name, approved product IDs (+ variation IDs) | client: "ok, we will send; by when?" | `B2B Bucket.docx` s.3 | yes | send the deadline (7c-3) |
-| A14 / X3 | final confirmation of pre-created accounts (and contact data / e-mails needed for it) | tentative: "Mozda" | `B2B Bucket.docx` s.4 | yes | ask for firm confirmation |
-| X3 | migrate ALL existing users or only selected ones | not answered | `B2B e-mail.docx` s.1 | yes | ask together with the export |
+| A14 | product list per CUSTOM OFFER customer (7): APROS partner code, customer name, approved product IDs (+ variation IDs) | client: "ok, we will send; by when?" | `B2B Bucket.docx` s.3 | yes | request via DreamPoint as soon as possible; no calendar date (7d) |
+| A14 / X3 | final confirmation of pre-created accounts (and contact data / e-mails needed for it) | tentative: "Mozda" | `B2B Bucket.docx` s.4 | yes | RESOLVED by owner 2026-11-24: all 96 accounts pre-created, no client question (7d) |
+| X3 | migrate ALL existing users or only selected ones | not answered | `B2B e-mail.docx` s.1 | yes | RESOLVED by owner 2026-11-24: the 96 spreadsheet customers only; no client question (7d) |
 | A4 | approval of the interim shipping methods (ADR-037); 1-location and post-order reset not verified | none new | ADR-037 | yes | unchanged, no correspondence in this batch |
 | A7 / F3 | order-number format; source of VAT-number / contact-person (F1) | none | roadmap | yes | owner decides first |
 | E14 | scope A vs B, signed vs unsigned, Appendix 1 maintenance, who uploads / replaces, needed for launch | none | `IZJAVA...docx`; client e-mail (verified) | unknown | questions below, after owner review |
@@ -338,14 +338,15 @@ Replaces the scattered question lists for status tracking; the older matrices (`
 
 | ID | Question / deliverable | Existing partial answer | Source | Blocks launch | Next action |
 |---|---|---|---|---|---|
-| X3 | the full existing B2B user-account export (fields in the X3 row; no passwords) | APROS: contact Lešić | `B2B e-mail.docx` s.1 | yes | contact Lešić; secure channel |
+| X3 | the full existing B2B user-account export (fields in the X3 row; no passwords) | APROS: contact Lešić | `B2B e-mail.docx` s.1 | yes -> conditional | CONDITIONAL fallback only (7d): not requested now; if production verification shows required missing data, request it via DreamPoint |
 | A2 | idempotency / duplicate-order behaviour of `order/create` when an order is re-sent, incl. lost-response cases | genuinely external: `order/create` is NOT documented in the API PDF and the general idempotency semantics are explicitly open (decisions.md AP-06 note, resolution matrix); the 'already imported' response is known only from exporter code | status 2026-11-24, ADR AP-06 | yes | ask APROS after the owner decides the retry model |
 | A11 | `paymentTypeId`, `shippingMethodId`, shipping article ID (undocumented in the API PDF) | none | ADR-037 / A11 | yes | unchanged |
 | A12 | why articles 53084 / 53085 carry no price | RCA done | roadmap A12 | yes | unchanged |
 | X4 | (a) full-snapshot semantics, pagination, size limit and an HTTP error contract for `partnerList/get` (PDF documents none); (b) is `partnerCode` stable and never reused; does DA -> NE -> DA return the same code; (c) can one B2B e-mail belong to several partners; (d) `taxId` for foreign partners, legal forms 106 / 111 (non-blocking); (e) production API access for identifier verification | PDF: plain GET, no parameters | `B2B - Apross.docx`, API PDF | yes (a, b, e) | collect into one message; do NOT re-ask the answered items |
 | A14 / pricing | how the country price list of a PARTNER is determined: `partnerList/get` has no country or price-list code, so the mapping country -> `countryPriceListCode` (BIH / SLO / SRBCG ...) must come from the client's table | the payload formats of `countryPriceList/get` and `partnerBrandDiscountList/get` ARE documented with examples in the API PDF v1.0 (the old 'payload missing' notes in ADR-001 pre-date it - do NOT ask for samples again); ADR-001 Model C implemented; `apros_country_code` user meta exists | API PDF, ADR-001, workbook | yes | internal first: map the countries in the workbook to price-list codes; ask only for confirmation |
-| E14 | does APROS hold an attribute or list identifying customers with stands; partner identification | none | client e-mail (verified) | unknown | ask only after the owner defines scope A / B |
+| E14 | does APROS hold an attribute or list identifying customers with stands; partner identification | none | client e-mail (verified) | unknown | REMOVED (7d): DreamPoint identifies the customers with stands; no APROS question, no APROS investigation |
 | A4 | deferred APROS delivery-location inquiry | none | ADR-037 addendum | yes | unchanged |
+| AP-07 | example response of `partnerDeliveryLocationList` and whether a partner may have an empty location list (separate from the delivery-method approval; answer obtained by DreamPoint) | none | ADR-010, blueprint | yes | in the technical e-mail to DreamPoint (7d) |
 | AP-10 | when APROS reserves stock on its side (checkout vs ERP confirmation) | open | ADR-007 | no | unchanged |
 
 **3. Questions received from the client that require OUR response**
@@ -380,7 +381,7 @@ Tentative: the pre-created accounts preference ("Mozda"); the claim that brand-t
 
 X2 promotional pricing: defer to a later phase. A6 MOQ / multipack: remove from the launch scope. Substitute-product groups: defer. E13 Segment Single: keep as a new UI task. F1-F4: keep the expanded full checkout Figma alignment. E14 stand documentation: keep pending client clarification. A5: verify the selected plugin's capabilities before committing to a countdown policy. Scope separation checked: E13 (segment pages) and F1-F4 (checkout) share no screens or estimates; the Lifestyle showcase requirement is recorded in the E13 acceptance (4); the A14 configuration estimate (4 h) excludes any engine modification. **A14 visibility policy:** the preferred long-term direction is a minimal targeted engine extension rather than a per-bucket whitelist of every unrelated brand; this is a DIRECTION, not an approved implementation. The business rule must first be confirmed by the client (do customers in ALL IZIPIZI buckets, including FULL-RANGE and CUSTOM OFFER, keep access to unrelated existing AND future brands?); other independently applicable access restrictions must be preserved; no engine modification and no bucket configuration is approved.
 
-**5b. Final external lists (2026-11-24, wording for later correspondence, NOT sent; internal terminology deliberately avoided)**
+**5b. Final external lists (2026-11-24, wording for later correspondence, NOT sent; internal terminology deliberately avoided). SUPERSEDED where different by section 7d / ADR-041: all requests go to DreamPoint (not directly to APROS); client items 2-4 and the Lešić export and APROS stand item 8 are removed; APROS item added for delivery locations.**
 
 *Što trebamo od klijenta:*
 1. Popis proizvoda za svakih od 7 kupaca s posebnom ponudom: APROS šifra partnera, naziv kupca, šifre odobrenih proizvoda (i varijacija gdje postoje). Rok: dogovaramo datum prije konačne dodjele bucketa.
@@ -416,6 +417,23 @@ X2 promotional pricing: defer to a later phase. A6 MOQ / multipack: remove from 
 **6. Deferred to future project phases** (X2 and substitute-product groups: owner decision 2026-11-24)
 
 X2 promotional price lists (original questions preserved); alternative-product groups through the API; E7 A / B; X13 documents tabs; X11 / X12 until a production environment exists.
+
+## 7d. Final communication decisions and responsibility policy (2026-11-24, owner; ADR-041; supersedes conflicting wording in 7c / 5b below)
+
+**Policy (project-wide, all items and future drafts):** DreamPoint coordinates ALL communication with APROS / ZGData and obtains answers, business data, documents, records, API access and credentials (secure channel). The development side defines requirements and questions, identifies genuinely missing information, reviews answers and data, and implements and verifies. No direct APROS contact, business-data collection or coordination by the development side; every APROS request is addressed to DreamPoint. Authorized technical API verification after access is supplied is unaffected. Both final e-mails (business confirmations; technical questions) are addressed to DreamPoint, owner-finalized, NOT confirmed as sent.
+
+| Topic | Recorded decision |
+|---|---|
+| CUSTOM OFFER lists (7 customers) | requested as soon as possible; no invented date; categories can be mapped to currently existing products / variations; new products need separate approval |
+| IZIPIZI visibility (A14) | approved owner interpretation of the existing client answers: IZIPIZI buckets restrict only IZIPIZI; other existing and future brands unrestricted by bucket membership; FULL-RANGE = complete IZIPIZI assortment; CUSTOM OFFER = only individually approved IZIPIZI products; independent restrictions stay. Redundant client question removed. A14 no longer blocked by this clarification; technical analysis and separate implementation approval still required; engine and bucket configuration untouched |
+| Existing customers (X3) | accounts pre-created for all 96, no client confirmation. Steps before creation: verify production partner codes and B2B e-mail availability; validate e-mail uniqueness, partner identity, eligibility; secure setup / reset links; settle approved-status / bucket sequence and activation timing; review the six notes and normalize country spelling. NOT assumed ready; no legacy migration beyond scope |
+| Legacy export (Lešić) | immediate request removed from both e-mails; CONDITIONAL fallback only, requested via DreamPoint. Production data NOT verified; production access pending; later read-only verification is separately authorized and reports aggregates only |
+| Delivery locations (AP-07) | new technical question: example `partnerDeliveryLocationList` response and whether the list may be empty; separate from the delivery-method approval |
+| Stands (E14) | DreamPoint identifies customers, supplies lists / declarations / signed documents / appendices / inventories, coordinates with APROS, clarifies ownership, maintenance and launch need; APROS question removed; automatic stand sync, digital signatures and inventory management NOT assumed; pending client, no implementation authorized |
+| Technical e-mail (7 topics, via DreamPoint) | (1) order submission / duplicate prevention / idempotency / lost response; (2) payment and shipping identifiers incl. shipping article; (3) prices of 53084 / 53085; (4) partner list completeness, pagination, errors, stable codes, reactivation, shared e-mail; (5) partner-to-country-price-list mapping; (6) delivery-location example / empty list; (7) production API access (secure channel) |
+| Other | promo price lists deferred; cart reservation recommendation = fixed 60 min from the first reservation, subject to plugin verification; permanent partner-to-price-list mapping pending information from DreamPoint; temporary delivery methods pending client approval; no new order-number format approved |
+
+Items 6.1 / 6.3 of the business e-mail (pre-created accounts, all vs selected) and the stand question to APROS are NOT in the final drafts. Estimates unchanged (known-scope baseline 43 h).
 
 ## 7a. Historical list (2026-10-31) - SUPERSEDED by section 7 above, kept as history
 

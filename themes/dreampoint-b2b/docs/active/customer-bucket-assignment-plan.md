@@ -26,6 +26,10 @@
 
 Decision 1: ALL 96 customers get access (99.9 % active, not all may use it). Decision 2: pre-created accounts only tentatively preferred ("Mozda") - final confirmation required. Identifiers are APROS partner codes ("Tako je!"); the earlier workbook is the APROS export of codes, names and country (the client asks whether anything else is needed); customers need the price list of their country as in APROS. The workbook is NOT the existing-customer account export (X3, contact Lešić). Decisions 3-4 depend on the production verification and on roadmap A14.
 
+### 2b. Owner decisions 2026-11-24 (ADR-041; supersede open items 1, 2 and the "Mozda" caveat above)
+
+All 96 customers get pre-created accounts; no further client confirmation. IZIPIZI buckets restrict only the IZIPIZI assortment (approved owner interpretation of the client answers); CUSTOM OFFER = only individually approved IZIPIZI products. Before creation: verify production partner codes and B2B e-mail availability (production API access pending, supplied via DreamPoint; read-only aggregate-only verification needs separate authorization), validate e-mail uniqueness / partner identity / eligibility, use secure password setup links, settle the approved-status / bucket sequence and activation timing, review the six notes in the workbook and normalize the country spelling. The 96 are NOT assumed ready. The legacy account export is a conditional fallback only; requests go through DreamPoint.
+
 ## 3. Mapping strategy
 
 Chain: **workbook identifier → confirmed APROS partner → existing WordPress user → `dp_bucket_id`.** Every link must be established independently; a missing link leaves the customer unassigned.

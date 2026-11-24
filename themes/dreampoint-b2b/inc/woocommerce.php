@@ -627,3 +627,82 @@ function dreampoint_b2b_archive_pagination_args( array $args ): array {
 	return $args;
 }
 add_filter( 'woocommerce_pagination_args', 'dreampoint_b2b_archive_pagination_args' );
+
+
+/**
+ * Croatian plural category of an integer: 'one' (1, 21, 31 ... but not 11), 'few' (2-4, 22-24 ... but not 12-14),
+ * 'many' otherwise. Used by the cart counter (E7).
+ */
+function dreampoint_b2b_hr_plural_form( int $n ): string {
+	$n    = abs( $n );
+	$m10  = $n % 10;
+	$m100 = $n % 100;
+
+	if ( 1 === $m10 && 11 !== $m100 ) {
+		return 'one';
+	}
+
+	if ( $m10 >= 2 && $m10 <= 4 && ( $m100 < 12 || $m100 > 14 ) ) {
+		return 'few';
+	}
+
+	return 'many';
+}
+
+/**
+ * Cart counter data (E7): total quantity of the visible cart lines and the number of DISTINCT effective SKUs.
+ *
+ * Effective SKU = the value the cart row shows in its SKU column: the APROS article code `_ARTICLE_CODE` of the
+ * cart unit itself (the variation for variable products, never the parent). When a unit has no article code the
+ * fallback identity is the product / variation ID, so unrelated products without a code are not collapsed into
+ * one SKU while two cart lines of the same unit still count once. Reads only the already loaded cart data and
+ * post meta that the cart template reads as well (no extra queries, nothing persisted).
+ *
+ * @return array{quantity:int,skus:int}
+ */
+function dreampoint_b2b_get_cart_counter_counts(): array {
+	$cart = function_exists( 'WC' ) ? WC()->cart : null;
+
+	if ( ! $cart instanceof WC_Cart ) {
+		return [ 'quantity' => 0, 'skus' => 0 ];
+	}
+
+	$quantity = 0;
+	$skus     = [];
+
+	foreach ( $cart->get_cart() as $cart_item_key => $cart_item ) {
+		$product = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'] ?? null, $cart_item, $cart_item_key );
+
+		// Same visibility rule as woocommerce/cart/cart.php.
+		if ( ! $product instanceof WC_Product || ! $product->exists() || $cart_item['quantity'] <= 0
+			|| ! apply_filters( 'woocommerce_cart_item_visible', true, $cart_item, $cart_item_key ) ) {
+			continue;
+		}
+
+		$quantity += (int) $cart_item['quantity'];
+
+		$code                                          = trim( (string) get_post_meta( $product->get_id(), '_ARTICLE_CODE', true ) );
+		$skus[ '' !== $code ? 'code:' . $code : 'id:' . $product->get_id() ] = true;
+	}
+
+	return [ 'quantity' => $quantity, 'skus' => count( $skus ) ];
+}
+
+/**
+ * Cart counter text, for example "6 artikala | 3 SKU-a" (Figma CART-02 11148:38464).
+ */
+function dreampoint_b2b_get_cart_counter_text(): string {
+	$counts = dreampoint_b2b_get_cart_counter_counts();
+
+	$items = [
+		'one'  => __( 'artikal', 'dreampoint-b2b' ),
+		'few'  => __( 'artikla', 'dreampoint-b2b' ),
+		'many' => __( 'artikala', 'dreampoint-b2b' ),
+	][ dreampoint_b2b_hr_plural_form( $counts['quantity'] ) ];
+
+	$sku = 'one' === dreampoint_b2b_hr_plural_form( $counts['skus'] )
+		? __( 'SKU', 'dreampoint-b2b' )
+		: __( 'SKU-a', 'dreampoint-b2b' );
+
+	return sprintf( '%1$d %2$s | %3$d %4$s', $counts['quantity'], $items, $counts['skus'], $sku );
+}

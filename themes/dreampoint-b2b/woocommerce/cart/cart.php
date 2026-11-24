@@ -31,6 +31,22 @@ do_action( 'woocommerce_before_cart' ); ?>
 					    <div>
 					        <?php do_action( 'woocommerce_before_cart_contents' ); ?>
 
+					        <?php // E7: the visible counter lives under the page heading (header.php); this hidden copy is refreshed with the form and read by js/cart-selection.js. ?>
+					        <span class="dp-cart-counter-source" hidden><?php echo esc_html( dreampoint_b2b_get_cart_counter_text() ); ?></span>
+
+					        <?php // E7: selection controls (bulk removal only, never part of Checkout). Hidden until js/cart-selection.js enables them. ?>
+					        <div class="cart-bulk-bar" data-select-ui hidden>
+					            <label class="cart-select-all">
+					                <input type="checkbox" class="cart-select-all__input">
+					                <span><?php esc_html_e( 'Označi sve', 'dreampoint-b2b' ); ?></span>
+					            </label>
+					            <button type="button" class="cart-bulk-remove" disabled>
+					                <i class="icon-trashcan" aria-hidden="true"></i>
+					                <span><?php esc_html_e( 'Ukloni označene', 'dreampoint-b2b' ); ?></span>
+					            </button>
+					            <span class="screen-reader-text cart-select-status" role="status" aria-live="polite"></span>
+					        </div>
+
 					        <div class="cart-table-header">
 					            <span class="col-product"><?php esc_html_e( 'Proizvod', 'dreampoint-b2b' ); ?></span>
 					            <span><?php esc_html_e( 'SKU', 'dreampoint-b2b' ); ?></span>
@@ -58,8 +74,11 @@ do_action( 'woocommerce_before_cart' ); ?>
 					                ?>
 					                <div class="woocommerce-cart-form__cart-item <?php echo esc_attr( apply_filters( 'woocommerce_cart_item_class', 'cart_item', $cart_item, $cart_item_key ) ); ?>">
 
-				               
-
+					                    <div class="product-select" data-select-ui hidden>
+					                        <label class="cart-select">
+					                            <input type="checkbox" class="cart-item-select" data-cart-item-key="<?php echo esc_attr( $cart_item_key ); ?>" aria-label="<?php echo esc_attr( sprintf( /* translators: %s: product name */ __( 'Označi za uklanjanje: %s', 'dreampoint-b2b' ), wp_strip_all_tags( $product_name ) ) ); ?>">
+					                        </label>
+					                    </div>
 
 					                    <div class="product-thumbnail">
 					                    <?php

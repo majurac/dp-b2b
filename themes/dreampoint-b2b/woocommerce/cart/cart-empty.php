@@ -26,20 +26,20 @@ do_action( 'woocommerce_cart_is_empty' );
 $quick_order_url = dreampoint_b2b_get_quick_order_url();
 ?>
 
-<div id="not-found">
+<div id="not-found" class="not-found--cart">
 	<div class="container">
 		<div class="not-found-holder">
-			<div class="nf-icon"><img src="<?php bloginfo('template_directory'); ?>/img/ico/face-sad.svg" alt=""></div>
+			<div class="nf-icon"><img src="<?php echo esc_url( get_template_directory_uri() . '/img/ico/emoji-sad.svg' ); ?>" width="144" height="144" alt=""></div>
 			<h1><?php esc_html_e( 'Vaša košarica je prazna', 'dreampoint-b2b' ); ?></h1>
 			<?php if ( $quick_order_url ) : ?>
-				<p><?php esc_html_e( 'Izgleda da još niste dodali nijedan proizvod. Pretražite proizvode ili koristite Quick Order za brže dodavanje.', 'dreampoint-b2b' ); ?></p>
+				<p class="nf-text"><?php esc_html_e( 'Izgleda da još niste dodali nijedan proizvod. Pretražite proizvode ili koristite Quick Order za brže dodavanje.', 'dreampoint-b2b' ); ?></p>
 			<?php else : ?>
-				<p><?php esc_html_e( 'Čini se da još niste dodali nijedan proizvod u svoju košaricu. Pregledajte našu ponudu i pronađite nešto što vam odgovara!', 'dreampoint-b2b' ); ?></p>
+				<p class="nf-text"><?php esc_html_e( 'Čini se da još niste dodali nijedan proizvod u svoju košaricu. Pregledajte našu ponudu i pronađite nešto što vam odgovara!', 'dreampoint-b2b' ); ?></p>
 			<?php endif; ?>
 			<div class="nf-actions">
-				<a href="<?php echo esc_url( apply_filters( 'woocommerce_return_to_shop_redirect', wc_get_page_permalink( 'shop' ) ) ); ?>" class="button button--xl"><?php esc_html_e( 'Posjeti trgovinu', 'dreampoint-b2b' ); ?> <i class="icon-shopping-bag"></i></a>
+				<a href="<?php echo esc_url( apply_filters( 'woocommerce_return_to_shop_redirect', wc_get_page_permalink( 'shop' ) ) ); ?>" class="button button--xl"><?php esc_html_e( 'Pretraži proizvode', 'dreampoint-b2b' ); ?></a>
 				<?php if ( $quick_order_url ) : ?>
-					<a href="<?php echo esc_url( $quick_order_url ); ?>" class="button button--xl button--outline"><?php esc_html_e( 'Quick Order', 'dreampoint-b2b' ); ?></a>
+					<a href="<?php echo esc_url( $quick_order_url ); ?>" class="button button--xl button--outline"><?php esc_html_e( 'Otvori quick order', 'dreampoint-b2b' ); ?></a>
 				<?php endif; ?>
 			</div>
 		</div>

@@ -377,6 +377,8 @@ $company_phone = get_field('company_phone', 'option') ?: '';
             $hide_heading = is_front_page() ||
                             is_home() ||
                             is_404() ||
+                            // E7 C: empty cart (Figma CART-01) renders its own heading; AJAX transitions are handled by js/cart-selection.js.
+                            (function_exists('is_cart') && is_cart() && WC()->cart instanceof WC_Cart && WC()->cart->is_empty()) ||
                             // Segment Single (page-segment-landing.php): the hero block renders the one H1 (E13).
                             is_page_template('page-segment-landing.php') ||
                             (function_exists('is_wc_endpoint_url') && is_wc_endpoint_url('order-received'));
@@ -417,6 +419,11 @@ $company_phone = get_field('company_phone', 'option') ?: '';
 
                         } elseif (!is_product()) {
                             echo '<h1>' . esc_html(get_the_title()) . '</h1>';
+                        }
+
+                        // E7: cart counter directly below the heading; kept in sync by js/cart-selection.js after AJAX refreshes.
+                        if (function_exists('is_cart') && is_cart()) {
+                            echo '<p id="dp-cart-counter" class="cart-counter" role="status">' . esc_html(dreampoint_b2b_get_cart_counter_text()) . '</p>';
                         }
                     }
 

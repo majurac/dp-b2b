@@ -565,6 +565,20 @@ function dreampoint_b2b_scripts(): void {
             'maxQty' => esc_html__( 'Maksimalna količina:', 'dreampoint-b2b' ),
         ] );
 
+        // E7 A: item selection + bulk removal (native update_cart with quantity 0) and counter / empty-state sync.
+        wp_enqueue_script(
+            'dreampoint-b2b-cart-selection',
+            get_template_directory_uri() . '/js/cart-selection.js',
+            [ 'jquery' ],
+            dreampoint_b2b_asset_ver( 'js/cart-selection.js' ),
+            true
+        );
+        wp_script_add_data( 'dreampoint-b2b-cart-selection', 'strategy', 'defer' );
+        wp_localize_script( 'dreampoint-b2b-cart-selection', 'dpCartSelect', [
+            /* translators: %d: number of selected cart lines */
+            'selected' => esc_html__( 'Označeno stavki: %d', 'dreampoint-b2b' ),
+        ] );
+
         // E7-C: sticky totals eligibility (fit check); no dependencies.
         wp_enqueue_script(
             'dreampoint-b2b-cart-sticky',

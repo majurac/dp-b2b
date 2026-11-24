@@ -130,15 +130,14 @@ $cart-shadow-md: 0 1px 3px rgba(10, 14, 21, 0.1), 0 5px 12px rgba(10, 14, 21, 0.
                         }
                     }
                 }
+                // E7 A: selection checkbox (hidden until js/cart-selection.js enables it). Mobile: first flex item,
+                // vertically centred on the 80px thumbnail; >=768px: first grid column (see .dp-cart-select below).
                 .product-select {
-                    position: absolute;
-                    left: 16px;
-                    top: 24px;
-                    z-index: 1;
-                    input[type="checkbox"] {
-                        width: 20px;
-                        height: 20px;
-                        background-color: $white;
+                    order: 0;
+                    flex: 0 0 20px;
+                    margin: 30px 4px 0 0;
+                    @include bp(sm-up) {
+                        margin: 0;
                     }
                 }
                 .product-thumbnail {
@@ -528,6 +527,131 @@ $cart-shadow-md: 0 1px 3px rgba(10, 14, 21, 0.1), 0 5px 12px rgba(10, 14, 21, 0.
     }
 }
 
+// E7 A (Figma CART-02: Header table 11206:40338, Checkbox 20x20 / 1px #d2d6db / radius 2, "Oznaci sve" 11148:38556,
+// "Ukloni oznacene" 11148:38560, Cart card 11200:39751 with the checkbox first, 28px before the thumbnail).
+// The extra column only exists while JS has enabled the controls (.dp-cart-select), so there is no dead column
+// without JavaScript. Selection is for bulk removal only and has no relation to Checkout.
+$cart-columns-select: 32px 64px minmax(0, 1fr) 128px 80px 80px 80px 24px;
+
+#cart .woocommerce-cart-form {
+    [hidden] {
+        display: none !important;
+    }
+    .cart-bulk-bar {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin: 0 0 8px;
+        padding: 0 4px;
+        // Stacked rows have no side padding: keep the "Oznaci sve" checkbox on the same x as the row checkboxes.
+        @include bp(sm-down) {
+            margin-left: -8px;
+        }
+    }
+    .cart-select-all,
+    .cart-bulk-remove {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+        padding: 4px;
+        border: 0;
+        background: none;
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 400;
+        font-size: 12px;
+        line-height: 18px;
+        letter-spacing: 0;
+        text-transform: none;
+        color: $dp-color-text-primary;
+        cursor: pointer;
+        // 44px interactive target around the 28px Figma control.
+        &::before {
+            content: '';
+            position: absolute;
+            inset: -8px;
+        }
+    }
+    .cart-bulk-remove {
+        i {
+            font-size: 16px;
+            line-height: 1;
+        }
+        &:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        &:focus-visible {
+            outline: none;
+            border-radius: 4px;
+            box-shadow: 0 0 0 2px $dp-color-bg-primary, 0 0 0 4px $dp-color-text-primary;
+        }
+    }
+    .cart-select {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        margin: -12px;
+        cursor: pointer;
+    }
+    .cart-item-select,
+    .cart-select-all__input {
+        -webkit-appearance: none;
+        appearance: none;
+        flex: 0 0 20px;
+        width: 20px;
+        height: 20px;
+        margin: 0;
+        border: 1px solid $dp-color-border-primary;
+        border-radius: 2px;
+        background: #fcfcfd center / 14px 14px no-repeat;
+        cursor: pointer;
+        &:checked {
+            border-color: $dp-color-bg-brand;
+            background-color: $dp-color-bg-brand;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M2.5 7.5l3 3 6-6.5' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        }
+        &:indeterminate {
+            border-color: $dp-color-bg-brand;
+            background-color: $dp-color-bg-brand;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M3 7h8' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+        }
+        &:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 2px $dp-color-bg-primary, 0 0 0 4px $dp-color-text-primary;
+        }
+    }
+    &.dp-cart-select {
+        @include bp(sm-up) {
+            .cart-table-header {
+                grid-template-columns: $cart-columns-select;
+                .col-product {
+                    grid-column: 3;
+                }
+            }
+            .shop_table .cart_item {
+                grid-template-columns: $cart-columns-select;
+            }
+        }
+    }
+}
+
+// E7 B (Figma CART-02 11148:38464): counter directly under the page heading (header.php); text refreshed by
+// js/cart-selection.js after WooCommerce replaces the cart form.
+// Figma: the counter sits flush under the 72px heading line (beats the shared `.inner-heading h1 + *` 16px gap).
+.inner-heading h1 + .cart-counter {
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 20px;
+    letter-spacing: -0.176px;
+    color: $dp-color-text-secondary;
+}
+
 .cart-empty.woocommerce-info {
     display: none;
 }
@@ -538,4 +662,57 @@ $cart-shadow-md: 0 1px 3px rgba(10, 14, 21, 0.1), 0 5px 12px rgba(10, 14, 21, 0.
     flex-wrap: wrap;
     justify-content: center;
     gap: 24px;
+}
+
+// E7 C - Empty cart (Figma CART-01 11148:37269, content 11148:37303): 544px column, 144px emoji-sad, Petrona 64/72 heading
+// (inherited from the shared #not-found rules), 18px text, two equal-width buttons 24px apart. No dp watermark: the
+// heading banner is not shown for an empty cart. Stacks below 768px (no mobile frame, inferred).
+#not-found.not-found--cart {
+    padding-top: 96px;
+    padding-bottom: 96px;
+    background-image: none;
+    @include bp(sm-down) {
+        padding-top: 48px;
+        padding-bottom: 64px;
+    }
+    .not-found-holder {
+        max-width: 544px;
+    }
+    .nf-icon {
+        margin: 0 0 16px;
+        img {
+            display: block;
+            width: 144px;
+            height: 144px;
+            margin: 0 auto;
+        }
+    }
+    h1 {
+        max-width: none;
+        margin: 0 0 8px;
+    }
+    .nf-text {
+        margin: 0 0 24px;
+    }
+    .nf-actions {
+        flex-wrap: nowrap;
+        gap: 24px;
+        .button {
+            flex: 1 1 0;
+            min-width: 0;
+            justify-content: center;
+            text-align: center;
+        }
+        .button:only-child {
+            flex: 0 1 259px;
+        }
+        @include bp(sm-down) {
+            flex-direction: column;
+            .button,
+            .button:only-child {
+                flex: none;
+                width: 100%;
+            }
+        }
+    }
 }

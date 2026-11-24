@@ -28,7 +28,10 @@ add_action( 'wp_enqueue_scripts', 'dreampoint_b2b_maybe_disable_cart_fragments',
 function dreampoint_b2b_maybe_disable_cart_fragments(): void {
     // Quick Order: its submit bridge triggers `wc_fragment_refresh`, whose only listener is the real
     // cart-fragments script. WooCommerce merely registers it, so it must be enqueued explicitly here (E12).
-    if ( is_page( 'quick-order' ) ) {
+    // E7: the cart page does not load wc-cart-fragments by default, so the header / mobile cart badge and the mini-cart stayed
+    // stale after every AJAX cart update (quantity change, removal, bulk removal, coupon). Its listener for `updated_wc_div`
+    // refreshes them natively. It must be enqueued here (priority 9999, after WooCommerce registered it).
+    if ( is_page( 'quick-order' ) || is_cart() ) {
         wp_enqueue_script( 'wc-cart-fragments' );
         return;
     }

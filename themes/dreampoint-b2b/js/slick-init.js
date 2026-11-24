@@ -629,6 +629,14 @@ jQuery( function ( $ ) {
          * @param {number} index - Slide index (non-cloned) to show.
          */
         let pendingGallerySlide = -1;
+        let programmaticSlide   = -1; // slide requested by goToGallerySlide(), consumed by its own afterChange
+        let galleryVariationId  = 0;  // variation being selected FROM the gallery (R2-B), 0 = none
+        let galleryVariationTtl = 0;  // Date.now() limit for the suppression above (never stays stuck)
+
+        function isGalleryDriven( variationId ) {
+            return galleryVariationId && Date.now() < galleryVariationTtl &&
+                ( ! variationId || variationId === galleryVariationId );
+        }
 
         function goToGallerySlide( index ) {
             pendingGallerySlide = index;
@@ -645,6 +653,7 @@ jQuery( function ( $ ) {
             if ( slick.currentSlide === index ) {
                 pendingGallerySlide = -1;
             } else {
+                programmaticSlide = index; // its afterChange must not drive the dropdowns (R2-B)
                 $sliderFor.slick( 'slickGoTo', index, false );
             }
 
@@ -654,8 +663,59 @@ jQuery( function ( $ ) {
 
         // Slick's postSlide() fires `afterChange` BEFORE it clears `animating`, so the pending slide is applied on the
         // next tick (one 0 ms timer, only when a request is pending).
-        $sliderFor.on( 'afterChange', function () {
+        $sliderFor.on( 'afterChange', function ( event, slick, current ) {
+            const programmatic = programmaticSlide === current;
+            programmaticSlide = -1;
+
+            // A user-driven change (thumbnail, arrow, swipe) is the latest intent: it supersedes any pending request.
+            if ( ! programmatic ) pendingGallerySlide = -1;
             if ( pendingGallerySlide >= 0 ) setTimeout( applyPendingGallerySlide, 0 );
+            if ( ! programmatic ) selectVariationFromSlide( current );
+        } );
+
+        /**
+         * C6 R2-B: the slide the USER navigated to belongs to a variation (ACF image association, exposed per variation
+         * as `dp_gallery_image_ids`): select that variation's complete attribute combination in the native dropdowns and
+         * let WooCommerce resolve it through its normal change -> found_variation lifecycle. Images owned by no
+         * variation, or by the variation that is already selected, change nothing.
+         *
+         * @param {number} current - Index of the slide now shown.
+         */
+        function selectVariationFromSlide( current ) {
+            const $form    = $( 'form.variations_form' ).first();
+            const products = $form.data( 'product_variations' ); // embedded variation data (<= WooCommerce AJAX threshold)
+            if ( ! $form.length || ! Array.isArray( products ) ) return;
+
+            const imageId = $sliderFor.find( '.slick-slide:not(.slick-cloned) img' ).eq( current ).data( 'attachment-id' );
+            if ( ! imageId ) return;
+
+            const owner = products.find( function ( v ) {
+                return Array.isArray( v.dp_gallery_image_ids ) && v.dp_gallery_image_ids.map( String ).indexOf( String( imageId ) ) !== -1;
+            } );
+            if ( ! owner || parseInt( $form.find( 'input.variation_id' ).val(), 10 ) === owner.variation_id ) return;
+
+            galleryVariationId  = owner.variation_id;
+            galleryVariationTtl = Date.now() + 1500;
+
+            // WooCommerce removes every option that is not valid together with the OTHER current selections, so a target
+            // value can be missing from its select (Black/+1 -> Blue Tortoise/+2: Blue Tortoise is not offered with +1).
+            // Step 1 clears the selects that differ (one change event, WooCommerce then restores all options); step 2
+            // applies the target values, each of which is valid because the target combination exists.
+            const changes = [];
+            $.each( owner.attributes || {}, function ( name, value ) {
+                const $select = $form.find( 'select[name="' + name + '"]' );
+                if ( value && $select.length && $select.val() !== value ) changes.push( { $select: $select, value: value } );
+            } );
+            if ( ! changes.length ) return;
+
+            changes.forEach( function ( change ) { change.$select.val( '' ); } );
+            changes[ 0 ].$select.trigger( 'change' );
+            changes.forEach( function ( change ) { change.$select.val( change.value ).trigger( 'change' ); } );
+        }
+
+        // A genuine user change of a dropdown ends the gallery-driven phase (jQuery-triggered events have no originalEvent).
+        $( document ).on( 'change', 'form.variations_form .variations select', function ( event ) {
+            if ( event.originalEvent ) galleryVariationId = 0;
         } );
 
         $( document ).on( 'found_variation', 'form.variations_form', function ( event, variation ) {
@@ -663,6 +723,12 @@ jQuery( function ( $ ) {
             // written the CURRENT variation_id into the form, so an event for any other variation is ignored.
             const currentId = parseInt( $( this ).find( 'input.variation_id' ).val(), 10 );
             if ( variation && variation.variation_id && currentId && parseInt( variation.variation_id, 10 ) !== currentId ) return;
+
+            // Gallery-driven selection (R2-B): the gallery already shows the exact image the user chose; keep it.
+            if ( variation && isGalleryDriven( parseInt( variation.variation_id, 10 ) ) ) {
+                galleryVariationId = 0;
+                return;
+            }
 
             try {
                 const slideIndex = findVariationSlideIndex( variation );
@@ -681,6 +747,7 @@ jQuery( function ( $ ) {
         } );
 
         $( document ).on( 'reset_data', 'form.variations_form', function () {
+            if ( isGalleryDriven() ) return; // intermediate reset while the dropdowns are being set from the gallery
             goToGallerySlide( 0 );
         } );
     }

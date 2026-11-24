@@ -15,6 +15,17 @@
 }
 
 
+// B6: title block -> content spacing on the Shop and product category archives (and product search, which carries the
+// same body class). The title banner has 24px bottom padding, so the total gap is 24 + this padding: 48px from 768px
+// (Figma CAT-02 without active chips), 36px below. Brand archives are excluded on purpose (their hero panel has its own
+// spacing). With active chips the row that hangs 76px above the card needs the same 76px as before: see the chips rule below.
+body:is(.post-type-archive-product, .tax-product_cat) #products-page.block {
+    padding-top: $dp-space-12;
+    @include bp(sm-up) {
+        padding-top: $dp-space-24;
+    }
+}
+
 @include mobile-filter-panel('.products-lhs-filter-wrap');
 
 .product-listing-wrap {
@@ -170,6 +181,11 @@ body:is(.post-type-archive-product, .tax-product_cat, .tax-product_brand) {
 @include bp(md-up) {
     #products-page .row.pos-r:has(.wpfSelectedParameter) {
         margin-top: $dp-space-12;
+    }
+    // B6: the Shop / category content padding is now 24px (was 64px), so the chips row (hangs 76px above the card) gets
+    // its space from the margin instead: 24 + 52 = 76px, i.e. the Figma 100px title-to-card gap with active chips.
+    body:is(.post-type-archive-product, .tax-product_cat) #products-page .row.pos-r:has(.wpfSelectedParameter) {
+        margin-top: $dp-space-40 + $dp-space-12;
     }
     // Brand archive: the Brand hero sits directly above #products-page (no title block like the shop), so the chips row,
     // which hangs 76px above the card, would touch the hero. 24px more keeps the card position 48px under the chips and

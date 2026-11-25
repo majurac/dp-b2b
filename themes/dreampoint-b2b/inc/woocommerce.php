@@ -587,6 +587,99 @@ function dreampoint_b2b_cart_item_data_html( array $cart_item, int $limit = 0 ):
 }
 
 /**
+ * Whether the current request belongs to the Checkout page: the first render (hydration runs while the Checkout page
+ * itself is being built, `is_checkout()`) or a live Store API call made by the Checkout block, whose Referer is the
+ * Checkout page. Any other Store API consumer (other pages, other clients) keeps the untouched cart response.
+ */
+function dreampoint_b2b_is_checkout_store_api_context(): bool {
+	if ( function_exists( 'is_checkout' ) && is_checkout() ) {
+		return true;
+	}
+
+	$referer = wp_get_raw_referer();
+	if ( ! $referer || ! function_exists( 'wc_get_checkout_url' ) ) {
+		return false;
+	}
+
+	$checkout_path = untrailingslashit( (string) wp_parse_url( wc_get_checkout_url(), PHP_URL_PATH ) );
+	$referer_path  = untrailingslashit( (string) wp_parse_url( $referer, PHP_URL_PATH ) );
+
+	return '' !== $checkout_path && ( $referer_path === $checkout_path || 0 === strpos( $referer_path, $checkout_path . '/' ) );
+}
+
+/**
+ * Checkout order summary (Blocks / Store API): the same variation lines as the Cart.
+ *
+ * The Cart prints only Boja and Dioptrija (`dreampoint_b2b_cart_item_data_html()`, "DIOPTRIJA +1,5" shown as "+1,5").
+ * The Checkout block renders the Store API cart item `variation` array, so the same selection and order are applied
+ * to that array in the response. Display only: the cart contents, the variation ID, the stored attribute values and
+ * the order item meta are not touched (the order is created from the cart, not from this response), and `item_data`
+ * (entries added by other plugins) is left as is, exactly like the Cart logic keeps non-variation entries.
+ *
+ * Runs on `rest_request_after_callbacks` (live Store API requests) and on `woocommerce_hydration_request_after_callbacks`
+ * (the preloaded cart of the first Checkout render, which bypasses the REST dispatch).
+ *
+ * @param WP_REST_Response|WP_HTTP_Response|WP_Error|mixed $response Response.
+ * @param array                                            $handler  Route handler.
+ * @param WP_REST_Request                                  $request  Request.
+ * @return mixed
+ */
+function dreampoint_b2b_store_api_cart_variation_display( $response, $handler, $request ) {
+	if ( ! $response instanceof WP_HTTP_Response || ! $request instanceof WP_REST_Request ) {
+		return $response;
+	}
+	if ( 0 !== strpos( $request->get_route(), '/wc/store/v1/cart' ) || ! dreampoint_b2b_is_checkout_store_api_context() ) {
+		return $response;
+	}
+
+	$data = $response->get_data();
+	if ( ! is_array( $data ) ) {
+		return $response;
+	}
+
+	$allowed = [ 'attribute_pa_boja', 'attribute_pa_dioptrija' ];
+
+	$trim_item = static function ( $item ) use ( $allowed ) {
+		if ( ! is_array( $item ) || empty( $item['variation'] ) || ! is_array( $item['variation'] ) ) {
+			return $item;
+		}
+
+		$kept = [];
+		foreach ( $item['variation'] as $entry ) {
+			$raw = is_array( $entry ) ? (string) ( $entry['raw_attribute'] ?? '' ) : '';
+			if ( ! in_array( $raw, $allowed, true ) ) {
+				continue;
+			}
+			if ( 'attribute_pa_dioptrija' === $raw && isset( $entry['value'] ) ) {
+				$entry['value'] = preg_replace( '/^\s*DIOPTRIJA\s*/i', '', (string) $entry['value'] );
+			}
+			$kept[] = $entry;
+		}
+		$item['variation'] = $kept;
+
+		return $item;
+	};
+
+	if ( isset( $data['items'] ) && is_array( $data['items'] ) ) {
+		$data['items'] = array_map( $trim_item, $data['items'] );
+	} elseif ( isset( $data['variation'] ) ) {
+		$data = $trim_item( $data ); // Single cart item route.
+	} elseif ( array_is_list( $data ) ) {
+		$data = array_map( $trim_item, $data ); // Cart items list route.
+	} else {
+		return $response;
+	}
+
+	$response->set_data( $data );
+
+	return $response;
+}
+add_filter( 'rest_request_after_callbacks', 'dreampoint_b2b_store_api_cart_variation_display', 20, 3 );
+// The first Checkout render is hydrated by WooCommerce Blocks straight from the controller (no REST dispatch),
+// through its own equivalent of `rest_request_after_callbacks`.
+add_filter( 'woocommerce_hydration_request_after_callbacks', 'dreampoint_b2b_store_api_cart_variation_display', 20, 3 );
+
+/**
  * Archive sorting: drop "Sort by average rating" (product ratings / reviews are not used on this shop).
  *
  * Only the dropdown option is removed through the core `woocommerce_catalog_orderby` filter; reviews and ratings stay

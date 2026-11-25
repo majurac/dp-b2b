@@ -10,9 +10,6 @@
     @include bp(md) { padding-bottom: 40px; }
     @include bp(sm-down) { padding-bottom: 32px; }
 
-    #shipping-method { margin-bottom: 24px; }
-    #payment-method { margin-bottom: 32px; }
-
     .wc-block-checkout__terms {
         margin-bottom: 32px;
     }
@@ -32,12 +29,8 @@
 
         label {
             @include paragraph-normal;
-            color: $icon-secondary;
+            color: $dp-color-text-secondary;
             font-size: 16px;
-        }
-
-        &.is-active label {
-            color: $black;
         }
     }
 
@@ -81,14 +74,28 @@
     // shrunken label so it never covers the value.
     .wc-block-components-text-input.is-active input,
     .wc-blocks-components-select__select {
-        padding-top: 22px !important;
+        padding-top: 16px !important;
         padding-bottom: 0 !important;
+    }
+
+    // Owner correction 6: an empty (placeholder-state) label is vertically centred in the 44px field
+    // (top 22px + the native -10px translate = label box centred on 22px); the floated label (is-active)
+    // keeps its own top and is scaled to 0.75 like the select label.
+    .wc-block-components-text-input:not(.is-active) label {
+        top: 22px;
+    }
+
+    // `.wc-block-components-form` prefix: outranks the Blocks rule for the floated / autofilled label transform.
+    .wc-block-components-form .wc-block-components-text-input.is-active label,
+    .wc-block-components-form .wc-block-components-text-input input:-webkit-autofill + label {
+        transform: scale(0.75);
+        transform-origin: top left;
     }
 
     // Select labels are not scaled by WooCommerce; match the text-input floated
     // label (transform only: the font-size is owned by the `.custom-form label` rules).
     .wc-blocks-components-select__label {
-        transform: scale(0.82);
+        transform: scale(0.75);
         transform-origin: top left;
     }
 
@@ -192,7 +199,10 @@
             @include bp(md-down) {
                 display: flex;
                 flex-direction: column;
-                @include paragraph-normal;
+                // Same base size as the desktop sidebar (item names / details scale from it); the former
+                // paragraph-normal (300 / 18px, 16px on phones) made the lower summary differ from the desktop one.
+                font-size: 16px;
+                font-weight: 400;
             }
         }
         .proceed-order-button {
@@ -245,7 +255,10 @@
     // the Store API remains the only source of truth. Pickup (#pickup-options) and the payment
     // controls are not matched by this scope. The two !important declarations only beat the legacy
     // `.wc-block-components-radio-control__option` rules above (padding / checked border), which are !important.
-    #shipping-option .wc-block-components-shipping-rates-control__package {
+    // Also the native Local Pickup rates control (`Kupac sam preuzima robu`): it rendered with the legacy radio rules
+    // (visible 20px radio outside a 28px row, 18px / 300 label). Same cards, same selected checkmark, same typography.
+    #shipping-option .wc-block-components-shipping-rates-control__package,
+    .wc-block-components-local-pickup-rates-control {
 
         .wc-block-components-radio-control {
             display: grid;
@@ -266,11 +279,29 @@
 
         .wc-block-components-radio-control__option {
             @include animate-fade;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
             padding: 12px !important;
-            border: 1px solid $dp-color-border-primary;
-            border-radius: 8px;
-            background: $dp-color-bg-secondary;
+            border: 1px solid $dp-color-bg-brand;
+            border-radius: $dp-radius-md;
+            background: $dp-color-bg-tertiary;
             cursor: pointer;
+
+            // Selected-state checkmark (owner re-QA): drawn in the card corner, hidden until selected, so
+            // selecting a method never changes the card size. The location tick / slash icons are kept for A4.
+            &:before {
+                content: '';
+                position: absolute;
+                top: 12px;
+                right: 12px;
+                width: 16px;
+                height: 16px;
+                opacity: 0;
+                background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M2.5 7.5l3 3 6-6.5' fill='none' stroke='%230d121c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center / 16px 16px;
+                pointer-events: none;
+            }
 
             // Blocks draws a 1px divider between options; cards do not need it.
             &:after {
@@ -278,16 +309,20 @@
             }
 
             &:hover {
-                border-color: $dp-color-border-control;
+                box-shadow: $dp-shadow-card-xs;
             }
         }
 
-        // Selected: same 1px border width (no layout shift), emphasis via colour, inset ring and shadow.
+        // Selected (Figma): same 1px border, double card shadow (0 5px 6px / 0 1px 1.5px) and the checkmark.
         .wc-block-components-radio-control__option-checked,
         .wc-block-components-radio-control__option--checked-option-highlighted {
             border: 1px solid $dp-color-bg-brand !important;
-            background: $dp-color-bg-primary;
-            box-shadow: inset 0 0 0 1px $dp-color-bg-brand, 0 4px 12px rgba($dp-color-bg-brand, 0.12);
+            background: $dp-color-bg-tertiary;
+            box-shadow: 0 5px 6px rgba(10, 14, 21, 0.12), 0 1px 1.5px rgba(10, 14, 21, 0.1);
+
+            &:before {
+                opacity: 1;
+            }
         }
 
         // Native radio: visually hidden but kept focusable and exposed to assistive technology.
@@ -316,25 +351,39 @@
             gap: 4px;
         }
 
+        // Figma card text: 12 / 20, -0.132px; method name Medium, price Bold, both #384250.
         .wc-block-components-radio-control__label,
         .wc-block-components-radio-control__secondary-label {
             flex: 0 0 auto;
             width: auto;
             font-family: 'Montserrat';
-            font-size: 14px;
+            font-size: 12px;
             line-height: 20px;
-            letter-spacing: 0;
+            letter-spacing: -0.132px;
             text-align: left;
+            color: $dp-color-text-secondary;
         }
 
         .wc-block-components-radio-control__label {
-            font-weight: 600;
-            color: $dp-color-text-primary;
+            font-weight: 500;
+        }
+
+        // The pickup control right-aligns / upper-cases its price by default: same left-aligned, normal-case price as
+        // the shipping-rate cards.
+        .wc-block-components-radio-control__label,
+        .wc-block-components-radio-control__secondary-label {
+            align-self: flex-start;
+            margin: 0;
+            text-transform: none;
         }
 
         .wc-block-components-radio-control__secondary-label {
-            font-weight: 400;
-            color: $dp-color-text-secondary;
+            font-weight: 700;
+
+            // Local pickup prints its price as <em>besplatno</em>.
+            em {
+                font-style: normal;
+            }
         }
     }
 
@@ -350,7 +399,7 @@
 
         button.wc-block-components-button {
             @include button-primary;
-            height: 44px;
+            height: 48px; // Figma CH-01 11148:37439
             width: 100%;
             padding: 0 24px;
 
@@ -366,34 +415,250 @@
     // -------------------------
     // HEADINGS
     // -------------------------
+    // Section cards (Figma 11148:37357 / 11148:38290): the section title sits in a 4px padded "Menu item" row,
+    // 24px above the content, with no divider rule.
     .wc-block-components-checkout-step__heading {
         display: flex;
         align-items: center;
-        gap: 24px;
-        margin-bottom: 24px;
+        margin-bottom: 0;
+        padding: 4px;
+    }
 
-        &:after {
-            content: "";
-            flex: 1;
-            height: 1px;
-            background: $dp-color-border-primary;
+    // Figma card title: Montserrat 14 / 600 / normal / 0.28px, uppercase, #0d121c (same as the injected company card).
+    h2.wc-block-components-checkout-step__title {
+        @include account-card-title;
+    }
+
+    // Owner correction 4: each visible Checkout section is a card. Only the step fieldsets inside the main column;
+    // nested controls (option cards, injected company block, BACS text) stay flat so no card is nested in a card.
+    .wc-block-checkout__main fieldset.wc-block-components-checkout-step {
+        margin: 0 0 24px;
+        padding: 16px;
+        border: 0;
+        border-radius: $dp-radius-md;
+        background: $dp-color-bg-tertiary;
+        box-shadow: $dp-shadow-card-xs;
+    }
+
+    // Read-only company / billing cards injected by js/checkout-b2b-info.js
+    // (Figma CH-01: company card 11148:37357, address card 11148:37388; no VAT-number row by owner decision).
+    .dp-b2b-billing-info {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        margin: 24px 0;
+
+        // Flat sub-section of the "Podaci za kontakt" card: divider + same 24px rhythm, no own background / shadow.
+        .ma-holder {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 24px;
+            padding: 24px 0 0;
+            border-top: 1px solid $dp-color-border-primary;
+        }
+
+        .ma-header .wod-title-holder {
+            margin: 0;
+            padding: 4px;
+
+            &:after { display: none; }
+        }
+
+        // Section title: Montserrat 14 / 600 / 0.28px uppercase (Figma 11148:38261)
+        .ma-header h2 {
+            margin: 0;
+            font-family: $dp-font-body;
+            font-size: 14px;
+            font-weight: 600;
+            line-height: normal;
+            letter-spacing: 0.28px;
+            text-transform: uppercase;
+            color: $dp-color-text-primary;
+        }
+
+        // Two columns on desktop (Figma 320 px columns, 34 px gap), stacked on phones.
+        .ma-columns {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 320px));
+            gap: 8px 34px;
+            width: 100%;
+
+            @include bp(xs-down) { grid-template-columns: minmax(0, 1fr); }
+
+            // A column without rows (no phone and no e-mail) must not leave an empty grid cell.
+            .ma-info:empty { display: none; }
+        }
+
+        .ma-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+
+            p {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 16px;
+                margin: 0;
+                font-family: $dp-font-body;
+                font-size: 12px;
+                line-height: 20px;
+                letter-spacing: -0.132px;
+                color: $dp-color-text-secondary;
+
+                span { font-weight: 500; }
+
+                strong {
+                    font-weight: 700;
+                    text-align: right;
+                    overflow-wrap: anywhere;
+                }
+            }
+        }
+
+        // ERP note: 24px lock + 10 / 14 Medium italic (Figma 11148:37384)
+        .ma-erp-notice {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            max-width: 440px;
+
+            img { flex: 0 0 24px; width: 24px; height: 24px; }
+
+            p {
+                margin: 0;
+                font-family: $dp-font-body;
+                font-size: 10px;
+                font-style: italic;
+                font-weight: 500;
+                line-height: 14px;
+                letter-spacing: -0.11px;
+                color: $dp-color-text-secondary;
+            }
         }
     }
 
-    h2.wc-block-components-checkout-step__title {
-        @include heading-5;
+
+    // -------------------------
+    // CHECKBOX LABEL LINE-HEIGHT
+    // -------------------------
+    // Legacy `.custom-form label` rules leave the label and its text span at line-height 0, which collapses the
+    // span to 0 px height: a wrapping label (e.g. "Koristite istu adresu za dostavu (neobavezno)" at 390 px)
+    // then overflows onto the next block. Give the checkbox text a real line box; no A9 logic involved.
+    .wc-block-components-checkbox label {
+        align-items: flex-start;
+        line-height: 20px;
     }
 
-    // Read-only company / billing blocks injected by js/checkout-b2b-info.js
-    // (Figma CH-01 section title: Montserrat 14 / 600 / 0.28px uppercase)
-    .dp-b2b-billing-info .ma-header h2 {
-        font-family: 'Montserrat';
-        font-size: 14px;
-        font-weight: 600;
-        line-height: normal;
-        letter-spacing: 0.28px;
-        text-transform: uppercase;
-        color: $dp-color-text-primary;
+    .wc-block-components-checkbox__label {
+        display: block;
+        line-height: 20px;
+    }
+
+
+    // -------------------------
+    // SOLE PAYMENT METHOD = INFO CARD (Figma CH-01 11148:37402)
+    // -------------------------
+    // When BACS is the only offered method its accordion option is the only child of the radio group: render it
+    // as the grey info card and hide the redundant radio. The native input stays in the DOM (visually hidden,
+    // still checked / focusable / announced); with two or more methods this block does not match and the normal
+    // radio list above applies.
+    // The Blocks group frame (`.wc-block-components-radio-control--highlight-checked::after`, 1px inset border) would
+    // draw an outline around the flat sole-method text; drop it only for a single-method group.
+    #payment-method .wc-block-components-radio-control:has(> .wc-block-components-radio-control-accordion-option:only-child):after {
+        display: none;
+    }
+
+    #payment-method .wc-block-components-radio-control-accordion-option:only-child {
+        position: relative;
+        padding: 0 !important;
+        border: 0 !important;
+        border-radius: $dp-radius-md;
+        background: transparent;
+        box-shadow: none;
+
+        &:focus-within {
+            outline: 2px solid $dp-color-text-primary;
+            outline-offset: 2px;
+        }
+
+        .wc-block-components-radio-control__option {
+            display: block;
+            padding: 0 !important;
+            border: 0 !important;
+        }
+
+        .wc-block-components-radio-control__input {
+            position: absolute;
+            width: 1px !important;
+            height: 1px !important;
+            margin: 0;
+            overflow: hidden;
+            clip: rect(0 0 0 0);
+            clip-path: inset(50%);
+            white-space: nowrap;
+        }
+
+        .wc-block-components-radio-control__option-layout,
+        .wc-block-components-radio-control__label-group {
+            display: block;
+            padding: 0;
+        }
+
+        .wc-block-components-radio-control__label {
+            font-family: $dp-font-body;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 20px;
+            letter-spacing: -0.132px;
+            color: $dp-color-text-secondary;
+        }
+
+        .wc-block-components-radio-control-accordion-content {
+            margin: 8px 0 0;
+            padding: 0;
+            font-family: $dp-font-body;
+            font-size: 12px;
+            font-weight: 500;
+            line-height: 20px;
+            letter-spacing: -0.132px;
+            color: $dp-color-text-secondary;
+        }
+    }
+
+
+    // -------------------------
+    // ORDER NOTE FIELD (Figma CH-01 input field 11148:37416: 96 px, 1px #d2d6db, radius 6, 12 / 16 padding)
+    // -------------------------
+    .wc-block-checkout__add-note .wc-block-components-textarea {
+        min-height: 96px;
+        padding: 12px 16px;
+        border: 1px solid $dp-color-border-primary;
+        border-radius: $dp-radius-textarea;
+        background: $dp-color-bg-primary;
+        font-family: $dp-font-body;
+        font-size: 16px;
+        line-height: 1.3;
+        color: $dp-color-text-secondary;
+
+        &:focus {
+            @include dp-form-focus-ring;
+        }
+    }
+
+
+    // -------------------------
+    // ORDER SUMMARY CARD (desktop sidebar, Figma CH-01 11148:37422)
+    // -------------------------
+    // Presentation only: native Blocks summary (items, coupon, totals) keeps its markup and behaviour.
+    .wc-block-checkout__sidebar.is-large {
+        padding: 16px;
+        border-radius: $dp-radius-md;
+        background: $dp-color-bg-tertiary;
+        box-shadow: 0 5px 6px rgba(10, 14, 21, 0.12), 0 1px 1.5px rgba(10, 14, 21, 0.1);
     }
 }
 
@@ -415,4 +680,366 @@
 
 #billing-fields {
     display: none!important;
+}
+
+
+// =============================
+// OWNER QA CORRECTIONS 2026-11-25
+// =============================
+
+// Correction 1: order-summary product list accordion (js/checkout-b2b-info.js adds .dp-summary-toggle as the first
+// child of the native cart-items wrapper; the native list itself is untouched and only hidden via the data attribute).
+.woocommerce-checkout .wp-block-woocommerce-checkout-order-summary-cart-items-block {
+    .dp-summary-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        margin: 0;
+        padding: 4px;
+        border: 0;
+        border-radius: 4px;
+        background: transparent;
+        cursor: pointer;
+        font-family: $dp-font-body;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: normal;
+        letter-spacing: 0.24px;
+        text-align: left;
+        text-transform: uppercase;
+        color: $dp-color-text-primary;
+
+        &:focus-visible {
+            outline: 2px solid $dp-color-text-primary;
+            outline-offset: 2px;
+        }
+    }
+
+    .dp-summary-toggle__icon {
+        flex: 0 0 16px;
+        transition: transform 0.2s ease;
+    }
+
+    .dp-summary-toggle[aria-expanded='true'] .dp-summary-toggle__icon {
+        transform: rotate(180deg);
+    }
+
+    &[data-dp-collapsed='true'] > :not(.dp-summary-toggle) {
+        display: none;
+    }
+}
+
+// Correction 2: "Kreni na narudžbu" proxy button (Figma 11148:37439: 48px, pill, 18 / 600, 20px arrow). The native
+// place-order row is only hidden (visibility, not display) while the proxy exists, so its click() keeps working; without
+// the data-dp-submit attribute (script failure) the native button stays visible.
+.dp-proceed {
+    margin-top: 24px;
+}
+
+.dp-proceed-button.button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    height: 48px;
+    padding: 0 24px;
+    border-radius: 24px;
+    font-family: $dp-font-body;
+    font-size: 18px;
+    font-weight: 600;
+
+    &.is-loading {
+        cursor: progress;
+        opacity: 0.7;
+    }
+}
+
+.wc-block-checkout[data-dp-submit='custom'] .wc-block-checkout__actions_row {
+    height: 0;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    visibility: hidden;
+}
+
+// Correction 8: notice-banner summary text (Checkout only).
+.woocommerce-checkout .wc-block-components-notice-banner > .wc-block-components-notice-banner__content .wc-block-components-notice-banner__summary {
+    font-size: 16px;
+    margin-bottom: 0;
+}
+
+// Correction 9: label typography. The shared `div.custom-form ... label` rule (16 / 600) and the Silkypress checkbox
+// rule (20 / 400) disagree with each other and with the rest of the theme. Checkout only; the extra `:not()` and the
+// `body` prefix lift the specificity above the shared rule without `!important`; screen-reader-only labels are excluded.
+// - Checkbox labels (terms, "ista adresa", order note, Silkypress): Montserrat 14 / 500 / 20, #384250.
+// - Floating labels: Montserrat 16 / 400 / 20 #384250 while they act as the placeholder; 600 once floated (Figma label 16 / 600).
+body.woocommerce-checkout div.custom-form:not(.subscription-form) label:not(.screen-reader-text):not(.woocommerce-form__label-for-checkbox) {
+    // Owner re-QA 2026-11-25: 14px labels in Checkout. Same selector as the shared rule plus the `body` prefix,
+    // so it wins without !important; family / weight / colour stay with the shared rule and the blocks below.
+    font-size: 14px;
+}
+
+body.woocommerce-checkout div.custom-form {
+    .wc-block-components-checkbox label:not(.screen-reader-text),
+    .wc-block-components-checkbox label:not(.screen-reader-text) .wc-block-components-checkbox__label {
+        font-family: $dp-font-body;
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 20px;
+        letter-spacing: 0;
+        color: $dp-color-text-secondary;
+    }
+
+    // The Silkypress plugin forces its checkbox label typography with !important (20px / theme colour), so the
+    // override for those labels needs !important as well; it is limited to Checkout and to the Silkypress checkbox.
+    .wp-block-silkypress-input-field .wc-block-components-checkbox label:not(.screen-reader-text) {
+        font-family: $dp-font-body !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        line-height: 20px !important;
+        color: $dp-color-text-secondary !important;
+    }
+
+    .wc-block-components-text-input:not(.is-active) label:not(.screen-reader-text) {
+        font-weight: 400;
+    }
+
+    .wc-block-components-text-input.is-active label:not(.screen-reader-text),
+    .wc-blocks-components-select__label:not(.screen-reader-text) {
+        font-weight: 600;
+    }
+}
+
+
+// =============================
+// OWNER RE-QA 2026-11-25 (second round)
+// =============================
+
+// Correction 1: sticky sidebar clears the sticky primary header (#header: 72px tall) plus a 24px gap, like the shop filter
+// and the cart totals (top 96px; the 32px admin bar adds to it, `body.admin-bar #header { top: 32px }` in _content.scss).
+// WooCommerce Blocks sets `top: 24px`, which slid the sidebar under the header. A summary taller than the viewport
+// scrolls inside the sticky card (max-height) so the whole summary and the order button stay reachable.
+.woocommerce-checkout .wc-block-checkout__sidebar.is-sticky {
+    top: 96px;
+    max-height: calc(100vh - 96px - 24px);
+    max-height: calc(100dvh - 96px - 24px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+body.admin-bar.woocommerce-checkout .wc-block-checkout__sidebar.is-sticky {
+    top: 128px;
+    max-height: calc(100vh - 128px - 24px);
+    max-height: calc(100dvh - 128px - 24px);
+}
+
+// Correction 3: links inside checkbox labels (terms / privacy) follow the label typography, stay underlined.
+body.woocommerce-checkout div.custom-form .wc-block-components-checkbox label:not(.screen-reader-text) a {
+    font: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+
+    &:hover {
+        text-decoration-thickness: 2px;
+    }
+
+    &:focus-visible {
+        outline: 2px solid $dp-color-text-primary;
+        outline-offset: 2px;
+        border-radius: 2px;
+    }
+}
+
+// Correction 7: order-summary product rows (Checkout only, native list untouched).
+// 7.1 product descriptions are not shown in the summary; 7.3 accordion toggle aligned to the summary rows.
+.woocommerce-checkout .wp-block-woocommerce-checkout-order-summary-cart-items-block {
+    .wc-block-components-product-metadata__description {
+        display: none;
+    }
+
+    // Rows (title, coupon, totals) are inset 16px from the card content edge; the toggle label and chevron follow.
+    .dp-summary-toggle {
+        padding: 4px 16px;
+    }
+
+    &[data-dp-collapsed='false'] .dp-summary-toggle {
+        margin-bottom: 16px;
+    }
+}
+
+// Native "Koristite istu adresu za naplatu" (`.wc-block-checkout__use-address-for-billing`, useShippingAsBilling):
+// the billing address is locked ERP master data and the billing form is not shown, so a visible option to bill to the
+// shipping address is misleading. Hidden like on Cotra B2B; the input stays in the DOM and keeps its native state, and
+// the billing master protection (inc/checkout-logic.php) still restores the protected values on every save.
+.woocommerce-checkout .wc-block-checkout__use-address-for-billing {
+    display: none;
+}
+
+
+// =============================
+// CONSISTENT CONTENT TYPOGRAPHY ACROSS BREAKPOINTS (owner QA 2026-11-25)
+// =============================
+
+// Order summary text (Figma CH-01 11148:37422) is the same in the desktop sidebar, the collapsible phone summary and the
+// lower phone summary; it used to be 12px only inside `.is-large` and native 13 / 20px elsewhere.
+.woocommerce-checkout {
+    // WooCommerce styles this title with `.wp-block-woocommerce-checkout-order-summary-block .…__title .…__title-text`
+    // (font-size 20px, weight 500): the same chain is repeated here so the Figma 12px wins at every width.
+    .wp-block-woocommerce-checkout-order-summary-block .wc-block-components-checkout-order-summary__title .wc-block-components-checkout-order-summary__title-text {
+        font-family: $dp-font-body;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: normal;
+        letter-spacing: 0.24px;
+        text-transform: uppercase;
+        color: $dp-color-text-primary;
+    }
+
+    .wc-block-components-checkout-order-summary__title-price {
+        font-family: $dp-font-body;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 20px;
+        letter-spacing: -0.132px;
+        color: $dp-color-text-secondary;
+    }
+
+    .wc-block-components-totals-item__label,
+    .wc-block-components-totals-item__description {
+        font-family: $dp-font-body;
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 20px;
+        letter-spacing: -0.132px;
+        color: $dp-color-text-secondary;
+    }
+
+    .wc-block-components-totals-item__value,
+    .wc-block-components-totals-footer-item .wc-block-components-totals-item__label,
+    .wc-block-components-totals-footer-item .wc-block-components-totals-item__value {
+        font-family: $dp-font-body;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 20px;
+        letter-spacing: -0.132px;
+        color: $dp-color-text-secondary;
+    }
+}
+
+// Order summary line price (items list, desktop sidebar and phone summary): Figma price 12 / 600 / 20, -0.132px, #384250.
+// Applied to the container; the nested price / amount elements are told to inherit it below, because WooCommerce
+// styles `.wc-block-components-product-price` and the formatted-money spans on their own.
+.wc-block-components-order-summary .wc-block-components-order-summary-item__total-price,
+.wc-block-components-order-summary .wc-block-cart-item__prices {
+    font-family: $dp-font-body;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 20px;
+    letter-spacing: -0.132px;
+    color: $dp-color-text-secondary;
+
+    .wc-block-components-product-price,
+    .wc-block-formatted-money-amount,
+    .wc-block-components-formatted-money-amount {
+        font: inherit;
+        letter-spacing: inherit;
+        color: inherit;
+    }
+}
+
+// Field text: the shared `div.custom-form` rule raises inputs / selects to 16px below 992px (iOS focus-zoom
+// precaution). Checkout keeps the desktop 14 / 18 / 400 at every width. Same selector + `body` prefix: no !important.
+body.woocommerce-checkout div.custom-form:not(.subscription-form) {
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="tel"],
+    input[type="number"],
+    select,
+    textarea {
+        font-size: 14px;
+    }
+}
+
+// Mobile "Slanje / Kupac sam preuzima robu" options (owner proposal): icon centred above a centred, naturally wrapping
+// label, both options the same height. Desktop (>= 768px) keeps the horizontal icon + label row. No font-size change.
+@include bp(sm-down) {
+    .woocommerce-checkout #shipping-method {
+        .wc-block-checkout__shipping-method-container {
+            align-items: stretch;
+        }
+
+        .wc-block-checkout__shipping-method-option {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 0;
+        }
+
+        .wc-block-checkout__shipping-method-option-title {
+            line-height: normal;
+        }
+
+        .wc-block-checkout__shipping-method-option-title-wrapper {
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+}
+
+// Order summary product name: Montserrat at every width (owner QA 2026-11-25); size / weight / spacing stay native.
+.wp-block-woocommerce-checkout-order-summary-block .wc-block-components-product-name {
+    font-family: Montserrat;
+}
+
+
+// =============================
+// RESPONSIVE ORDER SUMMARY (owner QA 2026-11-25)
+// =============================
+// Blocks switches to the stacked layout at <= 991px. There it renders TWO summaries: a native collapsible one in the
+// sidebar (above the contact step) and the full one in the actions block (after the fields and terms, before the order
+// button). js/checkout-b2b-info.js adds the "Pregled proizvoda" accordion to the lower one and only then sets
+// data-dp-summary="lower"; the native top summary is hidden by CSS alone (never removed from the React tree). Without
+// the attribute (script failure) both native summaries stay usable.
+.woocommerce-checkout .wc-block-checkout[data-dp-summary='lower'] .wc-block-checkout__sidebar .wp-block-woocommerce-checkout-order-summary-block {
+    display: none;
+}
+
+// Stacked layout (<= 991px): WooCommerce Blocks adds `margin-bottom: 36px` to the actions block on top of the Checkout page's
+// own bottom padding (40px / 32px), which left ~92px between the order button and the footer. The padding already provides
+// the space, so the extra margin is removed. The `.dp-proceed` margin-top is removed as well: Blocks already gives the lower
+// summary wrapper `padding-bottom: 36px` (`@container (max-width: 919px)`, container = `.wc-block-checkout`, ~690px or less
+// whenever the layout is stacked), so the card-to-button gap is that native 36px; the 24px margin only added to it.
+// Desktop (>= 992px) keeps the native margin and the 24px button margin inside the sidebar card.
+@include bp(md-down) {
+    .woocommerce-checkout .wc-block-checkout__actions {
+        margin-bottom: 0;
+    }
+
+    .woocommerce-checkout .dp-proceed {
+        margin-top: 0;
+    }
+}
+
+// Heading of the lower summary: the same Figma label style as the desktop sidebar title. The theme hides every
+// `.wc-block-components-checkout-step__heading` inside the summary block (the sidebar has its own title), so it is shown
+// again only for the lower summary that carries the accordion.
+.woocommerce-checkout .wc-block-checkout[data-dp-summary='lower'] .checkout-order-summary-block-fill-wrapper .wc-block-components-checkout-step__heading {
+    display: block;
+}
+
+.woocommerce-checkout .checkout-order-summary-block-fill-wrapper .wc-block-components-checkout-step__title {
+    margin: 0 0 16px;
+    font-family: $dp-font-body;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: normal;
+    letter-spacing: 0.24px;
+    text-transform: uppercase;
+    color: $dp-color-text-primary;
 }

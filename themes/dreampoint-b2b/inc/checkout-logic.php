@@ -196,3 +196,121 @@ function dreampoint_b2b_keep_existing_order_billing_master( $response, $handler,
 }
 add_filter( 'rest_request_before_callbacks', 'dreampoint_b2b_keep_existing_order_billing_master', 10, 3 );
 // --- end Gate 1 closure ---
+
+
+// --- "Koristite adresu naplate za dostavu": Silkypress checkbox #custom-checkbox-use-billing ---------------------
+// The checkbox is a field of the SilkyPress Input Field Block plugin (option `silkypress-input-field-block`, section
+// contact-information). Its INITIAL checked state is the plugin's React useState() initializer, read from the field's
+// `defaultValue` (build/fields.js), so it can only be decided on the server. Same mechanism as the Cotra B2B theme
+// (`option_silkypress-input-field-block` filter in inc/woocommerce-m.php), but conditional here (A9, owner decision
+// 2026-11-25). The box means "deliver to the billing address" and starts CHECKED only for:
+//   A. empty shipping address + usable billing address     (js/checkout-b2b-info.js then copies billing -> shipping once)
+//   B. shipping address already equal to a usable billing address, shipping itself usable
+// and UNCHECKED (additional shipping form visible) for:
+//   C. a different shipping address, D. a partially filled one, E. a billing address that is not usable for delivery.
+// The filter only changes the value handed to the initial React state: the customer's later toggle is authoritative.
+// Nothing is written to the customer here.
+
+/**
+ * Whether a customer address is usable as a delivery address: every part WooCommerce requires for its country
+ * (street, city, country, postcode / state per country locale, via WC_Countries::get_address_fields()) plus the
+ * first and last name, which the Blocks shipping form requires. A non-empty street alone is NOT enough.
+ *
+ * @param WC_Customer $customer Customer.
+ * @param string      $type     'billing' or 'shipping'.
+ */
+function dreampoint_b2b_customer_address_usable( WC_Customer $customer, string $type ): bool {
+	$value = static fn( string $part ): string => trim( (string) $customer->{"get_{$type}_{$part}"}() );
+
+	$country = $value( 'country' );
+	if ( '' === $country || '' === $value( 'address_1' ) || '' === $value( 'city' ) || '' === $value( 'first_name' ) || '' === $value( 'last_name' ) ) {
+		return false;
+	}
+
+	// Locale-dependent requirements (Croatia: postcode required, state optional).
+	$fields = function_exists( 'WC' ) && WC()->countries ? WC()->countries->get_address_fields( $country, $type . '_' ) : [];
+	foreach ( [ 'postcode', 'state' ] as $part ) {
+		$required = isset( $fields[ "{$type}_{$part}" ] ) ? ! empty( $fields[ "{$type}_{$part}" ]['required'] ) : ( 'postcode' === $part );
+		if ( $required && '' === $value( $part ) ) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+/**
+ * Classify the customer's shipping address against the billing address.
+ *
+ * @return string 'billing-incomplete' | 'empty' (no shipping address part at all) | 'same' | 'different'
+ */
+function dreampoint_b2b_shipping_vs_billing( WC_Customer $customer ): string {
+	if ( ! dreampoint_b2b_customer_address_usable( $customer, 'billing' ) ) {
+		return 'billing-incomplete';
+	}
+
+	$norm = static fn( $v ): string => strtolower( trim( preg_replace( '/\s+/', ' ', (string) $v ) ) );
+
+	// "Genuinely empty" = none of the user-entered address parts is filled: street, second line, city, postcode.
+	// Country and state are NOT counted: WooCommerce fills the country with a default and the Blocks form pre-selects
+	// the (optional) Croatian state, so a never-edited shipping address still arrives with them (found on the admin
+	// account: only state + country filled, which wrongly classified the address as an alternative one). Names and phone
+	// are not address parts. A shipping address with any of the four parts filled is an alternative address.
+	$empty = true;
+	foreach ( [ 'address_1', 'address_2', 'city', 'postcode' ] as $part ) {
+		if ( '' !== $norm( $customer->{"get_shipping_$part"}() ) ) {
+			$empty = false;
+			break;
+		}
+	}
+	if ( $empty ) {
+		return 'empty';
+	}
+
+	foreach ( [ 'address_1', 'address_2', 'city', 'postcode', 'state', 'country' ] as $part ) {
+		$billing  = $norm( $customer->{"get_billing_$part"}() );
+		$shipping = $norm( $customer->{"get_shipping_$part"}() );
+
+		// The state (Croatian "Županija") is optional and the Blocks form may leave the shipping one empty while the
+		// billing master carries it: an empty side does not make the addresses different.
+		if ( 'state' === $part && ( '' === $billing || '' === $shipping ) ) {
+			continue;
+		}
+
+		if ( $billing !== $shipping ) {
+			return 'different';
+		}
+	}
+
+	// Equal addresses, but a shipping address without names would leave the hidden Blocks form invalid.
+	return dreampoint_b2b_customer_address_usable( $customer, 'shipping' ) ? 'same' : 'different';
+}
+
+function dreampoint_b2b_use_billing_checkbox_field( $inputs ) {
+	if ( ! is_array( $inputs ) || is_admin() ) {
+		return $inputs;
+	}
+
+	foreach ( $inputs as $index => $input ) {
+		if ( ! is_array( $input ) || 'custom-checkbox-use-billing' !== ( $input['name'] ?? '' ) || 'checkbox' !== ( $input['type'] ?? '' ) ) {
+			continue;
+		}
+
+		// The box means "deliver to the billing address" (not "bill to the shipping address").
+		$inputs[ $index ]['label'] = __( 'Koristite adresu naplate za dostavu', 'dreampoint-b2b' );
+
+		// The plugin reads this option while the Checkout block integration initialises, before the main query is
+		// resolved (`is_checkout()` is not reliable yet), so the customer is the only input: the session customer
+		// when WooCommerce has created it, otherwise the stored customer of the logged-in user.
+		$customer = ( function_exists( 'WC' ) && WC()->customer instanceof WC_Customer )
+			? WC()->customer
+			: ( is_user_logged_in() ? new WC_Customer( get_current_user_id() ) : null );
+
+		if ( $customer instanceof WC_Customer ) {
+			$inputs[ $index ]['defaultValue'] = in_array( dreampoint_b2b_shipping_vs_billing( $customer ), [ 'empty', 'same' ], true );
+		}
+	}
+
+	return $inputs;
+}
+add_filter( 'option_silkypress-input-field-block', 'dreampoint_b2b_use_billing_checkbox_field' );

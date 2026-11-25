@@ -167,6 +167,7 @@ if ( class_exists( 'WooCommerce' ) ) {
     }, 5 );
     require get_template_directory() . '/inc/visibility.php';
     require get_template_directory() . '/inc/checkout-logic.php';
+    require get_template_directory() . '/inc/block-translations.php';
     require get_template_directory() . '/inc/checkout-delivery-location.php';
     require get_template_directory() . '/inc/ajax-handlers.php';
     require get_template_directory() . '/inc/product-search.php';
@@ -978,7 +979,7 @@ add_action( 'wp_enqueue_scripts', function(): void {
         'dreampoint-b2b-checkout-info',
         get_template_directory_uri() . '/js/checkout-b2b-info.js',
         [],
-        _S_VERSION,
+        dreampoint_b2b_asset_ver( 'js/checkout-b2b-info.js' ),
         true
     );
     wp_script_add_data( 'dreampoint-b2b-checkout-info', 'strategy', 'defer' );
@@ -996,15 +997,27 @@ add_action( 'wp_enqueue_scripts', function(): void {
             'country'         => esc_html(
                 WC()->countries->get_countries()[ get_user_meta( $user_id, 'billing_country', true ) ] ?? ''
             ),
-            'label_company_section' => __( 'Podaci tvrtke', 'dreampoint-b2b' ),
-            'label_company_name'    => __( 'Naziv tvrtke', 'dreampoint-b2b' ),
-            'label_oib'             => __( 'OIB', 'dreampoint-b2b' ),
-            'label_phone'           => __( 'Telefon', 'dreampoint-b2b' ),
-            'label_address_section' => __( 'Adresa naplate', 'dreampoint-b2b' ),
-            'label_address'         => __( 'Adresa', 'dreampoint-b2b' ),
-            'label_postcode'        => __( 'Poštanski broj', 'dreampoint-b2b' ),
-            'label_city'            => __( 'Grad', 'dreampoint-b2b' ),
-            'label_country'         => __( 'Država', 'dreampoint-b2b' ),
+            // Contact person = WooCommerce billing first + last name (owner decision 2026-11-25). Empty when
+            // both are empty: no fallback to the account display name. Billing e-mail has no account-e-mail fallback.
+            'contact_person'  => esc_html(
+                trim(
+                    trim( (string) get_user_meta( $user_id, 'billing_first_name', true ) ) . ' ' .
+                    trim( (string) get_user_meta( $user_id, 'billing_last_name', true ) )
+                )
+            ),
+            'email'           => esc_html( (string) get_user_meta( $user_id, 'billing_email', true ) ),
+            'lock_icon'       => esc_url( get_template_directory_uri() . '/img/ico/lock.svg' ),
+            'label_company_section' => esc_html__( 'Podaci tvrtke', 'dreampoint-b2b' ),
+            'label_company_name'    => esc_html__( 'Naziv tvrtke', 'dreampoint-b2b' ),
+            'label_oib'             => esc_html__( 'OIB', 'dreampoint-b2b' ),
+            'label_contact_person'  => esc_html__( 'Kontakt osoba', 'dreampoint-b2b' ),
+            'label_phone'           => esc_html__( 'Telefon', 'dreampoint-b2b' ),
+            'label_email'           => esc_html__( 'E-mail', 'dreampoint-b2b' ),
+            'label_summary_items'   => esc_html__( 'Pregled proizvoda', 'dreampoint-b2b' ),
+            'label_proceed'         => esc_html__( 'Kreni na narudžbu', 'dreampoint-b2b' ),
+            'label_address'         => esc_html__( 'Adresa', 'dreampoint-b2b' ),
+            // Company name, OIB and billing address are the protected ERP master data; phone / e-mail / contact person are not.
+            'note_erp'              => esc_html__( 'Naziv tvrtke, OIB i adresa naplate preuzimaju se iz ERP sistema. Za izmjene kontaktirajte svog prodajnog predstavnika ili korisničku podršku.', 'dreampoint-b2b' ),
         ]
     );
 } );

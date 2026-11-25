@@ -6,6 +6,13 @@
 // so the existing markup stays intact and every cell is a grid item of .cart_item.
 $cart-columns: 64px minmax(0, 1fr) 128px 80px 80px 80px 24px;
 $cart-column-gap: 16px;
+// Tablet (768-991px, summary stacked below the table): a 128px SKU column left the product column ~140px wide, so the
+// SKU / price columns are narrower there (SKU wraps anywhere) and the product name + attributes get the room.
+// The quantity control is 78px wide (24 + 28 + 24 + borders): a 72px column let it overflow by 6px into the 12px
+// gap (6px left to the total). 80px holds it with a 2px reserve (>= 12px to the total); the 8px come from the SKU column
+// (88 -> 80, the code wraps anywhere) so the product column keeps its width.
+$cart-columns-md: 64px minmax(0, 1fr) 80px 72px 80px 72px 24px;
+$cart-column-gap-md: 12px;
 // Figma effect card/md (CART-02 summary card).
 $cart-shadow-md: 0 1px 3px rgba(10, 14, 21, 0.1), 0 5px 12px rgba(10, 14, 21, 0.12);
 
@@ -78,6 +85,10 @@ $cart-shadow-md: 0 1px 3px rgba(10, 14, 21, 0.1), 0 5px 12px rgba(10, 14, 21, 0.
                 display: grid;
                 grid-template-columns: $cart-columns;
                 column-gap: $cart-column-gap;
+                @include bp(md) {
+                    grid-template-columns: $cart-columns-md;
+                    column-gap: $cart-column-gap-md;
+                }
                 align-items: center;
                 height: 20px;
                 margin: 0 0 8px;
@@ -257,31 +268,34 @@ $cart-shadow-md: 0 1px 3px rgba(10, 14, 21, 0.1), 0 5px 12px rgba(10, 14, 21, 0.
                         align-items: center;
                         justify-content: flex-end;
                         gap: 18px;
+                        // One typography at every width (owner QA 2026-11-25): amounts 12 / 700 / 20, -0.132px, #384250;
+                        // the phone-only "Cijena / Ukupno" labels use the SKU label value (12 / 500 / 20, tertiary).
+                        // Previously the amounts were card-price (18px / 400 / 26px, 0.04em uppercase; 16px <= 767px)
+                        // below 768px and the labels paragraph-normal (300 / 18px, 16px <= 767px).
                         .product-price, .product-subtotal {
+                            font-size: 12px;
+                            font-weight: 700;
+                            line-height: 20px;
+                            letter-spacing: -0.132px;
+                            color: $dp-color-text-secondary;
                             .label {
                                 display: block;
-                                @include paragraph-normal;
+                                font-size: 12px;
+                                font-weight: 500;
+                                line-height: 20px;
+                                letter-spacing: -0.132px;
                                 color: $dp-color-text-tertiary;
                                 @include bp(sm-up) {
                                     display: none;
                                 }
                             }
                             .amount {
-                                @include card-price;
-                            }
-                            @include bp(sm-up) {
                                 font-size: 12px;
                                 font-weight: 700;
                                 line-height: 20px;
                                 letter-spacing: -0.132px;
+                                text-transform: none;
                                 color: $dp-color-text-secondary;
-                                .amount {
-                                    font-size: 12px;
-                                    font-weight: 700;
-                                    line-height: 20px;
-                                    letter-spacing: -0.132px;
-                                    color: $dp-color-text-secondary;
-                                }
                             }
                         }
                     }
@@ -299,6 +313,10 @@ $cart-shadow-md: 0 1px 3px rgba(10, 14, 21, 0.1), 0 5px 12px rgba(10, 14, 21, 0.
                     display: grid;
                     grid-template-columns: $cart-columns;
                     column-gap: $cart-column-gap;
+                    @include bp(md) {
+                        grid-template-columns: $cart-columns-md;
+                        column-gap: $cart-column-gap-md;
+                    }
                     align-items: center;
                     padding: 8px;
                     // `.product-footer .product-total` matches the specificity of the flex rule above.
@@ -532,6 +550,7 @@ $cart-shadow-md: 0 1px 3px rgba(10, 14, 21, 0.1), 0 5px 12px rgba(10, 14, 21, 0.
 // The extra column only exists while JS has enabled the controls (.dp-cart-select), so there is no dead column
 // without JavaScript. Selection is for bulk removal only and has no relation to Checkout.
 $cart-columns-select: 32px 64px minmax(0, 1fr) 128px 80px 80px 80px 24px;
+$cart-columns-select-md: 32px 64px minmax(0, 1fr) 80px 72px 80px 72px 24px;
 
 #cart .woocommerce-cart-form {
     [hidden] {
@@ -628,12 +647,18 @@ $cart-columns-select: 32px 64px minmax(0, 1fr) 128px 80px 80px 80px 24px;
         @include bp(sm-up) {
             .cart-table-header {
                 grid-template-columns: $cart-columns-select;
+                @include bp(md) {
+                    grid-template-columns: $cart-columns-select-md;
+                }
                 .col-product {
                     grid-column: 3;
                 }
             }
             .shop_table .cart_item {
                 grid-template-columns: $cart-columns-select;
+                @include bp(md) {
+                    grid-template-columns: $cart-columns-select-md;
+                }
             }
         }
     }

@@ -303,7 +303,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 						                </td>
 						            </tr>
 						        <?php endforeach; ?>
-						    <?php else : ?>
+						    <?php elseif ( wc_coupons_enabled() ) : ?>
 						        <tr class="coupon-expand custom-form">
 						            <td colspan="2">
 						                <form class="woocommerce-coupon-form" method="post">

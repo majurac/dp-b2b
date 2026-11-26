@@ -130,6 +130,23 @@ class Dreampoint_B2B_Access_Table {
 	}
 
 	/**
+	 * Stored access value for one user/product pair: 'allow', 'deny', or null when no row exists.
+	 * Used by the brand-scoped custom_offer predicate, where a 'deny' row must block an otherwise open brand.
+	 */
+	public function get_access( int $user_id, int $product_id ): ?string {
+		global $wpdb;
+		$table  = self::get_name();
+		$access = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT access FROM {$table} WHERE user_id = %d AND product_id = %d",
+				$user_id,
+				$product_id
+			)
+		);
+		return in_array( $access, [ 'allow', 'deny' ], true ) ? $access : null;
+	}
+
+	/**
 	 * Batch insert — chunks to stay within max_allowed_packet limits.
 	 *
 	 * @param int[] $product_ids

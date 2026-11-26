@@ -126,6 +126,14 @@ class Dreampoint_B2B_Query_Filter {
 			return $clauses;
 		}
 
+		// A14 brand-scoped bucket (rule_based or custom_offer): shared builder keeps one SQL semantics.
+		if ( $context->is_scoped() ) {
+			$scoped            = $this->build_scoped_clauses( $context, get_current_user_id() );
+			$clauses['join']  .= $scoped['join'];
+			$clauses['where'] .= $scoped['where'];
+			return $clauses;
+		}
+
 		if ( $context->is_custom_offer() ) {
 			$user_id = get_current_user_id();
 			$table   = Dreampoint_B2B_Access_Table::get_name();
@@ -213,6 +221,10 @@ class Dreampoint_B2B_Query_Filter {
 			return $this->restrict_brand_terms( $terms, [], $solely_brand );
 		}
 
+		if ( $context->is_scoped() ) {
+			return $this->filter_scoped_brand_terms( $terms, $context, $user_id, $solely_brand );
+		}
+
 		if ( $context->is_rule_based() ) {
 			// No brand rules → visibility is by category/explicit only; don't filter brand list.
 			if ( empty( $context->allowed_brand_ids ) ) {
@@ -249,9 +261,128 @@ class Dreampoint_B2B_Query_Filter {
 		} ) );
 	}
 
+	/**
+	 * Brand-scoped bucket: every brand stays listed except the scoped brand, which is dropped when the
+	 * bucket grants no product of it at all. Only brand-term LISTS are affected (filters, menus, archives);
+	 * product eligibility is decided by build_scoped_clauses() / Access_Guard, never by this list.
+	 *
+	 * @param WP_Term[]|int[]|string[] $terms
+	 * @return WP_Term[]|int[]|string[]
+	 */
+	private function filter_scoped_brand_terms( array $terms, Dreampoint_B2B_Visibility_Context $context, int $user_id, bool $solely_brand ): array {
+		if ( $this->scoped_context_grants_scope_brand( $context, $user_id ) ) {
+			return $terms;
+		}
+
+		$scope    = $context->scope_brand_id;
+		$filtered = array_filter( $terms, static function ( $term ) use ( $scope, $solely_brand ): bool {
+			if ( $term instanceof WP_Term ) {
+				return ! ( 'product_brand' === $term->taxonomy && (int) $term->term_id === $scope );
+			}
+			// Scalar results carry no taxonomy identity: decidable only for brand-only queries.
+			return ! ( $solely_brand && is_numeric( $term ) && (int) $term === $scope );
+		} );
+
+		return array_is_list( $terms ) ? array_values( $filtered ) : $filtered;
+	}
+
+	/**
+	 * Whether a scoped bucket can show at least one product of the scoped brand.
+	 * Cheap structural check (no product query); may say "yes" when the granted categories/products
+	 * contain no scoped-brand item, which merely keeps an empty brand term listed.
+	 */
+	private function scoped_context_grants_scope_brand( Dreampoint_B2B_Visibility_Context $context, int $user_id ): bool {
+		if ( ! empty( $context->override_add ) ) {
+			return true;
+		}
+
+		if ( $context->is_custom_offer() ) {
+			return in_array( $context->scope_brand_id, $this->get_brand_ids_for_custom_offer( $user_id ), true );
+		}
+
+		return ! empty( $context->allowed_cat_ids ) || ! empty( $context->explicit_include_ids );
+	}
+
 	// -------------------------------------------------------------------------
 	// SQL builders
 	// -------------------------------------------------------------------------
+
+	/**
+	 * SQL for a brand-scoped bucket (A14), identical semantics for rule_based and custom_offer.
+	 * Must stay equivalent to Access_Guard::is_scoped_product_visible().
+	 *
+	 * A row is eligible when ALL hold:
+	 *   1. it has at least one product_brand assignment (unbranded products are denied, even via category / include);
+	 *   2. it is not denied: override_remove, explicit_exclude (minus override_add), or a custom_offer 'deny' row;
+	 *   3. it either carries no assignment to the scoped brand (open) or, being a scoped-brand product
+	 *      (also when it has another brand too), matches the bucket's allow rules.
+	 * Variations resolve to their parent product so brand, category and ID rules are evaluated on the parent.
+	 *
+	 * @return array{join: string, where: string}
+	 */
+	private function build_scoped_clauses( Dreampoint_B2B_Visibility_Context $ctx, int $user_id ): array {
+		global $wpdb;
+
+		$obj   = "(CASE WHEN {$wpdb->posts}.post_type = 'product_variation' THEN {$wpdb->posts}.post_parent ELSE {$wpdb->posts}.ID END)";
+		$scope = (int) $ctx->scope_brand_id;
+
+		$has_brand = "EXISTS (
+			SELECT 1 FROM {$wpdb->term_relationships} dp_trb
+			INNER JOIN {$wpdb->term_taxonomy} dp_ttb ON dp_trb.term_taxonomy_id = dp_ttb.term_taxonomy_id
+			WHERE dp_trb.object_id = {$obj} AND dp_ttb.taxonomy = 'product_brand'
+		)";
+		$has_scope = "EXISTS (
+			SELECT 1 FROM {$wpdb->term_relationships} dp_trs
+			INNER JOIN {$wpdb->term_taxonomy} dp_tts ON dp_trs.term_taxonomy_id = dp_tts.term_taxonomy_id
+			WHERE dp_trs.object_id = {$obj} AND dp_tts.taxonomy = 'product_brand' AND dp_tts.term_id = {$scope}
+		)";
+
+		$add    = array_values( array_unique( array_map( 'intval', $ctx->override_add ) ) );
+		$remove = array_values( array_unique( array_map( 'intval', $ctx->override_remove ) ) );
+		$join   = '';
+
+		if ( $ctx->is_custom_offer() ) {
+			$table = Dreampoint_B2B_Access_Table::get_name();
+			$join  = $wpdb->prepare( " LEFT JOIN {$table} dp_pa ON dp_pa.product_id = {$obj} AND dp_pa.user_id = %d", $user_id );
+
+			$open = "(dp_pa.access IS NULL OR dp_pa.access <> 'deny') AND ( NOT {$has_scope} OR dp_pa.access = 'allow' )";
+			if ( ! empty( $add ) ) {
+				$open = "{$obj} IN (" . implode( ',', $add ) . ") OR ({$open})";
+			}
+
+			$deny_ids = $remove;
+		} else {
+			$allow = [];
+
+			if ( ! empty( $ctx->allowed_cat_ids ) ) {
+				$ids     = implode( ',', array_map( 'intval', $ctx->allowed_cat_ids ) );
+				$allow[] = "EXISTS (
+					SELECT 1 FROM {$wpdb->term_relationships} dp_trc
+					INNER JOIN {$wpdb->term_taxonomy} dp_ttc ON dp_trc.term_taxonomy_id = dp_ttc.term_taxonomy_id
+					WHERE dp_trc.object_id = {$obj} AND dp_ttc.taxonomy = 'product_cat' AND dp_ttc.term_id IN ({$ids})
+				)";
+			}
+
+			$explicit = array_values( array_unique( array_merge( array_map( 'intval', $ctx->explicit_include_ids ), $add ) ) );
+			if ( ! empty( $explicit ) ) {
+				$allow[] = "{$obj} IN (" . implode( ',', $explicit ) . ')';
+			}
+
+			// No allow rule → every scoped-brand product is denied (1 = 0), other brands stay open.
+			$open = 'NOT ' . $has_scope . ' OR ' . ( $allow ? '(' . implode( ' OR ', $allow ) . ')' : '1 = 0' );
+
+			// override_add beats explicit_exclude; override_remove beats everything.
+			$effective_exclude = array_diff( array_map( 'intval', $ctx->explicit_exclude_ids ), $add );
+			$deny_ids          = array_values( array_unique( array_merge( $remove, $effective_exclude ) ) );
+		}
+
+		$where = " AND {$has_brand} AND ({$open})";
+		if ( ! empty( $deny_ids ) ) {
+			$where .= " AND {$obj} NOT IN (" . implode( ',', array_map( 'intval', $deny_ids ) ) . ')';
+		}
+
+		return [ 'join' => $join, 'where' => $where ];
+	}
 
 	/**
 	 * Builds the WHERE clause addition for rule_based users.

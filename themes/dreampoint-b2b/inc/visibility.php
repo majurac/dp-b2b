@@ -43,6 +43,11 @@ add_action( 'admin_init',         [ 'Dreampoint_B2B_Access_Table', 'install' ] )
 // This causes the versioned Redis context key to change → cached context is orphaned.
 add_action( 'dp_access_table_changed', [ 'Dreampoint_B2B_Visibility_Engine', 'increment_override_version' ] );
 
+// A14: a deleted scope-brand term must invalidate cached contexts so affected buckets fail closed.
+add_action( 'delete_product_brand', static function ( int $term_id ): void {
+	dreampoint_b2b_visibility_engine()->invalidate_scope_brand( $term_id );
+} );
+
 if ( is_admin() ) {
 	require __DIR__ . '/custom-offer-admin.php';
 }

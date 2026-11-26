@@ -56,6 +56,26 @@ function dreampoint_b2b_custom_offer_page(): void {
 			? array_values( array_filter( array_map( 'absint', (array) $_POST['dp_product_ids'] ) ) )
 			: [];
 
+		// Custom Offer assignments are parent-product level (A14). Individual variation IDs (or any ID that
+		// is not a product) are rejected, never converted to the parent: that could grant wider access
+		// than the editor intended. Nothing is saved when any submitted ID is invalid.
+		$invalid_ids = array_values( array_filter(
+			$save_prod_ids,
+			static fn( int $id ): bool => 'product' !== get_post_type( $id )
+		) );
+
+		if ( $save_user_id && ! empty( $invalid_ids ) ) {
+			wp_safe_redirect( add_query_arg(
+				[
+					'page'        => 'dp-custom-offer',
+					'user_id'     => $save_user_id,
+					'invalid_ids' => implode( ',', array_slice( $invalid_ids, 0, 20 ) ),
+				],
+				admin_url( 'admin.php' )
+			) );
+			exit;
+		}
+
 		if ( $save_user_id ) {
 			// Replace: clear existing rows then insert the new set.
 			$access_table->remove_all_for_user( $save_user_id );
@@ -90,6 +110,40 @@ function dreampoint_b2b_custom_offer_page(): void {
 	?>
 	<div class="wrap">
 		<h1><?php esc_html_e( 'Custom Offer Products', 'dreampoint-b2b' ); ?></h1>
+
+		<?php
+		$rejected_ids = array_filter( array_map( 'absint', explode( ',', (string) ( $_GET['invalid_ids'] ?? '' ) ) ) );
+		$stored_bad   = array_values( array_filter(
+			$assigned_ids,
+			static fn( int $id ): bool => 'product' !== get_post_type( $id )
+		) );
+		?>
+		<?php if ( ! empty( $rejected_ids ) ) : ?>
+			<div class="notice notice-error">
+				<p>
+					<?php
+					printf(
+						/* translators: %s: comma-separated list of rejected IDs */
+						esc_html__( 'Dodjele NISU sačuvane. Pojedinačne varijacije trenutno nisu podržane: Custom Offer se dodjeljuje na nivou nadređenog proizvoda (odobreni proizvod daje pristup svim svojim varijacijama). Uklonite ove ID-eve i odaberite nadređeni proizvod: %s', 'dreampoint-b2b' ),
+						esc_html( implode( ', ', array_map( 'intval', $rejected_ids ) ) )
+					);
+					?>
+				</p>
+			</div>
+		<?php endif; ?>
+		<?php if ( ! empty( $stored_bad ) ) : ?>
+			<div class="notice notice-warning">
+				<p>
+					<?php
+					printf(
+						/* translators: %s: comma-separated list of stored IDs that are not parent products */
+						esc_html__( 'Postojeći zapisi koji nisu nadređeni proizvodi (varijacije nisu podržane i ne daju pristup): %s. Spremanje će biti odbijeno dok ih ne uklonite.', 'dreampoint-b2b' ),
+						esc_html( implode( ', ', array_map( 'intval', $stored_bad ) ) )
+					);
+					?>
+				</p>
+			</div>
+		<?php endif; ?>
 
 		<?php if ( ! empty( $_GET['saved'] ) ) : ?>
 			<div class="notice notice-success is-dismissible">
@@ -142,13 +196,14 @@ function dreampoint_b2b_custom_offer_page(): void {
 					</th>
 					<td>
 						<p class="description" style="margin-bottom:6px">
-							<?php esc_html_e( 'Only selected products will be visible to this user.', 'dreampoint-b2b' ); ?>
+							<?php esc_html_e( 'Only selected products will be visible to this user. Assign parent products only: an approved product gives access to all of its variations. Individual variations are not supported and are rejected.', 'dreampoint-b2b' ); ?>
+<?php esc_html_e( 'If the bucket is brand-scoped (Scope Brand field), this list applies only to products of that brand; all other brands stay available automatically.', 'dreampoint-b2b' ); ?>
 						</p>
 						<select name="dp_product_ids[]" id="dp_product_ids"
 								class="wc-product-search" multiple="multiple"
 								style="min-width:500px"
 								data-placeholder="<?php esc_attr_e( 'Pretraži proizvode…', 'dreampoint-b2b' ); ?>"
-								data-action="woocommerce_json_search_products_and_variations">
+								data-action="woocommerce_json_search_products">
 							<?php foreach ( $assigned_products as $product ) : ?>
 								<option value="<?php echo esc_attr( $product->get_id() ); ?>" selected="selected">
 									<?php echo esc_html( sprintf( '[%d] %s', $product->get_id(), $product->get_name() ) ); ?>

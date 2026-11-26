@@ -22,5 +22,7 @@ class Dreampoint_B2B_Bucket_Context {
 		public readonly array  $explicit_exclude_ids = [],
 		/** Reserved for V2 variation-level filtering — always [] in V1. */
 		public readonly array  $variation_rules      = [],
+		/** product_brand term ID the bucket's assortment rules are scoped to (0 = unscoped bucket). */
+		public readonly int    $scope_brand_id       = 0,
 	) {}
 }

@@ -186,6 +186,11 @@ class Dreampoint_B2B_Access_Guard {
 			return false;
 		}
 
+		// A14 brand-scoped bucket: separate predicate, kept equivalent to the SQL in Query_Filter.
+		if ( $context->is_scoped() ) {
+			return $this->is_scoped_product_visible( $product_id, $user_id, $context );
+		}
+
 		// Layer 1: override_remove → DENY (highest priority, beats everything).
 		if ( in_array( $product_id, $context->override_remove, true ) ) {
 			return false;
@@ -232,6 +237,99 @@ class Dreampoint_B2B_Access_Guard {
 
 		// Layer 6: default → DENY.
 		return false;
+	}
+
+	/**
+	 * Eligibility of one product for a brand-scoped bucket (A14). Mirrors
+	 * Dreampoint_B2B_Query_Filter::build_scoped_clauses() rule for rule:
+	 *
+	 *  1. override_remove                         → deny
+	 *  2. no product_brand assignment at all      → deny (even for explicit include / override_add)
+	 *  3. override_add                            → allow
+	 *  4. explicit_exclude (rule_based)           → deny
+	 *  5. custom_offer 'deny' row                 → deny
+	 *  6. no assignment to the scoped brand       → allow (open brand)
+	 *  7. scoped-brand product (also with another brand):
+	 *     custom_offer → allowed only by an 'allow' row;
+	 *     rule_based   → allowed by explicit include or an allowed category.
+	 *
+	 * A variation is evaluated as its parent product.
+	 */
+	private function is_scoped_product_visible( int $product_id, int $user_id, Dreampoint_B2B_Visibility_Context $context ): bool {
+		if ( 'product_variation' === get_post_type( $product_id ) ) {
+			$product_id = (int) wp_get_post_parent_id( $product_id );
+		}
+		if ( $product_id <= 0 ) {
+			return false;
+		}
+
+		if ( in_array( $product_id, $context->override_remove, true ) ) {
+			return false;
+		}
+
+		$brand_ids = $this->get_product_brand_ids_unfiltered( $product_id );
+		if ( empty( $brand_ids ) ) {
+			return false;
+		}
+
+		if ( in_array( $product_id, $context->override_add, true ) ) {
+			return true;
+		}
+
+		$offer  = $context->is_custom_offer();
+		$access = null;
+
+		if ( $offer ) {
+			$access = ( new Dreampoint_B2B_Access_Table() )->get_access( $user_id, $product_id );
+			if ( 'deny' === $access ) {
+				return false;
+			}
+		} elseif ( in_array( $product_id, $context->explicit_exclude_ids, true ) ) {
+			return false;
+		}
+
+		if ( ! in_array( $context->scope_brand_id, $brand_ids, true ) ) {
+			return true;
+		}
+
+		if ( $offer ) {
+			return 'allow' === $access;
+		}
+
+		if ( in_array( $product_id, $context->explicit_include_ids, true ) ) {
+			return true;
+		}
+
+		if ( ! empty( $context->allowed_cat_ids ) ) {
+			$cat_ids = wp_get_object_terms( $product_id, 'product_cat', [ 'fields' => 'ids' ] );
+			if ( ! is_wp_error( $cat_ids ) && array_intersect( $context->allowed_cat_ids, array_map( 'intval', $cat_ids ) ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * product_brand term IDs read straight from the term tables.
+	 *
+	 * wp_get_object_terms() cannot be used here: it runs the `get_terms` filter, and
+	 * Query_Filter::filter_brand_terms() may hide the scoped brand term from a scoped customer,
+	 * which would make a scoped-brand product look "open" (fail-open).
+	 *
+	 * @return int[]
+	 */
+	private function get_product_brand_ids_unfiltered( int $product_id ): array {
+		global $wpdb;
+
+		$ids = $wpdb->get_col( $wpdb->prepare(
+			"SELECT tt.term_id FROM {$wpdb->term_relationships} tr
+			 INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+			 WHERE tr.object_id = %d AND tt.taxonomy = 'product_brand'",
+			$product_id
+		) );
+
+		return $ids ? array_map( 'intval', $ids ) : [];
 	}
 
 	/**

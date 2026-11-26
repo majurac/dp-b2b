@@ -20,6 +20,14 @@ class Dreampoint_B2B_Visibility_Engine {
 	/** @var array<int, Dreampoint_B2B_Bucket_Context> */
 	private static array $bucket_cache = [];
 
+	/**
+	 * Object-cache key schema version. Bump whenever the serialized shape of
+	 * Visibility_Context / Bucket_Context changes: contexts cached under an older
+	 * schema have uninitialised readonly properties and would throw on access.
+	 * (v2 = A14 brand-scoped buckets, `scope_brand_id`.)
+	 */
+	private const CONTEXT_CACHE_SCHEMA = 'v2';
+
 	// -------------------------------------------------------------------------
 	// Public API
 	// -------------------------------------------------------------------------
@@ -103,7 +111,7 @@ class Dreampoint_B2B_Visibility_Engine {
 
 	/**
 	 * Builds a versioned Redis key for the user's context.
-	 * Key: dp_vis_ctx_{user_id}_{bucket_version}_{override_version}
+	 * Key: dp_vis_ctx_{schema}_{user_id}_{bucket_version}_{override_version}
 	 *
 	 * When either version changes, the old key is abandoned — no explicit delete needed.
 	 * get_user_meta( dp_bucket_id ) is served from WP's own usermeta cache (no extra DB hit).
@@ -115,7 +123,7 @@ class Dreampoint_B2B_Visibility_Engine {
 
 		$this->debug_log( "Cache key: user={$user_id} bucket={$bucket_id} bv={$bucket_ver} ov={$override_ver}" );
 
-		return "dp_vis_ctx_{$user_id}_{$bucket_ver}_{$override_ver}";
+		return 'dp_vis_ctx_' . self::CONTEXT_CACHE_SCHEMA . "_{$user_id}_{$bucket_ver}_{$override_ver}";
 	}
 
 	private static function get_bucket_version( int $bucket_id ): int {
@@ -186,11 +194,20 @@ class Dreampoint_B2B_Visibility_Engine {
 			return new Dreampoint_B2B_Bucket_Context( Dreampoint_B2B_Visibility_Context::ACCESS_NONE );
 		}
 
-		// full_access and custom_offer don't use ACF rule fields.
-		if ( Dreampoint_B2B_Visibility_Context::ACCESS_FULL === $access_type
-			|| Dreampoint_B2B_Visibility_Context::ACCESS_OFFER === $access_type
-		) {
+		// full_access uses no ACF rule fields (a stale dp_scope_brand value is ignored).
+		if ( Dreampoint_B2B_Visibility_Context::ACCESS_FULL === $access_type ) {
 			return new Dreampoint_B2B_Bucket_Context( $access_type );
+		}
+
+		// Brand scope (A14): null = invalid configuration → fail closed.
+		$scope_brand_id = $this->resolve_scope_brand( $bucket_id );
+		if ( null === $scope_brand_id ) {
+			return new Dreampoint_B2B_Bucket_Context( Dreampoint_B2B_Visibility_Context::ACCESS_NONE );
+		}
+
+		// custom_offer: product list lives in wp_dp_product_access, no ACF rule fields.
+		if ( Dreampoint_B2B_Visibility_Context::ACCESS_OFFER === $access_type ) {
+			return new Dreampoint_B2B_Bucket_Context( $access_type, [], [], [], [], [], $scope_brand_id );
 		}
 
 		// rule_based: read all rule fields.
@@ -199,8 +216,15 @@ class Dreampoint_B2B_Visibility_Engine {
 		$include_ids = $this->extract_ids( get_field( 'dp_explicit_include', $bucket_id ) );
 		$exclude_ids = $this->extract_ids( get_field( 'dp_explicit_exclude', $bucket_id ) );
 
-		// Unconfigured bucket must not open the catalog (fail-safe).
-		if ( empty( $brand_ids ) && empty( $cat_ids ) && empty( $include_ids ) ) {
+		// Allowed Brands (brand OR category) and a brand scope contradict each other: fail closed.
+		if ( $scope_brand_id > 0 && ! empty( $brand_ids ) ) {
+			$this->debug_log( "Bucket {$bucket_id} sets both dp_allowed_brands and dp_scope_brand → no_access" );
+			return new Dreampoint_B2B_Bucket_Context( Dreampoint_B2B_Visibility_Context::ACCESS_NONE );
+		}
+
+		// Unconfigured bucket must not open the catalog (fail-safe). A scoped bucket with no rules is
+		// valid: it hides the scoped brand entirely and leaves every other brand open.
+		if ( 0 === $scope_brand_id && empty( $brand_ids ) && empty( $cat_ids ) && empty( $include_ids ) ) {
 			$this->debug_log( "Bucket {$bucket_id} is rule_based with no rules → downgraded to no_access" );
 			return new Dreampoint_B2B_Bucket_Context( Dreampoint_B2B_Visibility_Context::ACCESS_NONE );
 		}
@@ -210,7 +234,72 @@ class Dreampoint_B2B_Visibility_Engine {
 			$bucket_id, count( $brand_ids ), count( $cat_ids ), count( $include_ids ), count( $exclude_ids )
 		) );
 
-		return new Dreampoint_B2B_Bucket_Context( $access_type, $brand_ids, $cat_ids, $include_ids, $exclude_ids );
+		return new Dreampoint_B2B_Bucket_Context( $access_type, $brand_ids, $cat_ids, $include_ids, $exclude_ids, [], $scope_brand_id );
+	}
+
+	/**
+	 * Stored dp_scope_brand term IDs, read from raw post meta. get_field() could silently drop a value
+	 * whose term was deleted and thereby turn a scoped bucket into an unscoped one; the raw meta cannot.
+	 *
+	 * @return int[]
+	 */
+	private function raw_scope_brand_ids( int $bucket_id ): array {
+		$raw = maybe_unserialize( get_post_meta( $bucket_id, 'dp_scope_brand', true ) );
+
+		return array_values( array_unique( array_filter(
+			$this->extract_ids( $raw ),
+			static fn( int $id ): bool => $id > 0
+		) ) );
+	}
+
+	/**
+	 * Reads and validates the bucket's brand scope (ACF dp_scope_brand).
+	 *
+	 * @return int|null 0 = no scope (legacy behaviour); >0 = valid product_brand term ID;
+	 *                  null = invalid configuration (several values, deleted/foreign term) → caller fails closed.
+	 *
+	 * Note: this validates that the configured term still exists. It cannot detect that APROS renamed
+	 * the brand and the importer (which resolves brands by NAME) created a replacement term; see ADR-046.
+	 */
+	private function resolve_scope_brand( int $bucket_id ): ?int {
+		$ids = $this->raw_scope_brand_ids( $bucket_id );
+
+		if ( empty( $ids ) ) {
+			return 0;
+		}
+
+		if ( count( $ids ) > 1 ) {
+			$this->debug_log( "Bucket {$bucket_id} has several dp_scope_brand values → no_access" );
+			return null;
+		}
+
+		$term = get_term( $ids[0], 'product_brand' );
+		if ( ! $term instanceof WP_Term ) {
+			$this->debug_log( "Bucket {$bucket_id} dp_scope_brand {$ids[0]} is not an existing product_brand term → no_access" );
+			return null;
+		}
+
+		return (int) $term->term_id;
+	}
+
+	/**
+	 * Invalidates every bucket scoped to a brand term (called when that term is deleted), so the
+	 * next resolution sees the missing term and fails closed instead of serving a cached context.
+	 */
+	public function invalidate_scope_brand( int $term_id ): void {
+		$bucket_ids = get_posts( [
+			'post_type'      => Dreampoint_B2B_Bucket_CPT::POST_TYPE,
+			'post_status'    => 'any',
+			'posts_per_page' => -1,
+			'fields'         => 'ids',
+			'no_found_rows'  => true,
+		] );
+
+		foreach ( $bucket_ids as $bucket_id ) {
+			if ( in_array( $term_id, $this->raw_scope_brand_ids( (int) $bucket_id ), true ) ) {
+				$this->invalidate_bucket( (int) $bucket_id );
+			}
+		}
 	}
 
 	private function merge_context( Dreampoint_B2B_Bucket_Context $bucket, int $user_id ): Dreampoint_B2B_Visibility_Context {
@@ -237,6 +326,8 @@ class Dreampoint_B2B_Visibility_Engine {
 			$bucket->explicit_exclude_ids,
 			$override_add,
 			$override_remove,
+			[],
+			$bucket->scope_brand_id,
 		);
 	}
 

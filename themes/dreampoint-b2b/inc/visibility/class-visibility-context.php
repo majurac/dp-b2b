@@ -29,6 +29,8 @@ class Dreampoint_B2B_Visibility_Context {
 		public readonly array  $override_remove      = [],
 		/** Reserved for V2 variation-level filtering — always [] in V1. */
 		public readonly array  $variation_rules      = [],
+		/** product_brand term ID the bucket's assortment rules are scoped to (0 = unscoped). */
+		public readonly int    $scope_brand_id       = 0,
 	) {}
 
 	public static function no_access(): self {
@@ -45,6 +47,15 @@ class Dreampoint_B2B_Visibility_Context {
 
 	public function is_custom_offer(): bool {
 		return self::ACCESS_OFFER === $this->access_type;
+	}
+
+	/**
+	 * Brand-scoped bucket: rule_based / custom_offer whose assortment rules apply ONLY to the
+	 * configured brand (IZIPIZI). Products of other brands are open unless an independent
+	 * denial applies; products without any brand assignment are denied.
+	 */
+	public function is_scoped(): bool {
+		return $this->scope_brand_id > 0 && ( $this->is_rule_based() || $this->is_custom_offer() );
 	}
 
 	public function is_no_access(): bool {

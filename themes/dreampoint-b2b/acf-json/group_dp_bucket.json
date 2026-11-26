@@ -32,6 +32,46 @@
             "placeholder": ""
         },
         {
+            "key": "field_dp_scope_brand",
+            "label": "Scope Brand",
+            "name": "dp_scope_brand",
+            "aria-label": "",
+            "type": "taxonomy",
+            "instructions": "Optional. When set (e.g. IZIPIZI), this bucket's assortment rules apply ONLY to products of that brand; products of every other brand are available automatically, subject to independent restrictions (explicit exclude, deny records, overrides, approval status). Products without any brand are denied; products of the scoped brand AND another brand count as the scoped brand. Rule Based: Allowed Categories / Explicit Include decide which scoped-brand products are visible; leave Allowed Brands empty (combining both fails closed). Custom Offer: only listed products of the scoped brand are visible. Leave empty for the classic behaviour. A deleted brand term fails closed (no access). Ignored for Full Access.",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_dp_access_type",
+                        "operator": "==",
+                        "value": "rule_based"
+                    }
+                ],
+                [
+                    {
+                        "field": "field_dp_access_type",
+                        "operator": "==",
+                        "value": "custom_offer"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "taxonomy": "product_brand",
+            "add_term": 0,
+            "save_terms": 0,
+            "load_terms": 0,
+            "return_format": "id",
+            "field_type": "select",
+            "allow_null": 1,
+            "bidirectional": 0,
+            "multiple": 0,
+            "bidirectional_target": []
+        },
+        {
             "key": "field_dp_allowed_brands",
             "label": "Allowed Brands",
             "name": "dp_allowed_brands",
@@ -202,5 +242,5 @@
     "active": true,
     "description": "Visibility rules for customer bucket CPT. Controls which products each bucket of users can see.",
     "show_in_rest": 0,
-    "modified": 1745492400
+    "modified": 1795678837
 }

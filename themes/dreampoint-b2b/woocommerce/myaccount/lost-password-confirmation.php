@@ -44,7 +44,8 @@ $company_logo = get_field( 'logo', 'option' ); // alt text only; the horizontal 
     </div>
     <!-- /.container -->
     <div class="lr-image">
-        <img src="<?php echo esc_url( get_template_directory_uri() . '/img/bg/approval-pending.jpg' ); ?>" alt="">
+        <?php $dp_pending_image = dreampoint_b2b_get_pending_auth_image(); ?>
+        <img src="<?php echo esc_url( $dp_pending_image['url'] ); ?>" alt="<?php echo esc_attr( $dp_pending_image['alt'] ); ?>">
     </div>
     <!-- /.lr-image -->
 </div>

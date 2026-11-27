@@ -66,6 +66,31 @@ function dreampoint_b2b_is_approval_pending_page(): bool {
 }
 
 /**
+ * Right-hand image of the "approval pending" and "lost password e-mail sent" AUTH screens (E10).
+ * Chain: ACF option `lr_image_pending` -> `lr_image` (shared login/register image) -> bundled theme photo.
+ * An empty, deleted or url-less attachment falls through to the next link. Returns [ 'url' => string, 'alt' => string ].
+ *
+ * @return array{url: string, alt: string}
+ */
+function dreampoint_b2b_get_pending_auth_image(): array {
+    foreach ( array( 'lr_image_pending', 'lr_image' ) as $field_name ) {
+        $image = function_exists( 'get_field' ) ? get_field( $field_name, 'option' ) : false;
+
+        if ( is_array( $image ) && ! empty( $image['url'] ) ) {
+            return array(
+                'url' => (string) $image['url'],
+                'alt' => isset( $image['alt'] ) ? (string) $image['alt'] : '',
+            );
+        }
+    }
+
+    return array(
+        'url' => get_template_directory_uri() . '/img/bg/approval-pending.jpg',
+        'alt' => '',
+    );
+}
+
+/**
  * Password recovery screens: the `lost-password` endpoint (request form, "e-mail sent" confirmation and the
  * reset form reached from the e-mail link all live on it). Rendered as standalone AUTH screens for guests and
  * logged-in users alike; the normal My Account dashboard/endpoints are not affected.

@@ -431,10 +431,11 @@ $company_phone = get_field('company_phone', 'option') ?: '';
                      * Optional Intro Paragraph
                      * Contact/FAQ page intro text and Brand archive intro text
                      */
-                    if (is_page_template('contact.php') || is_page_template('faq.php')) {
-                        // Independent, editor-managed fields: Contact -> intro_text_contact, FAQ -> intro_text_faq.
+                    if (is_page_template('contact.php') || is_page_template('faq.php') || is_page_template('brands.php')) {
+                        // Independent, editor-managed fields: Contact -> intro_text_contact, FAQ -> intro_text_faq,
+                        // Brands listing -> intro_text_brands_listing (C3).
                         // No fallback copy: an empty (or whitespace-only) field renders no intro at all.
-                        $intro_field = is_page_template('faq.php') ? 'intro_text_faq' : 'intro_text_contact';
+                        $intro_field = is_page_template('faq.php') ? 'intro_text_faq' : ( is_page_template('brands.php') ? 'intro_text_brands_listing' : 'intro_text_contact' );
                         $intro_text  = trim((string) get_field($intro_field, get_queried_object_id()));
                         if ($intro_text !== '') {
                             echo '<div class="intro-text"><p>' . esc_html($intro_text) . '</p></div>';

@@ -48,6 +48,18 @@ function dreampoint_b2b_user_is_activated( int $user_id ): bool {
 }
 
 /**
+ * Ima li korisnik valjan bucket (A14: kontekst vidljivosti nije no_access; bucket postoji, objavljen, valjan tip).
+ * Osoblje nije obuhvaćeno (pozivatelji ga izuzimaju). Ne mijenja ništa; ne ovisi o DP_BYPASS_APPROVAL.
+ */
+function dreampoint_b2b_user_has_valid_bucket( int $user_id ): bool {
+    if ( $user_id <= 0 || ! function_exists( 'dreampoint_b2b_visibility_engine' ) ) {
+        return false;
+    }
+
+    return ! dreampoint_b2b_visibility_engine()->get_context( $user_id )->is_no_access();
+}
+
+/**
  * Je li trenutni korisnik osoblje (administrator ili shop manager) — izuzet iz B2B
  * ograničenja vidljivosti kataloga/bucketa. Isti kriterij kao izuzeće u
  * dreampoint_b2b_user_is_activated(), da katalog, Quick Order, košarica i checkout
@@ -214,7 +226,7 @@ function dreampoint_b2b_restrict_unapproved_access(): void {
 add_action( 'template_redirect', 'dreampoint_b2b_restrict_unapproved_access' );
 
 /**
- * Dodaj kolone "Odobreno" i "Bucket" u tablicu korisnika u WP adminu.
+ * Dodaj kolonu "Bucket" u tablicu korisnika u WP adminu (status daje "B2B status").
  *
  * Kolonu "Tvrtka" (b2b_company, sortabilna + filter) registrira b2b-partner-importer;
  * ovdje se ne dupla. Njegova legacy kolona "Task ID" (b2b_task_id, meta task_id, nije
@@ -225,7 +237,6 @@ add_action( 'template_redirect', 'dreampoint_b2b_restrict_unapproved_access' );
  */
 function dreampoint_b2b_approval_column( array $columns ): array {
     unset( $columns['b2b_task_id'] );
-    $columns['user_approval'] = __( 'Odobreno', 'dreampoint-b2b' );
     $columns['dp_bucket']     = __( 'Bucket', 'dreampoint-b2b' );
     return $columns;
 }
@@ -233,7 +244,7 @@ function dreampoint_b2b_approval_column( array $columns ): array {
 add_filter( 'manage_users_columns', 'dreampoint_b2b_approval_column', 99 );
 
 /**
- * Prikaži sadržaj kolona Odobreno i Bucket.
+ * Prikaži sadržaj kolone Bucket (kolona Odobreno je uklonjena iz liste: status daje kolona "B2B status"; meta `approved`, akcije Odobri / Opozovi i profilna polja nisu dirnuti).
  *
  * @param string $value
  * @param string $column_name
@@ -242,12 +253,6 @@ add_filter( 'manage_users_columns', 'dreampoint_b2b_approval_column', 99 );
  */
 function dreampoint_b2b_approval_column_content( string $value, string $column_name, int $user_id ): string {
     switch ( $column_name ) {
-        case 'user_approval':
-            $approved = get_user_meta( $user_id, 'approved', true );
-            return $approved
-                ? '<span style="color:#00a32a;font-weight:600">' . __( 'Da', 'dreampoint-b2b' ) . '</span>'
-                : '<span style="color:#d63638">' . __( 'Ne', 'dreampoint-b2b' ) . '</span>';
-
         case 'dp_bucket':
             $bucket_id = (int) get_user_meta( $user_id, 'dp_bucket_id', true );
             if ( ! $bucket_id ) {
@@ -377,14 +382,14 @@ add_filter( 'login_redirect', 'dreampoint_b2b_login_redirect', 10, 3 );
  *
  * @param int $user_id
  */
-function dreampoint_b2b_send_approval_email( int $user_id ): void {
+function dreampoint_b2b_send_approval_email( int $user_id ): bool {
     if ( ! function_exists( 'WC' ) ) {
-        return;
+        return false;
     }
 
     $user = get_userdata( $user_id );
     if ( ! $user ) {
-        return;
+        return false;
     }
 
     $shop_name      = get_bloginfo( 'name' );
@@ -403,7 +408,8 @@ function dreampoint_b2b_send_approval_email( int $user_id ): void {
 
     $mailer     = WC()->mailer();
     $email_body = $mailer->wrap_message( $email_heading, $email_message );
-    $mailer->send( $user->user_email, $email_subject, $email_body );
+    // Povratna vrijednost = predaja mail sustavu (wp_mail), NE potvrda dostave. Postojeći pozivatelji je ignoriraju.
+    return (bool) $mailer->send( $user->user_email, $email_subject, $email_body );
 }
 
 // ============================================================================

@@ -159,6 +159,7 @@ if ( class_exists( 'WooCommerce' ) ) {
     require get_template_directory() . '/inc/woocommerce.php';
     require get_template_directory() . '/inc/b2b-registration.php';
     require get_template_directory() . '/inc/registration-approval.php';
+    require get_template_directory() . '/inc/x4-activation.php';
     require get_template_directory() . '/inc/pending-checkout-guard.php';
     require get_template_directory() . '/inc/erp-export-status.php';
     require get_template_directory() . '/inc/myaccount-komercijalist.php';

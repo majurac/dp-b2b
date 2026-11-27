@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Za košaricu i checkout vidi dreampoint_b2b_cart_guard_block_reason().
  */
 function dreampoint_b2b_cart_guard_blocks_current_user(): bool {
-    return is_user_logged_in() && ! dreampoint_b2b_user_is_activated( get_current_user_id() );
+    return is_user_logged_in() && null !== dreampoint_b2b_cart_guard_checkout_block_reason();
 }
 
 /**
@@ -49,11 +49,34 @@ function dreampoint_b2b_cart_guard_block_reason(): ?string {
 }
 
 /**
+ * Razlog blokade ZAVRŠETKA kupovine (checkout, Store API checkout, order-pay): block_reason() plus 'no_bucket'
+ * (X4-D9: odobren, ali bez valjanog bucketa). Košarica se ne dira i izmjene stavki (uklanjanje/smanjenje) ostaju
+ * dopuštene; dodavanje bucket-less korisniku već blokira jedinstveno pravilo vidljivosti. Osoblje je izuzeto.
+ *
+ * @return 'login_required'|'not_activated'|'no_bucket'|null
+ */
+function dreampoint_b2b_cart_guard_checkout_block_reason(): ?string {
+    $reason = dreampoint_b2b_cart_guard_block_reason();
+    if ( null !== $reason ) {
+        return $reason;
+    }
+
+    if ( ! dreampoint_b2b_current_user_is_staff() && ! dreampoint_b2b_user_has_valid_bucket( get_current_user_id() ) ) {
+        return 'no_bucket';
+    }
+
+    return null;
+}
+
+/**
  * Poruka za neaktivirane korisnike (bez internih detalja o odobrenju).
  */
 function dreampoint_b2b_cart_guard_message( ?string $reason = null ): string {
     if ( 'login_required' === $reason ) {
         return __( 'Za naručivanje se morate prijaviti.', 'dreampoint-b2b' );
+    }
+    if ( 'no_bucket' === $reason ) {
+        return __( 'Vašem računu još nije dodijeljen asortiman. Naručivanje će biti moguće nakon dodjele.', 'dreampoint-b2b' );
     }
     return __( 'Vaš račun još nije odobren. Naručivanje će biti moguće nakon odobrenja.', 'dreampoint-b2b' );
 }
@@ -62,6 +85,9 @@ function dreampoint_b2b_cart_guard_message( ?string $reason = null ): string {
  * Strojni kod greške za razlog blokade.
  */
 function dreampoint_b2b_cart_guard_code( ?string $reason = null ): string {
+    if ( 'no_bucket' === $reason ) {
+        return 'dp_b2b_no_bucket';
+    }
     return 'login_required' === $reason ? 'dp_b2b_login_required' : 'dp_b2b_not_activated';
 }
 
@@ -331,9 +357,10 @@ function dreampoint_b2b_cart_guard_store_api_mutation( $response, $handler, $req
     // anonimni (guest narudžbe) nisu obuhvaćeni.
     if ( $route instanceof ( $ns . 'CheckoutOrder' ) && 'POST' === $method
         && dreampoint_b2b_cart_guard_blocks_current_user() ) {
+        $reason = dreampoint_b2b_cart_guard_checkout_block_reason();
         return new WP_Error(
-            'dp_b2b_not_activated',
-            dreampoint_b2b_cart_guard_message(),
+            dreampoint_b2b_cart_guard_code( $reason ),
+            dreampoint_b2b_cart_guard_message( $reason ),
             [ 'status' => 403 ]
         );
     }
@@ -352,7 +379,7 @@ add_filter( 'rest_request_before_callbacks', 'dreampoint_b2b_cart_guard_store_ap
  * prije kreiranja narudžbe). Stavke u košarici se ne diraju.
  */
 function dreampoint_b2b_cart_guard_check_cart_items(): void {
-    $reason = dreampoint_b2b_cart_guard_block_reason();
+    $reason = dreampoint_b2b_cart_guard_checkout_block_reason();
     if ( null !== $reason ) {
         dreampoint_b2b_cart_guard_notice( $reason );
         return;
@@ -377,7 +404,7 @@ function dreampoint_b2b_cart_guard_store_api_cart_errors( $errors ): void {
         return;
     }
 
-    $reason = dreampoint_b2b_cart_guard_block_reason();
+    $reason = dreampoint_b2b_cart_guard_checkout_block_reason();
     if ( null !== $reason ) {
         $errors->add( dreampoint_b2b_cart_guard_code( $reason ), dreampoint_b2b_cart_guard_message( $reason ) );
         return;
@@ -423,7 +450,7 @@ function dreampoint_b2b_cart_guard_order_pay_submission(): void {
         remove_action( 'wp', [ 'WC_Form_Handler', 'pay_action' ], $priority );
     }
 
-    dreampoint_b2b_cart_guard_notice();
+    dreampoint_b2b_cart_guard_notice( dreampoint_b2b_cart_guard_checkout_block_reason() );
 }
 add_action( 'wp', 'dreampoint_b2b_cart_guard_order_pay_submission', 10 );
 
@@ -433,7 +460,7 @@ add_action( 'wp', 'dreampoint_b2b_cart_guard_order_pay_submission', 10 );
  */
 function dreampoint_b2b_cart_guard_before_pay_action(): void {
     if ( dreampoint_b2b_cart_guard_blocks_current_user() ) {
-        dreampoint_b2b_cart_guard_notice();
+        dreampoint_b2b_cart_guard_notice( dreampoint_b2b_cart_guard_checkout_block_reason() );
     }
 }
 add_action( 'woocommerce_before_pay_action', 'dreampoint_b2b_cart_guard_before_pay_action', 1 );
